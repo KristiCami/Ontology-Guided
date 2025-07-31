@@ -1,8 +1,3 @@
-Ορίστε το `README.md` **έτοιμο για copy-paste** με σωστή Markdown μορφοποίηση:
-
----
-
-```markdown
 # 🧠 Ontology-Guided Ontology Drafting from Software Requirements
 
 This repository implements a **neuro-symbolic pipeline** for transforming natural language software requirements into machine-readable OWL ontologies. The approach combines **large language models (LLMs)** with **ontology engineering tools** for automated knowledge extraction, validation, and repair.
@@ -13,32 +8,30 @@ This repository implements a **neuro-symbolic pipeline** for transforming natura
 
 ## 📌 Objectives
 
-- Extract domain knowledge from unstructured requirement texts.
-- Generate semantically valid OWL ontologies.
-- Validate the ontologies using SHACL rules.
-- Automatically repair violations and re-validate iteratively.
+* Extract domain knowledge from unstructured requirement texts.
+* Generate semantically valid OWL ontologies.
+* Validate the ontologies using SHACL rules.
+* Automatically repair violations and re-validate iteratively.
 
 ---
 
 ## ⚙️ Project Structure
 
 ```
-
 Ontology-Guided/
 ├── OWL-Generation/
-│   ├── llm\_pipeline\_openai.py     # LLM-based OWL triple generation
-│   ├── ontology\_writer.py         # Writes triples to OWL format
+│   ├── llm_pipeline_openai.py     # LLM-based OWL triple generation
+│   ├── ontology_writer.py         # Writes triples to OWL format
 │   └── ...
-├── data\_loader.py                 # Loads and preprocesses data
-├── test\_loader.py                 # Test script for data pipeline
+├── data_loader.py                 # Loads and preprocesses data
+├── test_loader.py                 # Test script for data pipeline
 ├── validator.py                   # SHACL validation engine
-├── repair\_loop.py                 # Auto-repair mechanism
+├── repair_loop.py                 # Auto-repair mechanism
 ├── requirements.txt               # Required Python dependencies
 ├── results/                       # Generated OWL files
 ├── shapes.ttl                     # SHACL rules for validation
 └── README.md                      # This file
-
-````
+```
 
 ---
 
@@ -49,7 +42,7 @@ Ontology-Guided/
 ```bash
 git clone https://github.com/KristiCami/Ontology-Guided.git
 cd Ontology-Guided
-````
+```
 
 ### 2. Install dependencies
 
@@ -110,10 +103,3 @@ This project is licensed under the MIT License.
 Kristi Cami – [GitHub](https://github.com/KristiCami)
 
 Part of a Master's thesis in Artificial Intelligence.
-
-```
-
----
-
-📌 Αν θέλεις και **δίγλωσση έκδοση με ελληνική σύνοψη**, πες μου να το προσαρμόσω αναλόγως.
-```
