@@ -1,0 +1,7 @@
+spacy>=3.0
+python-docx
+openai>=1.0.0
+rdflib
+owlready2
+python-dotenv
+pyshacl

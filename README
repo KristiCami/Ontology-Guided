@@ -1,0 +1,100 @@
+# Ontology-Guided Ontology Drafting Pipeline
+
+This repository implements a neuro-symbolic pipeline for transforming natural language software requirements into formal OWL ontologies, validating them with SHACL, and iteratively repairing violations via GPT-4 prompts.
+
+---
+
+## Project Structure
+
+```
+OWL-Generation/
+├── data_loader.py       # Load & preprocess NL requirements
+├── llm_interface.py     # Wrapper for GPT-4 (OpenAI API) calls
+├── ontology_builder.py  # Merge Turtle snippets into RDF graph
+├── validator.py         # SHACL validation against shapes.ttl
+├── repair_loop.py       # Feedback loop: validation → repair with LLM
+├── shapes.ttl           # SHACL shapes definitions
+├── requirements.txt     # Python dependencies
+├── .env                 # Environment variables (API key)
+├── results/             # Output folder for TTL/OWL files
+│   ├── llm_output.ttl
+│   ├── combined.ttl
+│   ├── combined.owl
+│   ├── repaired.ttl
+│   └── repaired.owl
+├── test_loader.py       # Quick test for data_loader
+└── test_llm.py          # Quick test for LLM interface
+
+```
+
+---
+
+## Setup
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone <repo-url>
+   cd OWL-Generation
+   ```
+2. **Install dependencies**:
+
+   ```bash
+   pip install -r requirements.txt
+   python -m spacy download en_core_web_sm
+   ```
+3. **Create `.env` file** in project root with your OpenAI API key:
+
+   ```ini
+   OPENAI_API_KEY=sk-...
+   ```
+
+---
+
+## Usage
+
+### 1. Full Pipeline
+
+Run the orchestrator:
+
+```bash
+python main.py
+```
+
+This will:
+
+* Load & preprocess `requirements.txt` (add your own inputs)
+* Generate OWL/Turtle axioms via GPT-4
+* Merge into `results/combined.ttl` & `.owl`
+
+### 2. SHACL Validation
+
+Validate the generated ontology against `shapes.ttl`:
+
+```bash
+python validator.py --data results/combined.ttl --shapes shapes.ttl
+```
+
+### 3. Repair Loop
+
+If violations are found, automatically generate repair triples and apply them:
+
+```bash
+python repair_loop.py
+```
+
+Outputs will be in `results/repaired.ttl` & `.owl`.
+
+---
+
+## Customizing
+
+* **Domain IRI**: edit `BASE_IRI` in `main.py` and `repair_loop.py` to match your ontology namespace.
+* **SHACL Shapes**: extend `shapes.ttl` with additional shapes for other classes/properties.
+* **Prompts**: refine `PROMPT` in `main.py` and `PROMPT_TEMPLATE` in `repair_loop.py` for better LLM output.
+
+---
+
+## License
+
+MIT License. See [LICENSE](LICENSE).
