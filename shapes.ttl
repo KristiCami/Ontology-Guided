@@ -2,10 +2,37 @@
 @prefix atm: <http://example.com/atm#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
+# Κάθε συναλλαγή πρέπει να έχει actor και στόχο
 atm:TransactionShape
     a sh:NodeShape ;
     sh:targetClass atm:Transaction ;
     sh:property [
         sh:path atm:actor ;
+        sh:minCount 1 ;
+    ] ;
+    sh:property [
+        sh:path atm:target ;
+        sh:minCount 1 ;
+    ] .
+
+# Κάθε ενέργεια πρέπει επίσης να ορίζει actor και object
+atm:ActionShape
+    a sh:NodeShape ;
+    sh:targetClass atm:Action ;
+    sh:property [
+        sh:path atm:actor ;
+        sh:minCount 1 ;
+    ] ;
+    sh:property [
+        sh:path atm:object ;
+        sh:minCount 1 ;
+    ] .
+
+# Εισαγωγή κάρτας πρέπει να συσχετίζεται με συναλλαγή
+atm:CardInsertionShape
+    a sh:NodeShape ;
+    sh:targetClass atm:CardInsertion ;
+    sh:property [
+        sh:path atm:after ;
         sh:minCount 1 ;
     ] .
