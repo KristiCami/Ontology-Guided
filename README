@@ -17,8 +17,10 @@ Ontology-Guided/
 ├── validator.py             # SHACL έλεγχος ορθότητας
 ├── repair_loop.py           # Επαναληπτική επιδιόρθωση με LLM
 ├── main.py                  # Ενοποιημένο pipeline
-├── test_loader.py           # Παράδειγμα χρήσης DataLoader
-├── test_llm.py              # Παράδειγμα κλήσης LLM
+├── generate_examples.py     # Αυτόματη παραγωγή αρχείων στο results/
+├── tests/                   # Βασικά unit tests με pytest
+├── example_loader.py        # Παράδειγμα χρήσης DataLoader
+├── example_llm.py           # Παράδειγμα κλήσης LLM
 ├── demo.txt                 # Δείγμα απαιτήσεων
 ├── shapes.ttl               # Κανόνες SHACL
 ├── results/                 # Παραγόμενα αρχεία (TTL/OWL)
@@ -46,9 +48,14 @@ Ontology-Guided/
    Το script διαβάζει τις απαιτήσεις, παράγει τα OWL triples, τρέχει τον
    έλεγχο SHACL και αν χρειαστεί εκτελεί αυτόματο βρόχο διόρθωσης.
 
-4. **Χειροκίνητη εκτέλεση επιμέρους βημάτων** (προαιρετικά)
+4. **Αυτόματη δημιουργία παραδειγμάτων**
    ```bash
-   python3 test_llm.py            # παραγωγή αρχικών triples
+   python3 generate_examples.py
+   ```
+   Παράγει τα αρχεία `results/combined.ttl` και `results/combined.owl` από το `demo.txt`.
+5. **Χειροκίνητη εκτέλεση επιμέρους βημάτων** (προαιρετικά)
+   ```bash
+   python3 example_llm.py         # παραγωγή αρχικών triples
    python3 ontology_builder.py    # συγχώνευση σε combined.ttl/owl
    python3 validator.py --data results/combined.ttl --shapes shapes.ttl
    python3 repair_loop.py         # εφόσον υπάρχουν παραβιάσεις

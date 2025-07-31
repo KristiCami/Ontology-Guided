@@ -15,7 +15,12 @@ class DataLoader:
     Κλάση για φόρτωση και προεπεξεργασία φυσικών γλώσσών απαιτήσεων.
     """
     def __init__(self, spacy_model: str = "en_core_web_sm"):
-        self.nlp = spacy.load(spacy_model)
+        try:
+            self.nlp = spacy.load(spacy_model)
+        except OSError:
+            # Fallback to blank English model if not installed
+            self.nlp = spacy.blank("en")
+            self.nlp.add_pipe('sentencizer')
 
     def load_text_file(self, file_path: str) -> str:
         with open(file_path, 'r', encoding='utf-8') as f:

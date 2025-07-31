@@ -5,3 +5,4 @@ rdflib
 owlready2
 python-dotenv
 pyshacl
+pytest
