@@ -1,105 +1,77 @@
-# 🧠 Ontology-Guided Ontology Drafting from Software Requirements
+# 🧠 Σύνταξη Οντολογιών από Απαιτήσεις Λογισμικού
 
-This repository implements a **neuro-symbolic pipeline** for transforming natural language software requirements into machine-readable OWL ontologies. The approach combines **large language models (LLMs)** with **ontology engineering tools** for automated knowledge extraction, validation, and repair.
+Το αποθετήριο αυτό υλοποιεί μια μικτή **νευρο-συμβολική** διαδικασία που μετατρέπει φυσικές γλώσσες απαιτήσεων σε οντολογίες OWL.  
+Ο συνδυασμός της υπολογιστικής ισχύος μεγάλων γλωσσικών μοντέλων (LLMs) με κανόνες SHACL επιτρέπει την αυτόματη δημιουργία, επικύρωση και διόρθωση τριπλετών.
 
-> 📘 Developed as part of a Master's thesis in Artificial Intelligence.
-
----
-
-## 📌 Objectives
-
-* Extract domain knowledge from unstructured requirement texts.
-* Generate semantically valid OWL ontologies.
-* Validate the ontologies using SHACL rules.
-* Automatically repair violations and re-validate iteratively.
+> Αναπτύχθηκε στο πλαίσιο μεταπτυχιακής διπλωματικής εργασίας στην Τεχνητή Νοημοσύνη.
 
 ---
 
-## ⚙️ Project Structure
+## 📂 Δομή Αρχείων
 
 ```
 Ontology-Guided/
-├── OWL-Generation/
-│   ├── llm_pipeline_openai.py     # LLM-based OWL triple generation
-│   ├── ontology_writer.py         # Writes triples to OWL format
-│   └── ...
-├── data_loader.py                 # Loads and preprocesses data
-├── test_loader.py                 # Test script for data pipeline
-├── validator.py                   # SHACL validation engine
-├── repair_loop.py                 # Auto-repair mechanism
-├── requirements.txt               # Required Python dependencies
-├── results/                       # Generated OWL files
-├── shapes.ttl                     # SHACL rules for validation
-└── README.md                      # This file
+├── data_loader.py           # Φόρτωση και προεπεξεργασία κειμένων
+├── llm_interface.py         # Επικοινωνία με το LLM (π.χ. GPT-4)
+├── ontology_builder.py      # Ενοποίηση Turtle σε αρχείο OWL/TTL
+├── validator.py             # SHACL έλεγχος ορθότητας
+├── repair_loop.py           # Επαναληπτική επιδιόρθωση με LLM
+├── test_loader.py           # Παράδειγμα χρήσης DataLoader
+├── test_llm.py              # Παράδειγμα κλήσης LLM
+├── demo.txt                 # Δείγμα απαιτήσεων
+├── shapes.ttl               # Κανόνες SHACL
+├── results/                 # Παραγόμενα αρχεία (TTL/OWL)
+├── requirements.txt         # Εξαρτήσεις Python
+└── README                   # Το παρόν αρχείο
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Γρήγορη Εκκίνηση
 
-### 1. Clone the repository
+1. **Εγκατάσταση βιβλιοθηκών**
+   ```bash
+   python3 -m pip install -r requirements.txt
+   python3 -m spacy download en_core_web_sm
+   ```
 
-```bash
-git clone https://github.com/KristiCami/Ontology-Guided.git
-cd Ontology-Guided
-```
+2. **Ρύθμιση κλειδιού API**
+   Δημιουργήστε αρχείο `.env` με την μεταβλητή `OPENAI_API_KEY` για να μπορεί το LLM να κληθεί.
 
-### 2. Install dependencies
+3. **Παραγωγή τριπλετών από LLM**
+   ```bash
+   python3 test_llm.py
+   ```
+   Το αποτέλεσμα αποθηκεύεται στο `results/llm_output.ttl`.
 
-```bash
-python3 -m pip install -r requirements.txt
-python3 -m spacy download en_core_web_sm
-```
+4. **Σύνθεση οντολογίας**
+   ```bash
+   python3 ontology_builder.py
+   ```
+   Δημιουργούνται τα `results/combined.ttl` και `results/combined.owl`.
 
-### 3. Run the pipeline
+5. **Έλεγχος SHACL**
+   ```bash
+   python3 validator.py --data results/combined.ttl --shapes shapes.ttl
+   ```
 
-```bash
-python3 data_loader.py
-python3 test_loader.py
-python3 validator.py --data results/combined.ttl --shapes shapes.ttl
-python3 repair_loop.py
-```
-
----
-
-## 🧪 Example
-
-Given a requirement like:
-
-> “The ATM must log every user transaction before approval.”
-
-The system can generate OWL triples such as:
-
-```
-Class: ATM
-  SubClassOf: logs some Transaction
-
-Class: Transaction
-  SubClassOf: hasStatus some Approved
-```
-
-Then SHACL validates these triples against formal constraints.
+6. **Βρόχος διόρθωσης (προαιρετικό)**
+   ```bash
+   python3 repair_loop.py
+   ```
+   Αν εντοπιστούν παραβιάσεις, το LLM προτείνει διορθώσεις και γράφει τα
+   αποτελέσματα σε `results/repaired.ttl` και `results/repaired.owl`.
 
 ---
 
-## 🧰 Tools & Technologies
-
-* 🧠 **spaCy** – for NLP preprocessing
-* 🤖 **OpenAI API** – for LLM-based semantic interpretation
-* 🧩 **OWLReady2**, **rdflib** – for ontology manipulation
-* ✅ **pySHACL** – for SHACL validation
-* 🔁 **Repair loop** – for iterative feedback and correction
+## 🔧 Εργαλεία
+- **spaCy** για τμηματοποίηση προτάσεων
+- **OpenAI API** για παραγωγή αρχικών τριπλετών
+- **rdflib** και **OWLready2** για χειρισμό οντολογιών
+- **pySHACL** για επικύρωση με κανόνες SHACL
 
 ---
 
-## 📄 License
+## 📝 Άδεια Χρήσης
+Διανέμεται υπό την άδεια MIT.
 
-This project is licensed under the MIT License.
-
----
-
-## 👩‍🎓 Author
-
-Kristi Cami – [GitHub](https://github.com/KristiCami)
-
-Part of a Master's thesis in Artificial Intelligence.
