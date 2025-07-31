@@ -16,6 +16,7 @@ Ontology-Guided/
 ├── ontology_builder.py      # Ενοποίηση Turtle σε αρχείο OWL/TTL
 ├── validator.py             # SHACL έλεγχος ορθότητας
 ├── repair_loop.py           # Επαναληπτική επιδιόρθωση με LLM
+├── main.py                  # Ενοποιημένο pipeline
 ├── test_loader.py           # Παράδειγμα χρήσης DataLoader
 ├── test_llm.py              # Παράδειγμα κλήσης LLM
 ├── demo.txt                 # Δείγμα απαιτήσεων
@@ -38,29 +39,20 @@ Ontology-Guided/
 2. **Ρύθμιση κλειδιού API**
    Δημιουργήστε αρχείο `.env` με την μεταβλητή `OPENAI_API_KEY` για να μπορεί το LLM να κληθεί.
 
-3. **Παραγωγή τριπλετών από LLM**
+3. **Εκτέλεση ενοποιημένου pipeline**
    ```bash
-   python3 test_llm.py
+   python3 main.py --inputs demo.txt --shapes shapes.ttl --repair
    ```
-   Το αποτέλεσμα αποθηκεύεται στο `results/llm_output.ttl`.
+   Το script διαβάζει τις απαιτήσεις, παράγει τα OWL triples, τρέχει τον
+   έλεγχο SHACL και αν χρειαστεί εκτελεί αυτόματο βρόχο διόρθωσης.
 
-4. **Σύνθεση οντολογίας**
+4. **Χειροκίνητη εκτέλεση επιμέρους βημάτων** (προαιρετικά)
    ```bash
-   python3 ontology_builder.py
-   ```
-   Δημιουργούνται τα `results/combined.ttl` και `results/combined.owl`.
-
-5. **Έλεγχος SHACL**
-   ```bash
+   python3 test_llm.py            # παραγωγή αρχικών triples
+   python3 ontology_builder.py    # συγχώνευση σε combined.ttl/owl
    python3 validator.py --data results/combined.ttl --shapes shapes.ttl
+   python3 repair_loop.py         # εφόσον υπάρχουν παραβιάσεις
    ```
-
-6. **Βρόχος διόρθωσης (προαιρετικό)**
-   ```bash
-   python3 repair_loop.py
-   ```
-   Αν εντοπιστούν παραβιάσεις, το LLM προτείνει διορθώσεις και γράφει τα
-   αποτελέσματα σε `results/repaired.ttl` και `results/repaired.owl`.
 
 ---
 
