@@ -1,4 +1,5 @@
 import openai
+import httpx
 from typing import List
 import re
 
@@ -20,13 +21,23 @@ class LLMInterface:
                 + "\n" + prompt_template.format(sentence=sent)
             )
 
-            resp = openai.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": "You are a Turtle/OWL code generator."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
+            while True:
+                try:
+                    resp = openai.chat.completions.create(
+                        model=self.model,
+                        messages=[
+                            {"role": "system", "content": "You are a Turtle/OWL code generator."},
+                            {"role": "user", "content": prompt}
+                        ]
+                    )
+                    break
+                except (openai.OpenAIError, httpx.HTTPError) as e:
+                    print(f"LLM call failed: {e}")
+                    retry = input("Retry? (y/n): ").strip().lower()
+                    if retry != "y":
+                        print("Exiting gracefully.")
+                        return results
+                    
             raw = resp.choices[0].message.content
             # Εξαγωγή Turtle block αν υπάρχει fenced code
             match = re.search(r"```turtle\s*(.*?)```", raw, re.S)
@@ -36,4 +47,5 @@ class LLMInterface:
                 turtle_code = raw.strip()
 
             results.append(turtle_code)
+            
         return results
