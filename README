@@ -46,6 +46,7 @@ Ontology-Guided/
    ```
    Το script διαβάζει τις απαιτήσεις, παράγει τα OWL triples, τρέχει τον
    έλεγχο SHACL και αν χρειαστεί εκτελεί αυτόματο βρόχο διόρθωσης.
+   Ο φάκελος `results/` δημιουργείται αυτόματα αν δεν υπάρχει.
 
 4. **Αυτόματη δημιουργία παραδειγμάτων**
    ```bash
@@ -54,14 +55,21 @@ Ontology-Guided/
    Παράγει τα αρχεία `results/combined.ttl` και `results/combined.owl` από το `demo.txt`.
 5. **Χειροκίνητη εκτέλεση επιμέρους βημάτων** (προαιρετικά)
    ```bash
-   python3 test_llm.py            # παραγωγή αρχικών triples
+
    python3 ontology_builder.py    # συγχώνευση σε combined.ttl/owl
    python3 validator.py --data results/combined.ttl --shapes shapes.ttl
    python3 repair_loop.py         # εφόσον υπάρχουν παραβιάσεις
    ```
 
----
 
+6. **Εκτέλεση tests**
+   ```bash
+   pytest
+   ```
+   Τα tests βρίσκονται στον φάκελο `tests/` και τρέχουν χωρίς πραγματική κλήση στο OpenAI API.
+
+
+---
 ## 🔧 Εργαλεία
 - **spaCy** για τμηματοποίηση προτάσεων
 - **OpenAI API** για παραγωγή αρχικών τριπλετών
