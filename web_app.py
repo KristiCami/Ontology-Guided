@@ -15,6 +15,10 @@ FORM_HTML = """
   <label>File:</label> <input type=file name=file><br><br>
   <input type=submit value='Run Pipeline'>
 </form>
+{% if result %}
+<h2>Ontology Output</h2>
+<pre>{{ result }}</pre>
+{% endif %}
 """
 
 @app.route('/', methods=['GET', 'POST'])
@@ -40,8 +44,8 @@ def index():
         result_path = 'results/repaired.ttl' if os.path.exists('results/repaired.ttl') else 'results/combined.ttl'
         with open(result_path, 'r', encoding='utf-8') as f:
             data = f.read()
-        return f"<h2>Ontology Output</h2><pre>{data}</pre>"
-    return render_template_string(FORM_HTML)
+        return render_template_string(FORM_HTML, result=data)
+    return render_template_string(FORM_HTML, result=None)
 
 if __name__ == '__main__':
     app.run(debug=True)
