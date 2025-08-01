@@ -1,0 +1,2 @@
+The ATM must log every user transaction.
+The system shall notify the user on failure.
