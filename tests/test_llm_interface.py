@@ -1,7 +1,7 @@
 import types
 import openai
 from ontology_guided.llm_interface import LLMInterface
-
+import time
 
 def test_generate_owl_with_mock(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
@@ -38,10 +38,10 @@ def test_generate_owl_exit_on_error(monkeypatch):
         raise openai.OpenAIError("boom")
 
     monkeypatch.setattr(openai.chat.completions, "create", fake_create)
-    monkeypatch.setattr("builtins.input", lambda *args: "n")
+    monkeypatch.setattr(time, "sleep", lambda *args, **kwargs: None)
 
     llm = LLMInterface(api_key="dummy", model="gpt-4")
-    result = llm.generate_owl(["irrelevant"], "{sentence}")
+    result = llm.generate_owl(["irrelevant"], "{sentence}", max_retries=1, retry_delay=0)
     assert result == []
 
 
@@ -71,8 +71,8 @@ ex:A ex:B ex:C .
 ```""")
 
     monkeypatch.setattr(openai.chat.completions, "create", fake_create)
-    monkeypatch.setattr("builtins.input", lambda *args: "y")
+    monkeypatch.setattr(time, "sleep", lambda *args, **kwargs: None)
 
     llm = LLMInterface(api_key="dummy", model="gpt-4")
-    result = llm.generate_owl(["irrelevant"], "{sentence}")
+    result = llm.generate_owl(["irrelevant"], "{sentence}", max_retries=2, retry_delay=0)
     assert result == ["@prefix ex: <http://example.com/> .\nex:A ex:B ex:C ."]

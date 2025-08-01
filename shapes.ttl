@@ -36,3 +36,4 @@ atm:CardInsertionShape
         sh:path atm:after ;
         sh:minCount 1 ;
     ] .
+    
