@@ -29,10 +29,13 @@ class OntologyBuilder:
          - Debug-print the final Turtle
          - Parse into the graph
         """
-        # Filter out @prefix and blank lines
-        lines = [line for line in turtle_str.splitlines() 
-                 if line.strip() and not line.strip().startswith('@prefix')]
+        # Keep existing @prefix declarations so that any custom prefixes used
+        # in the LLM output remain defined. Only strip completely blank lines.
+        # rdflib handles duplicate prefix declarations gracefully as long as
+        # they map to the same IRI, so we avoid removing them blindly.
+        lines = [line for line in turtle_str.splitlines() if line.strip()]
         cleaned = "\n".join(lines)
+
 
         # Combine header and cleaned Turtle
         data = self.header + "\n" + cleaned

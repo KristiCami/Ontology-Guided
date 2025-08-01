@@ -6,3 +6,5 @@ owlready2
 python-dotenv
 pyshacl
 pytest
+pytest
+flask
