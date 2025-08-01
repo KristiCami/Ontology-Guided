@@ -1,11 +1,12 @@
 import argparse
 import os
 from dotenv import load_dotenv
-from data_loader import DataLoader
-from llm_interface import LLMInterface
-from ontology_builder import OntologyBuilder
-from validator import SHACLValidator
-from repair_loop import RepairLoop
+
+from ontology_guided.data_loader import DataLoader
+from ontology_guided.llm_interface import LLMInterface
+from ontology_guided.ontology_builder import OntologyBuilder
+from ontology_guided.validator import SHACLValidator
+from ontology_guided.repair_loop import RepairLoop
 
 PROMPT_TEMPLATE = (
     "Convert the following requirement into OWL axioms in Turtle syntax:\n\n"

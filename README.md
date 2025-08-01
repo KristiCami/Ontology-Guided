@@ -11,20 +11,22 @@
 
 ```
 Ontology-Guided/
-├── data_loader.py           # Φόρτωση και προεπεξεργασία κειμένων
-├── llm_interface.py         # Επικοινωνία με το LLM (π.χ. GPT-4)
-├── ontology_builder.py      # Ενοποίηση Turtle σε αρχείο OWL/TTL
-├── validator.py             # SHACL έλεγχος ορθότητας
-├── repair_loop.py           # Επαναληπτική επιδιόρθωση με LLM
-├── main.py                  # Ενοποιημένο pipeline
-├── generate_examples.py     # Αυτόματη παραγωγή αρχείων στο results/
-├── test_loader.py           # Παράδειγμα χρήσης DataLoader                
-├── test_llm.py              # Παράδειγμα κλήσης LLM     
+├── ontology_guided/         # Python package με τον βασικό κώδικα
+│   ├── __init__.py
+│   ├── data_loader.py       # Φόρτωση και προεπεξεργασία κειμένων
+│   ├── llm_interface.py     # Επικοινωνία με το LLM (π.χ. GPT-4)
+│   ├── ontology_builder.py  # Ενοποίηση Turtle σε αρχείο OWL/TTL
+│   ├── repair_loop.py       # Επαναληπτική επιδιόρθωση με LLM
+│   └── validator.py         # SHACL έλεγχος ορθότητας
+├── scripts/                 # Εκτελέσιμα βοηθητικά scripts
+│   ├── main.py              # Ενοποιημένο pipeline
+│   ├── generate_examples.py # Δημιουργία παραδειγμάτων
+│   └── web_app.py           # Απλή web διεπαφή
+├── tests/                   # Μονάδες ελέγχου
 ├── demo.txt                 # Δείγμα απαιτήσεων
 ├── shapes.ttl               # Κανόνες SHACL
-├── results/                 # Παραγόμενα αρχεία (TTL/OWL)
 ├── requirements.txt         # Εξαρτήσεις Python
-└── README                   # Το παρόν αρχείο
+└── README.md
 ```
 
 ---
@@ -42,7 +44,7 @@ Ontology-Guided/
 
 3. **Εκτέλεση ενοποιημένου pipeline**
    ```bash
-   python3 main.py --inputs demo.txt --shapes shapes.ttl --repair
+   python3 scripts/main.py --inputs demo.txt --shapes shapes.ttl --repair
    ```
    Το script διαβάζει τις απαιτήσεις, παράγει τα OWL triples, τρέχει τον
    έλεγχο SHACL και αν χρειαστεί εκτελεί αυτόματο βρόχο διόρθωσης.
@@ -50,15 +52,14 @@ Ontology-Guided/
 
 4. **Αυτόματη δημιουργία παραδειγμάτων**
    ```bash
-   python3 generate_examples.py
+   python3 scripts/generate_examples.py
    ```
    Παράγει τα αρχεία `results/combined.ttl` και `results/combined.owl` από το `demo.txt`.
 5. **Χειροκίνητη εκτέλεση επιμέρους βημάτων** (προαιρετικά)
    ```bash
-
-   python3 ontology_builder.py    # συγχώνευση σε combined.ttl/owl
-   python3 validator.py --data results/combined.ttl --shapes shapes.ttl
-   python3 repair_loop.py         # εφόσον υπάρχουν παραβιάσεις
+   python3 ontology_guided/ontology_builder.py    # συγχώνευση σε combined.ttl/owl
+   python3 ontology_guided/validator.py --data results/combined.ttl --shapes shapes.ttl
+   python3 ontology_guided/repair_loop.py         # εφόσον υπάρχουν παραβιάσεις
    ```
 
 
@@ -70,7 +71,7 @@ Ontology-Guided/
 
 7. **Εκκίνηση Web διεπαφής**
    ```bash
-   python3 web_app.py
+   python3 scripts/web_app.py
    ```
    Ανοίξτε τον browser στη διεύθυνση `http://localhost:5000` για να ανεβάσετε αρχεία ή κείμενο και να τρέξετε το pipeline μέσω web.
 

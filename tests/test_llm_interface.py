@@ -1,6 +1,6 @@
 import types
 import openai
-from llm_interface import LLMInterface
+from ontology_guided.llm_interface import LLMInterface
 
 
 def test_generate_owl_with_mock(monkeypatch):
