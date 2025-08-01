@@ -11,6 +11,5 @@ def test_demo_txt_loading_and_preprocessing():
     for t in texts:
         sentences.extend(loader.preprocess_text(t))
     assert sentences == [
-        "The ATM must log every user transaction.",
-        "The system shall notify the user on failure.",
+        "The ATM must log all user transactions after card insertion, linking each transaction to the user who performed it."
     ]
