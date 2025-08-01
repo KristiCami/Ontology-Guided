@@ -20,7 +20,7 @@ PROMPT_TEMPLATE = (
 )
 
 
-def run_pipeline(inputs, shapes, base_iri, model="gpt-4", repair=False):
+def run_pipeline(inputs, shapes, base_iri, model="gpt-4", repair=False, reason=False):
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
@@ -45,6 +45,15 @@ def run_pipeline(inputs, shapes, base_iri, model="gpt-4", repair=False):
     builder.save("results/combined.owl", fmt="xml")
     print("Saved results/combined.ttl and results/combined.owl")
 
+    if reason:
+        from ontology_guided.reasoner import run_reasoner, ReasonerError
+        print("Running OWL reasoner...")
+        try:
+            run_reasoner("results/combined.owl")
+        except ReasonerError as exc:
+            print(exc)
+
+
     validator = SHACLValidator("results/combined.ttl", shapes)
     conforms, report_text, _ = validator.run_validation()
     print("Conforms:", conforms)
@@ -63,10 +72,17 @@ def main():
     parser.add_argument("--base-iri", default="http://example.com/atm#", help="Base IRI for ontology")
     parser.add_argument("--model", default="gpt-4", help="OpenAI model")
     parser.add_argument("--repair", action="store_true", help="Run repair loop if validation fails")
+    parser.add_argument("--reason", action="store_true", help="Run OWL reasoner before validation")
     args = parser.parse_args()
 
-    run_pipeline(args.inputs, args.shapes, args.base_iri, model=args.model, repair=args.repair)
-
+    run_pipeline(
+        args.inputs,
+        args.shapes,
+        args.base_iri,
+        model=args.model,
+        repair=args.repair,
+        reason=args.reason,
+    )
 
 if __name__ == "__main__":
     main()

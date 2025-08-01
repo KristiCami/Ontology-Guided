@@ -44,11 +44,14 @@ Ontology-Guided/
 
 3. **Εκτέλεση ενοποιημένου pipeline**
    ```bash
-   python3 scripts/main.py --inputs demo.txt --shapes shapes.ttl --repair
+   python3 scripts/main.py --inputs demo.txt --shapes shapes.ttl --reason --repair
    ```
    Το script διαβάζει τις απαιτήσεις, παράγει τα OWL triples, τρέχει τον
-   έλεγχο SHACL και αν χρειαστεί εκτελεί αυτόματο βρόχο διόρθωσης.
+   reasoner και τον έλεγχο SHACL, και αν χρειαστεί εκτελεί αυτόματο βρόχο διόρθωσης.
    Ο φάκελος `results/` δημιουργείται αυτόματα αν δεν υπάρχει.
+
+   Η προαιρετική σημαία `--reason` τρέχει τον ενσωματωμένο reasoner της OWLready2 πριν τον έλεγχο SHACL.
+   Για να λειτουργήσει, απαιτείται εγκατεστημένο Java (π.χ. OpenJDK).
 
 4. **Αυτόματη δημιουργία παραδειγμάτων**
    ```bash
@@ -61,8 +64,6 @@ Ontology-Guided/
    python3 ontology_guided/validator.py --data results/combined.ttl --shapes shapes.ttl
    python3 ontology_guided/repair_loop.py         # εφόσον υπάρχουν παραβιάσεις
    ```
-
-
 6. **Εκτέλεση tests**
    ```bash
    pytest
@@ -75,9 +76,8 @@ Ontology-Guided/
    ```
    Ανοίξτε τον browser στη διεύθυνση `http://localhost:5000` για να ανεβάσετε αρχεία ή κείμενο και να τρέξετε το pipeline μέσω web.
 
-
-
 ---
+
 ## 🔧 Εργαλεία
 - **spaCy** για τμηματοποίηση προτάσεων
 - **OpenAI API** για παραγωγή αρχικών τριπλετών
