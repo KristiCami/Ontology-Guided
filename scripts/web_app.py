@@ -1,10 +1,15 @@
 from flask import Flask, request, render_template_string
 import os
+import sys
 from werkzeug.utils import secure_filename
 
-# Import run_pipeline from the same folder
-import sys
-sys.path.append(os.path.dirname(__file__))
+# Ensure both the scripts folder and project root are importable
+current_dir = os.path.dirname(__file__)
+project_root = os.path.abspath(os.path.join(current_dir, ".."))
+for path in (current_dir, project_root):
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
 from main import run_pipeline
 
 app = Flask(__name__)

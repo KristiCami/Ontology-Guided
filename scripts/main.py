@@ -1,6 +1,12 @@
 import argparse
 import os
 from dotenv import load_dotenv
+import sys
+
+# Ensure the project root is on the Python path when executed directly
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from ontology_guided.data_loader import DataLoader
 from ontology_guided.llm_interface import LLMInterface
