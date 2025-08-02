@@ -9,10 +9,12 @@ atm:TransactionShape
     sh:property [
         sh:path atm:actor ;
         sh:minCount 1 ;
+        sh:class atm:User ;
     ] ;
     sh:property [
         sh:path atm:target ;
         sh:minCount 1 ;
+        sh:class atm:Account ;
     ] .
 
 # Κάθε ενέργεια πρέπει επίσης να ορίζει actor και object
@@ -22,10 +24,12 @@ atm:ActionShape
     sh:property [
         sh:path atm:actor ;
         sh:minCount 1 ;
+        sh:class atm:User ;
     ] ;
     sh:property [
         sh:path atm:object ;
         sh:minCount 1 ;
+        sh:class atm:Item ;
     ] .
 
 # Εισαγωγή κάρτας πρέπει να συσχετίζεται με συναλλαγή
@@ -35,5 +39,6 @@ atm:CardInsertionShape
     sh:property [
         sh:path atm:after ;
         sh:minCount 1 ;
+        sh:class atm:Transaction ;
     ] .
     
