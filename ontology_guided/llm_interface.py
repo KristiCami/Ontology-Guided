@@ -1,6 +1,6 @@
 import openai
 import httpx
-from typing import List
+from typing import List, Tuple, Optional
 import re
 import time
 
@@ -14,16 +14,24 @@ class LLMInterface:
         sentences: List[str],
         prompt_template: str,
         *,
+        available_terms: Optional[Tuple[List[str], List[str]]] = None,
         max_retries: int = 3,
         retry_delay: float = 1.0,
     ) -> List[str]:
         """Call the LLM and return only the Turtle code."""
         results = []
+        classes = properties = []
+        if available_terms:
+            classes, properties = available_terms
         for sent in sentences:
-            prompt = (
-                "Return ONLY valid Turtle code, without any explanatory text or markdown fences."
-                + "\n" + prompt_template.format(sentence=sent)
-            )
+            prompt = "Return ONLY valid Turtle code, without any explanatory text or markdown fences.\n"
+            if classes or properties:
+                prompt += "Use existing ontology terms when appropriate.\n"
+                if classes:
+                    prompt += "Classes: " + ", ".join(classes) + "\n"
+                if properties:
+                    prompt += "Properties: " + ", ".join(properties) + "\n"
+            prompt += prompt_template.format(sentence=sent)
             attempts = 0
             resp = None
             while True:

@@ -1,4 +1,3 @@
-import types
 import openai
 from ontology_guided.llm_interface import LLMInterface
 import time
@@ -76,3 +75,32 @@ ex:A ex:B ex:C .
     llm = LLMInterface(api_key="dummy", model="gpt-4")
     result = llm.generate_owl(["irrelevant"], "{sentence}", max_retries=2, retry_delay=0)
     assert result == ["@prefix ex: <http://example.com/> .\nex:A ex:B ex:C ."]
+
+
+def test_generate_owl_with_terms(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+
+    class FakeMessage:
+        def __init__(self, content):
+            self.content = content
+
+    class FakeChoice:
+        def __init__(self, content):
+            self.message = FakeMessage(content)
+
+    class FakeResponse:
+        def __init__(self, content):
+            self.choices = [FakeChoice(content)]
+
+    captured = {}
+
+    def fake_create(*args, **kwargs):
+        captured["prompt"] = kwargs["messages"][1]["content"]
+        return FakeResponse("ex:A ex:B ex:C .")
+
+    monkeypatch.setattr(openai.chat.completions, "create", fake_create)
+
+    llm = LLMInterface(api_key="dummy", model="gpt-4")
+    llm.generate_owl(["irrelevant"], "{sentence}", available_terms=(['ex:Class'], ['ex:prop']))
+    assert 'ex:Class' in captured['prompt']
+    assert 'ex:prop' in captured['prompt']
