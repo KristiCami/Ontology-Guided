@@ -21,21 +21,32 @@ PROMPT_TEMPLATE = (
 
 
 def run_pipeline(inputs, shapes, base_iri, model="gpt-4", repair=False, reason=False):
+    """Execute the ontology drafting pipeline.
+
+    Parameters mirror the command line flags used in ``main``. The function now
+    returns a dictionary describing the intermediate artefacts so callers such
+    as the web interface can display each stage to the user.
+    """
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("Set OPENAI_API_KEY in .env")
 
+    pipeline = {}
+
     loader = DataLoader()
     texts = loader.load_requirements(inputs)
+    pipeline["texts"] = texts
     sentences = []
     for text in texts:
         sentences.extend(loader.preprocess_text(text))
     if not sentences:
         raise RuntimeError("No requirements found in inputs")
+    pipeline["sentences"] = sentences
 
     llm = LLMInterface(api_key=api_key, model=model)
     owl_snippets = llm.generate_owl(sentences, PROMPT_TEMPLATE)
+    pipeline["owl_snippets"] = owl_snippets
 
     os.makedirs("results", exist_ok=True)
     builder = OntologyBuilder(base_iri)
@@ -43,26 +54,34 @@ def run_pipeline(inputs, shapes, base_iri, model="gpt-4", repair=False, reason=F
         builder.parse_turtle(snippet)
     builder.save("results/combined.ttl", fmt="turtle")
     builder.save("results/combined.owl", fmt="xml")
+    pipeline["combined_ttl"] = "results/combined.ttl"
+    pipeline["combined_owl"] = "results/combined.owl"
     print("Saved results/combined.ttl and results/combined.owl")
 
     if reason:
         from ontology_guided.reasoner import run_reasoner, ReasonerError
         print("Running OWL reasoner...")
         try:
-            run_reasoner("results/combined.owl")
+            run_reasoner(pipeline["combined_owl"])
+            pipeline["reasoner"] = "OWL reasoning completed successfully."
         except ReasonerError as exc:
             print(exc)
+            pipeline["reasoner"] = f"Reasoner error: {exc}"
 
-
-    validator = SHACLValidator("results/combined.ttl", shapes)
+    validator = SHACLValidator(pipeline["combined_ttl"], shapes)
     conforms, report_text, _ = validator.run_validation()
     print("Conforms:", conforms)
     print(report_text)
+    pipeline["shacl_conforms"] = conforms
+    pipeline["shacl_report"] = report_text
 
     if not conforms and repair:
         print("Running repair loop...")
-        repairer = RepairLoop("results/combined.ttl", shapes, api_key)
+        repairer = RepairLoop(pipeline["combined_ttl"], shapes, api_key)
         repairer.run()
+        pipeline["repaired_ttl"] = "results/repaired.ttl"
+
+    return pipeline
 
 
 def main():

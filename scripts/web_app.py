@@ -15,19 +15,60 @@ from main import run_pipeline
 app = Flask(__name__)
 
 FORM_HTML = """<!doctype html>
-<title>Ontology Pipeline</title>
-<h1>Upload requirement file or paste text</h1>
-<form method=post enctype=multipart/form-data>
-  <label>Text:</label><br>
-  <textarea name=text rows=10 cols=80></textarea><br><br>
-  <label>File:</label> <input type=file name=file><br><br>
-  <input type=submit value='Run Pipeline'>
-</form>
-{% if result %}
-<h2>Ontology Output</h2>
-<pre>{{ result }}</pre>
-{% endif %}
-"""
+<html>
+<head>
+  <title>Ontology Pipeline</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    form textarea { width: 100%; }
+    .section { border: 1px solid #ddd; padding: 10px 15px; margin-top: 20px; border-radius: 4px; }
+    pre { background: #f8f8f8; padding: 10px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>Ontology Pipeline</h1>
+  <form method="post" enctype="multipart/form-data">
+    <label>Text:</label><br>
+    <textarea name="text" rows="6"></textarea><br><br>
+    <label>File:</label> <input type="file" name="file"><br><br>
+    <input type="submit" value="Run Pipeline">
+  </form>
+
+  {% if result %}
+    <div class="section">
+      <h2>Preprocessed Sentences</h2>
+      <ul>
+        {% for s in result.sentences %}
+          <li>{{ s }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>LLM Generated OWL</h2>
+      {% for snippet in result.owl_snippets %}
+        <pre>{{ snippet }}</pre>
+      {% endfor %}
+    </div>
+
+    <div class="section">
+      <h2>Reasoner</h2>
+      <p>{{ result.reasoner }}</p>
+    </div>
+
+    <div class="section">
+      <h2>SHACL Validation</h2>
+      <p>Conforms: {{ result.shacl_conforms }}</p>
+      <pre>{{ result.shacl_report }}</pre>
+    </div>
+
+    <div class="section">
+      <h2>Final Ontology</h2>
+      <pre>{{ ontology }}</pre>
+    </div>
+  {% endif %}
+</body>
+</html>"""
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -49,14 +90,18 @@ def index():
             inputs.append(file_path)
         if not inputs:
             return "No input provided", 400
-        run_pipeline(inputs, "shapes.ttl", "http://example.com/atm#", repair=True)
-        result_path = (
-            "results/repaired.ttl" if os.path.exists("results/repaired.ttl") else "results/combined.ttl"
+        result = run_pipeline(
+            inputs,
+            "shapes.ttl",
+            "http://example.com/atm#",
+            repair=True,
+            reason=True,
         )
-        with open(result_path, "r", encoding="utf-8") as f:
-            data = f.read()
-        return render_template_string(FORM_HTML, result=data)
-    return render_template_string(FORM_HTML, result=None)
+        ontology_path = result.get("repaired_ttl", result.get("combined_ttl"))
+        with open(ontology_path, "r", encoding="utf-8") as f:
+            ontology_data = f.read()
+        return render_template_string(FORM_HTML, result=result, ontology=ontology_data)
+    return render_template_string(FORM_HTML, result=None, ontology=None)
 
 
 if __name__ == "__main__":
