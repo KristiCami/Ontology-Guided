@@ -31,6 +31,7 @@ FORM_HTML = """<!doctype html>
     <label>Text:</label><br>
     <textarea name="text" rows="6"></textarea><br><br>
     <label>File:</label> <input type="file" name="file"><br><br>
+    <label>Ontologies:</label> <input type="file" name="ontologies" multiple><br><br>
     <input type="submit" value="Run Pipeline">
   </form>
 
@@ -75,6 +76,7 @@ FORM_HTML = """<!doctype html>
 def index():
     if request.method == "POST":
         inputs = []
+        ontology_files = []
         os.makedirs("uploads", exist_ok=True)
         text = request.form.get("text", "").strip()
         if text:
@@ -88,12 +90,19 @@ def index():
             file_path = os.path.join("uploads", filename)
             uploaded.save(file_path)
             inputs.append(file_path)
+        for onto in request.files.getlist("ontologies"):
+            if onto and onto.filename:
+                ofile = secure_filename(onto.filename)
+                o_path = os.path.join("uploads", ofile)
+                onto.save(o_path)
+                ontology_files.append(o_path)
         if not inputs:
             return "No input provided", 400
         result = run_pipeline(
             inputs,
             "shapes.ttl",
             "http://example.com/atm#",
+            ontologies=ontology_files,
             repair=True,
             reason=True,
         )

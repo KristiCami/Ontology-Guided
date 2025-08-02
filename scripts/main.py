@@ -20,7 +20,7 @@ PROMPT_TEMPLATE = (
 )
 
 
-def run_pipeline(inputs, shapes, base_iri, model="gpt-4", repair=False, reason=False):
+def run_pipeline(inputs, shapes, base_iri, ontologies=None, model="gpt-4", repair=False, reason=False):
     """Execute the ontology drafting pipeline.
 
     Parameters mirror the command line flags used in ``main``. The function now
@@ -44,12 +44,14 @@ def run_pipeline(inputs, shapes, base_iri, model="gpt-4", repair=False, reason=F
         raise RuntimeError("No requirements found in inputs")
     pipeline["sentences"] = sentences
 
+    builder = OntologyBuilder(base_iri, ontology_files=ontologies)
+    avail_terms = builder.get_available_terms()
+
     llm = LLMInterface(api_key=api_key, model=model)
-    owl_snippets = llm.generate_owl(sentences, PROMPT_TEMPLATE)
+    owl_snippets = llm.generate_owl(sentences, PROMPT_TEMPLATE, available_terms=avail_terms)
     pipeline["owl_snippets"] = owl_snippets
 
     os.makedirs("results", exist_ok=True)
-    builder = OntologyBuilder(base_iri)
     for snippet in owl_snippets:
         builder.parse_turtle(snippet)
     builder.save("results/combined.ttl", fmt="turtle")
@@ -89,6 +91,7 @@ def main():
     parser.add_argument("--inputs", nargs="+", default=["demo.txt"], help="Requirement files (.txt/.docx)")
     parser.add_argument("--shapes", default="shapes.ttl", help="SHACL shapes file")
     parser.add_argument("--base-iri", default="http://example.com/atm#", help="Base IRI for ontology")
+    parser.add_argument("--ontologies", nargs="*", default=[], help="Additional ontology files to load")
     parser.add_argument("--model", default="gpt-4", help="OpenAI model")
     parser.add_argument("--repair", action="store_true", help="Run repair loop if validation fails")
     parser.add_argument("--reason", action="store_true", help="Run OWL reasoner before validation")
@@ -98,6 +101,7 @@ def main():
         args.inputs,
         args.shapes,
         args.base_iri,
+        ontologies=args.ontologies,
         model=args.model,
         repair=args.repair,
         reason=args.reason,
