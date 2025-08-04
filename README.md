@@ -76,7 +76,7 @@ Ontology-Guided/
    ```bash
    python3 scripts/web_app.py
    ```
-   Ανοίξτε τον browser στη διεύθυνση `http://localhost:5000` για να ανεβάσετε αρχεία ή κείμενο και να τρέξετε το pipeline μέσω web.
+   Ανοίξτε τον browser στη διεύθυνση `http://localhost:8000` για να ανεβάσετε αρχεία ή κείμενο και να τρέξετε το pipeline μέσω web.
 
 ---
 
