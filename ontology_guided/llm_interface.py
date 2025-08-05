@@ -20,7 +20,7 @@ class LLMInterface:
     ) -> List[str]:
         """Call the LLM and return only the Turtle code."""
         results = []
-        classes = properties = []
+        classes, properties = [], []
         if available_terms:
             classes, properties = available_terms
         for sent in sentences:

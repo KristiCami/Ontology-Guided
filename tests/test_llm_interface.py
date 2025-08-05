@@ -104,3 +104,30 @@ def test_generate_owl_with_terms(monkeypatch):
     llm.generate_owl(["irrelevant"], "{sentence}", available_terms=(['ex:Class'], ['ex:prop']))
     assert 'ex:Class' in captured['prompt']
     assert 'ex:prop' in captured['prompt']
+
+
+def test_classes_and_properties_independent(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+
+    class FakeMessage:
+        def __init__(self, content):
+            self.content = content
+
+    class FakeChoice:
+        def __init__(self, content):
+            self.message = FakeMessage(content)
+
+    class FakeResponse:
+        def __init__(self, content):
+            self.choices = [FakeChoice(content)]
+
+    def fake_create(*args, **kwargs):
+        return FakeResponse("ex:A ex:B ex:C .")
+
+    monkeypatch.setattr(openai.chat.completions, "create", fake_create)
+
+    llm = LLMInterface(api_key="dummy", model="gpt-4")
+    classes, properties = [], []
+    llm.generate_owl(["irrelevant"], "{sentence}", available_terms=(classes, properties))
+    classes.append("NewClass")
+    assert properties == []

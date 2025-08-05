@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+  <title>Ontology Pipeline</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <h1>Ontology Pipeline</h1>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flash-messages">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  <form method="post" enctype="multipart/form-data">
+    <label>Text:</label><br>
+    <textarea name="text" rows="6"></textarea><br><br>
+    <label>File:</label> <input type="file" name="file"><br><br>
+    <label>Ontologies:</label> <input type="file" name="ontologies" multiple><br><br>
+    <label>Model:</label>
+    <select name="model">
+      <option value="gpt-4">gpt-4</option>
+      <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+    </select><br><br>
+    <label><input type="checkbox" name="reason" checked> Run Reasoner</label><br>
+    <label><input type="checkbox" name="repair" checked> Repair on Failure</label><br><br>
+    <input type="submit" value="Run Pipeline">
+  </form>
+</body>
+</html>
