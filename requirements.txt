@@ -6,4 +6,5 @@ owlready2
 python-dotenv
 pyshacl
 pytest
-flask
+fastapi
+uvicorn
