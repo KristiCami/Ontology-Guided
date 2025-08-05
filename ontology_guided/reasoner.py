@@ -20,7 +20,8 @@ def run_reasoner(owl_path: str = "results/combined.owl"):
 
     Returns
     -------
-    The loaded ontology after reasoning.
+    tuple
+        The loaded ontology after reasoning and the path used.
     """
     if not os.path.exists(owl_path):
         raise FileNotFoundError(f"{owl_path} not found")
@@ -33,4 +34,5 @@ def run_reasoner(owl_path: str = "results/combined.owl"):
         raise ReasonerError(
             "Java runtime not found; install Java to enable reasoning"
         ) from exc
-    return onto
+    return onto, owl_path
+

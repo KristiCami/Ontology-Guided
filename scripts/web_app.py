@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template, flash
 import os
 import sys
 from werkzeug.utils import secure_filename
@@ -12,64 +12,12 @@ for path in (current_dir, project_root):
 
 from main import run_pipeline
 
-app = Flask(__name__)
-
-FORM_HTML = """<!doctype html>
-<html>
-<head>
-  <title>Ontology Pipeline</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    form textarea { width: 100%; }
-    .section { border: 1px solid #ddd; padding: 10px 15px; margin-top: 20px; border-radius: 4px; }
-    pre { background: #f8f8f8; padding: 10px; overflow-x: auto; }
-  </style>
-</head>
-<body>
-  <h1>Ontology Pipeline</h1>
-  <form method="post" enctype="multipart/form-data">
-    <label>Text:</label><br>
-    <textarea name="text" rows="6"></textarea><br><br>
-    <label>File:</label> <input type="file" name="file"><br><br>
-    <label>Ontologies:</label> <input type="file" name="ontologies" multiple><br><br>
-    <input type="submit" value="Run Pipeline">
-  </form>
-
-  {% if result %}
-    <div class="section">
-      <h2>Preprocessed Sentences</h2>
-      <ul>
-        {% for s in result.sentences %}
-          <li>{{ s }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-
-    <div class="section">
-      <h2>LLM Generated OWL</h2>
-      {% for snippet in result.owl_snippets %}
-        <pre>{{ snippet }}</pre>
-      {% endfor %}
-    </div>
-
-    <div class="section">
-      <h2>Reasoner</h2>
-      <p>{{ result.reasoner }}</p>
-    </div>
-
-    <div class="section">
-      <h2>SHACL Validation</h2>
-      <p>Conforms: {{ result.shacl_conforms }}</p>
-      <pre>{{ result.shacl_report }}</pre>
-    </div>
-
-    <div class="section">
-      <h2>Final Ontology</h2>
-      <pre>{{ ontology }}</pre>
-    </div>
-  {% endif %}
-</body>
-</html>"""
+app = Flask(
+    __name__,
+    template_folder=os.path.join(project_root, "templates"),
+    static_folder=os.path.join(project_root, "static"),
+)
+app.secret_key = "dev"
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -97,20 +45,39 @@ def index():
                 onto.save(o_path)
                 ontology_files.append(o_path)
         if not inputs:
-            return "No input provided", 400
-        result = run_pipeline(
-            inputs,
-            "shapes.ttl",
-            "http://example.com/atm#",
-            ontologies=ontology_files,
-            repair=True,
-            reason=True,
-        )
+            flash("No input provided")
+            return render_template("index.html")
+
+        model = request.form.get("model", "gpt-4")
+        reason = bool(request.form.get("reason"))
+        repair = bool(request.form.get("repair"))
+
+        try:
+            result = run_pipeline(
+                inputs,
+                "shapes.ttl",
+                "http://example.com/atm#",
+                ontologies=ontology_files,
+                model=model,
+                repair=repair,
+                reason=reason,
+            )
+        except Exception as exc:
+            flash(str(exc))
+            return render_template("index.html")
+
         ontology_path = result.get("repaired_ttl", result.get("combined_ttl"))
         with open(ontology_path, "r", encoding="utf-8") as f:
             ontology_data = f.read()
-        return render_template_string(FORM_HTML, result=result, ontology=ontology_data)
-    return render_template_string(FORM_HTML, result=None, ontology=None)
+        return render_template(
+            "result.html",
+            result=result,
+            ontology=ontology_data,
+            model=model,
+            reason=reason,
+            repair=repair,
+        )
+    return render_template("index.html")
 
 
 if __name__ == "__main__":

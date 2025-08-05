@@ -16,10 +16,12 @@ def test_run_reasoner(tmp_path):
     onto.save(file=str(owl_path))
 
     try:
-        result = run_reasoner(str(owl_path))
+        result, used_path = run_reasoner(str(owl_path))
     except ReasonerError as exc:
         pytest.skip(str(exc))
         return
 
     names = {c.name for c in result.classes()}
+    assert used_path == str(owl_path)
     assert {"A", "B"}.issubset(names)
+

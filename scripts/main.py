@@ -64,8 +64,8 @@ def run_pipeline(inputs, shapes, base_iri, ontologies=None, model="gpt-4", repai
         from ontology_guided.reasoner import run_reasoner, ReasonerError
         print("Running OWL reasoner...")
         try:
-            run_reasoner(pipeline["combined_owl"])
-            pipeline["reasoner"] = "OWL reasoning completed successfully."
+            _, onto_path = run_reasoner(pipeline["combined_owl"])
+            pipeline["reasoner"] = f"OWL reasoning completed successfully on {onto_path}."
         except ReasonerError as exc:
             print(exc)
             pipeline["reasoner"] = f"Reasoner error: {exc}"
