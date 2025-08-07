@@ -20,7 +20,7 @@ ex:ClassA a owl:Class .
 """,
         encoding="utf-8",
     )
-    ob = OntologyBuilder('http://example.com/atm#', [str(ext)])
+    ob = OntologyBuilder('http://example.com/atm#', ontology_files=[str(ext)])
     classes, _ = ob.get_available_terms()
     assert "ex:ClassA" in classes
     assert "@prefix ex:" in ob.header
