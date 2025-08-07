@@ -32,6 +32,8 @@ FORM_HTML = """<!doctype html>
     <textarea name="text" rows="6"></textarea><br><br>
     <label>File:</label> <input type="file" name="file"><br><br>
     <label>Ontologies:</label> <input type="file" name="ontologies" multiple><br><br>
+    <label>SHACL Shapes:</label> <input type="file" name="shapes"><br><br>
+    <label>Base IRI:</label> <input type="text" name="base_iri"><br><br>
     <label>Repair:</label> <input type="checkbox" name="repair">
     <label>Reason:</label> <input type="checkbox" name="reason"><br><br>
     <input type="submit" value="Run Pipeline">
@@ -98,14 +100,26 @@ def index():
                 o_path = os.path.join("uploads", ofile)
                 onto.save(o_path)
                 ontology_files.append(o_path)
+
+        shapes_uploaded = False
+        shapes_path = "shapes.ttl"
+        shapes_file = request.files.get("shapes")
+        if shapes_file and shapes_file.filename:
+            shapes_uploaded = True
+            sname = secure_filename(shapes_file.filename)
+            shapes_path = os.path.join("uploads", sname)
+            shapes_file.save(shapes_path)
+
+        base_iri = request.form.get("base_iri", "http://example.com/atm#").strip()
+
         if not inputs:
             return "No input provided", 400
         repair_flag = bool(request.form.get("repair"))
         reason_flag = bool(request.form.get("reason"))
         result = run_pipeline(
             inputs,
-            "shapes.ttl",
-            "http://example.com/atm#",
+            shapes_path,
+            base_iri,
             ontologies=ontology_files,
             repair=repair_flag,
             reason=reason_flag,
@@ -116,6 +130,11 @@ def index():
         for path in inputs + ontology_files:
             try:
                 os.remove(path)
+            except OSError:
+                pass
+        if shapes_uploaded:
+            try:
+                os.remove(shapes_path)
             except OSError:
                 pass
         try:
