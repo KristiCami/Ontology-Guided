@@ -5,3 +5,4 @@ results/
 venv
 uploads/
 .pytest_cache/
+cache/
