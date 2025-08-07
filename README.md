@@ -52,6 +52,15 @@ Ontology-Guided/
    reasoner και τον έλεγχο SHACL, και αν χρειαστεί εκτελεί αυτόματο βρόχο διόρθωσης.
    Ο φάκελος `results/` δημιουργείται αυτόματα αν δεν υπάρχει.
 
+   Προαιρετικές επιλογές:
+   - `--spacy-model`: ορίζει ποιο spaCy μοντέλο θα χρησιμοποιηθεί για τμηματοποίηση προτάσεων.
+   - `--inference`: επιλέγει τρόπο συμπερασμού κατά την επικύρωση SHACL (`none`, `rdfs`, `owlrl`).
+
+   Παράδειγμα με προσαρμοσμένες επιλογές:
+   ```bash
+   python3 scripts/main.py --inputs demo.txt --shapes shapes.ttl --spacy-model en --inference none
+   ```
+
    Η προαιρετική σημαία `--reason` τρέχει τον ενσωματωμένο reasoner της OWLready2 πριν τον έλεγχο SHACL.
    Για να λειτουργήσει, απαιτείται εγκατεστημένο Java (π.χ. OpenJDK).
 
