@@ -1,4 +1,5 @@
 import os
+import logging
 from dotenv import load_dotenv
 
 from .validator import SHACLValidator
@@ -36,7 +37,8 @@ class RepairLoop:
         with open(self.data_path, "r", encoding="utf-8") as f:
             original = f.read()
         merged = original + "\n\n" + repair_triples
-        self.builder.parse_turtle(merged)
+        logger = logging.getLogger(__name__)
+        self.builder.parse_turtle(merged, logger=logger)
         os.makedirs("results", exist_ok=True)
         self.builder.save("results/repaired.ttl", fmt="turtle")
         self.builder.save("results/repaired.owl", fmt="xml")

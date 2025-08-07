@@ -2,6 +2,7 @@ import argparse
 import os
 from dotenv import load_dotenv
 import sys
+import logging
 
 # Ensure the project root is on the Python path when executed directly
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -45,6 +46,7 @@ def run_pipeline(inputs, shapes, base_iri, ontologies=None, model="gpt-4", repai
     pipeline["sentences"] = sentences
 
     builder = OntologyBuilder(base_iri, ontology_files=ontologies)
+    logger = logging.getLogger(__name__)
     avail_terms = builder.get_available_terms()
 
     llm = LLMInterface(api_key=api_key, model=model)
@@ -53,7 +55,7 @@ def run_pipeline(inputs, shapes, base_iri, ontologies=None, model="gpt-4", repai
 
     os.makedirs("results", exist_ok=True)
     for snippet in owl_snippets:
-        builder.parse_turtle(snippet)
+        builder.parse_turtle(snippet, logger=logger)
     builder.save("results/combined.ttl", fmt="turtle")
     builder.save("results/combined.owl", fmt="xml")
     pipeline["combined_ttl"] = "results/combined.ttl"
