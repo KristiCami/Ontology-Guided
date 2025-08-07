@@ -11,7 +11,7 @@ if PROJECT_ROOT not in sys.path:
 
 from ontology_guided.data_loader import DataLoader, clean_text
 from ontology_guided.llm_interface import LLMInterface
-from ontology_guided.ontology_builder import OntologyBuilder
+from ontology_guided.ontology_builder import OntologyBuilder, InvalidTurtleError
 from ontology_guided.validator import SHACLValidator
 from ontology_guided.repair_loop import RepairLoop
 
@@ -54,6 +54,7 @@ def run_pipeline(
         raise RuntimeError("Set OPENAI_API_KEY in .env")
 
     pipeline = {}
+    failed_snippets = pipeline["failed_snippets"] = []
 
     loader = DataLoader(spacy_model=spacy_model)
     texts_iter = loader.load_requirements(inputs)
@@ -92,24 +93,51 @@ def run_pipeline(
     BATCH_SIZE = 100
 
     os.makedirs("results", exist_ok=True)
-    batch = []
+    batch: list[str] = []
     any_sentence = False
+    snippet_counter = 0
     for sentence in sentences_iter:
         any_sentence = True
         batch.append(sentence)
         if len(batch) >= BATCH_SIZE:
-            owl_batch = llm.generate_owl(batch, PROMPT_TEMPLATE, available_terms=avail_terms)
-            for snippet in owl_batch:
+            owl_batch = llm.generate_owl(
+                batch, PROMPT_TEMPLATE, available_terms=avail_terms
+            )
+            for sent, snippet in zip(batch, owl_batch):
                 if len(snippets_preview) < PREVIEW_LIMIT:
                     snippets_preview.append(snippet)
-                builder.parse_turtle(snippet, logger=logger)
+                snippet_counter += 1
+                try:
+                    builder.parse_turtle(
+                        snippet,
+                        logger=logger,
+                        requirement=sent,
+                        snippet_index=snippet_counter,
+                    )
+                except InvalidTurtleError:
+                    logger.warning(
+                        "Skipping invalid OWL snippet for sentence: %s", sent
+                    )
+                    failed_snippets.append({"sentence": sent, "snippet": snippet})
             batch = []
     if batch:
         owl_batch = llm.generate_owl(batch, PROMPT_TEMPLATE, available_terms=avail_terms)
-        for snippet in owl_batch:
+        for sent, snippet in zip(batch, owl_batch):
             if len(snippets_preview) < PREVIEW_LIMIT:
                 snippets_preview.append(snippet)
-            builder.parse_turtle(snippet, logger=logger)
+            snippet_counter += 1
+            try:
+                builder.parse_turtle(
+                    snippet,
+                    logger=logger,
+                    requirement=sent,
+                    snippet_index=snippet_counter,
+                )
+            except InvalidTurtleError:
+                logger.warning(
+                    "Skipping invalid OWL snippet for sentence: %s", sent
+                )
+                failed_snippets.append({"sentence": sent, "snippet": snippet})
         any_sentence = True
     if not any_sentence:
         raise RuntimeError("No requirements found in inputs")
