@@ -9,6 +9,13 @@ Demo Url: https://kristitsami.pythonanywhere.com/
 
 ---
 
+Το backend εκτίθεται πλέον μέσω **FastAPI**, προσφέροντας:
+
+- Αυτόματη τεκμηρίωση API (Swagger UI, ReDoc)
+- Ασύγχρονα endpoints για καλύτερη απόδοση
+- Έλεγχο τύπων και validation με Pydantic
+- Διαχωρισμό front-end / back-end
+
 ## 📂 Δομή Αρχείων
 
 ```
@@ -23,7 +30,8 @@ Ontology-Guided/
 ├── scripts/                 # Εκτελέσιμα βοηθητικά scripts
 │   ├── main.py              # Ενοποιημένο pipeline
 │   ├── generate_examples.py # Δημιουργία παραδειγμάτων
-│   └── web_app.py           # Απλή web διεπαφή
+│   └── api.py               # FastAPI backend
+├── frontend/               # Παράδειγμα React διεπαφής
 ├── tests/                   # Μονάδες ελέγχου
 ├── demo.txt                 # Δείγμα απαιτήσεων
 ├── shapes.ttl               # Κανόνες SHACL
@@ -72,11 +80,15 @@ Ontology-Guided/
    ```
    Τα tests βρίσκονται στον φάκελο `tests/` και τρέχουν χωρίς πραγματική κλήση στο OpenAI API.
 
-7. **Εκκίνηση Web διεπαφής**
+7. **Εκκίνηση API με FastAPI**
    ```bash
-   python3 scripts/web_app.py
+   uvicorn scripts.api:app --reload
    ```
-   Ανοίξτε τον browser στη διεύθυνση `http://localhost:8000` για να ανεβάσετε αρχεία ή κείμενο και να τρέξετε το pipeline μέσω web.
+   Επισκεφθείτε το `http://localhost:8000/docs` για αυτόματη τεκμηρίωση και δοκιμές.
+
+8. **Παράδειγμα διεπαφής React**
+   Ανοίξτε το αρχείο `frontend/index.html` στον browser. Το UI καλεί το API και
+   εμφανίζει τα αποτελέσματα ως JSON.
 
 ---
 
@@ -85,6 +97,7 @@ Ontology-Guided/
 - **OpenAI API** για παραγωγή αρχικών τριπλετών
 - **rdflib** και **OWLready2** για χειρισμό οντολογιών
 - **pySHACL** για επικύρωση με κανόνες SHACL
+- **FastAPI** για την υλοποίηση του backend API
 
 ---
 

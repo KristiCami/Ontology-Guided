@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Ontology Pipeline UI</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      function App() {
+        const [text, setText] = React.useState("");
+        const [result, setResult] = React.useState(null);
+
+        const submit = async (e) => {
+          e.preventDefault();
+          const form = new FormData();
+          form.append("text", text);
+          const res = await fetch("http://localhost:8000/run-pipeline", {
+            method: "POST",
+            body: form,
+          });
+          const data = await res.json();
+          setResult(data);
+        };
+
+        return (
+          <div>
+            <h1>Ontology Pipeline</h1>
+            <form onSubmit={submit}>
+              <textarea
+                rows="6"
+                cols="60"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+              ></textarea>
+              <br />
+              <button type="submit">Run</button>
+            </form>
+            {result && (
+              <pre>{JSON.stringify(result, null, 2)}</pre>
+            )}
+          </div>
+        );
+      }
+
+      ReactDOM.render(<App />, document.getElementById("root"));
+    </script>
+  </body>
+</html>
