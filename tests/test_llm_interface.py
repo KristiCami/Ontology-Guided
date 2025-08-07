@@ -1,6 +1,7 @@
 import openai
 from ontology_guided.llm_interface import LLMInterface
 import time
+import logging
 
 def test_generate_owl_with_mock(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
@@ -31,7 +32,7 @@ ex:A ex:B ex:C .
     assert result == ["@prefix ex: <http://example.com/> .\nex:A ex:B ex:C ."]
 
 
-def test_generate_owl_exit_on_error(monkeypatch, tmp_path):
+def test_generate_owl_exit_on_error(monkeypatch, tmp_path, caplog):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     def fake_create(*args, **kwargs):
         raise openai.OpenAIError("boom")
@@ -40,11 +41,14 @@ def test_generate_owl_exit_on_error(monkeypatch, tmp_path):
     monkeypatch.setattr(time, "sleep", lambda *args, **kwargs: None)
 
     llm = LLMInterface(api_key="dummy", model="gpt-4", cache_dir=str(tmp_path))
-    result = llm.generate_owl(["irrelevant"], "{sentence}", max_retries=1, retry_delay=0)
+    with caplog.at_level(logging.WARNING):
+        result = llm.generate_owl(["irrelevant"], "{sentence}", max_retries=1, retry_delay=0)
     assert result == []
+    assert "LLM call failed" in caplog.text
+    assert "Exiting gracefully." in caplog.text
 
 
-def test_generate_owl_retry_then_success(monkeypatch, tmp_path):
+def test_generate_owl_retry_then_success(monkeypatch, tmp_path, caplog):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     class FakeMessage:
         def __init__(self, content):
@@ -73,8 +77,10 @@ ex:A ex:B ex:C .
     monkeypatch.setattr(time, "sleep", lambda *args, **kwargs: None)
 
     llm = LLMInterface(api_key="dummy", model="gpt-4", cache_dir=str(tmp_path))
-    result = llm.generate_owl(["irrelevant"], "{sentence}", max_retries=2, retry_delay=0)
+    with caplog.at_level(logging.WARNING):
+        result = llm.generate_owl(["irrelevant"], "{sentence}", max_retries=2, retry_delay=0)
     assert result == ["@prefix ex: <http://example.com/> .\nex:A ex:B ex:C ."]
+    assert "LLM call failed" in caplog.text
 
 
 def test_generate_owl_with_terms(monkeypatch, tmp_path):

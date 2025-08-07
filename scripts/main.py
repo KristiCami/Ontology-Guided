@@ -70,27 +70,27 @@ def run_pipeline(
     builder.save("results/combined.owl", fmt="xml")
     pipeline["combined_ttl"] = "results/combined.ttl"
     pipeline["combined_owl"] = "results/combined.owl"
-    print("Saved results/combined.ttl and results/combined.owl")
+    logger.info("Saved results/combined.ttl and results/combined.owl")
 
     if reason:
         from ontology_guided.reasoner import run_reasoner, ReasonerError
-        print("Running OWL reasoner...")
+        logger.info("Running OWL reasoner...")
         try:
             run_reasoner(pipeline["combined_owl"])
             pipeline["reasoner"] = "OWL reasoning completed successfully."
         except ReasonerError as exc:
-            print(exc)
+            logger.error(exc)
             pipeline["reasoner"] = f"Reasoner error: {exc}"
 
     validator = SHACLValidator(pipeline["combined_ttl"], shapes, inference=inference)
     conforms, report_text, _ = validator.run_validation()
-    print("Conforms:", conforms)
-    print(report_text)
+    logger.info("Conforms: %s", conforms)
+    logger.info(report_text)
     pipeline["shacl_conforms"] = conforms
     pipeline["shacl_report"] = report_text
 
     if not conforms and repair:
-        print("Running repair loop...")
+        logger.info("Running repair loop...")
         repairer = RepairLoop(pipeline["combined_ttl"], shapes, api_key)
         repairer.run()
         pipeline["repaired_ttl"] = "results/repaired.ttl"
