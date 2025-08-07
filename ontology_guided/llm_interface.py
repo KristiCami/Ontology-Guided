@@ -6,6 +6,7 @@ import time
 import hashlib
 import json
 from pathlib import Path
+import logging
 
 class LLMInterface:
     def __init__(self, api_key: str, model: str = "gpt-4", cache_dir: Optional[str] = None):
@@ -13,6 +14,7 @@ class LLMInterface:
         self.model = model
         self.cache_dir = Path(cache_dir or Path(__file__).resolve().parent.parent / "cache")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.logger = logging.getLogger(__name__)
 
     def _cache_file(self, sentence: str, available_terms: Optional[Tuple[List[str], List[str]]]):
         classes, properties = available_terms or ([], [])
@@ -79,9 +81,9 @@ class LLMInterface:
                     break
                 except (openai.OpenAIError, httpx.HTTPError) as e:
                     attempts += 1
-                    print(f"LLM call failed: {e}")
+                    self.logger.warning("LLM call failed: %s", e)
                     if attempts > max_retries:
-                        print("Exiting gracefully.")
+                        self.logger.error("Exiting gracefully.")
                         return results
                     time.sleep(retry_delay)
 

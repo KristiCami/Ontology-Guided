@@ -25,24 +25,24 @@ class RepairLoop:
         self.builder = OntologyBuilder(BASE_IRI)
 
     def run(self):
+        logger = logging.getLogger(__name__)
         validator = SHACLValidator(self.data_path, self.shapes_path)
         conforms, report_text, _ = validator.run_validation()
         if conforms:
-            print("No SHACL violations detected. No repair needed.")
+            logger.info("No SHACL violations detected. No repair needed.")
             return
-        print("SHACL Report:\n", report_text)
+        logger.info("SHACL Report:\n%s", report_text)
         prompt = PROMPT_TEMPLATE.format(sentence=report_text)
-        print("Repair prompt:\n", prompt)
+        logger.info("Repair prompt:\n%s", prompt)
         repair_triples = self.llm.generate_owl([prompt], "{sentence}")[0]
         with open(self.data_path, "r", encoding="utf-8") as f:
             original = f.read()
         merged = original + "\n\n" + repair_triples
-        logger = logging.getLogger(__name__)
         self.builder.parse_turtle(merged, logger=logger)
         os.makedirs("results", exist_ok=True)
         self.builder.save("results/repaired.ttl", fmt="turtle")
         self.builder.save("results/repaired.owl", fmt="xml")
-        print("Repaired ontology saved to results/repaired.ttl and results/repaired.owl")
+        logger.info("Repaired ontology saved to results/repaired.ttl and results/repaired.owl")
 
 
 def main():
