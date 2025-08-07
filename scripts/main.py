@@ -9,7 +9,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from ontology_guided.data_loader import DataLoader
+from ontology_guided.data_loader import DataLoader, clean_text
 from ontology_guided.llm_interface import LLMInterface
 from ontology_guided.ontology_builder import OntologyBuilder
 from ontology_guided.validator import SHACLValidator
@@ -58,13 +58,23 @@ def run_pipeline(
     loader = DataLoader(spacy_model=spacy_model)
     texts_iter = loader.load_requirements(inputs)
     pipeline["texts"] = []
-    sentences = []
-    for text in texts_iter:
-        pipeline["texts"].append(text)
-        sentences.extend(loader.preprocess_text(text))
-    if not sentences:
-        raise RuntimeError("No requirements found in inputs")
-    pipeline["sentences"] = sentences
+
+    # Store only a small preview of sentences for display purposes
+    sentences_preview = pipeline["sentences"] = []
+    PREVIEW_LIMIT = 20
+
+    def sentence_iterator():
+        for text in texts_iter:
+            pipeline["texts"].append(text)
+            lines = (line for line in text.splitlines() if line.strip())
+            cleaned_iter = (clean_text(line) for line in lines)
+            for doc in loader.nlp.pipe(cleaned_iter, batch_size=100, n_process=1):
+                for sent in doc.sents:
+                    sent_text = sent.text.strip()
+                    if len(sentences_preview) < PREVIEW_LIMIT:
+                        sentences_preview.append(sent_text)
+                    yield sent_text
+    sentences_iter = sentence_iterator()
 
     ontology_files = list(ontologies or [])
     if load_rbo:
@@ -77,12 +87,32 @@ def run_pipeline(
     avail_terms = builder.get_available_terms()
 
     llm = LLMInterface(api_key=api_key, model=model)
-    owl_snippets = llm.generate_owl(sentences, PROMPT_TEMPLATE, available_terms=avail_terms)
-    pipeline["owl_snippets"] = owl_snippets
+
+    snippets_preview = pipeline["owl_snippets"] = []
+    BATCH_SIZE = 100
 
     os.makedirs("results", exist_ok=True)
-    for snippet in owl_snippets:
-        builder.parse_turtle(snippet, logger=logger)
+    batch = []
+    any_sentence = False
+    for sentence in sentences_iter:
+        any_sentence = True
+        batch.append(sentence)
+        if len(batch) >= BATCH_SIZE:
+            owl_batch = llm.generate_owl(batch, PROMPT_TEMPLATE, available_terms=avail_terms)
+            for snippet in owl_batch:
+                if len(snippets_preview) < PREVIEW_LIMIT:
+                    snippets_preview.append(snippet)
+                builder.parse_turtle(snippet, logger=logger)
+            batch = []
+    if batch:
+        owl_batch = llm.generate_owl(batch, PROMPT_TEMPLATE, available_terms=avail_terms)
+        for snippet in owl_batch:
+            if len(snippets_preview) < PREVIEW_LIMIT:
+                snippets_preview.append(snippet)
+            builder.parse_turtle(snippet, logger=logger)
+        any_sentence = True
+    if not any_sentence:
+        raise RuntimeError("No requirements found in inputs")
     builder.save("results/combined.ttl", fmt="turtle")
     builder.save("results/combined.owl", fmt="xml")
     pipeline["combined_ttl"] = "results/combined.ttl"
