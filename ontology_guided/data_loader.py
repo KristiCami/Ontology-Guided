@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List
+from typing import Iterable, Iterator, List
 import spacy
 from docx import Document  # pip install python-docx
 
@@ -22,28 +22,27 @@ class DataLoader:
             self.nlp = spacy.blank("en")
             self.nlp.add_pipe("sentencizer")
 
-    def load_text_file(self, file_path: str) -> str:
+    def load_text_file(self, file_path: str) -> Iterator[str]:
         with open(file_path, "r", encoding="utf-8") as f:
-            return f.read()
+            for line in f:
+                yield line
 
     def load_docx_file(self, file_path: str) -> str:
         doc = Document(file_path)
         return "\n".join(para.text for para in doc.paragraphs)
 
-    def load_requirements(self, input_paths: List[str]) -> List[str]:
-        texts = []
+    def load_requirements(self, input_paths: List[str]) -> Iterable[str]:
         for path in input_paths:
             if not os.path.exists(path):
                 logging.warning("File %s does not exist and will be skipped", path)
                 continue
             ext = os.path.splitext(path)[1].lower()
             if ext == ".txt":
-                texts.append(self.load_text_file(path))
+                yield from self.load_text_file(path)
             elif ext == ".docx":
-                texts.append(self.load_docx_file(path))
+                yield self.load_docx_file(path)
             else:
                 raise ValueError(f"Unsupported file extension: {ext}")
-        return texts
 
     def preprocess_text(self, text: str) -> List[str]:
         cleaned = clean_text(text)

@@ -6,7 +6,7 @@ from ontology_guided.data_loader import DataLoader
 
 def test_demo_txt_loading_and_preprocessing():
     loader = DataLoader()
-    texts = loader.load_requirements(["demo.txt"])
+    texts = list(loader.load_requirements(["demo.txt"]))
     assert len(texts) == 1
     sentences = []
     for t in texts:
@@ -21,12 +21,12 @@ def test_load_requirements_warns_and_raises(tmp_path, caplog):
 
     missing_file = tmp_path / "missing.txt"
     with caplog.at_level(logging.WARNING):
-        texts = loader.load_requirements([str(missing_file)])
+        texts = list(loader.load_requirements([str(missing_file)]))
     assert "does not exist" in caplog.text
     assert texts == []
 
     bad_file = tmp_path / "bad.pdf"
     bad_file.write_text("dummy")
     with pytest.raises(ValueError, match="Unsupported file extension"):
-        loader.load_requirements([str(bad_file)])
+        list(loader.load_requirements([str(bad_file)]))
 

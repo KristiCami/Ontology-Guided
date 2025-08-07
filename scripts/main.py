@@ -56,10 +56,11 @@ def run_pipeline(
     pipeline = {}
 
     loader = DataLoader(spacy_model=spacy_model)
-    texts = loader.load_requirements(inputs)
-    pipeline["texts"] = texts
+    texts_iter = loader.load_requirements(inputs)
+    pipeline["texts"] = []
     sentences = []
-    for text in texts:
+    for text in texts_iter:
+        pipeline["texts"].append(text)
         sentences.extend(loader.preprocess_text(text))
     if not sentences:
         raise RuntimeError("No requirements found in inputs")
