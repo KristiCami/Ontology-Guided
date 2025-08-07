@@ -1,3 +1,4 @@
+import io
 from scripts import web_app
 
 
@@ -22,8 +23,10 @@ def test_temporary_files_removed(monkeypatch, tmp_path):
     monkeypatch.setattr(web_app, "run_pipeline", fake_run_pipeline)
     monkeypatch.chdir(tmp_path)
     client = web_app.app.test_client()
-    resp = client.post("/", data={"text": "hi"})
+    data = {"text": "hi", "shapes": (io.BytesIO(b"s"), "s.ttl")}
+    resp = client.post("/", data=data, content_type="multipart/form-data")
     assert resp.status_code == 200
     assert not dummy.exists()
     assert not (tmp_path / "uploads" / "input.txt").exists()
+    assert not (tmp_path / "uploads" / "s.ttl").exists()
 
