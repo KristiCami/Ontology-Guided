@@ -7,12 +7,13 @@ from rdflib.namespace import RDF, RDFS, OWL, XSD
 class OntologyBuilder:
     """Μετατρέπει τμήματα Turtle σε ενιαία οντολογία."""
 
-    def __init__(self, base_iri: str, ontology_files=None):
+    def __init__(self, base_iri: str, prefix: str | None = None, ontology_files=None):
         if not base_iri.endswith("#"):
             base_iri += "#"
         self.base_iri = base_iri
+        self.prefix = prefix or base_iri.rstrip("#").split("/")[-1]
         self.graph = Graph()
-        self.graph.bind("atm", self.base_iri)
+        self.graph.bind(self.prefix, self.base_iri)
         if ontology_files:
             for path in ontology_files:
                 self.graph.parse(path)
@@ -21,7 +22,7 @@ class OntologyBuilder:
 
     def _build_header(self):
         prefixes = {
-            "atm": self.base_iri,
+            self.prefix: self.base_iri,
             "rdf": str(RDF),
             "rdfs": str(RDFS),
             "owl": str(OWL),
