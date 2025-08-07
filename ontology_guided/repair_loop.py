@@ -44,6 +44,14 @@ class RepairLoop:
         self.builder.save("results/repaired.owl", fmt="xml")
         logger.info("Repaired ontology saved to results/repaired.ttl and results/repaired.owl")
 
+        repaired_validator = SHACLValidator("results/repaired.ttl", self.shapes_path)
+        repaired_conforms, repaired_report, _ = repaired_validator.run_validation()
+        if not repaired_conforms:
+            logger.error("Remaining SHACL violations:\n%s", repaired_report)
+            raise RuntimeError(
+                "Repaired ontology still violates SHACL constraints."
+            )
+
 
 def main():
     load_dotenv()
