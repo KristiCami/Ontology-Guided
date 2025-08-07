@@ -32,6 +32,8 @@ FORM_HTML = """<!doctype html>
     <textarea name="text" rows="6"></textarea><br><br>
     <label>File:</label> <input type="file" name="file"><br><br>
     <label>Ontologies:</label> <input type="file" name="ontologies" multiple><br><br>
+    <label>Repair:</label> <input type="checkbox" name="repair">
+    <label>Reason:</label> <input type="checkbox" name="reason"><br><br>
     <input type="submit" value="Run Pipeline">
   </form>
 
@@ -98,13 +100,15 @@ def index():
                 ontology_files.append(o_path)
         if not inputs:
             return "No input provided", 400
+        repair_flag = bool(request.form.get("repair"))
+        reason_flag = bool(request.form.get("reason"))
         result = run_pipeline(
             inputs,
             "shapes.ttl",
             "http://example.com/atm#",
             ontologies=ontology_files,
-            repair=True,
-            reason=True,
+            repair=repair_flag,
+            reason=reason_flag,
         )
         ontology_path = result.get("repaired_ttl", result.get("combined_ttl"))
         with open(ontology_path, "r", encoding="utf-8") as f:
