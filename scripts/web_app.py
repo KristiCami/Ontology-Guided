@@ -113,6 +113,15 @@ def index():
         ontology_path = result.get("repaired_ttl", result.get("combined_ttl"))
         with open(ontology_path, "r", encoding="utf-8") as f:
             ontology_data = f.read()
+        for path in inputs + ontology_files:
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+        try:
+            os.remove(ontology_path)
+        except OSError:
+            pass
         return render_template_string(FORM_HTML, result=result, ontology=ontology_data)
     return render_template_string(FORM_HTML, result=None, ontology=None)
 
