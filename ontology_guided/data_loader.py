@@ -1,4 +1,5 @@
 import os
+import logging
 from typing import List
 import spacy
 from docx import Document  # pip install python-docx
@@ -33,12 +34,15 @@ class DataLoader:
         texts = []
         for path in input_paths:
             if not os.path.exists(path):
+                logging.warning("File %s does not exist and will be skipped", path)
                 continue
             ext = os.path.splitext(path)[1].lower()
             if ext == ".txt":
                 texts.append(self.load_text_file(path))
             elif ext == ".docx":
                 texts.append(self.load_docx_file(path))
+            else:
+                raise ValueError(f"Unsupported file extension: {ext}")
         return texts
 
     def preprocess_text(self, text: str) -> List[str]:
