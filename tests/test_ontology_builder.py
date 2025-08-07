@@ -1,6 +1,8 @@
 import logging
 
-from ontology_guided.ontology_builder import OntologyBuilder
+import pytest
+
+from ontology_guided.ontology_builder import OntologyBuilder, InvalidTurtleError
 
 
 def test_parse_turtle_with_prefix():
@@ -9,6 +11,14 @@ def test_parse_turtle_with_prefix():
     logger = logging.getLogger(__name__)
     ob.parse_turtle(ttl, logger=logger)
     assert len(ob.graph) == 1
+
+
+def test_parse_turtle_bad_syntax():
+    ob = OntologyBuilder('http://example.com/atm#')
+    bad_ttl = "invalid ttl"
+    logger = logging.getLogger(__name__)
+    with pytest.raises(InvalidTurtleError):
+        ob.parse_turtle(bad_ttl, logger=logger, snippet_index=1)
 
 
 def test_import_external_ontology(tmp_path):
