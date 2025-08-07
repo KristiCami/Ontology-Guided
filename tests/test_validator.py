@@ -17,7 +17,8 @@ atm:alice a atm:User ;
 atm:acc123 a atm:Account ;
     atm:balance "100.0"^^xsd:decimal .
 atm:atm1 a atm:ATM ;
-    atm:location "Center"^^xsd:string .
+    atm:location "Center"^^xsd:string ;
+    atm:logs atm:tx1 .
 atm:tx1 a atm:Transaction ;
     atm:actor atm:alice ;
     atm:target atm:acc123 ;
@@ -46,11 +47,13 @@ atm:alice a atm:User ;
     atm:owns atm:acc123 .
 atm:acc123 a atm:Account ;
     atm:balance "100.0"^^xsd:decimal .
-atm:atm1 a atm:ATM ;
-    atm:location "Center"^^xsd:string .
-atm:tx2 a atm:Transaction ;
+atm:cash a atm:Item .
+atm:act1 a atm:Action ;
     atm:actor atm:alice ;
-    atm:target atm:acc123 .
+    atm:object atm:cash .
+atm:atm1 a atm:ATM ;
+    atm:location "Center"^^xsd:string ;
+    atm:logs atm:act1 .
 """
     data_path = _write_temp(tmp_path, "invalid.ttl", data)
     shapes_path = Path(__file__).resolve().parent.parent / "shapes.ttl"
