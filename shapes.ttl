@@ -15,6 +15,11 @@ atm:TransactionShape
         sh:path atm:target ;
         sh:minCount 1 ;
         sh:class atm:Account ;
+    ] ;
+    sh:property [
+        sh:path atm:amount ;
+        sh:minCount 1 ;
+        sh:datatype xsd:decimal ;
     ] .
 
 # Κάθε ενέργεια πρέπει επίσης να ορίζει actor και object
@@ -40,5 +45,35 @@ atm:CardInsertionShape
         sh:path atm:after ;
         sh:minCount 1 ;
         sh:class atm:Transaction ;
+    ] .
+
+# Οι χρήστες πρέπει να κατέχουν τουλάχιστον έναν λογαριασμό
+atm:UserShape
+    a sh:NodeShape ;
+    sh:targetClass atm:User ;
+    sh:property [
+        sh:path atm:owns ;
+        sh:minCount 1 ;
+        sh:class atm:Account ;
+    ] .
+
+# Κάθε λογαριασμός πρέπει να έχει υπόλοιπο
+atm:AccountShape
+    a sh:NodeShape ;
+    sh:targetClass atm:Account ;
+    sh:property [
+        sh:path atm:balance ;
+        sh:minCount 1 ;
+        sh:datatype xsd:decimal ;
+    ] .
+
+# Κάθε ATM πρέπει να δηλώνει την τοποθεσία του
+atm:ATMShape
+    a sh:NodeShape ;
+    sh:targetClass atm:ATM ;
+    sh:property [
+        sh:path atm:location ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
     ] .
     
