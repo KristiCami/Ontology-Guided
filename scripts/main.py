@@ -20,6 +20,11 @@ PROMPT_TEMPLATE = (
     "Requirement: {sentence}\n\nOWL:"
 )
 
+# Default ontology locations used by optional command-line flags
+ONTOLOGIES_DIR = os.path.join(PROJECT_ROOT, "ontologies")
+RBO_ONTOLOGY_PATH = os.path.join(ONTOLOGIES_DIR, "rbo.ttl")
+LEXICAL_ONTOLOGY_PATH = os.path.join(ONTOLOGIES_DIR, "lexical.ttl")
+
 
 def run_pipeline(
     inputs,
@@ -31,12 +36,17 @@ def run_pipeline(
     reason=False,
     spacy_model="en_core_web_sm",
     inference="rdfs",
+    load_rbo=False,
+    load_lexical=False,
 ):
     """Execute the ontology drafting pipeline.
 
     Parameters mirror the command line flags used in ``main``. The function now
     returns a dictionary describing the intermediate artefacts so callers such
-    as the web interface can display each stage to the user.
+    as the web interface can display each stage to the user. When ``load_rbo``
+    or ``load_lexical`` are ``True``, the predefined ontology files at
+    ``RBO_ONTOLOGY_PATH`` and ``LEXICAL_ONTOLOGY_PATH`` are included
+    automatically.
     """
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
@@ -55,7 +65,13 @@ def run_pipeline(
         raise RuntimeError("No requirements found in inputs")
     pipeline["sentences"] = sentences
 
-    builder = OntologyBuilder(base_iri, ontology_files=ontologies)
+    ontology_files = list(ontologies or [])
+    if load_rbo:
+        ontology_files.append(RBO_ONTOLOGY_PATH)
+    if load_lexical:
+        ontology_files.append(LEXICAL_ONTOLOGY_PATH)
+
+    builder = OntologyBuilder(base_iri, ontology_files=ontology_files)
     logger = logging.getLogger(__name__)
     avail_terms = builder.get_available_terms()
 
@@ -104,6 +120,8 @@ def main():
     parser.add_argument("--shapes", default="shapes.ttl", help="SHACL shapes file")
     parser.add_argument("--base-iri", default="http://example.com/atm#", help="Base IRI for ontology")
     parser.add_argument("--ontologies", nargs="*", default=[], help="Additional ontology files to load")
+    parser.add_argument("--rbo", action="store_true", help="Include the RBO ontology")
+    parser.add_argument("--lexical", action="store_true", help="Include the lexical ontology")
     parser.add_argument("--model", default="gpt-4", help="OpenAI model")
     parser.add_argument("--repair", action="store_true", help="Run repair loop if validation fails")
     parser.add_argument("--reason", action="store_true", help="Run OWL reasoner before validation")
@@ -130,6 +148,8 @@ def main():
         reason=args.reason,
         spacy_model=args.spacy_model,
         inference=args.inference,
+        load_rbo=args.rbo,
+        load_lexical=args.lexical,
     )
 
 if __name__ == "__main__":
