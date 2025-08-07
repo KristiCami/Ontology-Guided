@@ -8,7 +8,12 @@ import json
 from pathlib import Path
 import logging
 
-class LLMInterface:
+from .base_llm import BaseLLM
+
+
+class LLMInterface(BaseLLM):
+    """LLM provider that calls the OpenAI API."""
+
     def __init__(self, api_key: str, model: str = "gpt-4", cache_dir: Optional[str] = None):
         openai.api_key = api_key
         self.model = model

@@ -32,6 +32,7 @@ def run_pipeline(
     base_iri,
     ontologies=None,
     model="gpt-4",
+    llm_provider="openai",
     repair=False,
     reason=False,
     spacy_model="en_core_web_sm",
@@ -50,7 +51,7 @@ def run_pipeline(
     """
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
+    if llm_provider == "openai" and not api_key:
         raise RuntimeError("Set OPENAI_API_KEY in .env")
 
     pipeline = {}
@@ -75,7 +76,14 @@ def run_pipeline(
     logger = logging.getLogger(__name__)
     avail_terms = builder.get_available_terms()
 
-    llm = LLMInterface(api_key=api_key, model=model)
+    if llm_provider == "openai":
+        llm = LLMInterface(api_key=api_key, model=model)
+    elif llm_provider == "local":
+        from ontology_guided.local_llm_interface import LocalLLMInterface
+
+        llm = LocalLLMInterface(model=model)
+    else:
+        raise ValueError(f"Unknown LLM provider: {llm_provider}")
     owl_snippets = llm.generate_owl(sentences, PROMPT_TEMPLATE, available_terms=avail_terms)
     pipeline["owl_snippets"] = owl_snippets
 
@@ -123,6 +131,12 @@ def main():
     parser.add_argument("--rbo", action="store_true", help="Include the RBO ontology")
     parser.add_argument("--lexical", action="store_true", help="Include the lexical ontology")
     parser.add_argument("--model", default="gpt-4", help="OpenAI model")
+    parser.add_argument(
+        "--llm-provider",
+        default="openai",
+        choices=["openai", "local"],
+        help="Provider for LLM generation",
+    )
     parser.add_argument("--repair", action="store_true", help="Run repair loop if validation fails")
     parser.add_argument("--reason", action="store_true", help="Run OWL reasoner before validation")
     parser.add_argument(
@@ -144,6 +158,7 @@ def main():
         args.base_iri,
         ontologies=args.ontologies,
         model=args.model,
+        llm_provider=args.llm_provider,
         repair=args.repair,
         reason=args.reason,
         spacy_model=args.spacy_model,
