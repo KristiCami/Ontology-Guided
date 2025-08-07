@@ -31,6 +31,8 @@ FORM_HTML = """<!doctype html>
     <label>Text:</label><br>
     <textarea name="text" rows="6"></textarea><br><br>
     <label>File:</label> <input type="file" name="file"><br><br>
+    <label>Base IRI:</label> <input type="text" name="base_iri"><br><br>
+    <label>SHACL file:</label> <input type="file" name="shacl"><br><br>
     <label>Ontologies:</label> <input type="file" name="ontologies" multiple><br><br>
     <label>Repair:</label> <input type="checkbox" name="repair">
     <label>Reason:</label> <input type="checkbox" name="reason"><br><br>
@@ -79,6 +81,7 @@ def index():
     if request.method == "POST":
         inputs = []
         ontology_files = []
+        temp_files = []
         os.makedirs("uploads", exist_ok=True)
         text = request.form.get("text", "").strip()
         if text:
@@ -86,26 +89,37 @@ def index():
             with open(text_path, "w", encoding="utf-8") as f:
                 f.write(text)
             inputs.append(text_path)
+            temp_files.append(text_path)
         uploaded = request.files.get("file")
         if uploaded and uploaded.filename:
             filename = secure_filename(uploaded.filename)
             file_path = os.path.join("uploads", filename)
             uploaded.save(file_path)
             inputs.append(file_path)
+            temp_files.append(file_path)
         for onto in request.files.getlist("ontologies"):
             if onto and onto.filename:
                 ofile = secure_filename(onto.filename)
                 o_path = os.path.join("uploads", ofile)
                 onto.save(o_path)
                 ontology_files.append(o_path)
+                temp_files.append(o_path)
+        shacl_path = "shapes.ttl"
+        shacl = request.files.get("shacl")
+        if shacl and shacl.filename:
+            sfile = secure_filename(shacl.filename)
+            shacl_path = os.path.join("uploads", sfile)
+            shacl.save(shacl_path)
+            temp_files.append(shacl_path)
         if not inputs:
             return "No input provided", 400
+        base_iri = request.form.get("base_iri") or "http://example.com/atm#"
         repair_flag = bool(request.form.get("repair"))
         reason_flag = bool(request.form.get("reason"))
         result = run_pipeline(
             inputs,
-            "shapes.ttl",
-            "http://example.com/atm#",
+            shacl_path,
+            base_iri,
             ontologies=ontology_files,
             repair=repair_flag,
             reason=reason_flag,
@@ -113,7 +127,7 @@ def index():
         ontology_path = result.get("repaired_ttl", result.get("combined_ttl"))
         with open(ontology_path, "r", encoding="utf-8") as f:
             ontology_data = f.read()
-        for path in inputs + ontology_files:
+        for path in temp_files:
             try:
                 os.remove(path)
             except OSError:
