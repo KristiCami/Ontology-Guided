@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import logging
+from rdflib import Graph
 
 class LLMInterface:
     def __init__(self, api_key: str, model: str = "gpt-4", cache_dir: Optional[str] = None):
@@ -67,8 +68,8 @@ class LLMInterface:
                 if properties:
                     prompt += "Properties: " + ", ".join(properties) + "\n"
             prompt += prompt_template.format(sentence=sent)
+            base_prompt = prompt
             attempts = 0
-            resp = None
             while True:
                 try:
                     resp = openai.chat.completions.create(
@@ -78,7 +79,6 @@ class LLMInterface:
                             {"role": "user", "content": prompt},
                         ],
                     )
-                    break
                 except (openai.OpenAIError, httpx.HTTPError) as e:
                     attempts += 1
                     self.logger.warning("LLM call failed: %s", e)
@@ -86,10 +86,29 @@ class LLMInterface:
                         self.logger.error("Exiting gracefully.")
                         return results
                     time.sleep(retry_delay)
+                    continue
 
-            raw = resp.choices[0].message.content
-            match = re.search(r"```turtle\s*(.*?)```", raw, re.S)
-            turtle_code = match.group(1).strip() if match else raw.strip()
+                raw = resp.choices[0].message.content
+                match = re.search(r"```turtle\s*(.*?)```", raw, re.S)
+                turtle_code = match.group(1).strip() if match else raw.strip()
+                try:
+                    g = Graph()
+                    g.parse(data=turtle_code, format="turtle")
+                    break
+                except Exception as e:
+                    attempts += 1
+                    self.logger.warning("Invalid Turtle returned: %s", e)
+                    if attempts > max_retries:
+                        self.logger.error(
+                            "Failed to produce valid Turtle after %d retries", max_retries
+                        )
+                        raise ValueError("LLM returned invalid Turtle") from e
+                    prompt = (
+                        "Previous output was invalid Turtle; return only correct Turtle.\n"
+                        + base_prompt
+                    )
+                    time.sleep(retry_delay)
+
             results.append(turtle_code)
             self._save_cache(sent, available_terms, turtle_code)
         return results
