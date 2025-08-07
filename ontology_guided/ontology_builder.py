@@ -1,3 +1,5 @@
+import logging
+
 from rdflib import Graph
 from rdflib.namespace import RDF, RDFS, OWL, XSD
 
@@ -47,13 +49,14 @@ class OntologyBuilder:
     def get_available_terms(self):
         return self.available_classes, self.available_properties
 
-    def parse_turtle(self, turtle_str: str):
+    def parse_turtle(self, turtle_str: str, logger: logging.Logger | None = None):
         lines = [line for line in turtle_str.splitlines() if line.strip()]
         cleaned = "\n".join(lines)
         data = self.header + "\n" + cleaned
-        print("=== Turtle input to rdflib.parse ===")
-        print(data)
-        print("=== End of Turtle ===")
+        if logger:
+            logger.debug("=== Turtle input to rdflib.parse ===")
+            logger.debug(data)
+            logger.debug("=== End of Turtle ===")
         self.graph.parse(data=data, format="turtle")
         self._extract_available_terms()
 
@@ -65,12 +68,14 @@ class OntologyBuilder:
 if __name__ == "__main__":
     import os
 
+    logging.basicConfig(level=logging.DEBUG)
     BASE_IRI = "http://example.com/atm#"
     os.makedirs("results", exist_ok=True)
     with open("results/llm_output.ttl", "r", encoding="utf-8") as f:
         ttl = f.read()
     ob = OntologyBuilder(BASE_IRI)
-    ob.parse_turtle(ttl)
+    logger = logging.getLogger(__name__)
+    ob.parse_turtle(ttl, logger=logger)
     ob.save("results/combined.ttl", fmt="turtle")
     ob.save("results/combined.owl", fmt="xml")
     print("Saved results/combined.ttl and results/combined.owl")
