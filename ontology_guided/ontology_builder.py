@@ -2,6 +2,12 @@ import logging
 
 from rdflib import Graph
 from rdflib.namespace import RDF, RDFS, OWL, XSD
+from rdflib.plugins.parsers.notation3 import BadSyntax
+
+
+class InvalidTurtleError(ValueError):
+    """Raised when Turtle parsing fails."""
+    pass
 
 
 class OntologyBuilder:
@@ -50,7 +56,13 @@ class OntologyBuilder:
     def get_available_terms(self):
         return self.available_classes, self.available_properties
 
-    def parse_turtle(self, turtle_str: str, logger: logging.Logger | None = None):
+    def parse_turtle(
+        self,
+        turtle_str: str,
+        logger: logging.Logger | None = None,
+        requirement: str | None = None,
+        snippet_index: int | None = None,
+    ):
         lines = [line for line in turtle_str.splitlines() if line.strip()]
         cleaned = "\n".join(lines)
         data = self.header + "\n" + cleaned
@@ -58,7 +70,19 @@ class OntologyBuilder:
             logger.debug("=== Turtle input to rdflib.parse ===")
             logger.debug(data)
             logger.debug("=== End of Turtle ===")
-        self.graph.parse(data=data, format="turtle")
+        try:
+            self.graph.parse(data=data, format="turtle")
+        except BadSyntax as exc:
+            if logger:
+                idx = f" snippet_index={snippet_index}" if snippet_index is not None else ""
+                req = f" requirement={requirement!r}" if requirement is not None else ""
+                logger.exception(
+                    "Failed to parse Turtle%s%s. Snippet:\n%s",
+                    idx,
+                    req,
+                    data,
+                )
+            raise InvalidTurtleError("Invalid Turtle input") from exc
         self._extract_available_terms()
 
     def save(self, file_path: str, fmt: str = "turtle"):
