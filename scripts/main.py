@@ -21,7 +21,17 @@ PROMPT_TEMPLATE = (
 )
 
 
-def run_pipeline(inputs, shapes, base_iri, ontologies=None, model="gpt-4", repair=False, reason=False):
+def run_pipeline(
+    inputs,
+    shapes,
+    base_iri,
+    ontologies=None,
+    model="gpt-4",
+    repair=False,
+    reason=False,
+    spacy_model="en_core_web_sm",
+    inference="rdfs",
+):
     """Execute the ontology drafting pipeline.
 
     Parameters mirror the command line flags used in ``main``. The function now
@@ -35,7 +45,7 @@ def run_pipeline(inputs, shapes, base_iri, ontologies=None, model="gpt-4", repai
 
     pipeline = {}
 
-    loader = DataLoader()
+    loader = DataLoader(spacy_model=spacy_model)
     texts = loader.load_requirements(inputs)
     pipeline["texts"] = texts
     sentences = []
@@ -72,7 +82,7 @@ def run_pipeline(inputs, shapes, base_iri, ontologies=None, model="gpt-4", repai
             print(exc)
             pipeline["reasoner"] = f"Reasoner error: {exc}"
 
-    validator = SHACLValidator(pipeline["combined_ttl"], shapes)
+    validator = SHACLValidator(pipeline["combined_ttl"], shapes, inference=inference)
     conforms, report_text, _ = validator.run_validation()
     print("Conforms:", conforms)
     print(report_text)
@@ -97,6 +107,17 @@ def main():
     parser.add_argument("--model", default="gpt-4", help="OpenAI model")
     parser.add_argument("--repair", action="store_true", help="Run repair loop if validation fails")
     parser.add_argument("--reason", action="store_true", help="Run OWL reasoner before validation")
+    parser.add_argument(
+        "--spacy-model",
+        default="en_core_web_sm",
+        help="spaCy model for sentence segmentation",
+    )
+    parser.add_argument(
+        "--inference",
+        default="rdfs",
+        choices=["none", "rdfs", "owlrl"],
+        help="Inference to apply during SHACL validation",
+    )
     args = parser.parse_args()
 
     run_pipeline(
@@ -107,6 +128,8 @@ def main():
         model=args.model,
         repair=args.repair,
         reason=args.reason,
+        spacy_model=args.spacy_model,
+        inference=args.inference,
     )
 
 if __name__ == "__main__":
