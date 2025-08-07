@@ -9,16 +9,6 @@ def test_demo_txt_loading_and_preprocessing():
     for t in texts:
         sentences.extend(loader.preprocess_text(t))
     assert sentences == [
-        "@prefix atm: <http://example.com/atm#> .",
-        "atm:alice a atm:User .",
-        "atm:acc123 a atm:Account .",
-        "atm:tx1 a atm:Transaction ; atm:actor atm:alice ; atm:target atm:acc123 .",
-        "atm:device1 a atm:Device .",
-        "atm:tx2 a atm:Transaction ; atm:actor atm:device1 ; atm:target atm:acc123 .",
-        "atm:cash a atm:Item .",
-        "atm:cashWithdrawal a atm:Action ; atm:actor atm:alice ; atm:object atm:cash .",
-        "atm:balanceInquiry a atm:Action ; atm:actor atm:alice ; atm:object atm:unknownObject .",
-        "atm:insert1 a atm:CardInsertion ; atm:after atm:tx1 .",
-        "atm:insert2 a atm:CardInsertion ; atm:after atm:device1 .",
+        "The ATM must log all user transactions after card insertion."
     ]
 

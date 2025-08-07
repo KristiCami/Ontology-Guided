@@ -10,12 +10,18 @@ def _write_temp(tmp_path, name, content):
 
 def test_validation_conforming(tmp_path):
     data = """@prefix atm: <http://example.com/atm#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-atm:alice a atm:User .
-atm:acc123 a atm:Account .
+atm:alice a atm:User ;
+    atm:owns atm:acc123 .
+atm:acc123 a atm:Account ;
+    atm:balance "100.0"^^xsd:decimal .
+atm:atm1 a atm:ATM ;
+    atm:location "Center"^^xsd:string .
 atm:tx1 a atm:Transaction ;
     atm:actor atm:alice ;
-    atm:target atm:acc123 .
+    atm:target atm:acc123 ;
+    atm:amount "10.0"^^xsd:decimal .
 
 atm:cash a atm:Item .
 atm:act1 a atm:Action ;
@@ -34,11 +40,16 @@ atm:insert1 a atm:CardInsertion ;
 
 def test_validation_non_conforming(tmp_path):
     data = """@prefix atm: <http://example.com/atm#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-atm:device1 a atm:Device .
-atm:acc123 a atm:Account .
+atm:alice a atm:User ;
+    atm:owns atm:acc123 .
+atm:acc123 a atm:Account ;
+    atm:balance "100.0"^^xsd:decimal .
+atm:atm1 a atm:ATM ;
+    atm:location "Center"^^xsd:string .
 atm:tx2 a atm:Transaction ;
-    atm:actor atm:device1 ;
+    atm:actor atm:alice ;
     atm:target atm:acc123 .
 """
     data_path = _write_temp(tmp_path, "invalid.ttl", data)
