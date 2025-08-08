@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from rdflib import Graph
 from rdflib.namespace import RDF, RDFS, OWL, XSD
@@ -13,7 +14,7 @@ class InvalidTurtleError(ValueError):
 class OntologyBuilder:
     """Μετατρέπει τμήματα Turtle σε ενιαία οντολογία."""
 
-    def __init__(self, base_iri: str, prefix: str | None = None, ontology_files=None):
+    def __init__(self, base_iri: str, prefix: Optional[str] = None, ontology_files=None):
         if not base_iri.endswith("#"):
             base_iri += "#"
         self.base_iri = base_iri
@@ -59,9 +60,9 @@ class OntologyBuilder:
     def parse_turtle(
         self,
         turtle_str: str,
-        logger: logging.Logger | None = None,
-        requirement: str | None = None,
-        snippet_index: int | None = None,
+        logger: Optional[logging.Logger] = None,
+        requirement: Optional[str] = None,
+        snippet_index: Optional[int] = None,
     ):
         lines = [line for line in turtle_str.splitlines() if line.strip()]
         cleaned = "\n".join(lines)
