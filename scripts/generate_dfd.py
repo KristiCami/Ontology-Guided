@@ -10,7 +10,7 @@ import importlib.util
 import inspect
 import re
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 try:  # Graphviz is optional in restricted environments
     from graphviz import Digraph
@@ -30,7 +30,16 @@ def _load_run_pipeline():
     return module.run_pipeline
 
 
-def extract_steps() -> List[str]:
+def extract_steps() -> Tuple[List[str], List[Tuple[str, str]]]:
+    """Extract pipeline step names and their connections.
+
+    Returns
+    -------
+    Tuple[List[str], List[Tuple[str, str]]]
+        A tuple containing the list of step names and the list of edges
+        representing the data flow between steps.
+    """
+
     run_pipeline = _load_run_pipeline()
     source = inspect.getsource(run_pipeline)
     patterns = [
@@ -46,22 +55,32 @@ def extract_steps() -> List[str]:
         for pattern, label in patterns:
             if re.search(pattern, line) and label not in steps:
                 steps.append(label)
-    return steps
+
+    edges: List[Tuple[str, str]] = []
+    previous = "Inputs"
+    for step in steps:
+        edges.append((previous, step))
+        previous = step
+    edges.append((previous, "Outputs"))
+
+    if "Repair loop" in steps and "Validate SHACL" in steps:
+        edges.append(("Repair loop", "Validate SHACL"))
+
+    return steps, edges
 
 
-def build_graphviz(steps: List[str]) -> Optional[Digraph]:
+def build_graphviz(steps: List[str], edges: List[Tuple[str, str]]) -> Optional[Digraph]:
     if Digraph is None:
         return None
     dot = Digraph("DFD", format="png")
     dot.attr(rankdir="LR")
-    previous = "Inputs"
-    dot.node(previous)
-    for step in steps:
-        dot.node(step)
-        dot.edge(previous, step)
-        previous = step
-    dot.node("Outputs")
-    dot.edge(previous, "Outputs")
+
+    for node in ["Inputs", *steps, "Outputs"]:
+        dot.node(node)
+
+    for start, end in edges:
+        dot.edge(start, end)
+
     return dot
 
 
@@ -169,10 +188,10 @@ def render_png(steps: List[str], out_file: Path) -> None:
 
 
 def main(out_file: str = "docs/dfd.png") -> None:
-    steps = extract_steps()
+    steps, edges = extract_steps()
     out_path = Path(out_file)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    graph = build_graphviz(steps)
+    graph = build_graphviz(steps, edges)
     if graph is not None:
         try:
             graph.render(out_path.with_suffix(""), cleanup=True)
