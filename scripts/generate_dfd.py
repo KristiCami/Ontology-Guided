@@ -6,9 +6,11 @@ renderer implemented with the Python standard library is used.
 """
 from __future__ import annotations
 
+import ast
 import importlib.util
 import inspect
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -30,53 +32,84 @@ def _load_run_pipeline():
     return module.run_pipeline
 
 
-def extract_steps() -> Tuple[List[str], List[Tuple[str, str]]]:
-    """Extract pipeline step names and their connections.
+@dataclass
+class Node:
+    name: str
+    step_type: str
 
-    Returns
-    -------
-    Tuple[List[str], List[Tuple[str, str]]]
-        A tuple containing the list of step names and the list of edges
-        representing the data flow between steps.
-    """
+
+def extract_steps() -> Tuple[List[Node], List[Tuple[str, str]]]:
+    """Extract pipeline step details and their connections."""
 
     run_pipeline = _load_run_pipeline()
     source = inspect.getsource(run_pipeline)
+    tree = ast.parse(source)
+
     patterns = [
-        (r"DataLoader\(", "Load requirements"),
-        (r"LLMInterface\(", "Generate OWL"),
-        (r"OntologyBuilder\(", "Build ontology"),
-        (r"run_reasoner", "Run reasoner"),
-        (r"SHACLValidator\(", "Validate SHACL"),
-        (r"RepairLoop\(", "Repair loop"),
+        (r"load_requirements", "Load requirements", "input"),
+        (r"clean_text", "Clean text", "transform"),
+        (r"generate_owl", "Generate OWL", "process"),
+        (r"parse_turtle", "Build ontology", "process"),
+        (r"builder\.save", "Save ontology", "output"),
+        (r"run_reasoner", "Run reasoner", "process"),
+        (r"run_validation", "Validate SHACL", "validation"),
+        (r"RepairLoop", "Repair loop", "process"),
     ]
-    steps: List[str] = []
-    for line in source.splitlines():
-        for pattern, label in patterns:
-            if re.search(pattern, line) and label not in steps:
-                steps.append(label)
+
+    nodes: List[Node] = []
+    seen: set[str] = set()
+
+    class StepVisitor(ast.NodeVisitor):
+        def visit_Call(self, node: ast.Call) -> None:  # noqa: N802
+            name = ""
+            if isinstance(node.func, ast.Attribute):
+                value = getattr(node.func.value, "id", "")
+                name = f"{value}.{node.func.attr}" if value else node.func.attr
+            elif isinstance(node.func, ast.Name):
+                name = node.func.id
+
+            for pattern, label, kind in patterns:
+                if re.fullmatch(pattern, name) and label not in seen:
+                    nodes.append(Node(label, kind))
+                    seen.add(label)
+                    break
+
+            self.generic_visit(node)
+
+    StepVisitor().visit(tree)
 
     edges: List[Tuple[str, str]] = []
     previous = "Inputs"
-    for step in steps:
-        edges.append((previous, step))
-        previous = step
+    for node in nodes:
+        edges.append((previous, node.name))
+        previous = node.name
     edges.append((previous, "Outputs"))
 
-    if "Repair loop" in steps and "Validate SHACL" in steps:
+    names = {n.name for n in nodes}
+    if "Repair loop" in names and "Validate SHACL" in names:
         edges.append(("Repair loop", "Validate SHACL"))
 
-    return steps, edges
+    return nodes, edges
 
 
-def build_graphviz(steps: List[str], edges: List[Tuple[str, str]]) -> Optional[Digraph]:
+TYPE_STYLES = {
+    "input": {"shape": "parallelogram"},
+    "output": {"shape": "parallelogram"},
+    "process": {"shape": "rectangle"},
+    "transform": {"shape": "rectangle"},
+    "validation": {"shape": "diamond"},
+}
+
+
+def build_graphviz(nodes: List[Node], edges: List[Tuple[str, str]]) -> Optional[Digraph]:
     if Digraph is None:
         return None
     dot = Digraph("DFD", format="png")
     dot.attr(rankdir="LR")
 
-    for node in ["Inputs", *steps, "Outputs"]:
-        dot.node(node)
+    all_nodes = [Node("Inputs", "input"), *nodes, Node("Outputs", "output")]
+    for node in all_nodes:
+        dot.node(node.name, **TYPE_STYLES.get(node.step_type, {}))
 
     for start, end in edges:
         dot.edge(start, end)
@@ -116,14 +149,14 @@ FONT = {
 
 
 def render_png(
-    steps: List[str], edges: List[Tuple[str, str]], out_file: Path
+    nodes: List[Node], edges: List[Tuple[str, str]], out_file: Path
 ) -> None:
     """Render a simple PNG representation of the data flow diagram.
 
     Parameters
     ----------
-    steps:
-        Ordered list of step names appearing in the pipeline.
+    nodes:
+        Ordered list of pipeline steps.
     edges:
         Arbitrary connections between nodes. This allows rendering
         of cycles such as the Repair loop returning to SHACL
@@ -132,7 +165,8 @@ def render_png(
         Path where the generated PNG should be written.
     """
 
-    width = 140 * (len(steps) + 2)
+    labels = ["Inputs", *[n.name for n in nodes], "Outputs"]
+    width = 140 * len(labels)
     # Extra height to provide room for return arrows above the nodes
     height = 140
     white = (255, 255, 255)
@@ -192,14 +226,11 @@ def render_png(
     draw_text(x + 10, box_top + 10, "INPUTS")
     centers["Inputs"] = (x + 50, box_top + 20)
     x += 140
-    for step in steps:
+    for label in labels[1:]:
         draw_rect(x, box_top, x + 100, box_top + 40)
-        draw_text(x + 10, box_top + 10, step.upper())
-        centers[step] = (x + 50, box_top + 20)
+        draw_text(x + 10, box_top + 10, label.upper())
+        centers[label] = (x + 50, box_top + 20)
         x += 140
-    draw_rect(x, box_top, x + 100, box_top + 40)
-    draw_text(x + 10, box_top + 10, "OUTPUTS")
-    centers["Outputs"] = (x + 50, box_top + 20)
 
     # --- draw edges -----------------------------------------------------
     for start, end in edges:
@@ -231,17 +262,17 @@ def render_png(
 
 
 def main(out_file: str = "docs/dfd.png") -> None:
-    steps, edges = extract_steps()
+    nodes, edges = extract_steps()
     out_path = Path(out_file)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    graph = build_graphviz(steps, edges)
+    graph = build_graphviz(nodes, edges)
     if graph is not None:
         try:
             graph.render(out_path.with_suffix(""), cleanup=True)
             return
         except ExecutableNotFound:
             pass
-    render_png(steps, edges, out_path)
+    render_png(nodes, edges, out_path)
 
 
 if __name__ == "__main__":
