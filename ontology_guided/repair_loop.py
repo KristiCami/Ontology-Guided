@@ -12,7 +12,7 @@ DATA_FILE = "results/combined.ttl"
 
 PROMPT_TEMPLATE = (
     "Given the SHACL validation report, repair the ontology axioms.\n"
-    "Report:\n{sentence}\n\n"
+    "Violations:\n{violations}\n\n"
     "Provide additional Turtle triples to fix the violations."
 )
 
@@ -27,12 +27,16 @@ class RepairLoop:
     def run(self):
         logger = logging.getLogger(__name__)
         validator = SHACLValidator(self.data_path, self.shapes_path)
-        conforms, report_text, _ = validator.run_validation()
+        conforms, violations = validator.run_validation()
         if conforms:
             logger.info("No SHACL violations detected. No repair needed.")
             return
-        logger.info("SHACL Report:\n%s", report_text)
-        prompt = PROMPT_TEMPLATE.format(sentence=report_text)
+        logger.info("SHACL Violations: %s", violations)
+        report_text = "\n".join(
+            f"focusNode: {v['focusNode']}, resultPath: {v['resultPath']}, message: {v['message']}"
+            for v in violations
+        )
+        prompt = PROMPT_TEMPLATE.format(violations=report_text)
         logger.info("Repair prompt:\n%s", prompt)
         repair_triples = self.llm.generate_owl([prompt], "{sentence}")[0]
         with open(self.data_path, "r", encoding="utf-8") as f:
@@ -45,7 +49,7 @@ class RepairLoop:
         logger.info("Repaired ontology saved to results/repaired.ttl and results/repaired.owl")
 
         repaired_validator = SHACLValidator("results/repaired.ttl", self.shapes_path)
-        repaired_conforms, repaired_report, _ = repaired_validator.run_validation()
+        repaired_conforms, repaired_report = repaired_validator.run_validation()
         if not repaired_conforms:
             logger.error("Remaining SHACL violations:\n%s", repaired_report)
             raise RuntimeError(

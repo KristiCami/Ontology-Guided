@@ -29,8 +29,8 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
         def run_validation(self):
             FakeValidator.runs.append(self.data_path)
             if len(FakeValidator.runs) == 1:
-                return False, "error", None
-            return True, "", None
+                return False, [{"focusNode": "x", "resultPath": "p", "message": "error"}]
+            return True, []
 
     monkeypatch.setattr(repair_loop, "SHACLValidator", FakeValidator)
 
