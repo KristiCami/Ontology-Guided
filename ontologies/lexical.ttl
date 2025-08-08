@@ -1,1 +1,25 @@
-@prefix ex: <http://example.com/lexical#> .
+@prefix lex: <http://example.com/lexical#> .
+@prefix ex: <http://example.com/lexical/example#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+lex:Word a rdfs:Class .
+
+lex:Noun a rdfs:Class ;
+    rdfs:subClassOf lex:Word .
+
+lex:synonym a rdf:Property ;
+    rdfs:domain lex:Word ;
+    rdfs:range lex:Word .
+
+lex:antonym a rdf:Property ;
+    rdfs:domain lex:Word ;
+    rdfs:range lex:Word .
+
+ex:fast a lex:Word .
+
+ex:quick a lex:Word ;
+    lex:synonym ex:fast .
+
+ex:slow a lex:Word ;
+    lex:antonym ex:fast .
