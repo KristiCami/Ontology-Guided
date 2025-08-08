@@ -115,14 +115,31 @@ FONT = {
 }
 
 
-def render_png(steps: List[str], out_file: Path) -> None:
+def render_png(
+    steps: List[str], edges: List[Tuple[str, str]], out_file: Path
+) -> None:
+    """Render a simple PNG representation of the data flow diagram.
+
+    Parameters
+    ----------
+    steps:
+        Ordered list of step names appearing in the pipeline.
+    edges:
+        Arbitrary connections between nodes. This allows rendering
+        of cycles such as the Repair loop returning to SHACL
+        validation.
+    out_file:
+        Path where the generated PNG should be written.
+    """
+
     width = 140 * (len(steps) + 2)
-    height = 100
+    # Extra height to provide room for return arrows above the nodes
+    height = 140
     white = (255, 255, 255)
     black = (0, 0, 0)
     canvas = [[white for _ in range(width)] for _ in range(height)]
 
-    def draw_rect(x1, y1, x2, y2):
+    def draw_rect(x1: int, y1: int, x2: int, y2: int) -> None:
         for x in range(x1, x2 + 1):
             canvas[y1][x] = black
             canvas[y2][x] = black
@@ -130,16 +147,20 @@ def render_png(steps: List[str], out_file: Path) -> None:
             canvas[y][x1] = black
             canvas[y][x2] = black
 
-    def draw_line(x1, y1, x2, y2):
-        for x in range(x1, x2 + 1):
-            canvas[y1][x] = black
+    def draw_hline(x1: int, x2: int, y: int) -> None:
+        for x in range(min(x1, x2), max(x1, x2) + 1):
+            canvas[y][x] = black
 
-    def draw_arrow(x, y):
+    def draw_vline(x: int, y1: int, y2: int) -> None:
+        for y in range(min(y1, y2), max(y1, y2) + 1):
+            canvas[y][x] = black
+
+    def draw_arrow_right(x: int, y: int) -> None:
         for i in range(5):
             canvas[y - i][x - i] = black
             canvas[y + i][x - i] = black
 
-    def draw_text(x, y, text):
+    def draw_text(x: int, y: int, text: str) -> None:
         for char in text.upper():
             glyph = FONT.get(char, FONT[" "])
             for row_idx, row in enumerate(glyph):
@@ -148,24 +169,46 @@ def render_png(steps: List[str], out_file: Path) -> None:
                         canvas[y + row_idx][x + col_idx] = black
             x += 6
 
+    def draw_forward_edge(start: Tuple[int, int], end: Tuple[int, int]) -> None:
+        sx, sy = start
+        ex, ey = end
+        draw_hline(sx, ex - 20, sy)
+        draw_arrow_right(ex - 20, ey)
+
+    def draw_return_edge(start: Tuple[int, int], end: Tuple[int, int]) -> None:
+        sx, sy = start
+        ex, ey = end
+        top = sy - 40
+        draw_vline(sx, sy, top)
+        draw_hline(sx, ex - 20, top)
+        draw_vline(ex - 20, top, ey)
+        draw_arrow_right(ex - 20, ey)
+
+    # --- draw nodes -----------------------------------------------------
     x = 20
-    y = height // 2 - 20
-    centers = []
-    draw_rect(x, y, x + 100, y + 40)
-    draw_text(x + 10, y + 10, "INPUTS")
-    centers.append((x + 50, y + 20))
+    box_top = height // 2 - 20
+    centers: dict[str, Tuple[int, int]] = {}
+    draw_rect(x, box_top, x + 100, box_top + 40)
+    draw_text(x + 10, box_top + 10, "INPUTS")
+    centers["Inputs"] = (x + 50, box_top + 20)
     x += 140
     for step in steps:
-        draw_line(centers[-1][0], centers[-1][1], x - 20, y + 20)
-        draw_arrow(x - 20, y + 20)
-        draw_rect(x, y, x + 100, y + 40)
-        draw_text(x + 10, y + 10, step.upper())
-        centers.append((x + 50, y + 20))
+        draw_rect(x, box_top, x + 100, box_top + 40)
+        draw_text(x + 10, box_top + 10, step.upper())
+        centers[step] = (x + 50, box_top + 20)
         x += 140
-    draw_line(centers[-1][0], centers[-1][1], x - 20, y + 20)
-    draw_arrow(x - 20, y + 20)
-    draw_rect(x, y, x + 100, y + 40)
-    draw_text(x + 10, y + 10, "OUTPUTS")
+    draw_rect(x, box_top, x + 100, box_top + 40)
+    draw_text(x + 10, box_top + 10, "OUTPUTS")
+    centers["Outputs"] = (x + 50, box_top + 20)
+
+    # --- draw edges -----------------------------------------------------
+    for start, end in edges:
+        if start not in centers or end not in centers:
+            continue
+        if centers[start][0] <= centers[end][0]:
+            draw_forward_edge(centers[start], centers[end])
+        else:
+            draw_return_edge(centers[start], centers[end])
 
     import zlib, struct
 
@@ -198,7 +241,7 @@ def main(out_file: str = "docs/dfd.png") -> None:
             return
         except ExecutableNotFound:
             pass
-    render_png(steps, out_path)
+    render_png(steps, edges, out_path)
 
 
 if __name__ == "__main__":
