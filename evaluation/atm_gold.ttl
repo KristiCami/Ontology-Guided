@@ -1,0 +1,4 @@
+@prefix atm: <http://example.com/atm#> .
+
+atm:CorrectPINTransaction atm:hasOutcome atm:CashDispensed .
+atm:ThreeFailedPinAttempt atm:hasOutcome atm:CardRetained .
