@@ -34,6 +34,8 @@ Ontology-Guided/
 ---
 ## 🗺️ Διάγραμμα Ροής Δεδομένων
 
+![Data Flow Diagram](docs/dfd.png)
+
 Για να αναγεννήσετε το διάγραμμα μετά από αλλαγές στο pipeline εκτελέστε:
 
 ```bash
