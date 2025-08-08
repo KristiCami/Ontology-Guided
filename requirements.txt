@@ -7,3 +7,5 @@ python-dotenv
 pyshacl
 pytest
 flask
+graphviz
+pillow

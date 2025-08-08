@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+"""Generate a data flow diagram (docs/dfd.png) from the run_pipeline function.
+
+If Graphviz is available it is used for rendering, otherwise a simple PNG
+renderer implemented with the Python standard library is used.
+"""
+from __future__ import annotations
+
+import importlib.util
+import inspect
+import re
+from pathlib import Path
+from typing import List, Optional
+
+try:  # Graphviz is optional in restricted environments
+    from graphviz import Digraph
+    from graphviz.backend import ExecutableNotFound
+except Exception:  # pragma: no cover - fallback when graphviz is missing
+    Digraph = None  # type: ignore
+    ExecutableNotFound = Exception  # type: ignore
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+MAIN_PATH = SCRIPT_DIR / "main.py"
+
+
+def _load_run_pipeline():
+    spec = importlib.util.spec_from_file_location("_main", MAIN_PATH)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)  # type: ignore[arg-type]
+    return module.run_pipeline
+
+
+def extract_steps() -> List[str]:
+    run_pipeline = _load_run_pipeline()
+    source = inspect.getsource(run_pipeline)
+    patterns = [
+        (r"DataLoader\(", "Load requirements"),
+        (r"LLMInterface\(", "Generate OWL"),
+        (r"OntologyBuilder\(", "Build ontology"),
+        (r"run_reasoner", "Run reasoner"),
+        (r"SHACLValidator\(", "Validate SHACL"),
+        (r"RepairLoop\(", "Repair loop"),
+    ]
+    steps: List[str] = []
+    for line in source.splitlines():
+        for pattern, label in patterns:
+            if re.search(pattern, line) and label not in steps:
+                steps.append(label)
+    return steps
+
+
+def build_graphviz(steps: List[str]) -> Optional[Digraph]:
+    if Digraph is None:
+        return None
+    dot = Digraph("DFD", format="png")
+    dot.attr(rankdir="LR")
+    previous = "Inputs"
+    dot.node(previous)
+    for step in steps:
+        dot.node(step)
+        dot.edge(previous, step)
+        previous = step
+    dot.node("Outputs")
+    dot.edge(previous, "Outputs")
+    return dot
+
+
+FONT = {
+    "A": ["01110","10001","10001","11111","10001","10001","10001"],
+    "B": ["11110","10001","10001","11110","10001","10001","11110"],
+    "C": ["01111","10000","10000","10000","10000","10000","01111"],
+    "D": ["11110","10001","10001","10001","10001","10001","11110"],
+    "E": ["11111","10000","10000","11110","10000","10000","11111"],
+    "F": ["11111","10000","10000","11110","10000","10000","10000"],
+    "G": ["01111","10000","10000","10111","10001","10001","01110"],
+    "H": ["10001","10001","10001","11111","10001","10001","10001"],
+    "I": ["01110","00100","00100","00100","00100","00100","01110"],
+    "J": ["00111","00010","00010","00010","10010","10010","01100"],
+    "K": ["10001","10010","10100","11000","10100","10010","10001"],
+    "L": ["10000","10000","10000","10000","10000","10000","11111"],
+    "M": ["10001","11011","10101","10101","10001","10001","10001"],
+    "N": ["10001","11001","10101","10011","10001","10001","10001"],
+    "O": ["01110","10001","10001","10001","10001","10001","01110"],
+    "P": ["11110","10001","10001","11110","10000","10000","10000"],
+    "Q": ["01110","10001","10001","10001","10101","10010","01101"],
+    "R": ["11110","10001","10001","11110","10100","10010","10001"],
+    "S": ["01111","10000","10000","01110","00001","00001","11110"],
+    "T": ["11111","00100","00100","00100","00100","00100","00100"],
+    "U": ["10001","10001","10001","10001","10001","10001","01110"],
+    "V": ["10001","10001","10001","10001","10001","01010","00100"],
+    "W": ["10001","10001","10001","10101","10101","10101","01010"],
+    "X": ["10001","10001","01010","00100","01010","10001","10001"],
+    "Y": ["10001","10001","01010","00100","00100","00100","00100"],
+    "Z": ["11111","00001","00010","00100","01000","10000","11111"],
+    " ": ["00000","00000","00000","00000","00000","00000","00000"],
+}
+
+
+def render_png(steps: List[str], out_file: Path) -> None:
+    width = 140 * (len(steps) + 2)
+    height = 100
+    white = (255, 255, 255)
+    black = (0, 0, 0)
+    canvas = [[white for _ in range(width)] for _ in range(height)]
+
+    def draw_rect(x1, y1, x2, y2):
+        for x in range(x1, x2 + 1):
+            canvas[y1][x] = black
+            canvas[y2][x] = black
+        for y in range(y1, y2 + 1):
+            canvas[y][x1] = black
+            canvas[y][x2] = black
+
+    def draw_line(x1, y1, x2, y2):
+        for x in range(x1, x2 + 1):
+            canvas[y1][x] = black
+
+    def draw_arrow(x, y):
+        for i in range(5):
+            canvas[y - i][x - i] = black
+            canvas[y + i][x - i] = black
+
+    def draw_text(x, y, text):
+        for char in text.upper():
+            glyph = FONT.get(char, FONT[" "])
+            for row_idx, row in enumerate(glyph):
+                for col_idx, bit in enumerate(row):
+                    if bit == "1":
+                        canvas[y + row_idx][x + col_idx] = black
+            x += 6
+
+    x = 20
+    y = height // 2 - 20
+    centers = []
+    draw_rect(x, y, x + 100, y + 40)
+    draw_text(x + 10, y + 10, "INPUTS")
+    centers.append((x + 50, y + 20))
+    x += 140
+    for step in steps:
+        draw_line(centers[-1][0], centers[-1][1], x - 20, y + 20)
+        draw_arrow(x - 20, y + 20)
+        draw_rect(x, y, x + 100, y + 40)
+        draw_text(x + 10, y + 10, step.upper())
+        centers.append((x + 50, y + 20))
+        x += 140
+    draw_line(centers[-1][0], centers[-1][1], x - 20, y + 20)
+    draw_arrow(x - 20, y + 20)
+    draw_rect(x, y, x + 100, y + 40)
+    draw_text(x + 10, y + 10, "OUTPUTS")
+
+    import zlib, struct
+
+    raw = b""
+    for row in canvas:
+        raw += b"\x00"
+        for r, g, b in row:
+            raw += bytes([r, g, b])
+    compressed = zlib.compress(raw)
+
+    def chunk(tag, data):
+        return (len(data).to_bytes(4, "big") + tag + data +
+                zlib.crc32(tag + data).to_bytes(4, "big"))
+
+    png = b"\x89PNG\r\n\x1a\n"
+    png += chunk(b"IHDR", (width).to_bytes(4, "big") + (height).to_bytes(4, "big") + bytes([8,2,0,0,0]))
+    png += chunk(b"IDAT", compressed)
+    png += chunk(b"IEND", b"")
+    out_file.write_bytes(png)
+
+
+def main(out_file: str = "docs/dfd.png") -> None:
+    steps = extract_steps()
+    out_path = Path(out_file)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    graph = build_graphviz(steps)
+    if graph is not None:
+        try:
+            graph.render(out_path.with_suffix(""), cleanup=True)
+            return
+        except ExecutableNotFound:
+            pass
+    render_png(steps, out_path)
+
+
+if __name__ == "__main__":
+    main()

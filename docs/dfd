@@ -1,0 +1,18 @@
+digraph DFD {
+	rankdir=LR
+	Inputs
+	"Load requirements"
+	Inputs -> "Load requirements"
+	"Build ontology"
+	"Load requirements" -> "Build ontology"
+	"Generate OWL"
+	"Build ontology" -> "Generate OWL"
+	"Run reasoner"
+	"Generate OWL" -> "Run reasoner"
+	"Validate SHACL"
+	"Run reasoner" -> "Validate SHACL"
+	"Repair loop"
+	"Validate SHACL" -> "Repair loop"
+	Outputs
+	"Repair loop" -> Outputs
+}
