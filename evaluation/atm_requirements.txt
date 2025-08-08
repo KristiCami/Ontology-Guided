@@ -1,0 +1,2 @@
+The ATM shall dispense cash when the PIN is correct.
+The ATM shall retain the card after three failed PIN attempts.
