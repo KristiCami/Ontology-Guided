@@ -53,12 +53,16 @@ Ontology-Guided/
    Ο φάκελος `results/` δημιουργείται αυτόματα αν δεν υπάρχει.
 
    Προαιρετικές επιλογές:
+   - `--base-iri`: αλλάζει το βασικό IRI της παραγόμενης οντολογίας.
+   - `--ontologies`: λίστα από επιπλέον αρχεία TTL που θα φορτωθούν.
+   - `--ontology-dir`: φόρτωση όλων των οντολογιών από φάκελο.
+   - `--rbo`, `--lexical`: συμπερίληψη των προ-ενσωματωμένων οντολογιών.
    - `--spacy-model`: ορίζει ποιο spaCy μοντέλο θα χρησιμοποιηθεί για τμηματοποίηση προτάσεων.
    - `--inference`: επιλέγει τρόπο συμπερασμού κατά την επικύρωση SHACL (`none`, `rdfs`, `owlrl`).
 
    Παράδειγμα με προσαρμοσμένες επιλογές:
    ```bash
-   python3 scripts/main.py --inputs demo.txt --shapes shapes.ttl --spacy-model en --inference none
+   python3 scripts/main.py --inputs demo.txt --shapes shapes.ttl --ontology-dir ontologies --rbo --lexical --base-iri http://example.com/atm#
    ```
 
    Η προαιρετική σημαία `--reason` τρέχει τον ενσωματωμένο reasoner της OWLready2 πριν τον έλεγχο SHACL.
@@ -85,10 +89,25 @@ Ontology-Guided/
    ```bash
    python3 scripts/web_app.py
    ```
-   Ανοίξτε τον browser στη διεύθυνση `http://localhost:8000` για να ανεβάσετε αρχεία ή κείμενο και να τρέξετε το pipeline μέσω web.
+   Ανοίξτε τον browser στη διεύθυνση `http://localhost:8000` για να ανεβάσετε κείμενο, πολλαπλά αρχεία οντολογιών και προσαρμοσμένο base IRI πριν τρέξετε το pipeline μέσω web.
    Τα αρχεία που ανεβάζονται διαγράφονται αυτόματα μετά την ολοκλήρωση κάθε αιτήματος.
 
 ---
+
+## 📦 Προ-ενσωματωμένες Οντολογίες
+
+- **ontologies/rbo.ttl**: ορίζει βασικές κλάσεις για Requirements, Actions και Actors, μαζί με τις ιδιότητες `requiresAction` και `performedBy`.
+- **ontologies/lexical.ttl**: περιέχει λεξική δομή με κλάσεις `Word`, `Noun` και σχέσεις `synonym`, `antonym` μεταξύ λέξεων.
+
+## 📊 Αξιολόγηση
+
+Για να συγκρίνετε τα παραγόμενα OWL triples με ένα χρυσό πρότυπο, χρησιμοποιήστε το script:
+
+```bash
+python3 evaluation/compare_metrics.py evaluation/atm_requirements.txt evaluation/atm_gold.ttl
+```
+
+Το script υπολογίζει **precision** και **recall** και αποθηκεύει τις μετρικές στο `results/metrics.txt`.
 
 ## 🔧 Εργαλεία
 - **spaCy** για τμηματοποίηση προτάσεων
