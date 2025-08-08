@@ -31,6 +31,7 @@ def run_pipeline(
     shapes,
     base_iri,
     ontologies=None,
+    ontology_dir=None,
     model="gpt-4",
     repair=False,
     reason=False,
@@ -46,7 +47,8 @@ def run_pipeline(
     as the web interface can display each stage to the user. When ``load_rbo``
     or ``load_lexical`` are ``True``, the predefined ontology files at
     ``RBO_ONTOLOGY_PATH`` and ``LEXICAL_ONTOLOGY_PATH`` are included
-    automatically.
+    automatically.  ``ontology_dir`` allows specifying a directory from which
+    all ``.ttl`` files will be loaded as additional ontologies.
     """
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
@@ -78,6 +80,10 @@ def run_pipeline(
     sentences_iter = sentence_iterator()
 
     ontology_files = list(ontologies or [])
+    if ontology_dir:
+        for name in os.listdir(ontology_dir):
+            if name.endswith(".ttl"):
+                ontology_files.append(os.path.join(ontology_dir, name))
     if load_rbo:
         ontology_files.append(RBO_ONTOLOGY_PATH)
     if load_lexical:
@@ -179,6 +185,11 @@ def main():
     parser.add_argument("--shapes", default="shapes.ttl", help="SHACL shapes file")
     parser.add_argument("--base-iri", default="http://example.com/atm#", help="Base IRI for ontology")
     parser.add_argument("--ontologies", nargs="*", default=[], help="Additional ontology files to load")
+    parser.add_argument(
+        "--ontology-dir",
+        default=None,
+        help="Directory from which to load all .ttl ontology files",
+    )
     parser.add_argument("--rbo", action="store_true", help="Include the RBO ontology")
     parser.add_argument("--lexical", action="store_true", help="Include the lexical ontology")
     parser.add_argument("--model", default="gpt-4", help="OpenAI model")
@@ -202,6 +213,7 @@ def main():
         args.shapes,
         args.base_iri,
         ontologies=args.ontologies,
+        ontology_dir=args.ontology_dir,
         model=args.model,
         repair=args.repair,
         reason=args.reason,
