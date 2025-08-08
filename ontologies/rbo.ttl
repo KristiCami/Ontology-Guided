@@ -1,1 +1,29 @@
-@prefix ex: <http://example.com/rbo#> .
+@prefix rbo: <http://example.com/rbo#> .
+@prefix ex: <http://example.com/rbo/example#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+rbo:Requirement a rdfs:Class .
+
+rbo:Action a rdfs:Class .
+
+rbo:Actor a rdfs:Class .
+
+rbo:FunctionalRequirement a rdfs:Class ;
+    rdfs:subClassOf rbo:Requirement .
+
+rbo:requiresAction a rdf:Property ;
+    rdfs:domain rbo:Requirement ;
+    rdfs:range rbo:Action .
+
+rbo:performedBy a rdf:Property ;
+    rdfs:domain rbo:Action ;
+    rdfs:range rbo:Actor .
+
+ex:REQ1 a rbo:FunctionalRequirement ;
+    rbo:requiresAction ex:LoginAction .
+
+ex:LoginAction a rbo:Action ;
+    rbo:performedBy ex:User .
+
+ex:User a rbo:Actor .
