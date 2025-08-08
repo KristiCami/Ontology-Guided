@@ -9,6 +9,20 @@ from pathlib import Path
 import logging
 from rdflib import Graph
 
+
+# Common namespace prefixes that may appear in LLM output. If a prefix is used
+# but not declared, we will automatically insert a declaration using this map
+# before attempting to parse the Turtle code.
+KNOWN_PREFIXES = {
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "schema": "http://schema.org/",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+}
+
 class LLMInterface:
     def __init__(self, api_key: str, model: str = "gpt-4", cache_dir: Optional[str] = None):
         openai.api_key = api_key
@@ -60,7 +74,12 @@ class LLMInterface:
             if cached is not None:
                 results.append(cached)
                 continue
-            prompt = "Return ONLY valid Turtle code, without any explanatory text or markdown fences.\n"
+            prompt = (
+                "Return ONLY valid Turtle code, without any explanatory text or markdown fences.\n"
+                "Include explicit @prefix declarations for any prefixes you use "
+                "(e.g., @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .). "
+                "If a prefix is not declared, use full IRIs enclosed in <> instead of shorthand.\n"
+            )
             if classes or properties:
                 prompt += "Use existing ontology terms when appropriate.\n"
                 if classes:
@@ -91,6 +110,25 @@ class LLMInterface:
                 raw = resp.choices[0].message.content
                 match = re.search(r"```turtle\s*(.*?)```", raw, re.S)
                 turtle_code = match.group(1).strip() if match else raw.strip()
+
+                # Detect prefixes used in the Turtle that are not declared. For any
+                # known prefix we add a corresponding @prefix declaration so that
+                # rdflib can parse the graph without errors.
+                used_prefixes = set(
+                    re.findall(r"(?<!<)\b([A-Za-z][\w-]*):(?!//)", turtle_code)
+                )
+                declared_prefixes = set(
+                    re.findall(r"@prefix\s+([A-Za-z][\w-]*):", turtle_code)
+                )
+                undeclared = used_prefixes - declared_prefixes
+                prefix_lines = [
+                    f"@prefix {p}: <{KNOWN_PREFIXES[p]}> ."
+                    for p in sorted(undeclared)
+                    if p in KNOWN_PREFIXES
+                ]
+                if prefix_lines:
+                    turtle_code = "\n".join(prefix_lines) + "\n" + turtle_code
+
                 try:
                     g = Graph()
                     g.parse(data=turtle_code, format="turtle")

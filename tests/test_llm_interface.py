@@ -33,6 +33,32 @@ ex:A ex:B ex:C .
     assert result == ["@prefix ex: <http://example.com/> .\nex:A ex:B ex:C ."]
 
 
+def test_generate_owl_adds_known_prefix(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+
+    class FakeMessage:
+        def __init__(self, content):
+            self.content = content
+
+    class FakeChoice:
+        def __init__(self, content):
+            self.message = FakeMessage(content)
+
+    class FakeResponse:
+        def __init__(self, content):
+            self.choices = [FakeChoice(content)]
+
+    def fake_create(*args, **kwargs):
+        # Returns Turtle using a known prefix without declaring it
+        return FakeResponse("schema:Person a schema:Class .")
+
+    monkeypatch.setattr(openai.chat.completions, "create", fake_create)
+
+    llm = LLMInterface(api_key="dummy", model="gpt-4", cache_dir=str(tmp_path))
+    result = llm.generate_owl(["irrelevant"], "{sentence}")
+    assert result == ["@prefix schema: <http://schema.org/> .\nschema:Person a schema:Class ."]
+
+
 def test_generate_owl_exit_on_error(monkeypatch, tmp_path, caplog):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     def fake_create(*args, **kwargs):
