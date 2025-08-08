@@ -10,7 +10,7 @@ def _fake_result(path):
         "owl_snippets": [],
         "reasoner": "",
         "shacl_conforms": True,
-        "shacl_report": "",
+        "shacl_report": [],
     }
 
 

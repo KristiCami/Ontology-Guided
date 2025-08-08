@@ -1,4 +1,4 @@
-from rdflib import Graph
+from rdflib.namespace import RDF, SH
 from pyshacl import validate
 import os
 
@@ -12,14 +12,29 @@ class SHACLValidator:
         self.inference = inference
 
     def run_validation(self):
-        """Επιστρέφει αποτελέσματα επικύρωσης."""
-        conforms, results_graph, results_text = validate(
+        """Επιστρέφει αποτελέσματα επικύρωσης ως δομημένη λίστα."""
+        conforms, results_graph, _ = validate(
             data_graph=self.data_graph_path,
             shacl_graph=self.shapes_graph_path,
             inference=self.inference,
             debug=False,
         )
-        return conforms, results_text, results_graph
+
+        results = []
+        if not conforms:
+            for result in results_graph.subjects(RDF.type, SH.ValidationResult):
+                focus = results_graph.value(result, SH.focusNode)
+                path = results_graph.value(result, SH.resultPath)
+                message = results_graph.value(result, SH.resultMessage)
+                results.append(
+                    {
+                        "focusNode": str(focus) if focus else None,
+                        "resultPath": str(path) if path else None,
+                        "message": str(message) if message else None,
+                    }
+                )
+
+        return conforms, results
 
 
 if __name__ == "__main__":
@@ -41,7 +56,10 @@ if __name__ == "__main__":
         exit(1)
 
     validator = SHACLValidator(args.data, args.shapes, inference=args.inference)
-    conforms, results_text, _ = validator.run_validation()
+    conforms, results = validator.run_validation()
     print("Conforms:", conforms)
     print("--- Validation Report ---")
-    print(results_text)
+    for r in results:
+        print(
+            f"- focusNode: {r['focusNode']}, resultPath: {r['resultPath']}, message: {r['message']}"
+        )

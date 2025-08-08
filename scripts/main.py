@@ -164,11 +164,11 @@ def run_pipeline(
             pipeline["reasoner"] = f"Reasoner error: {exc}"
 
     validator = SHACLValidator(pipeline["combined_ttl"], shapes, inference=inference)
-    conforms, report_text, _ = validator.run_validation()
+    conforms, report = validator.run_validation()
     logger.info("Conforms: %s", conforms)
-    logger.info(report_text)
+    logger.info("SHACL Report: %s", report)
     pipeline["shacl_conforms"] = conforms
-    pipeline["shacl_report"] = report_text
+    pipeline["shacl_report"] = report
 
     if not conforms and repair:
         logger.info("Running repair loop...")

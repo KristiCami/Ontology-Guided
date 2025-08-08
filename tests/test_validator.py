@@ -35,8 +35,9 @@ atm:insert1 a atm:CardInsertion ;
     data_path = _write_temp(tmp_path, "valid.ttl", data)
     shapes_path = Path(__file__).resolve().parent.parent / "shapes.ttl"
     validator = SHACLValidator(data_path, str(shapes_path))
-    conforms, _, _ = validator.run_validation()
+    conforms, results = validator.run_validation()
     assert conforms
+    assert results == []
 
 
 def test_validation_non_conforming(tmp_path):
@@ -58,6 +59,8 @@ atm:atm1 a atm:ATM ;
     data_path = _write_temp(tmp_path, "invalid.ttl", data)
     shapes_path = Path(__file__).resolve().parent.parent / "shapes.ttl"
     validator = SHACLValidator(data_path, str(shapes_path))
-    conforms, _, _ = validator.run_validation()
+    conforms, results = validator.run_validation()
     assert not conforms
+    assert isinstance(results, list)
+    assert all({"focusNode", "resultPath", "message"} <= r.keys() for r in results)
 
