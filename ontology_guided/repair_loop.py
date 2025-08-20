@@ -1,6 +1,10 @@
 import os
 import logging
+from typing import List, Tuple
+
 from dotenv import load_dotenv
+from rdflib import Graph, URIRef
+from rdflib.namespace import RDF, RDFS, OWL
 
 from .validator import SHACLValidator
 from .llm_interface import LLMInterface
@@ -12,10 +16,76 @@ SHAPES_FILE = "shapes.ttl"
 DATA_FILE = "results/combined.ttl"
 
 PROMPT_TEMPLATE = (
-    "Given the SHACL validation report, repair the ontology axioms.\n"
-    "Violations:\n{violations}\n\n"
-    "Provide additional Turtle triples to fix the violations."
+    "Given the SHACL violation, local RDF context, and available ontology terms, "
+    "provide Turtle axioms that repair the violation. Return only the corrected or "
+    "new Turtle axioms.\n\n"
+    "Violation:\n{violation}\n\n"
+    "Context:\n{context}\n\n"
+    "Terms:\n{terms}\n"
 )
+
+
+def local_context(graph: Graph, focus_node: str, path: str, hops: int = 2) -> str:
+    """Return Turtle describing a subgraph around the focus node."""
+    context = Graph()
+    frontier = {URIRef(focus_node)}
+    visited = set()
+    for _ in range(hops):
+        next_frontier = set()
+        for node in frontier:
+            for s, p, o in graph.triples((node, None, None)):
+                context.add((s, p, o))
+                if isinstance(o, URIRef) and o not in visited:
+                    next_frontier.add(o)
+            for s, p, o in graph.triples((None, None, node)):
+                context.add((s, p, o))
+                if isinstance(s, URIRef) and s not in visited:
+                    next_frontier.add(s)
+        visited.update(frontier)
+        frontier = next_frontier - visited
+    data = context.serialize(format="turtle")
+    return data.decode("utf-8") if isinstance(data, bytes) else data
+
+
+def canonicalize_violation(violation: dict) -> str:
+    """Create a canonical textual description of a SHACL violation."""
+    return (
+        f"focusNode: {violation.get('focusNode')}, "
+        f"resultPath: {violation.get('resultPath')}, "
+        f"message: {violation.get('message')}"
+    )
+
+
+def map_to_ontology_terms(
+    available_terms: Tuple[List[str], List[str]], context: str
+) -> Tuple[List[str], List[str]]:
+    """Select ontology terms mentioned in the context."""
+    classes, properties = available_terms
+    class_hits = [c for c in classes if c in context]
+    property_hits = [p for p in properties if p in context]
+    return class_hits, property_hits
+
+
+def synthesize_repair_prompts(
+    violations, graph: Graph, available_terms: Tuple[List[str], List[str]]
+) -> List[str]:
+    """Construct prompts for the LLM based on violations and context."""
+    prompts: List[str] = []
+    for v in violations:
+        canon = canonicalize_violation(v)
+        ctx = local_context(graph, v.get("focusNode"), v.get("resultPath"))
+        class_terms, property_terms = map_to_ontology_terms(available_terms, ctx)
+        terms_text = ""
+        if class_terms:
+            terms_text += "Classes: " + ", ".join(class_terms) + "\n"
+        if property_terms:
+            terms_text += "Properties: " + ", ".join(property_terms)
+        prompts.append(
+            PROMPT_TEMPLATE.format(
+                violation=canon, context=ctx, terms=terms_text
+            )
+        )
+    return prompts
 
 
 class RepairLoop:
@@ -62,13 +132,37 @@ class RepairLoop:
                 break
 
             logger.info("SHACL Violations: %s", violations)
-            prompts = []
-            for v in violations:
-                report_text = (
-                    f"focusNode: {v['focusNode']}, resultPath: {v['resultPath']}, message: {v['message']}"
-                )
-                prompts.append(PROMPT_TEMPLATE.format(violations=report_text))
-            repair_snippets = self.llm.generate_owl(prompts, "{sentence}")
+
+            graph = Graph()
+            graph.parse(current_data, format="turtle")
+            classes = sorted(
+                {
+                    str(s)
+                    for s in graph.subjects(RDF.type, OWL.Class)
+                }
+                | {str(s) for s in graph.subjects(RDF.type, RDFS.Class)}
+            )
+            properties = sorted(
+                {
+                    str(s)
+                    for s in graph.subjects(RDF.type, RDF.Property)
+                }
+                | {
+                    str(s)
+                    for s in graph.subjects(RDF.type, OWL.ObjectProperty)
+                }
+                | {
+                    str(s)
+                    for s in graph.subjects(RDF.type, OWL.DatatypeProperty)
+                }
+            )
+            available_terms = (classes, properties)
+
+            prompts = synthesize_repair_prompts(violations, graph, available_terms)
+            repair_snippets = []
+            for prompt in prompts:
+                snippet = self.llm.generate_owl([prompt], "{sentence}")[0]
+                repair_snippets.append(snippet)
             with open(current_data, "r", encoding="utf-8") as f:
                 original = f.read()
             merged = original + "\n\n" + "\n\n".join(repair_snippets)
