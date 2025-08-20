@@ -136,8 +136,9 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
     captured = {}
 
     class FakeRepairLoop:
-        def __init__(self, data_path, shapes_path, api_key, kmax=5):
+        def __init__(self, data_path, shapes_path, api_key, *, kmax=5, base_iri=None):
             captured["kmax"] = kmax
+            captured["base_iri"] = base_iri
 
         def run(self, reason=False, inference="rdfs"):
             captured["reason"] = reason
@@ -161,7 +162,12 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
         spacy_model="en",
     )
 
-    assert captured == {"kmax": 7, "reason": True, "inference": "owlrl"}
+    assert captured == {
+        "kmax": 7,
+        "reason": True,
+        "inference": "owlrl",
+        "base_iri": "http://example.com/atm#",
+    }
     assert result["repaired_ttl"] == "fixed.ttl"
     assert result["repaired_report"]["path"] == "final_report.txt"
     assert result["repaired_report"]["violations"] == ["v1"]
@@ -186,7 +192,7 @@ def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
     monkeypatch.setattr(main, "SHACLValidator", FakeValidator)
 
     class FakeRepairLoop:
-        def __init__(self, data_path, shapes_path, api_key, kmax=5):
+        def __init__(self, data_path, shapes_path, api_key, *, kmax=5, base_iri=None):
             pass
 
         def run(self, reason=False, inference="rdfs"):
