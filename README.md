@@ -32,6 +32,11 @@ Ontology-Guided/
 ```
 
 ---
+## 🔄 OG‑NSD Pipeline
+
+![OG‑NSD Pipeline](docs/pipeline.svg)
+
+---
 ## 🗺️ Διάγραμμα Ροής Δεδομένων
 
 ![Data Flow Diagram](docs/dfd.png)
