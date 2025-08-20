@@ -29,9 +29,11 @@ class DataLoader:
             for line in f:
                 yield line
 
-    def load_docx_file(self, file_path: str) -> str:
+    def load_docx_file(self, file_path: str) -> Iterator[str]:
+        """Yield each paragraph from a DOCX file as a separate line."""
         doc = Document(file_path)
-        return "\n".join(para.text for para in doc.paragraphs)
+        for para in doc.paragraphs:
+            yield para.text
 
     def load_requirements(self, input_paths: List[str]) -> Iterable[str]:
         for path in input_paths:
@@ -42,7 +44,7 @@ class DataLoader:
             if ext == ".txt":
                 yield from self.load_text_file(path)
             elif ext == ".docx":
-                yield self.load_docx_file(path)
+                yield from self.load_docx_file(path)
             else:
                 raise ValueError(f"Unsupported file extension: {ext}")
 

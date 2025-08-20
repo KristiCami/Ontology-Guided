@@ -16,6 +16,25 @@ def test_demo_txt_loading_and_preprocessing():
     ]
 
 
+def test_docx_loading_and_preprocessing(tmp_path):
+    from docx import Document
+
+    doc = Document()
+    doc.add_paragraph("First requirement.")
+    doc.add_paragraph("Second requirement.")
+    file_path = tmp_path / "reqs.docx"
+    doc.save(file_path)
+
+    loader = DataLoader()
+    lines = list(loader.load_requirements([str(file_path)]))
+    assert lines == ["First requirement.", "Second requirement."]
+
+    sentences = []
+    for line in lines:
+        sentences.extend(loader.preprocess_text(line))
+    assert sentences == ["First requirement.", "Second requirement."]
+
+
 def test_load_requirements_warns_and_raises(tmp_path, caplog):
     loader = DataLoader()
 
