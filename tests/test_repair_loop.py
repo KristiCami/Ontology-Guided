@@ -30,7 +30,17 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
         def run_validation(self):
             FakeValidator.runs.append(self.data_path)
             if len(FakeValidator.runs) == 1:
-                return False, [{"focusNode": "x", "resultPath": "p", "message": "error"}]
+                return False, [
+                    {
+                        "focusNode": "x",
+                        "resultPath": "p",
+                        "message": "error",
+                        "sourceShape": "ex:Shape",
+                        "sourceConstraintComponent": "sh:MinCountConstraintComponent",
+                        "expected": "1",
+                        "value": "0",
+                    }
+                ]
             return True, []
 
     monkeypatch.setattr(repair_loop, "SHACLValidator", FakeValidator)
@@ -42,3 +52,7 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
     assert FakeValidator.runs[1].endswith("results/repaired_1.ttl")
     assert ttl_path and ttl_path.endswith("results/repaired_1.ttl")
     assert report_path.endswith("results/report_1.txt")
+
+    report0 = tmp_path / "results" / "report_0.txt"
+    content = report0.read_text(encoding="utf-8").strip()
+    assert content == "Shape=ex:Shape, Expected=1, Observed=0"
