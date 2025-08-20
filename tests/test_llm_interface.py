@@ -148,9 +148,17 @@ def test_generate_owl_with_terms(monkeypatch, tmp_path):
     monkeypatch.setattr(openai.chat.completions, "create", fake_create)
 
     llm = LLMInterface(api_key="dummy", model="gpt-4", cache_dir=str(tmp_path))
-    llm.generate_owl(["irrelevant"], "{sentence}", available_terms=(['ex:Class'], ['ex:prop']))
+    terms = {
+        "classes": ["ex:Class"],
+        "properties": ["ex:prop"],
+        "domain_range_hints": {"ex:prop": {"domain": ["ex:A"], "range": ["ex:B"]}},
+        "synonyms": {"ex:quick": "ex:fast"},
+    }
+    llm.generate_owl(["irrelevant"], "{sentence}", available_terms=terms)
     assert 'ex:Class' in captured['prompt']
     assert 'ex:prop' in captured['prompt']
+    assert 'domain ex:A' in captured['prompt']
+    assert 'ex:quick -> ex:fast' in captured['prompt']
 
 
 def test_generate_owl_uses_cache(monkeypatch, tmp_path):

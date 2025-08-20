@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from rdflib import Graph
-from rdflib.namespace import RDF, RDFS, OWL, XSD
+from rdflib.namespace import RDF, RDFS, OWL, XSD, Namespace
 from rdflib.plugins.parsers.notation3 import BadSyntax
 
 
@@ -50,14 +50,45 @@ class OntologyBuilder:
             nm.normalizeUri(c)
             for c in self.graph.subjects(RDF.type, OWL.Class)
         ]
-        props = []
+
+        prop_uris = []
         for t in (OWL.ObjectProperty, OWL.DatatypeProperty, OWL.AnnotationProperty):
-            props.extend(nm.normalizeUri(p) for p in self.graph.subjects(RDF.type, t))
+            for p in self.graph.subjects(RDF.type, t):
+                prop_uris.append(p)
+
+        props = [nm.normalizeUri(p) for p in prop_uris]
         self.available_classes = sorted(set(classes))
         self.available_properties = sorted(set(props))
 
+        # Build domain/range hints for properties
+        hints: dict[str, dict[str, list[str]]] = {}
+        for p in prop_uris:
+            key = nm.normalizeUri(p)
+            domains = [nm.normalizeUri(o) for o in self.graph.objects(p, RDFS.domain)]
+            ranges = [nm.normalizeUri(o) for o in self.graph.objects(p, RDFS.range)]
+            if domains or ranges:
+                entry: dict[str, list[str]] = {}
+                if domains:
+                    entry["domain"] = domains
+                if ranges:
+                    entry["range"] = ranges
+                hints[key] = entry
+        self.domain_range_hints = hints
+
+        # Extract synonym mappings from lexical ontology if present
+        LEX = Namespace("http://example.com/lexical#")
+        syn_map: dict[str, str] = {}
+        for s, o in self.graph.subject_objects(LEX.synonym):
+            syn_map[nm.normalizeUri(s)] = nm.normalizeUri(o)
+        self.synonym_map = syn_map
+
     def get_available_terms(self):
-        return self.available_classes, self.available_properties
+        return {
+            "classes": self.available_classes,
+            "properties": self.available_properties,
+            "domain_range_hints": self.domain_range_hints,
+            "synonyms": self.synonym_map,
+        }
 
     def parse_turtle(
         self,
