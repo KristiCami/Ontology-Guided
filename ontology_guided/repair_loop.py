@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from dotenv import load_dotenv
 from rdflib import Graph, URIRef
@@ -103,10 +103,13 @@ class RepairLoop:
         self.llm = LLMInterface(api_key=api_key)
         self.builder = OntologyBuilder(BASE_IRI)
 
-    def run(self, *, reason: bool = False, inference: str = "rdfs"):
+    def run(
+        self, *, reason: bool = False, inference: str = "rdfs"
+    ) -> Tuple[Optional[str], str]:
         logger = logging.getLogger(__name__)
         os.makedirs("results", exist_ok=True)
         current_data = self.data_path
+        report_path = ""
         k = 0
         while True:
             validator = SHACLValidator(current_data, self.shapes_path, inference=inference)
@@ -175,6 +178,8 @@ class RepairLoop:
                     logger.warning("Reasoner failed: %s", exc)
             current_data = ttl_path
             k += 1
+
+        return (current_data if k > 0 else None, report_path)
 
 
 def main():
