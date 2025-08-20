@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import sys
 import logging
+import json
 
 # Ensure the project root is on the Python path when executed directly
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -172,8 +173,12 @@ def run_pipeline(
     conforms, report = validator.run_validation()
     logger.info("Conforms: %s", conforms)
     logger.info("SHACL Report: %s", report)
+    shacl_report_path = "results/shacl_report.txt"
+    with open(shacl_report_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, indent=2)
     pipeline["shacl_conforms"] = conforms
     pipeline["shacl_report"] = report
+    pipeline["shacl_report_path"] = shacl_report_path
 
     if not conforms and repair:
         logger.info("Running repair loop...")
