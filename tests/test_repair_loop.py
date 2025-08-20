@@ -57,7 +57,11 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
 
     report0 = tmp_path / "results" / "report_0.txt"
     content = report0.read_text(encoding="utf-8").strip()
-    assert content == "Shape=ex:Shape, Expected=1, Observed=0"
+    assert (
+        content
+        == "Shape=ex:Shape, Constraint=sh:MinCountConstraintComponent, Path=p, "
+        "Expected=1, Observed=0"
+    )
 
 
 def test_local_context_filters_by_path():
