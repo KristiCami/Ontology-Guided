@@ -198,7 +198,13 @@ class RepairLoop:
             self.builder.save(owl_path, fmt="xml")
             if reason:
                 try:
-                    run_reasoner(owl_path)
+                    _, inconsistent = run_reasoner(owl_path)
+                    inc_path = os.path.join(
+                        "results", f"inconsistent_classes_{k + 1}.txt"
+                    )
+                    with open(inc_path, "w", encoding="utf-8") as f:
+                        for iri in inconsistent:
+                            f.write(iri + "\n")
                 except ReasonerError as exc:
                     logger.warning("Reasoner failed: %s", exc)
             current_data = ttl_path
