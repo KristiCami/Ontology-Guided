@@ -36,7 +36,9 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
     monkeypatch.setattr(repair_loop, "SHACLValidator", FakeValidator)
 
     repairer = RepairLoop(str(data_path), str(shapes_path), api_key="dummy")
-    repairer.run()
+    ttl_path, report_path = repairer.run()
 
     assert len(FakeValidator.runs) == 2
     assert FakeValidator.runs[1].endswith("results/repaired_1.ttl")
+    assert ttl_path and ttl_path.endswith("results/repaired_1.ttl")
+    assert report_path.endswith("results/report_1.txt")

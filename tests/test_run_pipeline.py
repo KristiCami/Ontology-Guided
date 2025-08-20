@@ -142,6 +142,7 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
         def run(self, reason=False, inference="rdfs"):
             captured["reason"] = reason
             captured["inference"] = inference
+            return ("fixed.ttl", "final_report.txt")
 
     monkeypatch.setattr(main, "RepairLoop", FakeRepairLoop)
 
@@ -149,7 +150,7 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
     inputs = [str(root / "demo.txt")]
     shapes = str(root / "shapes.ttl")
 
-    run_pipeline(
+    result = run_pipeline(
         inputs,
         shapes,
         "http://example.com/atm#",
@@ -161,6 +162,52 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
     )
 
     assert captured == {"kmax": 7, "reason": True, "inference": "owlrl"}
+    assert result["repaired_ttl"] == "fixed.ttl"
+    assert result["repaired_report"] == "final_report.txt"
+
+
+def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+    monkeypatch.chdir(tmp_path)
+
+    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+        return ["@prefix atm: <http://example.com/atm#> .\natm:dummy a atm:Unused ."]
+
+    monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
+
+    class FakeValidator:
+        def __init__(self, data_path, shapes_path, inference="rdfs"):
+            pass
+
+        def run_validation(self):
+            return False, "report"
+
+    monkeypatch.setattr(main, "SHACLValidator", FakeValidator)
+
+    class FakeRepairLoop:
+        def __init__(self, data_path, shapes_path, api_key, kmax=5):
+            pass
+
+        def run(self, reason=False, inference="rdfs"):
+            return (None, "final_report.txt")
+
+    monkeypatch.setattr(main, "RepairLoop", FakeRepairLoop)
+
+    root = pathlib.Path(__file__).resolve().parent.parent
+    inputs = [str(root / "demo.txt")]
+    shapes = str(root / "shapes.ttl")
+
+    result = run_pipeline(
+        inputs,
+        shapes,
+        "http://example.com/atm#",
+        repair=True,
+        spacy_model="en",
+        inference="none",
+    )
+
+    assert "repaired_ttl" not in result
+    assert result["repaired_report"] == "final_report.txt"
 
 
 def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
