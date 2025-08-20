@@ -62,5 +62,18 @@ atm:atm1 a atm:ATM ;
     conforms, results = validator.run_validation()
     assert not conforms
     assert isinstance(results, list)
-    assert all({"focusNode", "resultPath", "message"} <= r.keys() for r in results)
+    assert all(
+        {
+            "focusNode",
+            "resultPath",
+            "message",
+            "sourceShape",
+            "resultSeverity",
+            "sourceConstraintComponent",
+            "expected",
+            "value",
+        }
+        <= r.keys()
+        for r in results
+    )
 

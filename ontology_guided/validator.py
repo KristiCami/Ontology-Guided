@@ -1,4 +1,5 @@
 from rdflib.namespace import RDF, SH
+from rdflib import URIRef
 from pyshacl import validate
 import os
 
@@ -26,11 +27,25 @@ class SHACLValidator:
                 focus = results_graph.value(result, SH.focusNode)
                 path = results_graph.value(result, SH.resultPath)
                 message = results_graph.value(result, SH.resultMessage)
+                source_shape = results_graph.value(result, SH.sourceShape)
+                severity = results_graph.value(result, SH.resultSeverity)
+                component = results_graph.value(
+                    result, SH.sourceConstraintComponent
+                )
+                expected = results_graph.value(result, URIRef(str(SH) + "expected"))
+                value = results_graph.value(result, SH.value)
                 results.append(
                     {
                         "focusNode": str(focus) if focus else None,
                         "resultPath": str(path) if path else None,
                         "message": str(message) if message else None,
+                        "sourceShape": str(source_shape) if source_shape else None,
+                        "resultSeverity": str(severity) if severity else None,
+                        "sourceConstraintComponent": str(component)
+                        if component
+                        else None,
+                        "expected": str(expected) if expected else None,
+                        "value": str(value) if value else None,
                     }
                 )
 
