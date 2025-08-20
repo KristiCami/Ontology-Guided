@@ -21,9 +21,10 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
         instances = []
         runs = []
 
-        def __init__(self, data_path, shapes_path):
+        def __init__(self, data_path, shapes_path, inference="rdfs"):
             self.data_path = data_path
             self.shapes_path = shapes_path
+            self.inference = inference
             FakeValidator.instances.append(self)
 
         def run_validation(self):
@@ -38,4 +39,4 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
     repairer.run()
 
     assert len(FakeValidator.runs) == 2
-    assert FakeValidator.runs[1].endswith("results/repaired.ttl")
+    assert FakeValidator.runs[1].endswith("results/repaired_1.ttl")
