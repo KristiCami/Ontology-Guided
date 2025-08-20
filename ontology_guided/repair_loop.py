@@ -110,15 +110,17 @@ class RepairLoop:
 
     def run(
         self, *, reason: bool = False, inference: str = "rdfs"
-    ) -> Tuple[Optional[str], str]:
+    ) -> Tuple[Optional[str], str, List[dict]]:
         logger = logging.getLogger(__name__)
         os.makedirs("results", exist_ok=True)
         current_data = self.data_path
         report_path = ""
+        final_violations: List[dict] = []
         k = 0
         while True:
             validator = SHACLValidator(current_data, self.shapes_path, inference=inference)
             conforms, violations = validator.run_validation()
+            final_violations = violations
             report_path = os.path.join("results", f"report_{k}.txt")
             with open(report_path, "w", encoding="utf-8") as f:
                 if conforms:
@@ -182,7 +184,7 @@ class RepairLoop:
             current_data = ttl_path
             k += 1
 
-        return (current_data if k > 0 else None, report_path)
+        return (current_data if k > 0 else None, report_path, final_violations)
 
 
 def main():

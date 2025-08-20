@@ -142,7 +142,7 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
         def run(self, reason=False, inference="rdfs"):
             captured["reason"] = reason
             captured["inference"] = inference
-            return ("fixed.ttl", "final_report.txt")
+            return ("fixed.ttl", "final_report.txt", ["v1"])
 
     monkeypatch.setattr(main, "RepairLoop", FakeRepairLoop)
 
@@ -163,7 +163,8 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
 
     assert captured == {"kmax": 7, "reason": True, "inference": "owlrl"}
     assert result["repaired_ttl"] == "fixed.ttl"
-    assert result["repaired_report"] == "final_report.txt"
+    assert result["repaired_report"]["path"] == "final_report.txt"
+    assert result["repaired_report"]["violations"] == ["v1"]
 
 
 def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
@@ -189,7 +190,7 @@ def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
             pass
 
         def run(self, reason=False, inference="rdfs"):
-            return (None, "final_report.txt")
+            return (None, "final_report.txt", [])
 
     monkeypatch.setattr(main, "RepairLoop", FakeRepairLoop)
 
@@ -207,7 +208,8 @@ def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
     )
 
     assert "repaired_ttl" not in result
-    assert result["repaired_report"] == "final_report.txt"
+    assert result["repaired_report"]["path"] == "final_report.txt"
+    assert result["repaired_report"]["violations"] == []
 
 
 def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
