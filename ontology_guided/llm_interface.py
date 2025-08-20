@@ -62,6 +62,7 @@ class LLMInterface:
         available_terms: Optional[Tuple[List[str], List[str]]] = None,
         max_retries: int = 3,
         retry_delay: float = 1.0,
+        max_retry_delay: float = 60.0,
     ) -> List[str]:
         """Call the LLM and return only the Turtle code."""
         results = []
@@ -89,6 +90,7 @@ class LLMInterface:
             prompt += prompt_template.format(sentence=sent)
             base_prompt = prompt
             attempts = 0
+            current_delay = retry_delay
             while True:
                 try:
                     resp = openai.chat.completions.create(
@@ -104,7 +106,8 @@ class LLMInterface:
                     if attempts > max_retries:
                         self.logger.error("Exiting gracefully.")
                         return results
-                    time.sleep(retry_delay)
+                    time.sleep(current_delay)
+                    current_delay = min(current_delay * 2, max_retry_delay)
                     continue
 
                 raw = resp.choices[0].message.content
@@ -145,7 +148,8 @@ class LLMInterface:
                         "Previous output was invalid Turtle; return only correct Turtle.\n"
                         + base_prompt
                     )
-                    time.sleep(retry_delay)
+                    time.sleep(current_delay)
+                    current_delay = min(current_delay * 2, max_retry_delay)
 
             results.append(turtle_code)
             self._save_cache(sent, available_terms, turtle_code)

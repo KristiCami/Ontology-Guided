@@ -61,16 +61,30 @@ def test_generate_owl_adds_known_prefix(monkeypatch, tmp_path):
 
 def test_generate_owl_exit_on_error(monkeypatch, tmp_path, caplog):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+
     def fake_create(*args, **kwargs):
         raise openai.OpenAIError("boom")
 
     monkeypatch.setattr(openai.chat.completions, "create", fake_create)
-    monkeypatch.setattr(time, "sleep", lambda *args, **kwargs: None)
+
+    sleep_calls = []
+
+    def fake_sleep(seconds):
+        sleep_calls.append(seconds)
+
+    monkeypatch.setattr(time, "sleep", fake_sleep)
 
     llm = LLMInterface(api_key="dummy", model="gpt-4", cache_dir=str(tmp_path))
     with caplog.at_level(logging.WARNING):
-        result = llm.generate_owl(["irrelevant"], "{sentence}", max_retries=1, retry_delay=0)
+        result = llm.generate_owl(
+            ["irrelevant"],
+            "{sentence}",
+            max_retries=3,
+            retry_delay=1,
+            max_retry_delay=2,
+        )
     assert result == []
+    assert sleep_calls == [1, 2, 2]
     assert "LLM call failed" in caplog.text
     assert "Exiting gracefully." in caplog.text
 
