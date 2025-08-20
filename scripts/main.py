@@ -159,6 +159,15 @@ def run_pipeline(
     pipeline["provenance"] = builder.triple_provenance
     logger.info("Saved results/combined.ttl and results/combined.owl")
 
+    if reason:
+        try:
+            from ontology_guided.reasoner import run_reasoner
+
+            run_reasoner(pipeline["combined_owl"])
+            pipeline["reasoning_log"] = "Reasoner completed successfully"
+        except Exception as exc:  # pragma: no cover - log unexpected errors
+            pipeline["reasoning_log"] = str(exc)
+
     validator = SHACLValidator(pipeline["combined_ttl"], shapes, inference=inference)
     conforms, report = validator.run_validation()
     logger.info("Conforms: %s", conforms)

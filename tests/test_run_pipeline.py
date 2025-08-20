@@ -161,3 +161,38 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
     )
 
     assert captured == {"kmax": 7, "reason": True, "inference": "owlrl"}
+
+
+def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+    monkeypatch.chdir(tmp_path)
+
+    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+        return ["@prefix atm: <http://example.com/atm#> .\natm:dummy a atm:Unused ."]
+
+    monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
+
+    called = {}
+
+    def fake_run_reasoner(path):
+        called["path"] = path
+
+    import ontology_guided.reasoner as reasoner
+
+    monkeypatch.setattr(reasoner, "run_reasoner", fake_run_reasoner)
+
+    root = pathlib.Path(__file__).resolve().parent.parent
+    inputs = [str(root / "demo.txt")]
+    shapes = str(root / "shapes.ttl")
+
+    result = run_pipeline(
+        inputs,
+        shapes,
+        "http://example.com/atm#",
+        reason=True,
+        spacy_model="en",
+        inference="none",
+    )
+
+    assert called["path"].endswith("combined.owl")
+    assert result["reasoning_log"] == "Reasoner completed successfully"
