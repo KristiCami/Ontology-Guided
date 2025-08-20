@@ -16,12 +16,11 @@ SHAPES_FILE = "shapes.ttl"
 DATA_FILE = "results/combined.ttl"
 
 PROMPT_TEMPLATE = (
-    "Given the SHACL violation, local RDF context, and available ontology terms, "
-    "provide Turtle axioms that repair the violation. Return only the corrected or "
-    "new Turtle axioms.\n\n"
-    "Violation:\n{violation}\n\n"
-    "Context:\n{context}\n\n"
-    "Terms:\n{terms}\n"
+    "You must FIX the OWL to satisfy this constraint.\n"
+    "Violation: {violation}\n"
+    "Context (TTL): {context}\n"
+    "Use vocabulary: {terms}\n"
+    "Return ONLY corrected Turtle axioms that replace/add minimal edits.\n"
 )
 
 
@@ -134,11 +133,8 @@ def synthesize_repair_prompts(
         canon = canonicalize_violation(v)
         ctx = local_context(graph, v.get("focusNode"), v.get("resultPath"))
         class_terms, property_terms = map_to_ontology_terms(available_terms, ctx)
-        terms_text = ""
-        if class_terms:
-            terms_text += "Classes: " + ", ".join(class_terms) + "\n"
-        if property_terms:
-            terms_text += "Properties: " + ", ".join(property_terms)
+        terms = sorted(set(class_terms + property_terms))
+        terms_text = ", ".join(terms)
         prompts.append(
             PROMPT_TEMPLATE.format(
                 violation=canon, context=ctx, terms=terms_text

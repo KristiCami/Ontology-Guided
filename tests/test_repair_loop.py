@@ -64,6 +64,45 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
     )
 
 
+def test_synthesize_repair_prompts_uses_new_template(monkeypatch):
+    graph_data = """
+        @prefix ex: <http://example.com/> .
+        ex:a a ex:A ;
+             ex:p ex:b .
+    """
+    graph = Graph().parse(data=graph_data, format="turtle")
+
+    violations = [
+        {
+            "focusNode": "http://example.com/a",
+            "resultPath": "http://example.com/p",
+            "sourceShape": "ex:Shape",
+            "sourceConstraintComponent": "sh:MinCountConstraintComponent",
+            "expected": "1",
+            "value": "0",
+        }
+    ]
+    available_terms = {"classes": [], "properties": []}
+
+    monkeypatch.setattr(
+        repair_loop,
+        "map_to_ontology_terms",
+        lambda available_terms, ctx: (
+            ["http://example.com/A"], ["http://example.com/p"]
+        ),
+    )
+
+    prompts = repair_loop.synthesize_repair_prompts(
+        violations, graph, available_terms
+    )
+
+    assert len(prompts) == 1
+    prompt = prompts[0]
+    assert "Use vocabulary: http://example.com/A" in prompt
+    assert "http://example.com/p" in prompt
+    assert "Terms:" not in prompt
+
+
 def test_local_context_filters_by_path():
     data = """
         @prefix ex: <http://example.com/> .
