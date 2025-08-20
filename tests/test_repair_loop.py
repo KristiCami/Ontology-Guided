@@ -99,3 +99,63 @@ def test_local_context_filters_by_path():
         URIRef("http://example.com/q"),
         URIRef("http://example.com/d"),
     ) in ctx_all_graph
+
+
+def test_local_context_handles_inverse_path():
+    data = """
+        @prefix ex: <http://example.com/> .
+        ex:b ex:p ex:a .
+        ex:c ex:p ex:b .
+        ex:d ex:p ex:c .
+    """
+    graph = Graph().parse(data=data, format="turtle")
+
+    path = {"inversePath": "http://example.com/p"}
+    ctx = repair_loop.local_context(graph, "http://example.com/a", path)
+    ctx_graph = Graph().parse(data=ctx, format="turtle")
+
+    assert (
+        URIRef("http://example.com/b"),
+        URIRef("http://example.com/p"),
+        URIRef("http://example.com/a"),
+    ) in ctx_graph
+    assert (
+        URIRef("http://example.com/c"),
+        URIRef("http://example.com/p"),
+        URIRef("http://example.com/b"),
+    ) in ctx_graph
+    assert (
+        URIRef("http://example.com/d"),
+        URIRef("http://example.com/p"),
+        URIRef("http://example.com/c"),
+    ) not in ctx_graph
+
+
+def test_local_context_handles_sequence_path():
+    data = """
+        @prefix ex: <http://example.com/> .
+        ex:a ex:p ex:b .
+        ex:b ex:q ex:c .
+        ex:b ex:r ex:d .
+    """
+    graph = Graph().parse(data=data, format="turtle")
+
+    path = ["http://example.com/p", "http://example.com/q"]
+    ctx = repair_loop.local_context(graph, "http://example.com/a", path)
+    ctx_graph = Graph().parse(data=ctx, format="turtle")
+
+    assert (
+        URIRef("http://example.com/a"),
+        URIRef("http://example.com/p"),
+        URIRef("http://example.com/b"),
+    ) in ctx_graph
+    assert (
+        URIRef("http://example.com/b"),
+        URIRef("http://example.com/q"),
+        URIRef("http://example.com/c"),
+    ) in ctx_graph
+    assert (
+        URIRef("http://example.com/b"),
+        URIRef("http://example.com/r"),
+        URIRef("http://example.com/d"),
+    ) not in ctx_graph

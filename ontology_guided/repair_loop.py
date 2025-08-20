@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Union, Dict, Any
 
 from dotenv import load_dotenv
 from rdflib import Graph, URIRef
@@ -26,31 +26,31 @@ PROMPT_TEMPLATE = (
 
 
 def local_context(
-    graph: Graph, focus_node: str, path: Optional[str], hops: int = 2
+    graph: Graph,
+    focus_node: str,
+    path: Optional[Union[str, Dict[str, Any], List[Any]]],
+    hops: int = 2,
 ) -> str:
     """Return Turtle describing a subgraph around the focus node.
 
-    If ``path`` is provided, only triples using that predicate are traversed and
-    collected. Otherwise, the entire neighbourhood of the focus node is
-    explored, preserving the previous behaviour.
+    ``path`` may be a simple predicate URI, an ``inversePath`` or
+    ``alternativePath`` structure, or a list representing a sequence of such
+    steps. At most ``hops`` edges are followed.
     """
     context = Graph()
     frontier = {URIRef(focus_node)}
     visited = set()
-    for _ in range(hops):
+    for i in range(hops):
         next_frontier = set()
+        step = None
+        if isinstance(path, list):
+            if i >= len(path):
+                break
+            step = path[i]
+        else:
+            step = path
         for node in frontier:
-            if path:
-                predicate = URIRef(path)
-                for s, p, o in graph.triples((node, predicate, None)):
-                    context.add((s, p, o))
-                    if isinstance(o, URIRef) and o not in visited:
-                        next_frontier.add(o)
-                for s, p, o in graph.triples((None, predicate, node)):
-                    context.add((s, p, o))
-                    if isinstance(s, URIRef) and s not in visited:
-                        next_frontier.add(s)
-            else:
+            if step is None:
                 for s, p, o in graph.triples((node, None, None)):
                     context.add((s, p, o))
                     if isinstance(o, URIRef) and o not in visited:
@@ -59,8 +59,38 @@ def local_context(
                     context.add((s, p, o))
                     if isinstance(s, URIRef) and s not in visited:
                         next_frontier.add(s)
+            elif isinstance(step, dict):
+                if "inversePath" in step:
+                    predicate = URIRef(step["inversePath"])
+                    for s, p, o in graph.triples((None, predicate, node)):
+                        context.add((s, p, o))
+                        if isinstance(s, URIRef) and s not in visited:
+                            next_frontier.add(s)
+                elif "alternativePath" in step:
+                    for pred in step["alternativePath"]:
+                        predicate = URIRef(pred)
+                        for s, p, o in graph.triples((node, predicate, None)):
+                            context.add((s, p, o))
+                            if isinstance(o, URIRef) and o not in visited:
+                                next_frontier.add(o)
+                        for s, p, o in graph.triples((None, predicate, node)):
+                            context.add((s, p, o))
+                            if isinstance(s, URIRef) and s not in visited:
+                                next_frontier.add(s)
+            else:
+                predicate = URIRef(step)
+                for s, p, o in graph.triples((node, predicate, None)):
+                    context.add((s, p, o))
+                    if isinstance(o, URIRef) and o not in visited:
+                        next_frontier.add(o)
+                for s, p, o in graph.triples((None, predicate, node)):
+                    context.add((s, p, o))
+                    if isinstance(s, URIRef) and s not in visited:
+                        next_frontier.add(s)
         visited.update(frontier)
         frontier = next_frontier - visited
+        if not frontier:
+            break
     data = context.serialize(format="turtle")
     return data.decode("utf-8") if isinstance(data, bytes) else data
 
