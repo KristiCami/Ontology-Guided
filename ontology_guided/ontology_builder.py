@@ -26,6 +26,8 @@ class OntologyBuilder:
                 self.graph.parse(path)
         self._build_header()
         self._extract_available_terms()
+        self.triple_provenance: dict[str, dict] = {}
+        self._triple_counter = 0
 
     def _build_header(self):
         prefixes = {
@@ -72,7 +74,8 @@ class OntologyBuilder:
             logger.debug(data)
             logger.debug("=== End of Turtle ===")
         try:
-            self.graph.parse(data=data, format="turtle")
+            temp_graph = Graph()
+            temp_graph.parse(data=data, format="turtle")
         except BadSyntax as exc:
             if logger:
                 idx = f" snippet_index={snippet_index}" if snippet_index is not None else ""
@@ -84,7 +87,24 @@ class OntologyBuilder:
                     data,
                 )
             raise InvalidTurtleError("Invalid Turtle input") from exc
+        triples = list(temp_graph.triples((None, None, None)))
+        for triple in triples:
+            self.graph.add(triple)
         self._extract_available_terms()
+        return triples
+
+    def add_provenance(self, requirement: str, triples):
+        """Map generated triples to the originating requirement."""
+        triple_ids = []
+        for s, p, o in triples:
+            self._triple_counter += 1
+            tid = f"t{self._triple_counter}"
+            self.triple_provenance[tid] = {
+                "requirement": requirement,
+                "triple": (str(s), str(p), str(o)),
+            }
+            triple_ids.append(tid)
+        return triple_ids
 
     def save(self, file_path: str, fmt: str = "turtle"):
         """Αποθηκεύει την οντολογία σε αρχείο."""

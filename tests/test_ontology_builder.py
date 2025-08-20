@@ -9,8 +9,10 @@ def test_parse_turtle_with_prefix():
     ob = OntologyBuilder('http://example.com/atm#')
     ttl = """@prefix ex: <http://example.com/> .\nex:A ex:B ex:C ."""
     logger = logging.getLogger(__name__)
-    ob.parse_turtle(ttl, logger=logger)
+    triples = ob.parse_turtle(ttl, logger=logger)
+    ob.add_provenance("req", triples)
     assert len(ob.graph) == 1
+    assert ob.triple_provenance
 
 
 def test_parse_turtle_bad_syntax():
