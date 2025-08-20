@@ -48,12 +48,17 @@ def local_context(graph: Graph, focus_node: str, path: str, hops: int = 2) -> st
 
 
 def canonicalize_violation(violation: dict) -> str:
-    """Create a canonical textual description of a SHACL violation."""
-    return (
-        f"focusNode: {violation.get('focusNode')}, "
-        f"resultPath: {violation.get('resultPath')}, "
-        f"message: {violation.get('message')}"
-    )
+    """Create a canonical textual description of a SHACL violation.
+
+    Includes shape, constraint component, expected and observed values.
+    The output is formatted as:
+    "Shape=<...>, Expected=<...>, Observed=<...>".
+    """
+    shape = violation.get("sourceShape")
+    _component = violation.get("sourceConstraintComponent")
+    expected = violation.get("expected")
+    observed = violation.get("value")
+    return f"Shape={shape}, Expected={expected}, Observed={observed}"
 
 
 def map_to_ontology_terms(
@@ -120,9 +125,7 @@ class RepairLoop:
                     f.write("Conforms\n")
                 else:
                     for v in violations:
-                        f.write(
-                            f"focusNode: {v['focusNode']}, resultPath: {v['resultPath']}, message: {v['message']}\n"
-                        )
+                        f.write(canonicalize_violation(v) + "\n")
             if conforms:
                 logger.info("SHACL validation passed on iteration %d", k)
                 break
