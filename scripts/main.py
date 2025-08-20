@@ -164,8 +164,16 @@ def run_pipeline(
         try:
             from ontology_guided.reasoner import run_reasoner
 
-            run_reasoner(pipeline["combined_owl"])
+            _, inconsistent = run_reasoner(pipeline["combined_owl"])
+            inconsistent_path = os.path.join("results", "inconsistent_classes.txt")
+            with open(inconsistent_path, "w", encoding="utf-8") as f:
+                for iri in inconsistent:
+                    f.write(iri + "\n")
             pipeline["reasoning_log"] = "Reasoner completed successfully"
+            pipeline["inconsistent_classes"] = {
+                "path": inconsistent_path,
+                "iris": inconsistent,
+            }
         except Exception as exc:  # pragma: no cover - log unexpected errors
             pipeline["reasoning_log"] = str(exc)
 

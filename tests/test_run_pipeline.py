@@ -231,6 +231,7 @@ def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
 
     def fake_run_reasoner(path):
         called["path"] = path
+        return None, []
 
     import ontology_guided.reasoner as reasoner
 
@@ -251,3 +252,5 @@ def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
 
     assert called["path"].endswith("combined.owl")
     assert result["reasoning_log"] == "Reasoner completed successfully"
+    assert result["inconsistent_classes"]["iris"] == []
+    assert pathlib.Path(result["inconsistent_classes"]["path"]).exists()
