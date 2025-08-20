@@ -34,6 +34,7 @@ def run_pipeline(
     ontology_dir=None,
     model="gpt-4",
     repair=False,
+    kmax=5,
     reason=False,
     spacy_model="en_core_web_sm",
     inference="rdfs",
@@ -48,7 +49,9 @@ def run_pipeline(
     or ``load_lexical`` are ``True``, the predefined ontology files at
     ``RBO_ONTOLOGY_PATH`` and ``LEXICAL_ONTOLOGY_PATH`` are included
     automatically.  ``ontology_dir`` allows specifying a directory from which
-    all ``.ttl`` files will be loaded as additional ontologies.
+    all ``.ttl`` files will be loaded as additional ontologies. ``kmax`` sets
+    the maximum number of repair iterations, while ``reason`` and ``inference``
+    control reasoning behaviour within the repair loop.
     """
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
@@ -156,16 +159,6 @@ def run_pipeline(
     pipeline["provenance"] = builder.triple_provenance
     logger.info("Saved results/combined.ttl and results/combined.owl")
 
-    if reason:
-        from ontology_guided.reasoner import run_reasoner, ReasonerError
-        logger.info("Running OWL reasoner...")
-        try:
-            run_reasoner(pipeline["combined_owl"])
-            pipeline["reasoner"] = "OWL reasoning completed successfully."
-        except ReasonerError as exc:
-            logger.error(exc)
-            pipeline["reasoner"] = f"Reasoner error: {exc}"
-
     validator = SHACLValidator(pipeline["combined_ttl"], shapes, inference=inference)
     conforms, report = validator.run_validation()
     logger.info("Conforms: %s", conforms)
@@ -175,8 +168,8 @@ def run_pipeline(
 
     if not conforms and repair:
         logger.info("Running repair loop...")
-        repairer = RepairLoop(pipeline["combined_ttl"], shapes, api_key)
-        repairer.run()
+        repairer = RepairLoop(pipeline["combined_ttl"], shapes, api_key, kmax=kmax)
+        repairer.run(reason=reason, inference=inference)
         pipeline["repaired_ttl"] = "results/repaired.ttl"
 
     return pipeline
@@ -197,7 +190,12 @@ def main():
     parser.add_argument("--lexical", action="store_true", help="Include the lexical ontology")
     parser.add_argument("--model", default="gpt-4", help="OpenAI model")
     parser.add_argument("--repair", action="store_true", help="Run repair loop if validation fails")
-    parser.add_argument("--reason", action="store_true", help="Run OWL reasoner before validation")
+    parser.add_argument("--kmax", type=int, default=5, help="Maximum repair iterations")
+    parser.add_argument(
+        "--reason",
+        action="store_true",
+        help="Run OWL reasoner during repair loop",
+    )
     parser.add_argument(
         "--spacy-model",
         default="en_core_web_sm",
@@ -207,7 +205,7 @@ def main():
         "--inference",
         default="rdfs",
         choices=["none", "rdfs", "owlrl"],
-        help="Inference to apply during SHACL validation",
+        help="Inference to apply during SHACL validation and repair loop",
     )
     args = parser.parse_args()
 
@@ -219,6 +217,7 @@ def main():
         ontology_dir=args.ontology_dir,
         model=args.model,
         repair=args.repair,
+        kmax=args.kmax,
         reason=args.reason,
         spacy_model=args.spacy_model,
         inference=args.inference,

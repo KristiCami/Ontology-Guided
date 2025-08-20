@@ -96,24 +96,20 @@ class RepairLoop:
         api_key: str,
         *,
         kmax: int = 5,
-        reason: bool = False,
-        inference: str = "rdfs",
     ):
         self.data_path = data_path
         self.shapes_path = shapes_path
         self.kmax = kmax
-        self.reason = reason
-        self.inference = inference
         self.llm = LLMInterface(api_key=api_key)
         self.builder = OntologyBuilder(BASE_IRI)
 
-    def run(self):
+    def run(self, *, reason: bool = False, inference: str = "rdfs"):
         logger = logging.getLogger(__name__)
         os.makedirs("results", exist_ok=True)
         current_data = self.data_path
         k = 0
         while True:
-            validator = SHACLValidator(current_data, self.shapes_path, inference=self.inference)
+            validator = SHACLValidator(current_data, self.shapes_path, inference=inference)
             conforms, violations = validator.run_validation()
             report_path = os.path.join("results", f"report_{k}.txt")
             with open(report_path, "w", encoding="utf-8") as f:
@@ -172,7 +168,7 @@ class RepairLoop:
             owl_path = os.path.join("results", f"repaired_{k + 1}.owl")
             self.builder.save(ttl_path, fmt="turtle")
             self.builder.save(owl_path, fmt="xml")
-            if self.reason:
+            if reason:
                 try:
                     run_reasoner(owl_path)
                 except ReasonerError as exc:
@@ -194,10 +190,8 @@ def main():
         SHAPES_FILE,
         api_key,
         kmax=kmax,
-        reason=reason,
-        inference=inference,
     )
-    repairer.run()
+    repairer.run(reason=reason, inference=inference)
 
 
 if __name__ == "__main__":

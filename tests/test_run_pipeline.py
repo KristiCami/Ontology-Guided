@@ -112,3 +112,52 @@ def test_run_pipeline_ontology_dir(monkeypatch, tmp_path):
     )
 
     assert str(ttl_file) in captured["files"]
+
+
+def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
+    """Ensure kmax, reason and inference are forwarded to RepairLoop."""
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+    monkeypatch.chdir(tmp_path)
+
+    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+        return ["@prefix atm: <http://example.com/atm#> .\natm:dummy a atm:Unused ."]
+
+    monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
+
+    class FakeValidator:
+        def __init__(self, data_path, shapes_path, inference="rdfs"):
+            self.inference = inference
+
+        def run_validation(self):
+            return False, "report"
+
+    monkeypatch.setattr(main, "SHACLValidator", FakeValidator)
+
+    captured = {}
+
+    class FakeRepairLoop:
+        def __init__(self, data_path, shapes_path, api_key, kmax=5):
+            captured["kmax"] = kmax
+
+        def run(self, reason=False, inference="rdfs"):
+            captured["reason"] = reason
+            captured["inference"] = inference
+
+    monkeypatch.setattr(main, "RepairLoop", FakeRepairLoop)
+
+    root = pathlib.Path(__file__).resolve().parent.parent
+    inputs = [str(root / "demo.txt")]
+    shapes = str(root / "shapes.ttl")
+
+    run_pipeline(
+        inputs,
+        shapes,
+        "http://example.com/atm#",
+        repair=True,
+        reason=True,
+        inference="owlrl",
+        kmax=7,
+        spacy_model="en",
+    )
+
+    assert captured == {"kmax": 7, "reason": True, "inference": "owlrl"}
