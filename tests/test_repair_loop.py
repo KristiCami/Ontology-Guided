@@ -46,12 +46,13 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
     monkeypatch.setattr(repair_loop, "SHACLValidator", FakeValidator)
 
     repairer = RepairLoop(str(data_path), str(shapes_path), api_key="dummy")
-    ttl_path, report_path = repairer.run()
+    ttl_path, report_path, violations = repairer.run()
 
     assert len(FakeValidator.runs) == 2
     assert FakeValidator.runs[1].endswith("results/repaired_1.ttl")
     assert ttl_path and ttl_path.endswith("results/repaired_1.ttl")
     assert report_path.endswith("results/report_1.txt")
+    assert violations == []
 
     report0 = tmp_path / "results" / "report_0.txt"
     content = report0.read_text(encoding="utf-8").strip()

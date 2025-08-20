@@ -178,10 +178,10 @@ def run_pipeline(
     if not conforms and repair:
         logger.info("Running repair loop...")
         repairer = RepairLoop(pipeline["combined_ttl"], shapes, api_key, kmax=kmax)
-        repaired_ttl, repaired_report = repairer.run(
+        repaired_ttl, repaired_report, violations = repairer.run(
             reason=reason, inference=inference
         )
-        pipeline["repaired_report"] = repaired_report
+        pipeline["repaired_report"] = {"path": repaired_report, "violations": violations}
         if repaired_ttl:
             pipeline["repaired_ttl"] = repaired_ttl
 
