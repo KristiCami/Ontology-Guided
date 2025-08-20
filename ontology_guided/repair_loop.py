@@ -115,17 +115,18 @@ def canonicalize_violation(violation: dict) -> str:
 
 
 def map_to_ontology_terms(
-    available_terms: Tuple[List[str], List[str]], context: str
+    available_terms: Dict[str, List[str]], context: str
 ) -> Tuple[List[str], List[str]]:
     """Select ontology terms mentioned in the context."""
-    classes, properties = available_terms
+    classes = available_terms.get("classes", [])
+    properties = available_terms.get("properties", [])
     class_hits = [c for c in classes if c in context]
     property_hits = [p for p in properties if p in context]
     return class_hits, property_hits
 
 
 def synthesize_repair_prompts(
-    violations, graph: Graph, available_terms: Tuple[List[str], List[str]]
+    violations, graph: Graph, available_terms: Dict[str, List[str]]
 ) -> List[str]:
     """Construct prompts for the LLM based on violations and context."""
     prompts: List[str] = []
@@ -215,7 +216,12 @@ class RepairLoop:
                     for s in graph.subjects(RDF.type, OWL.DatatypeProperty)
                 }
             )
-            available_terms = (classes, properties)
+            available_terms = {
+                "classes": classes,
+                "properties": properties,
+                "domain_range_hints": {},
+                "synonyms": {},
+            }
 
             prompts = synthesize_repair_prompts(violations, graph, available_terms)
             repair_snippets = []

@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import pytest
 
@@ -33,6 +34,36 @@ ex:ClassA a owl:Class .
         encoding="utf-8",
     )
     ob = OntologyBuilder('http://example.com/atm#', ontology_files=[str(ext)])
-    classes, _ = ob.get_available_terms()
-    assert "ex:ClassA" in classes
+    terms = ob.get_available_terms()
+    assert "ex:ClassA" in terms["classes"]
     assert "@prefix ex:" in ob.header
+
+
+def test_domain_range_and_synonyms(tmp_path):
+    ext = tmp_path / "ext.ttl"
+    ext.write_text(
+        """@prefix ex: <http://example.com/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+ex:A a owl:Class .
+ex:B a owl:Class .
+ex:prop a owl:ObjectProperty ;
+    rdfs:domain ex:A ;
+    rdfs:range ex:B .
+""",
+        encoding="utf-8",
+    )
+    lex = Path(__file__).resolve().parent.parent / "ontologies" / "lexical.ttl"
+    ob = OntologyBuilder(
+        'http://example.com/atm#',
+        ontology_files=[str(ext), str(lex)],
+    )
+    terms = ob.get_available_terms()
+    assert terms["domain_range_hints"]["ex:prop"] == {
+        "domain": ["ex:A"],
+        "range": ["ex:B"],
+    }
+    assert any(
+        k.split(":")[-1] == "quick" and v.split(":")[-1] == "fast"
+        for k, v in terms["synonyms"].items()
+    )

@@ -85,7 +85,7 @@ def test_run_pipeline_ontology_dir(monkeypatch, tmp_path):
             self.triple_provenance = {}
 
         def get_available_terms(self):
-            return []
+            return {"classes": [], "properties": [], "domain_range_hints": {}, "synonyms": {}}
 
         def parse_turtle(self, *args, **kwargs):
             return []

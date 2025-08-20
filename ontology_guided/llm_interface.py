@@ -1,6 +1,6 @@
 import openai
 import httpx
-from typing import List, Tuple, Optional
+from typing import List, Optional, Dict, Any
 import re
 import time
 import hashlib
@@ -31,25 +31,35 @@ class LLMInterface:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.logger = logging.getLogger(__name__)
 
-    def _cache_file(self, sentence: str, available_terms: Optional[Tuple[List[str], List[str]]]):
-        classes, properties = available_terms or ([], [])
+    def _cache_file(self, sentence: str, available_terms: Optional[Dict[str, Any]]):
+        classes = []
+        properties = []
+        hints = {}
+        synonyms = {}
+        if available_terms:
+            classes = available_terms.get("classes", [])
+            properties = available_terms.get("properties", [])
+            hints = available_terms.get("domain_range_hints", {})
+            synonyms = available_terms.get("synonyms", {})
         key_data = {
             "sentence": sentence,
             "classes": classes,
             "properties": properties,
+            "hints": hints,
+            "synonyms": synonyms,
         }
         key_str = json.dumps(key_data, sort_keys=True)
         key_hash = hashlib.sha256(key_str.encode()).hexdigest()
         return self.cache_dir / f"{key_hash}.json"
 
-    def _load_cache(self, sentence: str, available_terms: Optional[Tuple[List[str], List[str]]]):
+    def _load_cache(self, sentence: str, available_terms: Optional[Dict[str, Any]]):
         path = self._cache_file(sentence, available_terms)
         if path.exists():
             with path.open("r") as f:
                 return json.load(f).get("result")
         return None
 
-    def _save_cache(self, sentence: str, available_terms: Optional[Tuple[List[str], List[str]]], result: str):
+    def _save_cache(self, sentence: str, available_terms: Optional[Dict[str, Any]], result: str):
         path = self._cache_file(sentence, available_terms)
         with path.open("w") as f:
             json.dump({"result": result}, f)
@@ -59,7 +69,7 @@ class LLMInterface:
         sentences: List[str],
         prompt_template: str,
         *,
-        available_terms: Optional[Tuple[List[str], List[str]]] = None,
+        available_terms: Optional[Dict[str, Any]] = None,
         max_retries: int = 3,
         retry_delay: float = 1.0,
         max_retry_delay: float = 60.0,
@@ -68,8 +78,13 @@ class LLMInterface:
         results = []
         classes = []
         properties = []
+        hints = {}
+        synonyms = {}
         if available_terms:
-            classes, properties = available_terms
+            classes = available_terms.get("classes", [])
+            properties = available_terms.get("properties", [])
+            hints = available_terms.get("domain_range_hints", {})
+            synonyms = available_terms.get("synonyms", {})
         for sent in sentences:
             cached = self._load_cache(sent, available_terms)
             if cached is not None:
@@ -81,12 +96,22 @@ class LLMInterface:
                 "(e.g., @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .). "
                 "If a prefix is not declared, use full IRIs enclosed in <> instead of shorthand.\n"
             )
-            if classes or properties:
+            if classes or properties or hints or synonyms:
                 prompt += "Use existing ontology terms when appropriate.\n"
                 if classes:
                     prompt += "Classes: " + ", ".join(classes) + "\n"
                 if properties:
                     prompt += "Properties: " + ", ".join(properties) + "\n"
+                if hints:
+                    prompt += "Property domains/ranges:\n"
+                    for p, dr in hints.items():
+                        dom = ", ".join(dr.get("domain", []))
+                        rng = ", ".join(dr.get("range", []))
+                        prompt += f"  - {p}: domain {dom or '-'}; range {rng or '-'}\n"
+                if synonyms:
+                    prompt += "Synonyms:\n"
+                    for s, c in synonyms.items():
+                        prompt += f"  - {s} -> {c}\n"
             prompt += prompt_template.format(sentence=sent)
             base_prompt = prompt
             attempts = 0
