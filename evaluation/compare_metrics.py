@@ -20,7 +20,7 @@ def compare_metrics(requirements_path: str, gold_path: str, shapes_path: str = "
     Returns
     -------
     dict
-        Dictionary with ``precision`` and ``recall`` values.
+        Dictionary with ``precision``, ``recall`` and ``f1`` values.
     """
     result = run_pipeline(
         [requirements_path],
@@ -43,13 +43,18 @@ def compare_metrics(requirements_path: str, gold_path: str, shapes_path: str = "
 
     precision = len(intersection) / len(pred_triples) if pred_triples else 0.0
     recall = len(intersection) / len(gold_triples) if gold_triples else 0.0
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if (precision + recall) > 0
+        else 0.0
+    )
 
-    metrics = {"precision": precision, "recall": recall}
+    metrics = {"precision": precision, "recall": recall, "f1": f1}
 
     # Save metrics to a file for convenience
     Path("results").mkdir(exist_ok=True)
     with open("results/metrics.txt", "w", encoding="utf-8") as f:
-        f.write(f"precision: {precision}\nrecall: {recall}\n")
+        f.write(f"precision: {precision}\nrecall: {recall}\nf1: {f1}\n")
 
     return metrics
 
@@ -64,6 +69,7 @@ def main():
     metrics = compare_metrics(args.requirements, args.gold, args.shapes)
     print(f"Precision: {metrics['precision']:.3f}")
     print(f"Recall: {metrics['recall']:.3f}")
+    print(f"F1: {metrics['f1']:.3f}")
 
 
 if __name__ == "__main__":
