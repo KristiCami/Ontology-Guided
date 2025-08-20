@@ -119,12 +119,14 @@ class RepairLoop:
         api_key: str,
         *,
         kmax: int = 5,
+        base_iri: str = BASE_IRI,
     ):
         self.data_path = data_path
         self.shapes_path = shapes_path
         self.kmax = kmax
         self.llm = LLMInterface(api_key=api_key)
-        self.builder = OntologyBuilder(BASE_IRI)
+        self.base_iri = base_iri
+        self.builder = OntologyBuilder(self.base_iri)
 
     def run(
         self, *, reason: bool = False, inference: str = "rdfs"
@@ -188,7 +190,7 @@ class RepairLoop:
             with open(current_data, "r", encoding="utf-8") as f:
                 original = f.read()
             merged = original + "\n\n" + "\n\n".join(repair_snippets)
-            self.builder = OntologyBuilder(BASE_IRI)
+            self.builder = OntologyBuilder(self.base_iri)
             self.builder.parse_turtle(merged, logger=logger)
             ttl_path = os.path.join("results", f"repaired_{k + 1}.ttl")
             owl_path = os.path.join("results", f"repaired_{k + 1}.owl")
