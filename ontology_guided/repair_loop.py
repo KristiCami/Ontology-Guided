@@ -68,15 +68,20 @@ def local_context(
 def canonicalize_violation(violation: dict) -> str:
     """Create a canonical textual description of a SHACL violation.
 
-    Includes shape, constraint component, expected and observed values.
-    The output is formatted as:
-    "Shape=<...>, Expected=<...>, Observed=<...>".
+    Includes shape, constraint component, focus node, result path,
+    expected and observed values. The output is formatted as:
+    "Shape=<...>, Constraint=<...>, Path=<...>, Expected=<...>, Observed=<...>".
     """
     shape = violation.get("sourceShape")
-    _component = violation.get("sourceConstraintComponent")
+    component = violation.get("sourceConstraintComponent")
+    _focus = violation.get("focusNode")
+    path = violation.get("resultPath")
     expected = violation.get("expected")
     observed = violation.get("value")
-    return f"Shape={shape}, Expected={expected}, Observed={observed}"
+    return (
+        f"Shape={shape}, Constraint={component}, Path={path}, "
+        f"Expected={expected}, Observed={observed}"
+    )
 
 
 def map_to_ontology_terms(
