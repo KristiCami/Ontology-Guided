@@ -1,6 +1,7 @@
 import ontology_guided.repair_loop as repair_loop
 from ontology_guided.repair_loop import RepairLoop
 from ontology_guided.llm_interface import LLMInterface
+from rdflib import Graph, URIRef
 
 
 def test_repair_loop_validates_twice(monkeypatch, tmp_path):
@@ -57,3 +58,40 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
     report0 = tmp_path / "results" / "report_0.txt"
     content = report0.read_text(encoding="utf-8").strip()
     assert content == "Shape=ex:Shape, Expected=1, Observed=0"
+
+
+def test_local_context_filters_by_path():
+    data = """
+        @prefix ex: <http://example.com/> .
+        ex:a ex:p ex:b .
+        ex:b ex:p ex:c .
+        ex:b ex:q ex:d .
+    """
+    graph = Graph().parse(data=data, format="turtle")
+
+    ctx = repair_loop.local_context(graph, "http://example.com/a", "http://example.com/p")
+    ctx_graph = Graph().parse(data=ctx, format="turtle")
+
+    assert (
+        URIRef("http://example.com/a"),
+        URIRef("http://example.com/p"),
+        URIRef("http://example.com/b"),
+    ) in ctx_graph
+    assert (
+        URIRef("http://example.com/b"),
+        URIRef("http://example.com/p"),
+        URIRef("http://example.com/c"),
+    ) in ctx_graph
+    assert (
+        URIRef("http://example.com/b"),
+        URIRef("http://example.com/q"),
+        URIRef("http://example.com/d"),
+    ) not in ctx_graph
+
+    ctx_all = repair_loop.local_context(graph, "http://example.com/a", None)
+    ctx_all_graph = Graph().parse(data=ctx_all, format="turtle")
+    assert (
+        URIRef("http://example.com/b"),
+        URIRef("http://example.com/q"),
+        URIRef("http://example.com/d"),
+    ) in ctx_all_graph

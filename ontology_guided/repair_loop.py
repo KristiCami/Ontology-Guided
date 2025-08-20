@@ -25,22 +25,40 @@ PROMPT_TEMPLATE = (
 )
 
 
-def local_context(graph: Graph, focus_node: str, path: str, hops: int = 2) -> str:
-    """Return Turtle describing a subgraph around the focus node."""
+def local_context(
+    graph: Graph, focus_node: str, path: Optional[str], hops: int = 2
+) -> str:
+    """Return Turtle describing a subgraph around the focus node.
+
+    If ``path`` is provided, only triples using that predicate are traversed and
+    collected. Otherwise, the entire neighbourhood of the focus node is
+    explored, preserving the previous behaviour.
+    """
     context = Graph()
     frontier = {URIRef(focus_node)}
     visited = set()
     for _ in range(hops):
         next_frontier = set()
         for node in frontier:
-            for s, p, o in graph.triples((node, None, None)):
-                context.add((s, p, o))
-                if isinstance(o, URIRef) and o not in visited:
-                    next_frontier.add(o)
-            for s, p, o in graph.triples((None, None, node)):
-                context.add((s, p, o))
-                if isinstance(s, URIRef) and s not in visited:
-                    next_frontier.add(s)
+            if path:
+                predicate = URIRef(path)
+                for s, p, o in graph.triples((node, predicate, None)):
+                    context.add((s, p, o))
+                    if isinstance(o, URIRef) and o not in visited:
+                        next_frontier.add(o)
+                for s, p, o in graph.triples((None, predicate, node)):
+                    context.add((s, p, o))
+                    if isinstance(s, URIRef) and s not in visited:
+                        next_frontier.add(s)
+            else:
+                for s, p, o in graph.triples((node, None, None)):
+                    context.add((s, p, o))
+                    if isinstance(o, URIRef) and o not in visited:
+                        next_frontier.add(o)
+                for s, p, o in graph.triples((None, None, node)):
+                    context.add((s, p, o))
+                    if isinstance(s, URIRef) and s not in visited:
+                        next_frontier.add(s)
         visited.update(frontier)
         frontier = next_frontier - visited
     data = context.serialize(format="turtle")
