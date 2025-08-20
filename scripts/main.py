@@ -114,12 +114,13 @@ def run_pipeline(
                     snippets_preview.append(snippet)
                 snippet_counter += 1
                 try:
-                    builder.parse_turtle(
+                    triples = builder.parse_turtle(
                         snippet,
                         logger=logger,
                         requirement=sent,
                         snippet_index=snippet_counter,
                     )
+                    builder.add_provenance(sent, triples)
                 except InvalidTurtleError:
                     logger.warning(
                         "Skipping invalid OWL snippet for sentence: %s", sent
@@ -133,12 +134,13 @@ def run_pipeline(
                 snippets_preview.append(snippet)
             snippet_counter += 1
             try:
-                builder.parse_turtle(
+                triples = builder.parse_turtle(
                     snippet,
                     logger=logger,
                     requirement=sent,
                     snippet_index=snippet_counter,
                 )
+                builder.add_provenance(sent, triples)
             except InvalidTurtleError:
                 logger.warning(
                     "Skipping invalid OWL snippet for sentence: %s", sent
@@ -151,6 +153,7 @@ def run_pipeline(
     builder.save("results/combined.owl", fmt="xml")
     pipeline["combined_ttl"] = "results/combined.ttl"
     pipeline["combined_owl"] = "results/combined.owl"
+    pipeline["provenance"] = builder.triple_provenance
     logger.info("Saved results/combined.ttl and results/combined.owl")
 
     if reason:

@@ -27,6 +27,10 @@ def test_run_pipeline_custom_settings(monkeypatch, tmp_path):
     )
     assert result["shacl_conforms"] is True
     assert result["failed_snippets"] == []
+    assert any(
+        "The ATM must log" in entry["requirement"]
+        for entry in result["provenance"].values()
+    )
 
 
 def test_run_pipeline_collects_failed_snippets(monkeypatch, tmp_path):
@@ -56,6 +60,7 @@ def test_run_pipeline_collects_failed_snippets(monkeypatch, tmp_path):
             "snippet": "invalid turtle",
         }
     ]
+    assert result["provenance"] == {}
 
 
 def test_run_pipeline_ontology_dir(monkeypatch, tmp_path):
@@ -77,11 +82,15 @@ def test_run_pipeline_ontology_dir(monkeypatch, tmp_path):
     class FakeBuilder:
         def __init__(self, base_iri, ontology_files=None):
             captured["files"] = list(ontology_files or [])
+            self.triple_provenance = {}
 
         def get_available_terms(self):
             return []
 
         def parse_turtle(self, *args, **kwargs):
+            return []
+
+        def add_provenance(self, requirement, triples):
             pass
 
         def save(self, path, fmt):
