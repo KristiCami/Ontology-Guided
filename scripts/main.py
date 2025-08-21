@@ -42,6 +42,7 @@ def run_pipeline(
     load_rbo=False,
     load_lexical=False,
     use_terms: bool = True,
+    validate: bool = True,
 ):
     """Execute the ontology drafting pipeline.
 
@@ -54,7 +55,8 @@ def run_pipeline(
     all ``.ttl`` files will be loaded as additional ontologies. ``kmax`` sets
     the maximum number of repair iterations, while ``reason`` and ``inference``
     control reasoning behaviour within the repair loop. ``use_terms`` controls
-    whether ontology terms are supplied to the language model.
+    whether ontology terms are supplied to the language model. ``validate``
+    toggles SHACL validation and the subsequent repair loop.
     """
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
@@ -179,28 +181,33 @@ def run_pipeline(
         except Exception as exc:  # pragma: no cover - log unexpected errors
             pipeline["reasoning_log"] = str(exc)
 
-    validator = SHACLValidator(pipeline["combined_ttl"], shapes, inference=inference)
-    conforms, report = validator.run_validation()
-    logger.info("Conforms: %s", conforms)
-    logger.info("SHACL Report: %s", report)
-    shacl_report_path = "results/shacl_report.txt"
-    with open(shacl_report_path, "w", encoding="utf-8") as f:
-        json.dump(report, f, indent=2)
-    pipeline["shacl_conforms"] = conforms
-    pipeline["shacl_report"] = report
-    pipeline["shacl_report_path"] = shacl_report_path
+    if validate:
+        validator = SHACLValidator(pipeline["combined_ttl"], shapes, inference=inference)
+        conforms, report = validator.run_validation()
+        logger.info("Conforms: %s", conforms)
+        logger.info("SHACL Report: %s", report)
+        shacl_report_path = "results/shacl_report.txt"
+        with open(shacl_report_path, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2)
+        pipeline["shacl_conforms"] = conforms
+        pipeline["shacl_report"] = report
+        pipeline["shacl_report_path"] = shacl_report_path
 
-    if not conforms and repair:
-        logger.info("Running repair loop...")
-        repairer = RepairLoop(
-            pipeline["combined_ttl"], shapes, api_key, kmax=kmax, base_iri=base_iri
-        )
-        repaired_ttl, repaired_report, violations = repairer.run(
-            reason=reason, inference=inference
-        )
-        pipeline["repaired_report"] = {"path": repaired_report, "violations": violations}
-        if repaired_ttl:
-            pipeline["repaired_ttl"] = repaired_ttl
+        if not conforms and repair:
+            logger.info("Running repair loop...")
+            repairer = RepairLoop(
+                pipeline["combined_ttl"], shapes, api_key, kmax=kmax, base_iri=base_iri
+            )
+            repaired_ttl, repaired_report, violations = repairer.run(
+                reason=reason, inference=inference
+            )
+            pipeline["repaired_report"] = {"path": repaired_report, "violations": violations}
+            if repaired_ttl:
+                pipeline["repaired_ttl"] = repaired_ttl
+    else:
+        pipeline["shacl_conforms"] = None
+        pipeline["shacl_report"] = {}
+        pipeline["shacl_report_path"] = None
 
     return pipeline
 
@@ -242,6 +249,11 @@ def main():
         action="store_true",
         help="Do not supply available ontology terms to the language model",
     )
+    parser.add_argument(
+        "--no-shacl",
+        action="store_true",
+        help="Skip SHACL validation and the repair loop",
+    )
     args = parser.parse_args()
 
     run_pipeline(
@@ -259,6 +271,7 @@ def main():
         load_rbo=args.rbo,
         load_lexical=args.lexical,
         use_terms=not args.no_terms,
+        validate=not args.no_shacl,
     )
 
 if __name__ == "__main__":
