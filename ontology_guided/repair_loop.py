@@ -1,5 +1,6 @@
 import os
 import logging
+import difflib
 from typing import List, Tuple, Optional, Union, Dict, Any
 
 from dotenv import load_dotenv
@@ -227,6 +228,20 @@ class RepairLoop:
             with open(current_data, "r", encoding="utf-8") as f:
                 original = f.read()
             merged = original + "\n\n" + "\n\n".join(repair_snippets)
+
+            diff_lines = list(
+                difflib.unified_diff(
+                    original.splitlines(keepends=True),
+                    merged.splitlines(keepends=True),
+                    fromfile="original",
+                    tofile="repaired",
+                )
+            )
+            diff_path = os.path.join("results", f"diff_{k + 1}.patch")
+            with open(diff_path, "w", encoding="utf-8") as diff_file:
+                diff_file.writelines(diff_lines)
+            logger.info("Diff size for iteration %d: %d lines", k + 1, len(diff_lines))
+
             self.builder = OntologyBuilder(self.base_iri)
             self.builder.parse_turtle(merged, logger=logger)
             ttl_path = os.path.join("results", f"repaired_{k + 1}.ttl")
