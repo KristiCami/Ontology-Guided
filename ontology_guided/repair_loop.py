@@ -6,7 +6,6 @@ from typing import List, Tuple, Optional, Union, Dict, Any
 
 from dotenv import load_dotenv
 from rdflib import Graph, URIRef, Literal
-from rdflib.namespace import RDF, RDFS, OWL
 
 from .validator import SHACLValidator
 from .llm_interface import LLMInterface
@@ -116,7 +115,7 @@ def canonicalize_violation(violation: dict) -> Dict[str, Optional[str]]:
 
 
 def map_to_ontology_terms(
-    available_terms: Dict[str, List[str]], context: str
+    available_terms: Dict[str, Any], context: str
 ) -> Tuple[List[str], List[str]]:
     """Select ontology terms mentioned in the context."""
     classes = available_terms.get("classes", [])
@@ -129,7 +128,7 @@ def map_to_ontology_terms(
 def synthesize_repair_prompts(
     violations,
     graph: Graph,
-    available_terms: Dict[str, List[str]],
+    available_terms: Dict[str, Any],
     inconsistencies: Optional[List[str]] = None,
 ) -> List[str]:
     """Construct structured prompts for the LLM.
@@ -139,6 +138,8 @@ def synthesize_repair_prompts(
     ``offending_axioms`` – list of offending triples or missing triple descriptions,
     ``context`` – Turtle snippet around the violation,
     ``terms`` – ontology terms found in the context,
+    ``domain_range_hints`` – optional property domain/range hints,
+    ``synonyms`` – optional synonym mappings,
     ``reasoner_inconsistencies`` – optional list of inconsistent classes.
     """
     prompts: List[str] = []
@@ -174,6 +175,12 @@ def synthesize_repair_prompts(
             "context": ctx,
             "terms": terms,
         }
+        hints = available_terms.get("domain_range_hints", {})
+        if hints:
+            prompt_obj["domain_range_hints"] = hints
+        synonyms = available_terms.get("synonyms", {})
+        if synonyms:
+            prompt_obj["synonyms"] = synonyms
         if inconsistencies:
             prompt_obj["reasoner_inconsistencies"] = inconsistencies
         prompts.append(json.dumps(prompt_obj))
@@ -231,49 +238,30 @@ class RepairLoop:
 
             graph = Graph()
             graph.parse(current_data, format="turtle")
-            classes = sorted(
-                {
-                    str(s)
-                    for s in graph.subjects(RDF.type, OWL.Class)
-                }
-                | {str(s) for s in graph.subjects(RDF.type, RDFS.Class)}
-            )
-            properties = sorted(
-                {
-                    str(s)
-                    for s in graph.subjects(RDF.type, RDF.Property)
-                }
-                | {
-                    str(s)
-                    for s in graph.subjects(RDF.type, OWL.ObjectProperty)
-                }
-                | {
-                    str(s)
-                    for s in graph.subjects(RDF.type, OWL.DatatypeProperty)
-                }
-            )
-            available_terms = {
-                "classes": classes,
-                "properties": properties,
-                "domain_range_hints": {},
-                "synonyms": {},
-            }
+
+            # Extract available ontology terms, domain/range hints, and synonyms
+            # from the current data using an OntologyBuilder instance.
+            temp_builder = OntologyBuilder(self.base_iri)
+            with open(current_data, "r", encoding="utf-8") as data_file:
+                temp_builder.parse_turtle(data_file.read(), logger=logger)
+            available_terms = temp_builder.get_available_terms()
+
             inconsistent: List[str] = []
             try:
-                temp_builder = OntologyBuilder(self.base_iri)
-                with open(current_data, "r", encoding="utf-8") as data_file:
-                    temp_builder.parse_turtle(data_file.read(), logger=logger)
                 temp_owl = os.path.join("results", f"pre_reason_{k}.owl")
                 temp_builder.save(temp_owl, fmt="xml")
                 _, inconsistent = run_reasoner(temp_owl)
             except ReasonerError as exc:
                 logger.warning("Reasoner failed: %s", exc)
+
             prompts = synthesize_repair_prompts(
                 violations, graph, available_terms, inconsistent
             )
             repair_snippets = []
             for prompt in prompts:
-                snippet = self.llm.generate_owl([prompt], "{sentence}")[0]
+                snippet = self.llm.generate_owl(
+                    [prompt], "{sentence}", available_terms=available_terms
+                )[0]
                 repair_snippets.append(snippet)
             with open(current_data, "r", encoding="utf-8") as f:
                 original = f.read()
