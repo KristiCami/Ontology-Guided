@@ -45,6 +45,7 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
             return True, []
 
     monkeypatch.setattr(repair_loop, "SHACLValidator", FakeValidator)
+    monkeypatch.setattr(repair_loop, "run_reasoner", lambda path: (None, []))
 
     repairer = RepairLoop(str(data_path), str(shapes_path), api_key="dummy")
     ttl_path, report_path, violations, stats = repairer.run()
@@ -94,7 +95,7 @@ def test_synthesize_repair_prompts_uses_new_template(monkeypatch):
     )
 
     prompts = repair_loop.synthesize_repair_prompts(
-        violations, graph, available_terms
+        violations, graph, available_terms, ["http://example.com/BadClass"]
     )
 
     assert len(prompts) == 1
@@ -102,6 +103,7 @@ def test_synthesize_repair_prompts_uses_new_template(monkeypatch):
     assert "Use vocabulary: http://example.com/A" in prompt
     assert "http://example.com/p" in prompt
     assert "Terms:" not in prompt
+    assert "Reasoner inconsistencies: http://example.com/BadClass" in prompt
 
 
 def test_local_context_filters_by_path():
