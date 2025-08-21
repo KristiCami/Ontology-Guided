@@ -126,19 +126,30 @@ def map_to_ontology_terms(
 
 
 def synthesize_repair_prompts(
-    violations, graph: Graph, available_terms: Dict[str, List[str]]
+    violations,
+    graph: Graph,
+    available_terms: Dict[str, List[str]],
+    inconsistencies: Optional[List[str]] = None,
 ) -> List[str]:
-    """Construct prompts for the LLM based on violations and context."""
+    """Construct prompts for the LLM based on violations, context, and reasoning."""
     prompts: List[str] = []
+    reasoning_text = ""
+    if inconsistencies:
+        reasoning_text = (
+            "\nReasoner inconsistencies: " + ", ".join(inconsistencies)
+        )
     for v in violations:
         canon = canonicalize_violation(v)
         ctx = local_context(graph, v.get("focusNode"), v.get("resultPath"))
-        class_terms, property_terms = map_to_ontology_terms(available_terms, ctx)
+        full_ctx = ctx + reasoning_text
+        class_terms, property_terms = map_to_ontology_terms(
+            available_terms, full_ctx
+        )
         terms = sorted(set(class_terms + property_terms))
         terms_text = ", ".join(terms)
         prompts.append(
             PROMPT_TEMPLATE.format(
-                violation=canon, context=ctx, terms=terms_text
+                violation=canon, context=full_ctx, terms=terms_text
             )
         )
     return prompts
@@ -222,8 +233,19 @@ class RepairLoop:
                 "domain_range_hints": {},
                 "synonyms": {},
             }
-
-            prompts = synthesize_repair_prompts(violations, graph, available_terms)
+            inconsistent: List[str] = []
+            try:
+                temp_builder = OntologyBuilder(self.base_iri)
+                with open(current_data, "r", encoding="utf-8") as data_file:
+                    temp_builder.parse_turtle(data_file.read(), logger=logger)
+                temp_owl = os.path.join("results", f"pre_reason_{k}.owl")
+                temp_builder.save(temp_owl, fmt="xml")
+                _, inconsistent = run_reasoner(temp_owl)
+            except ReasonerError as exc:
+                logger.warning("Reasoner failed: %s", exc)
+            prompts = synthesize_repair_prompts(
+                violations, graph, available_terms, inconsistent
+            )
             repair_snippets = []
             for prompt in prompts:
                 snippet = self.llm.generate_owl([prompt], "{sentence}")[0]
