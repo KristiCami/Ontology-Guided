@@ -198,10 +198,11 @@ def run_pipeline(
             repairer = RepairLoop(
                 pipeline["combined_ttl"], shapes, api_key, kmax=kmax, base_iri=base_iri
             )
-            repaired_ttl, repaired_report, violations = repairer.run(
+            repaired_ttl, repaired_report, violations, stats = repairer.run(
                 reason=reason, inference=inference
             )
             pipeline["repaired_report"] = {"path": repaired_report, "violations": violations}
+            pipeline["violation_stats"] = stats
             if repaired_ttl:
                 pipeline["repaired_ttl"] = repaired_ttl
     else:
