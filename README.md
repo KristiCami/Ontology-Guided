@@ -36,6 +36,10 @@ Ontology-Guided/
 
 ![OG‑NSD Pipeline](docs/pipeline.svg)
 
+## ♻️ Repair Loop
+
+![Repair Loop](docs/repair_loop_zoom.svg)
+
 ---
 ## 🗺️ Διάγραμμα Ροής Δεδομένων
 
