@@ -38,6 +38,8 @@ Ontology-Guided/
 
 ## ♻️ Repair Loop
 
+The diagram below zooms into the repair cycle from detecting a real violation to producing the corrected axioms diff.
+
 ![Repair Loop](docs/repair_loop_zoom.svg)
 
 ---
