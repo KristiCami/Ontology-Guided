@@ -85,7 +85,17 @@ def test_synthesize_repair_prompts_returns_structured_json(monkeypatch):
             "value": "http://example.com/b",
         }
     ]
-    available_terms = {"classes": [], "properties": []}
+    available_terms = {
+        "classes": [],
+        "properties": [],
+        "domain_range_hints": {
+            "http://example.com/p": {
+                "domain": ["http://example.com/A"],
+                "range": ["http://example.com/B"],
+            }
+        },
+        "synonyms": {"http://example.com/alias": "http://example.com/A"},
+    }
 
     monkeypatch.setattr(
         repair_loop,
@@ -106,6 +116,10 @@ def test_synthesize_repair_prompts_returns_structured_json(monkeypatch):
         "http://example.com/a http://example.com/p http://example.com/b"
     ]
     assert "http://example.com/p" in prompt["terms"]
+    assert prompt["domain_range_hints"]["http://example.com/p"]["domain"] == [
+        "http://example.com/A"
+    ]
+    assert prompt["synonyms"]["http://example.com/alias"] == "http://example.com/A"
     assert prompt["reasoner_inconsistencies"] == [
         "http://example.com/BadClass"
     ]
