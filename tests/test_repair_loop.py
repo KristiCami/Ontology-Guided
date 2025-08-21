@@ -1,5 +1,6 @@
 import ontology_guided.repair_loop as repair_loop
 from ontology_guided.repair_loop import RepairLoop
+import json
 from ontology_guided.llm_interface import LLMInterface
 from rdflib import Graph, URIRef
 
@@ -66,7 +67,7 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
     )
 
 
-def test_synthesize_repair_prompts_uses_new_template(monkeypatch):
+def test_synthesize_repair_prompts_returns_structured_json(monkeypatch):
     graph_data = """
         @prefix ex: <http://example.com/> .
         ex:a a ex:A ;
@@ -81,7 +82,7 @@ def test_synthesize_repair_prompts_uses_new_template(monkeypatch):
             "sourceShape": "ex:Shape",
             "sourceConstraintComponent": "sh:MinCountConstraintComponent",
             "expected": "1",
-            "value": "0",
+            "value": "http://example.com/b",
         }
     ]
     available_terms = {"classes": [], "properties": []}
@@ -99,11 +100,15 @@ def test_synthesize_repair_prompts_uses_new_template(monkeypatch):
     )
 
     assert len(prompts) == 1
-    prompt = prompts[0]
-    assert "Use vocabulary: http://example.com/A" in prompt
-    assert "http://example.com/p" in prompt
-    assert "Terms:" not in prompt
-    assert "Reasoner inconsistencies: http://example.com/BadClass" in prompt
+    prompt = json.loads(prompts[0])
+    assert prompt["violation"].startswith("Shape=ex:Shape")
+    assert prompt["offending_axioms"] == [
+        "http://example.com/a http://example.com/p http://example.com/b"
+    ]
+    assert "http://example.com/p" in prompt["terms"]
+    assert prompt["reasoner_inconsistencies"] == [
+        "http://example.com/BadClass"
+    ]
 
 
 def test_local_context_filters_by_path():
