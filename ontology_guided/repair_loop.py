@@ -1,10 +1,11 @@
 import os
 import logging
 import difflib
+import json
 from typing import List, Tuple, Optional, Union, Dict, Any
 
 from dotenv import load_dotenv
-from rdflib import Graph, URIRef
+from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL
 
 from .validator import SHACLValidator
@@ -15,14 +16,6 @@ from .reasoner import run_reasoner, ReasonerError
 BASE_IRI = "http://example.com/atm#"
 SHAPES_FILE = "shapes.ttl"
 DATA_FILE = "results/combined.ttl"
-
-PROMPT_TEMPLATE = (
-    "You must FIX the OWL to satisfy this constraint.\n"
-    "Violation: {violation}\n"
-    "Context (TTL): {context}\n"
-    "Use vocabulary: {terms}\n"
-    "Return ONLY corrected Turtle axioms that replace/add minimal edits.\n"
-)
 
 
 def local_context(
@@ -95,23 +88,31 @@ def local_context(
     return data.decode("utf-8") if isinstance(data, bytes) else data
 
 
-def canonicalize_violation(violation: dict) -> str:
-    """Create a canonical textual description of a SHACL violation.
+def canonicalize_violation(violation: dict) -> Dict[str, Optional[str]]:
+    """Create a canonical structured description of a SHACL violation.
 
-    Includes shape, constraint component, focus node, result path,
-    expected and observed values. The output is formatted as:
-    "Shape=<...>, Constraint=<...>, Path=<...>, Expected=<...>, Observed=<...>".
+    Returns a dictionary with individual fields and a ``text`` key containing a
+    concise human readable summary.
     """
     shape = violation.get("sourceShape")
     component = violation.get("sourceConstraintComponent")
-    _focus = violation.get("focusNode")
+    focus = violation.get("focusNode")
     path = violation.get("resultPath")
     expected = violation.get("expected")
     observed = violation.get("value")
-    return (
+    text = (
         f"Shape={shape}, Constraint={component}, Path={path}, "
         f"Expected={expected}, Observed={observed}"
     )
+    return {
+        "shape": shape,
+        "constraint": component,
+        "focusNode": focus,
+        "path": path,
+        "expected": expected,
+        "observed": observed,
+        "text": text,
+    }
 
 
 def map_to_ontology_terms(
@@ -131,27 +132,51 @@ def synthesize_repair_prompts(
     available_terms: Dict[str, List[str]],
     inconsistencies: Optional[List[str]] = None,
 ) -> List[str]:
-    """Construct prompts for the LLM based on violations, context, and reasoning."""
+    """Construct structured prompts for the LLM.
+
+    Each prompt is a JSON object with keys:
+    ``violation`` – canonical text,
+    ``offending_axioms`` – list of offending triples or missing triple descriptions,
+    ``context`` – Turtle snippet around the violation,
+    ``terms`` – ontology terms found in the context,
+    ``reasoner_inconsistencies`` – optional list of inconsistent classes.
+    """
     prompts: List[str] = []
-    reasoning_text = ""
-    if inconsistencies:
-        reasoning_text = (
-            "\nReasoner inconsistencies: " + ", ".join(inconsistencies)
-        )
     for v in violations:
         canon = canonicalize_violation(v)
         ctx = local_context(graph, v.get("focusNode"), v.get("resultPath"))
-        full_ctx = ctx + reasoning_text
-        class_terms, property_terms = map_to_ontology_terms(
-            available_terms, full_ctx
-        )
+        class_terms, property_terms = map_to_ontology_terms(available_terms, ctx)
         terms = sorted(set(class_terms + property_terms))
-        terms_text = ", ".join(terms)
-        prompts.append(
-            PROMPT_TEMPLATE.format(
-                violation=canon, context=full_ctx, terms=terms_text
-            )
-        )
+
+        offending: List[str] = []
+        focus = canon.get("focusNode")
+        path = canon.get("path")
+        observed = canon.get("observed")
+        if focus and path:
+            subj = URIRef(focus)
+            pred = URIRef(path)
+            obj = None
+            if observed:
+                if observed.startswith("http://") or observed.startswith("https://"):
+                    obj = URIRef(observed)
+                else:
+                    obj = Literal(observed)
+            triples = list(graph.triples((subj, pred, obj if observed else None)))
+            if triples:
+                offending = [f"{s} {p} {o}" for s, p, o in triples]
+            else:
+                missing = f"{focus} {path} {observed if observed else '?'}"
+                offending = [f"Missing triple: {missing}"]
+
+        prompt_obj: Dict[str, Any] = {
+            "violation": canon["text"],
+            "offending_axioms": offending,
+            "context": ctx,
+            "terms": terms,
+        }
+        if inconsistencies:
+            prompt_obj["reasoner_inconsistencies"] = inconsistencies
+        prompts.append(json.dumps(prompt_obj))
     return prompts
 
 
@@ -194,7 +219,7 @@ class RepairLoop:
                     f.write("Conforms\n")
                 else:
                     for v in violations:
-                        f.write(canonicalize_violation(v) + "\n")
+                        f.write(canonicalize_violation(v)["text"] + "\n")
             if conforms:
                 logger.info("SHACL validation passed on iteration %d", k)
                 break
