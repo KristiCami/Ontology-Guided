@@ -1,2 +1,3 @@
-The ATM shall dispense cash when the PIN is correct.
+The ATM shall log all user transactions after card insertion.
 The ATM shall retain the card after three failed PIN attempts.
+The ATM shall dispense cash when the PIN is correct.
