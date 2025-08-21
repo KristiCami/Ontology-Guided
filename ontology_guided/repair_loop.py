@@ -170,9 +170,12 @@ class RepairLoop:
         report_path = ""
         final_violations: List[dict] = []
         k = 0
+        initial_count = 0
         while True:
             validator = SHACLValidator(current_data, self.shapes_path, inference=inference)
             conforms, violations = validator.run_validation()
+            if k == 0:
+                initial_count = len(violations)
             final_violations = violations
             report_path = os.path.join("results", f"report_{k}.txt")
             with open(report_path, "w", encoding="utf-8") as f:
@@ -262,7 +265,18 @@ class RepairLoop:
             current_data = ttl_path
             k += 1
 
-        return (current_data if k > 0 else None, report_path, final_violations)
+        stats = {
+            "initial_count": initial_count,
+            "final_count": len(final_violations),
+            "iterations": k,
+        }
+
+        return (
+            current_data if k > 0 else None,
+            report_path,
+            final_violations,
+            stats,
+        )
 
 
 def main():
