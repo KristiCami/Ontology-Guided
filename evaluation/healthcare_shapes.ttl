@@ -1,0 +1,16 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix hc: <http://example.com/healthcare#> .
+
+hc:ObservationShape
+    a sh:NodeShape ;
+    sh:targetClass hc:Observation ;
+    sh:property [
+        sh:path hc:performedBy ;
+        sh:minCount 1 ;
+        sh:class hc:Doctor ;
+    ] ;
+    sh:property [
+        sh:path hc:onPatient ;
+        sh:minCount 1 ;
+        sh:class hc:Patient ;
+    ] .

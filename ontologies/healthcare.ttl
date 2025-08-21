@@ -1,0 +1,15 @@
+@prefix hc: <http://example.com/healthcare#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+hc:Patient a owl:Class .
+hc:Doctor a owl:Class .
+hc:Observation a owl:Class .
+
+hc:performedBy a owl:ObjectProperty ;
+    rdfs:domain hc:Observation ;
+    rdfs:range hc:Doctor .
+
+hc:onPatient a owl:ObjectProperty ;
+    rdfs:domain hc:Observation ;
+    rdfs:range hc:Patient .

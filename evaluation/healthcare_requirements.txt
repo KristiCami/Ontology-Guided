@@ -1,0 +1,2 @@
+Each patient observation must record the doctor performing the observation.
+The system shall link observations to the patient being examined.
