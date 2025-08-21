@@ -41,6 +41,7 @@ def run_pipeline(
     inference="rdfs",
     load_rbo=False,
     load_lexical=False,
+    use_terms: bool = True,
 ):
     """Execute the ontology drafting pipeline.
 
@@ -52,7 +53,8 @@ def run_pipeline(
     automatically.  ``ontology_dir`` allows specifying a directory from which
     all ``.ttl`` files will be loaded as additional ontologies. ``kmax`` sets
     the maximum number of repair iterations, while ``reason`` and ``inference``
-    control reasoning behaviour within the repair loop.
+    control reasoning behaviour within the repair loop. ``use_terms`` controls
+    whether ontology terms are supplied to the language model.
     """
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
@@ -95,7 +97,7 @@ def run_pipeline(
 
     builder = OntologyBuilder(base_iri, ontology_files=ontology_files)
     logger = logging.getLogger(__name__)
-    avail_terms = builder.get_available_terms()
+    avail_terms = builder.get_available_terms() if use_terms else None
 
     llm = LLMInterface(api_key=api_key, model=model)
 
@@ -235,6 +237,11 @@ def main():
         choices=["none", "rdfs", "owlrl"],
         help="Inference to apply during SHACL validation and repair loop",
     )
+    parser.add_argument(
+        "--no-terms",
+        action="store_true",
+        help="Do not supply available ontology terms to the language model",
+    )
     args = parser.parse_args()
 
     run_pipeline(
@@ -251,6 +258,7 @@ def main():
         inference=args.inference,
         load_rbo=args.rbo,
         load_lexical=args.lexical,
+        use_terms=not args.no_terms,
     )
 
 if __name__ == "__main__":
