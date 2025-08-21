@@ -126,6 +126,24 @@ python3 scripts/generate_dfd.py
 - **ontologies/rbo.ttl**: ορίζει βασικές κλάσεις για Requirements, Actions και Actors, μαζί με τις ιδιότητες `requiresAction` και `performedBy`.
 - **ontologies/lexical.ttl**: περιέχει λεξική δομή με κλάσεις `Word`, `Noun` και σχέσεις `synonym`, `antonym` μεταξύ λέξεων.
 
+## 🏥 Εναλλαγή Τομέων
+
+Η ίδια διαδικασία μπορεί να στραφεί σε διαφορετικό domain αλλάζοντας απλώς
+τις απαιτήσεις, τα SHACL shapes και τις (προαιρετικές) οντολογίες. Για
+παράδειγμα, το παρακάτω command εκτελεί το pipeline σε σενάριο υγείας χωρίς
+καμία επανεκπαίδευση του μοντέλου:
+
+```bash
+python3 scripts/main.py \
+    --inputs evaluation/healthcare_requirements.txt \
+    --shapes evaluation/healthcare_shapes.ttl \
+    --ontologies ontologies/healthcare.ttl \
+    --base-iri http://example.com/healthcare#
+```
+
+Το αποτέλεσμα είναι μια οντολογία με κανόνες για γιατρούς, ασθενείς και
+ιατρικές παρατηρήσεις.
+
 ## 📊 Αξιολόγηση
 
 Για να συγκρίνετε τα παραγόμενα OWL triples με ένα χρυσό πρότυπο, χρησιμοποιήστε το script:
