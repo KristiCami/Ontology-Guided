@@ -129,6 +129,8 @@ def run_pipeline(
                         snippet_index=snippet_counter,
                     )
                     builder.add_provenance(sent, triples)
+                    if use_terms:
+                        avail_terms = builder.get_available_terms()
                 except InvalidTurtleError:
                     logger.warning(
                         "Skipping invalid OWL snippet for sentence: %s", sent
@@ -149,6 +151,8 @@ def run_pipeline(
                     snippet_index=snippet_counter,
                 )
                 builder.add_provenance(sent, triples)
+                if use_terms:
+                    avail_terms = builder.get_available_terms()
             except InvalidTurtleError:
                 logger.warning(
                     "Skipping invalid OWL snippet for sentence: %s", sent
