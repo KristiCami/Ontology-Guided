@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 from rdflib import Graph
-from typing import Iterable
+from typing import Iterable, Optional, Union
 
 import os, sys
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -16,7 +16,7 @@ def compare_metrics(
     gold_path: str,
     shapes_path: str = "shapes.ttl",
     base_iri: str = "http://lod.csd.auth.gr/atm/atm.ttl#",
-    keywords: Iterable[str] | None = None,
+    keywords: Optional[Union[Iterable[str], None]] = None,
 ) -> dict:
     """Run the pipeline on requirements and compare against a gold TTL file.
 

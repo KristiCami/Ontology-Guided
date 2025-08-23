@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import sys
 import logging
 import json
-from typing import Iterable
+from typing import Iterable, Optional, Union
 
 # Ensure the project root is on the Python path when executed directly
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -49,7 +49,7 @@ def run_pipeline(
     validate: bool = True,
     use_async: bool = False,
     strict_terms: bool = False,
-    keywords: Iterable[str] | None = None,
+    keywords: Optional[Union[Iterable[str], None]] = None,
 ):
     """Execute the ontology drafting pipeline.
 
