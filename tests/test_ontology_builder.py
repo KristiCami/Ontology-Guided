@@ -111,3 +111,18 @@ ex:knownProp a owl:ObjectProperty .
     assert not any("UnknownClass" in str(o) for _, _, o in triples)
     assert "unknownProp" in caplog.text
     assert "UnknownClass" in caplog.text
+
+
+def test_parse_turtle_applies_synonym():
+    lex = Path(__file__).resolve().parent.parent / "ontologies" / "lexical.ttl"
+    ob = OntologyBuilder('http://example.com/atm#', ontology_files=[str(lex)])
+    ttl = "ex:quick lex:antonym ex:quick ."
+    logger = logging.getLogger(__name__)
+    triples = ob.parse_turtle(ttl, logger=logger)
+    nm = ob.graph.namespace_manager
+    ex_fast = nm.expand_curie("ex:fast")
+    ex_quick = nm.expand_curie("ex:quick")
+    lex_antonym = nm.expand_curie("lex:antonym")
+    assert (ex_fast, lex_antonym, ex_fast) in ob.graph
+    assert (ex_quick, lex_antonym, ex_quick) not in ob.graph
+    assert triples == [(ex_fast, lex_antonym, ex_fast)]

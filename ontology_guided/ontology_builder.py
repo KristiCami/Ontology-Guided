@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-from rdflib import Graph
+from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, RDFS, OWL, XSD, Namespace
 from rdflib.plugins.parsers.notation3 import BadSyntax
 
@@ -158,10 +158,22 @@ class OntologyBuilder:
                         o.n3(nm),
                     )
             triples = kept_triples
-        for triple in triples:
-            self.graph.add(triple)
+        nm = self.graph.namespace_manager
+        syn_map = self.synonym_map
+        canonical_triples = []
+        for s, p, o in triples:
+            if isinstance(s, URIRef):
+                s_norm = nm.normalizeUri(s)
+                if s_norm in syn_map:
+                    s = nm.expand_curie(syn_map[s_norm])
+            if isinstance(o, URIRef):
+                o_norm = nm.normalizeUri(o)
+                if o_norm in syn_map:
+                    o = nm.expand_curie(syn_map[o_norm])
+            self.graph.add((s, p, o))
+            canonical_triples.append((s, p, o))
         self._extract_available_terms()
-        return triples
+        return canonical_triples
 
     def add_provenance(self, requirement: str, triples):
         """Map generated triples to the originating requirement."""
