@@ -64,3 +64,18 @@ def test_preprocess_filters_noisy_inputs():
         "Users must change password.",
     ]
 
+
+def test_preprocess_removes_duplicate_sentences():
+    loader = DataLoader()
+    text = (
+        "The system shall reboot.\n"
+        "Users must change password.\n"
+        "The system shall reboot.\n"
+        "Users must change password."
+    )
+    sentences = loader.preprocess_text(text)
+    assert sentences == [
+        "The system shall reboot.",
+        "Users must change password.",
+    ]
+

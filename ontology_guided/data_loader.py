@@ -71,4 +71,5 @@ class DataLoader:
                 has_verb = any(token.pos_ in {"VERB", "AUX"} for token in sent)
                 if has_keyword or has_verb:
                     sentences.append(sent_text)
-        return sentences
+        # Remove duplicates while preserving order
+        return list(dict.fromkeys(sentences))
