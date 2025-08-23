@@ -251,9 +251,13 @@ def main() -> None:  # pragma: no cover - CLI wrapper
             {"name": "table4", "use_terms": False, "validate": False},
         ]
 
-    if args.ontologies:
-        for setting in settings_list:
-            setting.setdefault("ontologies", args.ontologies)
+    ontology_list = args.ontologies or [
+        "ontologies/atm_domain.ttl",
+        "ontologies/lexical.ttl",
+        "ontologies/lexical_atm.ttl",
+    ]
+    for setting in settings_list:
+        setting.setdefault("ontologies", ontology_list)
 
     run_evaluations(
         pairs,

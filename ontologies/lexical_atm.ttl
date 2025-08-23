@@ -1,0 +1,17 @@
+@prefix lex: <http://example.com/lexical#> .
+@prefix : <http://lod.csd.auth.gr/atm/atm.ttl#> .
+
+lex:AutomatedTellerMachine a lex:Word ;
+    lex:synonym :ATM .
+
+lex:BankCard a lex:Word ;
+    lex:synonym :CashCard .
+
+lex:BankCustomer a lex:Word ;
+    lex:synonym :Customer .
+
+lex:BankAccount a lex:Word ;
+    lex:synonym :Account .
+
+lex:FinancialInstitution a lex:Word ;
+    lex:synonym :Bank .
