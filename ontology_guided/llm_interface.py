@@ -24,12 +24,23 @@ KNOWN_PREFIXES = {
 }
 
 class LLMInterface:
-    def __init__(self, api_key: str, model: str = "gpt-4", cache_dir: Optional[str] = None):
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "gpt-4",
+        cache_dir: Optional[str] = None,
+        temperature: float = 0.0,
+        examples: Optional[List[Dict[str, str]]] = None,
+    ):
         openai.api_key = api_key
         self.model = model
-        self.cache_dir = Path(cache_dir or Path(__file__).resolve().parent.parent / "cache")
+        self.cache_dir = Path(
+            cache_dir or Path(__file__).resolve().parent.parent / "cache"
+        )
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.logger = logging.getLogger(__name__)
+        self.temperature = temperature
+        self.examples = examples or []
 
     def _cache_file(self, sentence: str, available_terms: Optional[Dict[str, Any]]):
         classes = []
@@ -118,12 +129,23 @@ class LLMInterface:
             current_delay = retry_delay
             while True:
                 try:
+                    messages = [
+                        {
+                            "role": "system",
+                            "content": "You are a Turtle/OWL code generator.",
+                        }
+                    ]
+                    for ex in self.examples:
+                        user_msg = ex.get("user")
+                        assistant_msg = ex.get("assistant")
+                        if user_msg is not None and assistant_msg is not None:
+                            messages.append({"role": "user", "content": user_msg})
+                            messages.append({"role": "assistant", "content": assistant_msg})
+                    messages.append({"role": "user", "content": prompt})
                     resp = openai.chat.completions.create(
                         model=self.model,
-                        messages=[
-                            {"role": "system", "content": "You are a Turtle/OWL code generator."},
-                            {"role": "user", "content": prompt},
-                        ],
+                        temperature=self.temperature,
+                        messages=messages,
                     )
                 except (openai.OpenAIError, httpx.HTTPError) as e:
                     attempts += 1
