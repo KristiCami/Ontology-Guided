@@ -176,6 +176,14 @@ python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.txt:eva
 Το script εκτελεί το pipeline με όλους τους συνδυασμούς των σημαιών `use_terms` και `validate`,
 αποθηκεύοντας τα αποτελέσματα σε πίνακες `table_<N>.csv` και `table_<N>.md` στον φάκελο `evaluation`.
 
+Παράδειγμα με προσαρμοσμένη ρύθμιση που φορτώνει επιπλέον οντολογίες:
+
+```bash
+python -m evaluation.run_benchmark \
+    --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" \
+    --settings '[{"name":"table1","use_terms":true,"validate":true,"ontologies":["ontologies/rbo.ttl","ontologies/lexical.ttl"]}]'
+```
+
 ## 🔧 Εργαλεία
 - **spaCy** για τμηματοποίηση προτάσεων
 - **OpenAI API** για παραγωγή αρχικών τριπλετών

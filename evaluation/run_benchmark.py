@@ -72,10 +72,17 @@ def compute_metrics(predicted_ttl: str, gold_path: str) -> Dict[str, float]:
 
 
 def evaluate_once(
-    requirements: str, gold: str, shapes: str, base_iri: str, **settings: Any
+    requirements: str,
+    gold: str,
+    shapes: str,
+    base_iri: str,
+    ontologies: Sequence[str] | None = None,
+    **settings: Any,
 ) -> Tuple[Dict[str, float], Dict[str, Any], Any]:
     """Run the pipeline once and compute evaluation metrics."""
-    result = run_pipeline([requirements], shapes, base_iri, **settings)
+    result = run_pipeline(
+        [requirements], shapes, base_iri, ontologies=ontologies, **settings
+    )
     metrics = compute_metrics(result["combined_ttl"], gold)
     violation_stats = result.get("violation_stats", {}) or {}
     shacl_conforms = result.get("shacl_conforms")
@@ -191,6 +198,12 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         default="evaluation",
         help="Directory where result tables will be written",
     )
+    parser.add_argument(
+        "--ontologies",
+        nargs="*",
+        default=None,
+        help="List of ontology TTL files to include in each run",
+    )
     args = parser.parse_args()
 
     pairs = [parse_pair(p) for p in args.pairs]
@@ -204,6 +217,10 @@ def main() -> None:  # pragma: no cover - CLI wrapper
             {"name": "table3", "use_terms": True, "validate": False},
             {"name": "table4", "use_terms": False, "validate": False},
         ]
+
+    if args.ontologies:
+        for setting in settings_list:
+            setting.setdefault("ontologies", args.ontologies)
 
     run_evaluations(
         pairs, settings_list, args.repeats, args.base_iri, Path(args.output_dir)
