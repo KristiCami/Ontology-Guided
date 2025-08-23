@@ -3,6 +3,7 @@ import httpx
 from typing import List, Optional, Dict, Any
 import re
 import time
+import asyncio
 import hashlib
 import json
 from pathlib import Path
@@ -75,7 +76,7 @@ class LLMInterface:
         with path.open("w") as f:
             json.dump({"result": result}, f)
 
-    def generate_owl(
+    def generate_owl_sync(
         self,
         sentences: List[str],
         prompt_template: str,
@@ -85,7 +86,7 @@ class LLMInterface:
         retry_delay: float = 1.0,
         max_retry_delay: float = 60.0,
     ) -> List[str]:
-        """Call the LLM and return only the Turtle code."""
+        """Synchronous helper that calls the LLM and returns Turtle code."""
         results = []
         classes = []
         properties = []
@@ -205,3 +206,157 @@ class LLMInterface:
             results.append(turtle_code)
             self._save_cache(sent, available_terms, turtle_code)
         return results
+
+    async def generate_owl(
+        self,
+        sentences: List[str],
+        prompt_template: str,
+        *,
+        available_terms: Optional[Dict[str, Any]] = None,
+        max_retries: int = 3,
+        retry_delay: float = 1.0,
+        max_retry_delay: float = 60.0,
+    ) -> List[str]:
+        """Asynchronously call the LLM and return only the Turtle code."""
+
+        classes = []
+        properties = []
+        hints: Dict[str, Any] = {}
+        synonyms: Dict[str, Any] = {}
+        if available_terms:
+            classes = available_terms.get("classes", [])
+            properties = available_terms.get("properties", [])
+            hints = available_terms.get("domain_range_hints", {})
+            synonyms = available_terms.get("synonyms", {})
+
+        async def process(sent: str) -> str:
+            cached = self._load_cache(sent, available_terms)
+            if cached is not None:
+                return cached
+
+            prompt = (
+                "Return ONLY valid Turtle code, without any explanatory text or markdown fences.\n"
+                "Include explicit @prefix declarations for any prefixes you use "
+                "(e.g., @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .). "
+                "If a prefix is not declared, use full IRIs enclosed in <> instead of shorthand.\n"
+            )
+            if classes or properties or hints or synonyms:
+                prompt += "Use existing ontology terms when appropriate.\n"
+                if classes:
+                    prompt += "Classes: " + ", ".join(classes) + "\n"
+                if properties:
+                    prompt += "Properties: " + ", ".join(properties) + "\n"
+                if hints:
+                    prompt += "Property domains/ranges:\n"
+                    for p, dr in hints.items():
+                        dom = ", ".join(dr.get("domain", []))
+                        rng = ", ".join(dr.get("range", []))
+                        prompt += f"  - {p}: domain {dom or '-'}; range {rng or '-'}\n"
+                if synonyms:
+                    prompt += "Synonyms:\n"
+                    for s, c in synonyms.items():
+                        prompt += f"  - {s} -> {c}\n"
+            prompt += prompt_template.format(sentence=sent)
+            base_prompt = prompt
+            attempts = 0
+            current_delay = retry_delay
+            while True:
+                try:
+                    messages = [
+                        {
+                            "role": "system",
+                            "content": "You are a Turtle/OWL code generator.",
+                        }
+                    ]
+                    for ex in self.examples:
+                        user_msg = ex.get("user")
+                        assistant_msg = ex.get("assistant")
+                        if user_msg is not None and assistant_msg is not None:
+                            messages.append({"role": "user", "content": user_msg})
+                            messages.append({"role": "assistant", "content": assistant_msg})
+                    messages.append({"role": "user", "content": prompt})
+                    resp = await openai.chat.completions.create(
+                        model=self.model,
+                        temperature=self.temperature,
+                        messages=messages,
+                    )
+                except (openai.OpenAIError, httpx.HTTPError) as e:
+                    attempts += 1
+                    self.logger.warning("LLM call failed: %s", e)
+                    if attempts > max_retries:
+                        self.logger.error(
+                            "LLM call failed after %d retries", max_retries
+                        )
+                        raise RuntimeError(
+                            f"LLM call failed after {max_retries} retries"
+                        ) from e
+                    await asyncio.sleep(current_delay)
+                    current_delay = min(current_delay * 2, max_retry_delay)
+                    continue
+
+                raw = resp.choices[0].message.content
+                match = re.search(r"```turtle\s*(.*?)```", raw, re.S)
+                turtle_code = match.group(1).strip() if match else raw.strip()
+
+                used_prefixes = set(
+                    re.findall(r"(?<!<)\b([A-Za-z][\w-]*):(?!//)", turtle_code)
+                )
+                declared_prefixes = set(
+                    re.findall(r"@prefix\s+([A-Za-z][\w-]*):", turtle_code)
+                )
+                undeclared = used_prefixes - declared_prefixes
+                prefix_lines = [
+                    f"@prefix {p}: <{KNOWN_PREFIXES[p]}> ."
+                    for p in sorted(undeclared)
+                    if p in KNOWN_PREFIXES
+                ]
+                if prefix_lines:
+                    turtle_code = "\n".join(prefix_lines) + "\n" + turtle_code
+
+                try:
+                    g = Graph()
+                    g.parse(data=turtle_code, format="turtle")
+                    break
+                except Exception as e:
+                    attempts += 1
+                    self.logger.warning("Invalid Turtle returned: %s", e)
+                    if attempts > max_retries:
+                        self.logger.error(
+                            "Failed to produce valid Turtle after %d retries", max_retries
+                        )
+                        raise ValueError("LLM returned invalid Turtle") from e
+                    prompt = (
+                        "Previous output was invalid Turtle; return only correct Turtle.\n"
+                        + base_prompt
+                    )
+                    await asyncio.sleep(current_delay)
+                    current_delay = min(current_delay * 2, max_retry_delay)
+
+            self._save_cache(sent, available_terms, turtle_code)
+            return turtle_code
+
+        tasks = [process(sent) for sent in sentences]
+        return await asyncio.gather(*tasks)
+
+    def async_generate_owl(
+        self,
+        sentences: List[str],
+        prompt_template: str,
+        *,
+        available_terms: Optional[Dict[str, Any]] = None,
+        max_retries: int = 3,
+        retry_delay: float = 1.0,
+        max_retry_delay: float = 60.0,
+    ) -> List[str]:
+        """Convenience wrapper to run ``generate_owl`` in a new event loop."""
+
+        return asyncio.run(
+            self.generate_owl(
+                sentences,
+                prompt_template,
+                available_terms=available_terms,
+                max_retries=max_retries,
+                retry_delay=retry_delay,
+                max_retry_delay=max_retry_delay,
+            )
+        )

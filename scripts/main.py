@@ -45,6 +45,7 @@ def run_pipeline(
     load_lexical=False,
     use_terms: bool = True,
     validate: bool = True,
+    use_async: bool = False,
 ):
     """Execute the ontology drafting pipeline.
 
@@ -121,9 +122,14 @@ def run_pipeline(
         any_sentence = True
         batch.append(sentence)
         if len(batch) >= BATCH_SIZE:
-            owl_batch = llm.generate_owl(
-                batch, PROMPT_TEMPLATE, available_terms=avail_terms
-            )
+            if use_async:
+                owl_batch = llm.async_generate_owl(
+                    batch, PROMPT_TEMPLATE, available_terms=avail_terms
+                )
+            else:
+                owl_batch = llm.generate_owl_sync(
+                    batch, PROMPT_TEMPLATE, available_terms=avail_terms
+                )
             for sent, snippet in zip(batch, owl_batch):
                 if len(snippets_preview) < PREVIEW_LIMIT:
                     snippets_preview.append(snippet)
@@ -145,7 +151,14 @@ def run_pipeline(
                     failed_snippets.append({"sentence": sent, "snippet": snippet})
             batch = []
     if batch:
-        owl_batch = llm.generate_owl(batch, PROMPT_TEMPLATE, available_terms=avail_terms)
+        if use_async:
+            owl_batch = llm.async_generate_owl(
+                batch, PROMPT_TEMPLATE, available_terms=avail_terms
+            )
+        else:
+            owl_batch = llm.generate_owl_sync(
+                batch, PROMPT_TEMPLATE, available_terms=avail_terms
+            )
         for sent, snippet in zip(batch, owl_batch):
             if len(snippets_preview) < PREVIEW_LIMIT:
                 snippets_preview.append(snippet)
@@ -277,6 +290,12 @@ def main():
         action="store_true",
         help="Skip SHACL validation and the repair loop",
     )
+    parser.add_argument(
+        "--async",
+        dest="use_async",
+        action="store_true",
+        help="Generate OWL snippets asynchronously",
+    )
     args = parser.parse_args()
 
     try:
@@ -302,6 +321,7 @@ def main():
             load_lexical=args.lexical,
             use_terms=not args.no_terms,
             validate=not args.no_shacl,
+            use_async=args.use_async,
         )
     except RuntimeError as exc:
         logging.getLogger(__name__).error("Pipeline aborted: %s", exc)
