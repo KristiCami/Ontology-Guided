@@ -18,7 +18,14 @@ atm:alice atm:knows atm:bob .""",
     shapes_path = tmp_path / "shapes.ttl"
     shapes_path.write_text("", encoding="utf-8")
 
-    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+    def fake_generate_owl(
+        self,
+        sentences,
+        prompt_template,
+        available_terms=None,
+        base=None,
+        prefix=None,
+    ):
         return [
             "<http://example.com/atm#alice> <http://example.com/atm#friend> <http://example.com/atm#bob> ."
         ]

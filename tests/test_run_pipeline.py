@@ -9,7 +9,14 @@ def test_run_pipeline_custom_settings(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     monkeypatch.chdir(tmp_path)
 
-    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+    def fake_generate_owl(
+        self,
+        sentences,
+        prompt_template,
+        available_terms=None,
+        base=None,
+        prefix=None,
+    ):
         return ["@prefix atm: <http://example.com/atm#> .\natm:dummy a atm:Unused ."]
 
     monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
@@ -37,7 +44,14 @@ def test_run_pipeline_collects_failed_snippets(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     monkeypatch.chdir(tmp_path)
 
-    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+    def fake_generate_owl(
+        self,
+        sentences,
+        prompt_template,
+        available_terms=None,
+        base=None,
+        prefix=None,
+    ):
         return ["invalid turtle"]
 
     monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
@@ -67,7 +81,14 @@ def test_run_pipeline_ontology_dir(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     monkeypatch.chdir(tmp_path)
 
-    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+    def fake_generate_owl(
+        self,
+        sentences,
+        prompt_template,
+        available_terms=None,
+        base=None,
+        prefix=None,
+    ):
         return ["@prefix atm: <http://example.com/atm#> .\natm:dummy a atm:Unused ."]
 
     monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
@@ -83,6 +104,7 @@ def test_run_pipeline_ontology_dir(monkeypatch, tmp_path):
         def __init__(self, base_iri, ontology_files=None):
             captured["files"] = list(ontology_files or [])
             self.triple_provenance = {}
+            self.prefix = "atm"
 
         def get_available_terms(self):
             return {"classes": [], "properties": [], "domain_range_hints": {}, "synonyms": {}}
@@ -119,7 +141,14 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     monkeypatch.chdir(tmp_path)
 
-    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+    def fake_generate_owl(
+        self,
+        sentences,
+        prompt_template,
+        available_terms=None,
+        base=None,
+        prefix=None,
+    ):
         return ["@prefix atm: <http://example.com/atm#> .\natm:dummy a atm:Unused ."]
 
     monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
@@ -187,7 +216,14 @@ def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     monkeypatch.chdir(tmp_path)
 
-    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+    def fake_generate_owl(
+        self,
+        sentences,
+        prompt_template,
+        available_terms=None,
+        base=None,
+        prefix=None,
+    ):
         return ["@prefix atm: <http://example.com/atm#> .\natm:dummy a atm:Unused ."]
 
     monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
@@ -242,7 +278,14 @@ def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     monkeypatch.chdir(tmp_path)
 
-    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+    def fake_generate_owl(
+        self,
+        sentences,
+        prompt_template,
+        available_terms=None,
+        base=None,
+        prefix=None,
+    ):
         return ["@prefix atm: <http://example.com/atm#> .\natm:dummy a atm:Unused ."]
 
     monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)

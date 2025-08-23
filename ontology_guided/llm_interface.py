@@ -46,7 +46,13 @@ class LLMInterface:
                 examples = json.load(f)
         self.examples = examples or []
 
-    def _cache_file(self, sentence: str, available_terms: Optional[Dict[str, Any]]):
+    def _cache_file(
+        self,
+        sentence: str,
+        available_terms: Optional[Dict[str, Any]],
+        base: Optional[str],
+        prefix: Optional[str],
+    ):
         classes = []
         properties = []
         hints = {}
@@ -58,6 +64,8 @@ class LLMInterface:
             synonyms = available_terms.get("synonyms", {})
         key_data = {
             "sentence": sentence,
+            "base": base,
+            "prefix": prefix,
             "classes": classes,
             "properties": properties,
             "hints": hints,
@@ -67,15 +75,28 @@ class LLMInterface:
         key_hash = hashlib.sha256(key_str.encode()).hexdigest()
         return self.cache_dir / f"{key_hash}.json"
 
-    def _load_cache(self, sentence: str, available_terms: Optional[Dict[str, Any]]):
-        path = self._cache_file(sentence, available_terms)
+    def _load_cache(
+        self,
+        sentence: str,
+        available_terms: Optional[Dict[str, Any]],
+        base: Optional[str],
+        prefix: Optional[str],
+    ):
+        path = self._cache_file(sentence, available_terms, base, prefix)
         if path.exists():
             with path.open("r") as f:
                 return json.load(f).get("result")
         return None
 
-    def _save_cache(self, sentence: str, available_terms: Optional[Dict[str, Any]], result: str):
-        path = self._cache_file(sentence, available_terms)
+    def _save_cache(
+        self,
+        sentence: str,
+        available_terms: Optional[Dict[str, Any]],
+        base: Optional[str],
+        prefix: Optional[str],
+        result: str,
+    ):
+        path = self._cache_file(sentence, available_terms, base, prefix)
         with path.open("w") as f:
             json.dump({"result": result}, f)
 
@@ -85,6 +106,8 @@ class LLMInterface:
         prompt_template: str,
         *,
         available_terms: Optional[Dict[str, Any]] = None,
+        base: Optional[str] = None,
+        prefix: Optional[str] = None,
         max_retries: int = 3,
         retry_delay: float = 1.0,
         max_retry_delay: float = 60.0,
@@ -101,7 +124,7 @@ class LLMInterface:
             hints = available_terms.get("domain_range_hints", {})
             synonyms = available_terms.get("synonyms", {})
         for sent in sentences:
-            cached = self._load_cache(sent, available_terms)
+            cached = self._load_cache(sent, available_terms, base, prefix)
             if cached is not None:
                 results.append(cached)
                 continue
@@ -127,7 +150,9 @@ class LLMInterface:
                     prompt += "Synonyms:\n"
                     for s, c in synonyms.items():
                         prompt += f"  - {s} -> {c}\n"
-            prompt += prompt_template.format(sentence=sent)
+            prompt += prompt_template.format(
+                sentence=sent, base=base, prefix=prefix
+            )
             base_prompt = prompt
             attempts = 0
             current_delay = retry_delay
@@ -207,7 +232,7 @@ class LLMInterface:
                     current_delay = min(current_delay * 2, max_retry_delay)
 
             results.append(turtle_code)
-            self._save_cache(sent, available_terms, turtle_code)
+            self._save_cache(sent, available_terms, base, prefix, turtle_code)
         return results
 
     async def _generate_owl_async(
@@ -216,6 +241,8 @@ class LLMInterface:
         prompt_template: str,
         *,
         available_terms: Optional[Dict[str, Any]] = None,
+        base: Optional[str] = None,
+        prefix: Optional[str] = None,
         max_retries: int = 3,
         retry_delay: float = 1.0,
         max_retry_delay: float = 60.0,
@@ -233,7 +260,7 @@ class LLMInterface:
             synonyms = available_terms.get("synonyms", {})
 
         async def process(sent: str) -> str:
-            cached = self._load_cache(sent, available_terms)
+            cached = self._load_cache(sent, available_terms, base, prefix)
             if cached is not None:
                 return cached
 
@@ -259,7 +286,9 @@ class LLMInterface:
                     prompt += "Synonyms:\n"
                     for s, c in synonyms.items():
                         prompt += f"  - {s} -> {c}\n"
-            prompt += prompt_template.format(sentence=sent)
+            prompt += prompt_template.format(
+                sentence=sent, base=base, prefix=prefix
+            )
             base_prompt = prompt
             attempts = 0
             current_delay = retry_delay
@@ -335,7 +364,7 @@ class LLMInterface:
                     await asyncio.sleep(current_delay)
                     current_delay = min(current_delay * 2, max_retry_delay)
 
-            self._save_cache(sent, available_terms, turtle_code)
+            self._save_cache(sent, available_terms, base, prefix, turtle_code)
             return turtle_code
 
         tasks = [process(sent) for sent in sentences]
@@ -347,6 +376,8 @@ class LLMInterface:
         prompt_template: str,
         *,
         available_terms: Optional[Dict[str, Any]] = None,
+        base: Optional[str] = None,
+        prefix: Optional[str] = None,
         max_retries: int = 3,
         retry_delay: float = 1.0,
         max_retry_delay: float = 60.0,
@@ -358,6 +389,8 @@ class LLMInterface:
                 sentences,
                 prompt_template,
                 available_terms=available_terms,
+                base=base,
+                prefix=prefix,
                 max_retries=max_retries,
                 retry_delay=retry_delay,
                 max_retry_delay=max_retry_delay,
@@ -370,6 +403,8 @@ class LLMInterface:
         prompt_template: str,
         *,
         available_terms: Optional[Dict[str, Any]] = None,
+        base: Optional[str] = None,
+        prefix: Optional[str] = None,
         max_retries: int = 3,
         retry_delay: float = 1.0,
         max_retry_delay: float = 60.0,
@@ -379,6 +414,8 @@ class LLMInterface:
             sentences,
             prompt_template,
             available_terms=available_terms,
+            base=base,
+            prefix=prefix,
             max_retries=max_retries,
             retry_delay=retry_delay,
             max_retry_delay=max_retry_delay,

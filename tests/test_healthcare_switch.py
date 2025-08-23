@@ -8,7 +8,14 @@ def test_pipeline_switches_to_healthcare(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     monkeypatch.chdir(tmp_path)
 
-    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+    def fake_generate_owl(
+        self,
+        sentences,
+        prompt_template,
+        available_terms=None,
+        base=None,
+        prefix=None,
+    ):
         return [
             "@prefix hc: <http://example.com/healthcare#> .\n"
             "hc:obs1 a hc:Observation ;\n"

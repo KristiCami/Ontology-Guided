@@ -91,6 +91,27 @@ python3 scripts/generate_dfd.py
    - `--no-terms`: δεν παρέχονται διαθέσιμοι όροι της οντολογίας στο LLM (προεπιλογή: παρέχονται).
    - `--no-shacl`: απενεργοποίηση του ελέγχου SHACL και του βρόχου διόρθωσης (προεπιλογή: ενεργοποιημένα).
 
+   Η προτροπή προς το LLM πλέον περιλαμβάνει οδηγίες για το base IRI και το prefix, ώστε τα παραγόμενα IRIs να είναι συνεπή. Παράδειγμα:
+
+   ```python
+   from scripts.main import PROMPT_TEMPLATE
+
+   print(
+       PROMPT_TEMPLATE.format(
+           sentence="The ATM authenticates cards.",
+           base="http://example.com/atm#",
+           prefix="atm",
+       )
+   )
+   ```
+
+   Παράγει απόσπασμα τύπου:
+
+   ```turtle
+   @prefix atm: <http://example.com/atm#> .
+   atm:Authentication a owl:Class .
+   ```
+
    Παράδειγμα με προσαρμοσμένες επιλογές:
    ```bash
    python3 scripts/main.py --inputs demo.txt --shapes shapes.ttl --ontology-dir ontologies --rbo --lexical --base-iri http://example.com/atm#
