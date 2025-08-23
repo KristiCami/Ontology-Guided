@@ -1,26 +1,26 @@
-The ATM shall log all user transactions after card insertion.
-The ATM shall retain the card after three failed PIN attempts.
-The ATM shall dispense cash when the PIN is correct.
-The ATM shall validate the inserted card with the bank's network.
-The ATM shall prompt the user to enter a personal identification number.
-The ATM shall verify the entered PIN against the bank database.
-The ATM shall display the account balance upon user request.
-The ATM shall allow the user to withdraw cash from available funds.
-The ATM shall debit the user's account for the withdrawn amount.
-The ATM shall issue a printed receipt for each transaction.
-The ATM shall allow the user to deposit cash into their account.
-The ATM shall accept checks and credit them to the user's account.
-The ATM shall update the account balance after each successful transaction.
-The ATM shall return the card after the session ends.
-The ATM shall allow the user to transfer funds between accounts.
-The ATM shall display error messages for invalid inputs.
-The ATM shall allow the user to change the account PIN.
-The ATM shall terminate the session after a period of inactivity.
-The ATM shall notify the user when funds are insufficient.
-The ATM shall retain captured cards for retrieval by the bank.
-The ATM shall prevent withdrawals that exceed daily limits.
-The ATM shall encrypt all communication with the bank.
-The ATM shall allow the user to select a preferred language.
-The ATM shall comply with accessibility standards for users with disabilities.
-The ATM shall provide help instructions during transactions.
-The ATM shall record the date and time of each transaction.
+Initialize parameters t,k,m,n
+If no cash card is in the ATM the system should display initial display
+If the ATM is running out of money no card should be accepted. An error message is displayed
+The ATM has to check if the entered card is a valid cash card
+If the cash card is valid the ATM should read the serial number and bank code
+The serial number should be logged
+Authorization dialog. The user is requested to enter his password. The ATM verifies the bank code and password with the bank computer
+Different negative answers from bank computer for authorization dialog
+If password and serial number are ok the authorization process is finished
+If a card was entered more than three times in a row at any ATM and the password was wrong each time, the card is kept by the ATM. A message will be displayed that the customer should call the bank
+The kind of transactions the ATM offers is withdrawal
+Initial withdrawal sequence. If it is too much withdrawal redo the transaction
+Perform transaction
+If the transaction is successful the money is dispensed
+If the money is dispensed the amount is logged
+If the transaction is not successful an error message should be displayed. The card should be ejected
+The bank computer checks if the bank code is valid. A bank code is valid if the cash card was issued by the bank
+If it is not a valid bank code the bank computer will send a message to the ATM
+The bank computer checks if the password is valid for a valid cash card
+If it is not a valid password the bank computer will send a message to the ATM
+If it is a valid cash card and a valid password but there are problems with the account, the bank will send a message to the ATM that there are problems
+If it is a valid cash card, a valid password and there are no problems with the account, the bank computer will send a message to the ATM that everything is ok
+After a request the bank computer processes the transaction
+Update account after money is dispensed
+Each bank has a limit k for each account about the amount of money that is available via cash card each day/monthly
+The bank only provides security for their own computer and their own software
