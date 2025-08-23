@@ -9,6 +9,7 @@ Example
 -------
 python -m evaluation.run_benchmark \
     --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" \
+    --examples evaluation/atm_examples.json \
     --base-iri http://lod.csd.auth.gr/atm/atm.ttl# \
     --repeats 1
 
@@ -208,6 +209,11 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         help="List of requirements:gold[:shapes] triples",
     )
     parser.add_argument(
+        "--examples",
+        default=None,
+        help="Path to JSON file with few-shot examples",
+    )
+    parser.add_argument(
         "--settings",
         type=str,
         default=None,
@@ -266,8 +272,14 @@ def main() -> None:  # pragma: no cover - CLI wrapper
             "ontologies/lexical.ttl",
             "ontologies/lexical_atm.ttl",
         ]
+    examples = None
+    if args.examples:
+        with open(args.examples, "r", encoding="utf-8") as f:
+            examples = json.load(f)
     for setting in settings_list:
         setting.setdefault("ontologies", ontology_list)
+        if examples is not None:
+            setting.setdefault("examples", examples)
 
     run_evaluations(
         pairs,
