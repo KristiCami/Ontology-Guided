@@ -127,7 +127,7 @@ def run_pipeline(
                     batch, PROMPT_TEMPLATE, available_terms=avail_terms
                 )
             else:
-                owl_batch = llm.generate_owl_sync(
+                owl_batch = llm.generate_owl(
                     batch, PROMPT_TEMPLATE, available_terms=avail_terms
                 )
             for sent, snippet in zip(batch, owl_batch):
@@ -156,7 +156,7 @@ def run_pipeline(
                 batch, PROMPT_TEMPLATE, available_terms=avail_terms
             )
         else:
-            owl_batch = llm.generate_owl_sync(
+            owl_batch = llm.generate_owl(
                 batch, PROMPT_TEMPLATE, available_terms=avail_terms
             )
         for sent, snippet in zip(batch, owl_batch):

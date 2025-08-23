@@ -31,7 +31,7 @@ class LLMInterface:
         model: str = "gpt-4",
         cache_dir: Optional[str] = None,
         temperature: float = 0.0,
-        examples: Optional[List[Dict[str, str]]] = None,
+        examples: Optional[List[Dict[str, str]] | str | Path] = None,
     ):
         openai.api_key = api_key
         self.model = model
@@ -41,6 +41,9 @@ class LLMInterface:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.logger = logging.getLogger(__name__)
         self.temperature = temperature
+        if isinstance(examples, (str, Path)):
+            with open(examples, "r", encoding="utf-8") as f:
+                examples = json.load(f)
         self.examples = examples or []
 
     def _cache_file(self, sentence: str, available_terms: Optional[Dict[str, Any]]):
@@ -207,7 +210,7 @@ class LLMInterface:
             self._save_cache(sent, available_terms, turtle_code)
         return results
 
-    async def generate_owl(
+    async def _generate_owl_async(
         self,
         sentences: List[str],
         prompt_template: str,
@@ -351,7 +354,7 @@ class LLMInterface:
         """Convenience wrapper to run ``generate_owl`` in a new event loop."""
 
         return asyncio.run(
-            self.generate_owl(
+            self._generate_owl_async(
                 sentences,
                 prompt_template,
                 available_terms=available_terms,
@@ -359,4 +362,24 @@ class LLMInterface:
                 retry_delay=retry_delay,
                 max_retry_delay=max_retry_delay,
             )
+        )
+
+    def generate_owl(
+        self,
+        sentences: List[str],
+        prompt_template: str,
+        *,
+        available_terms: Optional[Dict[str, Any]] = None,
+        max_retries: int = 3,
+        retry_delay: float = 1.0,
+        max_retry_delay: float = 60.0,
+    ) -> List[str]:
+        """Backward compatible synchronous wrapper."""
+        return self.generate_owl_sync(
+            sentences,
+            prompt_template,
+            available_terms=available_terms,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+            max_retry_delay=max_retry_delay,
         )

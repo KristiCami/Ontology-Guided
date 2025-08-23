@@ -1,0 +1,10 @@
+[
+  {
+    "user": "The ATM dispenses cash.",
+    "assistant": "@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\natm:ATM a owl:Class .\natm:Cash a owl:Class .\natm:dispenses a owl:ObjectProperty .\natm:ATM atm:dispenses atm:Cash ."
+  },
+  {
+    "user": "A cash card has a serial number.",
+    "assistant": "@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\natm:CashCard a owl:Class .\natm:SerialNumber a owl:Class .\natm:hasSerialNumber a owl:ObjectProperty .\natm:CashCard atm:hasSerialNumber atm:SerialNumber ."
+  }
+]

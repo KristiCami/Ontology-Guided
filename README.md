@@ -172,7 +172,7 @@ python3 evaluation/compare_metrics.py evaluation/atm_requirements.txt evaluation
 Για την αναπαραγωγή πινάκων αξιολόγησης σε διαφορετικές ρυθμίσεις, υπάρχει το script:
 
 ```bash
-python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" --repeats 1
+python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" --examples evaluation/atm_examples.json --repeats 1
 ```
 
 Το script εκτελεί το pipeline με όλους τους συνδυασμούς των σημαιών `use_terms` και `validate`,
@@ -188,6 +188,7 @@ python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.txt:eva
 ```bash
 python3 evaluation/run_benchmark.py \
     --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" \
+    --examples evaluation/atm_examples.json \
     --ontology-dir ontologies \
     --repeats 1
 ```
@@ -197,6 +198,7 @@ python3 evaluation/run_benchmark.py \
 ```bash
 python -m evaluation.run_benchmark \
     --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" \
+    --examples evaluation/atm_examples.json \
     --settings '[{"name":"table1","use_terms":true,"validate":true,"ontologies":["ontologies/rbo.ttl","ontologies/lexical.ttl"]}]'
 ```
 
