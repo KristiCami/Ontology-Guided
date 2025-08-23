@@ -10,12 +10,18 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
 
     data_path = tmp_path / "combined.ttl"
-    data_path.write_text("""@prefix atm: <http://example.com/atm#> .\natm:alice a atm:User .""", encoding="utf-8")
+    data_path.write_text(
+        """@prefix atm: <http://example.com/atm#> .
+atm:alice atm:knows atm:bob .""",
+        encoding="utf-8",
+    )
     shapes_path = tmp_path / "shapes.ttl"
     shapes_path.write_text("", encoding="utf-8")
 
     def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
-        return ["atm:bob a atm:User ."]
+        return [
+            "<http://example.com/atm#alice> <http://example.com/atm#friend> <http://example.com/atm#bob> ."
+        ]
 
     monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
 
@@ -34,13 +40,13 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
             if len(FakeValidator.runs) == 1:
                 return False, [
                     {
-                        "focusNode": "x",
-                        "resultPath": "p",
+                        "focusNode": "http://example.com/atm#alice",
+                        "resultPath": "http://example.com/atm#knows",
                         "message": "error",
                         "sourceShape": "ex:Shape",
                         "sourceConstraintComponent": "sh:MinCountConstraintComponent",
                         "expected": "1",
-                        "value": "0",
+                        "value": "http://example.com/atm#bob",
                     }
                 ]
             return True, []
@@ -62,9 +68,20 @@ def test_repair_loop_validates_twice(monkeypatch, tmp_path):
     content = report0.read_text(encoding="utf-8").strip()
     assert (
         content
-        == "Shape=ex:Shape, Constraint=sh:MinCountConstraintComponent, Path=p, "
-        "Expected=1, Observed=0"
+        == "Shape=ex:Shape, Constraint=sh:MinCountConstraintComponent, Path=http://example.com/atm#knows, Expected=1, Observed=http://example.com/atm#bob"
     )
+
+    final_graph = Graph().parse(ttl_path, format="turtle")
+    assert (
+        URIRef("http://example.com/atm#alice"),
+        URIRef("http://example.com/atm#knows"),
+        URIRef("http://example.com/atm#bob"),
+    ) not in final_graph
+    assert (
+        URIRef("http://example.com/atm#alice"),
+        URIRef("http://example.com/atm#friend"),
+        URIRef("http://example.com/atm#bob"),
+    ) in final_graph
 
 
 def test_synthesize_repair_prompts_returns_structured_json(monkeypatch):
