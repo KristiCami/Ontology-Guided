@@ -1,13 +1,15 @@
 import os
 import logging
+import re
 from typing import Iterable, Iterator, List
 import spacy
 from docx import Document  # pip install python-docx
 
 
 def clean_text(text: str) -> str:
-    """Καθαρίζει το κείμενο από περιττούς χαρακτήρες και πολλαπλά κενά."""
-    cleaned = text.replace("\r", " ").replace("\n", " ")
+    """Καθαρίζει το κείμενο από bullets/λίστες, περιττούς χαρακτήρες και πολλαπλά κενά."""
+    cleaned = re.sub(r"^\s*[\d\-\*]+[.)]?\s*", "", text)
+    cleaned = cleaned.replace("\r", " ").replace("\n", " ")
     return " ".join(cleaned.split())
 
 
@@ -62,5 +64,11 @@ class DataLoader:
         cleaned_iter = (clean_text(line) for line in lines)
         sentences: List[str] = []
         for doc in self.nlp.pipe(cleaned_iter, batch_size=batch_size, n_process=n_process):
-            sentences.extend(sent.text.strip() for sent in doc.sents)
+            for sent in doc.sents:
+                sent_text = sent.text.strip()
+                tokens_lower = {token.text.lower() for token in sent}
+                has_keyword = any(k in tokens_lower for k in {"shall", "must", "should"})
+                has_verb = any(token.pos_ in {"VERB", "AUX"} for token in sent)
+                if has_keyword or has_verb:
+                    sentences.append(sent_text)
         return sentences
