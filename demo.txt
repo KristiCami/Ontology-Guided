@@ -1,4 +1,1 @@
-Initialize parameters t,k,m,n
-If no cash card is in the ATM the system should display initial display
-If the ATM is running out of money no card should be accepted. An error message is displayed
-The ATM has to check if the entered card is a valid cash card
+The ATM must log all user transactions after card insertion.

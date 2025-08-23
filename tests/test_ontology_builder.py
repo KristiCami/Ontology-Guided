@@ -67,3 +67,19 @@ ex:prop a owl:ObjectProperty ;
         k.split(":")[-1] == "quick" and v.split(":")[-1] == "fast"
         for k, v in terms["synonyms"].items()
     )
+
+
+def test_custom_lexical_namespace(tmp_path):
+    lex = tmp_path / "lex.ttl"
+    lex.write_text(
+        """@prefix foo: <http://example.com/foo#> .\n"""
+        "foo:a foo:synonym foo:b .\n",
+        encoding="utf-8",
+    )
+    ob = OntologyBuilder(
+        'http://example.com/atm#',
+        ontology_files=[str(lex)],
+        lexical_namespace="http://example.com/foo#",
+    )
+    terms = ob.get_available_terms()
+    assert terms["synonyms"]["foo:a"] == "foo:b"

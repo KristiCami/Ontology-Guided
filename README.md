@@ -17,7 +17,7 @@ Ontology-Guided/
 │   ├── __init__.py
 │   ├── data_loader.py       # Φόρτωση και προεπεξεργασία κειμένων
 │   ├── llm_interface.py     # Επικοινωνία με το LLM (π.χ. GPT-4)
-│   ├── ontology_builder.py  # Ενοποίηση Turtle σε αρχείο OWL/TTL
+│   ├── ontology_builder.py  # Ενοποίηση Turtle σε αρχείο OWL/TTL (υποστηρίζει `lexical_namespace` για συνώνυμα)
 │   ├── repair_loop.py       # Επαναληπτική επιδιόρθωση με LLM
 │   └── validator.py         # SHACL έλεγχος ορθότητας
 ├── scripts/                 # Εκτελέσιμα βοηθητικά scripts
@@ -136,6 +136,7 @@ python3 scripts/generate_dfd.py
 
 - **ontologies/rbo.ttl**: ορίζει βασικές κλάσεις για Requirements, Actions και Actors, μαζί με τις ιδιότητες `requiresAction` και `performedBy`.
 - **ontologies/lexical.ttl**: περιέχει λεξική δομή με κλάσεις `Word`, `Noun` και σχέσεις `synonym`, `antonym` μεταξύ λέξεων.
+  Ο `OntologyBuilder` δέχεται προαιρετικό `lexical_namespace` ώστε να καθοριστεί το namespace της ιδιότητας `synonym`.
 
 ## 🏥 Εναλλαγή Τομέων
 
