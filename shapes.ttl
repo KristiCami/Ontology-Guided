@@ -93,4 +93,65 @@ atm:ATMLogShape
             ] ;
         ] ;
     ] .
+
+# Κάρτες πρέπει να είναι έγκυρες και να φέρουν τραπεζικό κωδικό
+atm:CardValidationShape
+    a sh:NodeShape ;
+    sh:targetClass atm:Card ;
+    sh:property [
+        sh:path atm:isValid ;
+        sh:minCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path atm:bankCode ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:pattern "^[0-9]{4}$" ;
+    ] .
+
+# Η διάθεση μετρητών πρέπει να καταγράφει σειριακό αριθμό και ποσό
+atm:CashDispenseShape
+    a sh:NodeShape ;
+    sh:targetClass atm:CashDispense ;
+    sh:property [
+        sh:path atm:hasSerial ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path atm:amount ;
+        sh:minCount 1 ;
+        sh:datatype xsd:decimal ;
+    ] .
+
+# Περιορισμός απόπειρας PIN (>=3 οδηγεί σε κράτηση κάρτας)
+atm:PINAttemptShape
+    a sh:NodeShape ;
+    sh:targetClass atm:PINAttempt ;
+    sh:property [
+        sh:path atm:attemptCount ;
+        sh:minCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:maxExclusive 3 ;
+    ] ;
+    sh:property [
+        sh:path atm:cardRetained ;
+        sh:datatype xsd:boolean ;
+    ] .
+
+# Όρια ημερήσιας και μηνιαίας ανάληψης
+atm:WithdrawalLimitShape
+    a sh:NodeShape ;
+    sh:targetClass atm:Withdrawal ;
+    sh:property [
+        sh:path atm:dailyWithdrawal ;
+        sh:datatype xsd:decimal ;
+        sh:maxInclusive 1000 ;
+    ] ;
+    sh:property [
+        sh:path atm:monthlyWithdrawal ;
+        sh:datatype xsd:decimal ;
+        sh:maxInclusive 5000 ;
+    ] .
     
