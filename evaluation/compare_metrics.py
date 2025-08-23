@@ -5,7 +5,12 @@ from rdflib import Graph
 from scripts.main import run_pipeline
 
 
-def compare_metrics(requirements_path: str, gold_path: str, shapes_path: str = "shapes.ttl") -> dict:
+def compare_metrics(
+    requirements_path: str,
+    gold_path: str,
+    shapes_path: str = "shapes.ttl",
+    base_iri: str = "http://lod.csd.auth.gr/atm/atm.ttl#",
+) -> dict:
     """Run the pipeline on requirements and compare against a gold TTL file.
 
     Parameters
@@ -16,6 +21,8 @@ def compare_metrics(requirements_path: str, gold_path: str, shapes_path: str = "
         Path to gold standard TTL file containing expected triples.
     shapes_path: str
         Path to SHACL shapes file.
+    base_iri: str
+        Base IRI for the generated ontology.
 
     Returns
     -------
@@ -25,7 +32,7 @@ def compare_metrics(requirements_path: str, gold_path: str, shapes_path: str = "
     result = run_pipeline(
         [requirements_path],
         shapes_path,
-        "http://example.com/atm#",
+        base_iri,
         spacy_model="en",
         inference="none",
     )
@@ -64,9 +71,14 @@ def main():
     parser.add_argument("requirements", help="Path to requirements text file")
     parser.add_argument("gold", help="Path to gold standard TTL file")
     parser.add_argument("--shapes", default="shapes.ttl", help="Path to SHACL shapes file")
+    parser.add_argument(
+        "--base-iri",
+        default="http://lod.csd.auth.gr/atm/atm.ttl#",
+        help="Base IRI for the generated ontology",
+    )
     args = parser.parse_args()
 
-    metrics = compare_metrics(args.requirements, args.gold, args.shapes)
+    metrics = compare_metrics(args.requirements, args.gold, args.shapes, args.base_iri)
     print(f"Precision: {metrics['precision']:.3f}")
     print(f"Recall: {metrics['recall']:.3f}")
     print(f"F1: {metrics['f1']:.3f}")
