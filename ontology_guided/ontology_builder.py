@@ -104,6 +104,7 @@ class OntologyBuilder:
         logger: Optional[logging.Logger] = None,
         requirement: Optional[str] = None,
         snippet_index: Optional[int] = None,
+        strict_terms: bool = False,
     ):
         lines = [line for line in turtle_str.splitlines() if line.strip()]
         cleaned = "\n".join(lines)
@@ -127,6 +128,36 @@ class OntologyBuilder:
                 )
             raise InvalidTurtleError("Invalid Turtle input") from exc
         triples = list(temp_graph.triples((None, None, None)))
+        if strict_terms:
+            nm = self.graph.namespace_manager
+            props = set(self.available_properties)
+            classes = set(self.available_classes)
+            synonyms = self.synonym_map
+            kept_triples = []
+            log = logger or logging.getLogger(__name__)
+            for s, p, o in triples:
+                p_norm = nm.normalizeUri(p)
+                keep = False
+                if p_norm in props:
+                    keep = True
+                elif p in (RDF.type, RDFS.subClassOf, OWL.equivalentClass):
+                    o_norm = nm.normalizeUri(o)
+                    if (
+                        o_norm in classes
+                        or o_norm in synonyms
+                        or synonyms.get(o_norm) in classes
+                    ):
+                        keep = True
+                if keep:
+                    kept_triples.append((s, p, o))
+                else:
+                    log.warning(
+                        "Discarded triple due to unknown terms: %s %s %s",
+                        s.n3(nm),
+                        p.n3(nm),
+                        o.n3(nm),
+                    )
+            triples = kept_triples
         for triple in triples:
             self.graph.add(triple)
         self._extract_available_terms()

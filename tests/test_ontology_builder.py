@@ -83,3 +83,31 @@ def test_custom_lexical_namespace(tmp_path):
     )
     terms = ob.get_available_terms()
     assert terms["synonyms"]["foo:a"] == "foo:b"
+
+
+def test_strict_terms_filters_unknown(tmp_path, caplog):
+    ext = tmp_path / "ext.ttl"
+    ext.write_text(
+        """@prefix ex: <http://example.com/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+ex:A a owl:Class .
+ex:knownProp a owl:ObjectProperty .
+""",
+        encoding="utf-8",
+    )
+    ob = OntologyBuilder('http://example.com/atm#', ontology_files=[str(ext)])
+    ttl = (
+        "@prefix ex: <http://example.com/> .\n"
+        "ex:x ex:knownProp ex:A .\n"
+        "ex:x ex:unknownProp ex:A .\n"
+        "ex:x a ex:A .\n"
+        "ex:x a ex:UnknownClass .\n"
+    )
+    logger = logging.getLogger(__name__)
+    with caplog.at_level(logging.WARNING):
+        triples = ob.parse_turtle(ttl, logger=logger, strict_terms=True)
+    assert len(triples) == 2
+    assert not any("unknownProp" in str(p) for _, p, _ in triples)
+    assert not any("UnknownClass" in str(o) for _, _, o in triples)
+    assert "unknownProp" in caplog.text
+    assert "UnknownClass" in caplog.text
