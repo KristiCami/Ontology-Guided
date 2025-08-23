@@ -1,6 +1,6 @@
 import openai
 import httpx
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 import re
 import time
 import asyncio
@@ -31,7 +31,7 @@ class LLMInterface:
         model: str = "gpt-4",
         cache_dir: Optional[str] = None,
         temperature: float = 0.0,
-        examples: Optional[List[Dict[str, str]] | str | Path] = None,
+        examples: Optional[Union[List[Dict[str, str]], str, Path]] = None,
     ):
         openai.api_key = api_key
         self.model = model
