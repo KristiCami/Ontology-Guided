@@ -149,10 +149,11 @@ python3 scripts/generate_dfd.py
 python3 scripts/main.py \
     --inputs evaluation/healthcare_requirements.txt \
     --shapes evaluation/healthcare_shapes.ttl \
-    --ontologies ontologies/healthcare.ttl \
+    --ontology-dir ontologies/healthcare \
     --base-iri http://example.com/healthcare#
 ```
 
+Εναλλακτικά, περάστε συγκεκριμένα αρχεία με `--ontologies`.
 Το αποτέλεσμα είναι μια οντολογία με κανόνες για γιατρούς, ασθενείς και
 ιατρικές παρατηρήσεις.
 
@@ -179,6 +180,17 @@ python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.txt:eva
 
 Η προαιρετική σημαία `--normalize-base` κανονικοποιεί τα base IRIs πριν τη σύγκριση,
 μειώνοντας ψευδείς αποκλίσεις όταν οι ίδιες τριπλέτες χρησιμοποιούν διαφορετικά base.
+
+Οι οντολογίες ανά domain καθορίζονται εύκολα μέσω `--ontologies` για
+μεμονωμένα αρχεία ή `--ontology-dir` για φόρτωση όλων των `.ttl` από έναν
+φάκελο. Παράδειγμα:
+
+```bash
+python3 evaluation/run_benchmark.py \
+    --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" \
+    --ontology-dir ontologies \
+    --repeats 1
+```
 
 Παράδειγμα με προσαρμοσμένη ρύθμιση που φορτώνει επιπλέον οντολογίες:
 
