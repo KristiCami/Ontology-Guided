@@ -233,6 +233,11 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         help="List of ontology TTL files to include in each run",
     )
     parser.add_argument(
+        "--ontology-dir",
+        default=None,
+        help="Directory from which all .ttl ontologies will be loaded",
+    )
+    parser.add_argument(
         "--normalize-base",
         action="store_true",
         help="Normalize base IRIs before comparing graphs",
@@ -251,11 +256,16 @@ def main() -> None:  # pragma: no cover - CLI wrapper
             {"name": "table4", "use_terms": False, "validate": False},
         ]
 
-    ontology_list = args.ontologies or [
-        "ontologies/atm_domain.ttl",
-        "ontologies/lexical.ttl",
-        "ontologies/lexical_atm.ttl",
-    ]
+    ontology_list = list(args.ontologies or [])
+    if args.ontology_dir:
+        dir_path = Path(args.ontology_dir)
+        ontology_list.extend(str(p) for p in sorted(dir_path.glob("*.ttl")))
+    if not ontology_list:
+        ontology_list = [
+            "ontologies/atm_domain.ttl",
+            "ontologies/lexical.ttl",
+            "ontologies/lexical_atm.ttl",
+        ]
     for setting in settings_list:
         setting.setdefault("ontologies", ontology_list)
 
