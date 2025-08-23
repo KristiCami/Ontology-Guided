@@ -237,3 +237,22 @@ def test_local_context_handles_sequence_path():
         URIRef("http://example.com/r"),
         URIRef("http://example.com/d"),
     ) not in ctx_graph
+
+
+def test_local_context_trims_to_max_triples():
+    data = "@prefix ex: <http://example.com/> .\n" + "\n".join(
+        f"ex:a ex:p ex:o{i} ." for i in range(60)
+    )
+    graph = Graph().parse(data=data, format="turtle")
+    orig = list(
+        graph.triples(
+            (URIRef("http://example.com/a"), URIRef("http://example.com/p"), None)
+        )
+    )
+    assert len(orig) == 60
+
+    ctx = repair_loop.local_context(
+        graph, "http://example.com/a", "http://example.com/p", max_triples=10
+    )
+    ctx_graph = Graph().parse(data=ctx, format="turtle")
+    assert len(ctx_graph) == 10
