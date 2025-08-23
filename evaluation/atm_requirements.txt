@@ -1,3 +1,26 @@
 The ATM shall log all user transactions after card insertion.
 The ATM shall retain the card after three failed PIN attempts.
 The ATM shall dispense cash when the PIN is correct.
+The ATM shall validate the inserted card with the bank's network.
+The ATM shall prompt the user to enter a personal identification number.
+The ATM shall verify the entered PIN against the bank database.
+The ATM shall display the account balance upon user request.
+The ATM shall allow the user to withdraw cash from available funds.
+The ATM shall debit the user's account for the withdrawn amount.
+The ATM shall issue a printed receipt for each transaction.
+The ATM shall allow the user to deposit cash into their account.
+The ATM shall accept checks and credit them to the user's account.
+The ATM shall update the account balance after each successful transaction.
+The ATM shall return the card after the session ends.
+The ATM shall allow the user to transfer funds between accounts.
+The ATM shall display error messages for invalid inputs.
+The ATM shall allow the user to change the account PIN.
+The ATM shall terminate the session after a period of inactivity.
+The ATM shall notify the user when funds are insufficient.
+The ATM shall retain captured cards for retrieval by the bank.
+The ATM shall prevent withdrawals that exceed daily limits.
+The ATM shall encrypt all communication with the bank.
+The ATM shall allow the user to select a preferred language.
+The ATM shall comply with accessibility standards for users with disabilities.
+The ATM shall provide help instructions during transactions.
+The ATM shall record the date and time of each transaction.
