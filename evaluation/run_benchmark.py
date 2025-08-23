@@ -9,6 +9,7 @@ Example
 -------
 python -m evaluation.run_benchmark \
     --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" \
+    --base-iri http://lod.csd.auth.gr/atm/atm.ttl# \
     --repeats 1
 
 The default run evaluates the ATM dataset under all four combinations of the
@@ -76,14 +77,18 @@ def evaluate_once(
     return metrics, violation_stats, shacl_conforms
 
 
-def write_csv(path: Path, rows: Sequence[Dict[str, Any]], headers: Sequence[str]) -> None:
+def write_csv(
+    path: Path, rows: Sequence[Dict[str, Any]], headers: Sequence[str]
+) -> None:
     with path.open("w", encoding="utf-8") as f:
         f.write(",".join(headers) + "\n")
         for row in rows:
             f.write(",".join(str(row.get(h, "")) for h in headers) + "\n")
 
 
-def write_markdown(path: Path, rows: Sequence[Dict[str, Any]], headers: Sequence[str]) -> None:
+def write_markdown(
+    path: Path, rows: Sequence[Dict[str, Any]], headers: Sequence[str]
+) -> None:
     with path.open("w", encoding="utf-8") as f:
         f.write("| " + " | ".join(headers) + " |\n")
         f.write("|" + "|".join(["---"] * len(headers)) + "|\n")
@@ -168,10 +173,12 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         default=None,
         help="JSON list with setting dictionaries",
     )
-    parser.add_argument("--repeats", type=int, default=1, help="Number of runs per configuration")
+    parser.add_argument(
+        "--repeats", type=int, default=1, help="Number of runs per configuration"
+    )
     parser.add_argument(
         "--base-iri",
-        default="http://example.com/atm#",
+        default="http://lod.csd.auth.gr/atm/atm.ttl#",
         help="Base IRI for generated ontologies",
     )
     parser.add_argument(
@@ -193,7 +200,9 @@ def main() -> None:  # pragma: no cover - CLI wrapper
             {"name": "table4", "use_terms": False, "validate": False},
         ]
 
-    run_evaluations(pairs, settings_list, args.repeats, args.base_iri, Path(args.output_dir))
+    run_evaluations(
+        pairs, settings_list, args.repeats, args.base_iri, Path(args.output_dir)
+    )
 
 
 if __name__ == "__main__":  # pragma: no cover - CLI entry point
