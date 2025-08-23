@@ -129,8 +129,12 @@ class LLMInterface:
                     attempts += 1
                     self.logger.warning("LLM call failed: %s", e)
                     if attempts > max_retries:
-                        self.logger.error("Exiting gracefully.")
-                        return results
+                        self.logger.error(
+                            "LLM call failed after %d retries", max_retries
+                        )
+                        raise RuntimeError(
+                            f"LLM call failed after {max_retries} retries"
+                        ) from e
                     time.sleep(current_delay)
                     current_delay = min(current_delay * 2, max_retry_delay)
                     continue
