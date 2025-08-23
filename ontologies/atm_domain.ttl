@@ -1,0 +1,26 @@
+@prefix : <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:ATM a owl:Class .
+:Bank a owl:Class .
+:CashCard a owl:Class .
+:Customer a owl:Class .
+:Account a owl:Class .
+
+:ownsCard a owl:ObjectProperty ;
+    rdfs:domain :Customer ;
+    rdfs:range :CashCard .
+
+:belongsToBank a owl:ObjectProperty ;
+    rdfs:domain :ATM ;
+    rdfs:range :Bank .
+
+:hasAccount a owl:ObjectProperty ;
+    rdfs:domain :Customer ;
+    rdfs:range :Account .
+
+:cardIssuedBy a owl:ObjectProperty ;
+    rdfs:domain :CashCard ;
+    rdfs:range :Bank .
