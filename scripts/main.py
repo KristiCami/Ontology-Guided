@@ -34,6 +34,8 @@ def run_pipeline(
     ontologies=None,
     ontology_dir=None,
     model="gpt-4",
+    temperature: float = 0.0,
+    examples=None,
     repair=False,
     kmax=5,
     reason=False,
@@ -101,7 +103,12 @@ def run_pipeline(
     logger = logging.getLogger(__name__)
     avail_terms = builder.get_available_terms() if use_terms else None
 
-    llm = LLMInterface(api_key=api_key, model=model)
+    llm = LLMInterface(
+        api_key=api_key,
+        model=model,
+        temperature=temperature,
+        examples=examples,
+    )
 
     snippets_preview = pipeline["owl_snippets"] = []
     BATCH_SIZE = 100
@@ -231,6 +238,17 @@ def main():
     parser.add_argument("--rbo", action="store_true", help="Include the RBO ontology")
     parser.add_argument("--lexical", action="store_true", help="Include the lexical ontology")
     parser.add_argument("--model", default="gpt-4", help="OpenAI model")
+    parser.add_argument(
+        "--temperature",
+        type=float,
+        default=0.0,
+        help="Sampling temperature for the language model",
+    )
+    parser.add_argument(
+        "--examples",
+        default=None,
+        help="Path to JSON file with few-shot examples",
+    )
     parser.add_argument("--repair", action="store_true", help="Run repair loop if validation fails")
     parser.add_argument("--kmax", type=int, default=5, help="Maximum repair iterations")
     parser.add_argument(
@@ -262,6 +280,10 @@ def main():
     args = parser.parse_args()
 
     try:
+        examples = None
+        if args.examples:
+            with open(args.examples, "r", encoding="utf-8") as f:
+                examples = json.load(f)
         run_pipeline(
             args.inputs,
             args.shapes,
@@ -269,6 +291,8 @@ def main():
             ontologies=args.ontologies,
             ontology_dir=args.ontology_dir,
             model=args.model,
+            temperature=args.temperature,
+            examples=examples,
             repair=args.repair,
             kmax=args.kmax,
             reason=args.reason,

@@ -249,3 +249,46 @@ def test_generate_owl_raises_after_invalid_turtle(monkeypatch, tmp_path):
     llm = LLMInterface(api_key="dummy", model="gpt-4", cache_dir=str(tmp_path))
     with pytest.raises(ValueError):
         llm.generate_owl(["irrelevant"], "{sentence}", max_retries=1, retry_delay=0)
+
+
+def test_generate_owl_passes_temperature_and_examples(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+
+    class FakeMessage:
+        def __init__(self, content):
+            self.content = content
+
+    class FakeChoice:
+        def __init__(self, content):
+            self.message = FakeMessage(content)
+
+    class FakeResponse:
+        def __init__(self, content):
+            self.choices = [FakeChoice(content)]
+
+    captured = {}
+
+    def fake_create(*args, **kwargs):
+        captured["temperature"] = kwargs.get("temperature")
+        captured["messages"] = kwargs["messages"]
+        return FakeResponse("@prefix ex: <http://example.com/> .\nex:A ex:B ex:C .")
+
+    monkeypatch.setattr(openai.chat.completions, "create", fake_create)
+
+    examples = [{"user": "Example", "assistant": "@prefix ex: <http://example.com/> ."}]
+    llm = LLMInterface(
+        api_key="dummy",
+        model="gpt-4",
+        cache_dir=str(tmp_path),
+        temperature=0.3,
+        examples=examples,
+    )
+    llm.generate_owl(["irrelevant"], "{sentence}")
+
+    assert captured["temperature"] == 0.3
+    assert captured["messages"][1] == {"role": "user", "content": "Example"}
+    assert captured["messages"][2] == {
+        "role": "assistant",
+        "content": "@prefix ex: <http://example.com/> .",
+    }
+    assert captured["messages"][3]["role"] == "user"
