@@ -257,15 +257,44 @@ class RepairLoop:
             prompts = synthesize_repair_prompts(
                 violations, graph, available_terms, inconsistent
             )
+            with open(current_data, "r", encoding="utf-8") as f:
+                original = f.read()
+
             repair_snippets = []
             for prompt in prompts:
                 snippet = self.llm.generate_owl(
                     [prompt], "{sentence}", available_terms=available_terms
                 )[0]
                 repair_snippets.append(snippet)
-            with open(current_data, "r", encoding="utf-8") as f:
-                original = f.read()
-            merged = original + "\n\n" + "\n\n".join(repair_snippets)
+
+                prompt_data = json.loads(prompt)
+                offending_axioms = prompt_data.get("offending_axioms", [])
+                for axiom in offending_axioms:
+                    if axiom.startswith("Missing triple"):
+                        continue
+                    try:
+                        s_str, p_str, o_str = axiom.split(" ", 2)
+                    except ValueError:
+                        continue
+                    subj = URIRef(s_str)
+                    pred = URIRef(p_str)
+                    obj = (
+                        URIRef(o_str)
+                        if o_str.startswith("http://") or o_str.startswith("https://")
+                        else Literal(o_str)
+                    )
+                    graph.remove((subj, pred, obj))
+
+                temp_graph = Graph()
+                try:
+                    temp_graph.parse(data=snippet, format="turtle")
+                    for triple in temp_graph:
+                        graph.add(triple)
+                except Exception as exc:
+                    logger.warning("Failed to parse LLM snippet: %s", exc)
+
+            merged_data = graph.serialize(format="turtle")
+            merged = merged_data.decode("utf-8") if isinstance(merged_data, bytes) else merged_data
 
             diff_lines = list(
                 difflib.unified_diff(
