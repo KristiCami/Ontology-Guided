@@ -22,6 +22,7 @@ def local_context(
     focus_node: str,
     path: Optional[Union[str, Dict[str, Any], List[Any]]],
     hops: int = 2,
+    max_triples: int = 50,
 ) -> str:
     """Return Turtle describing a subgraph around the focus node.
 
@@ -83,6 +84,12 @@ def local_context(
         frontier = next_frontier - visited
         if not frontier:
             break
+    triples = list(context)
+    if max_triples and len(triples) > max_triples:
+        trimmed = Graph()
+        for s, p, o in triples[:max_triples]:
+            trimmed.add((s, p, o))
+        context = trimmed
     data = context.serialize(format="turtle")
     return data.decode("utf-8") if isinstance(data, bytes) else data
 
@@ -130,6 +137,7 @@ def synthesize_repair_prompts(
     graph: Graph,
     available_terms: Dict[str, Any],
     inconsistencies: Optional[List[str]] = None,
+    max_triples: int = 50,
 ) -> List[str]:
     """Construct structured prompts for the LLM.
 
@@ -145,7 +153,9 @@ def synthesize_repair_prompts(
     prompts: List[str] = []
     for v in violations:
         canon = canonicalize_violation(v)
-        ctx = local_context(graph, v.get("focusNode"), v.get("resultPath"))
+        ctx = local_context(
+            graph, v.get("focusNode"), v.get("resultPath"), max_triples=max_triples
+        )
         class_terms, property_terms = map_to_ontology_terms(available_terms, ctx)
         terms = sorted(set(class_terms + property_terms))
 
@@ -205,8 +215,8 @@ class RepairLoop:
         self.builder = OntologyBuilder(self.base_iri)
 
     def run(
-        self, *, reason: bool = False, inference: str = "rdfs"
-    ) -> Tuple[Optional[str], str, List[dict]]:
+        self, *, reason: bool = False, inference: str = "rdfs", max_triples: int = 50
+    ) -> Tuple[Optional[str], str, List[dict], Dict[str, int]]:
         logger = logging.getLogger(__name__)
         os.makedirs("results", exist_ok=True)
         current_data = self.data_path
@@ -255,7 +265,7 @@ class RepairLoop:
                 logger.warning("Reasoner failed: %s", exc)
 
             prompts = synthesize_repair_prompts(
-                violations, graph, available_terms, inconsistent
+                violations, graph, available_terms, inconsistent, max_triples=max_triples
             )
             with open(current_data, "r", encoding="utf-8") as f:
                 original = f.read()
