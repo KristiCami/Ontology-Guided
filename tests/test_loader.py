@@ -79,3 +79,17 @@ def test_preprocess_removes_duplicate_sentences():
         "Users must change password.",
     ]
 
+
+def test_preprocess_custom_keywords():
+    loader = DataLoader()
+    text = "Requirement: optional item."
+    sentences = loader.preprocess_text(text, keywords=["requirement"])
+    assert sentences == ["Requirement: optional item."]
+
+
+def test_preprocess_no_keywords_argument():
+    loader = DataLoader()
+    text = "Logging is enabled."
+    sentences = loader.preprocess_text(text, keywords=None)
+    assert sentences == ["Logging is enabled."]
+
