@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import sys
 import logging
 import json
+from typing import Iterable
 
 # Ensure the project root is on the Python path when executed directly
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -48,6 +49,7 @@ def run_pipeline(
     validate: bool = True,
     use_async: bool = False,
     strict_terms: bool = False,
+    keywords: Iterable[str] | None = None,
 ):
     """Execute the ontology drafting pipeline.
 
@@ -83,14 +85,10 @@ def run_pipeline(
     def sentence_iterator():
         for text in texts_iter:
             pipeline["texts"].append(text)
-            lines = (line for line in text.splitlines() if line.strip())
-            cleaned_iter = (clean_text(line) for line in lines)
-            for doc in loader.nlp.pipe(cleaned_iter, batch_size=100, n_process=1):
-                for sent in doc.sents:
-                    sent_text = sent.text.strip()
-                    if len(sentences_preview) < PREVIEW_LIMIT:
-                        sentences_preview.append(sent_text)
-                    yield sent_text
+            for sent_text in loader.preprocess_text(text, keywords=keywords):
+                if len(sentences_preview) < PREVIEW_LIMIT:
+                    sentences_preview.append(sent_text)
+                yield sent_text
     sentences_iter = sentence_iterator()
 
     ontology_files = list(ontologies or [])
@@ -322,6 +320,11 @@ def main():
         action="store_true",
         help="Generate OWL snippets asynchronously",
     )
+    parser.add_argument(
+        "--keywords",
+        default=None,
+        help="Comma-separated keywords for sentence filtering",
+    )
     args = parser.parse_args()
 
     try:
@@ -329,6 +332,11 @@ def main():
         if args.examples:
             with open(args.examples, "r", encoding="utf-8") as f:
                 examples = json.load(f)
+        keywords = (
+            [k.strip() for k in args.keywords.split(",") if k.strip()]
+            if args.keywords
+            else None
+        )
         run_pipeline(
             args.inputs,
             args.shapes,
@@ -349,6 +357,7 @@ def main():
             validate=not args.no_shacl,
             use_async=args.use_async,
             strict_terms=args.strict_terms,
+            keywords=keywords,
         )
     except RuntimeError as exc:
         logging.getLogger(__name__).error("Pipeline aborted: %s", exc)

@@ -51,24 +51,41 @@ class DataLoader:
                 raise ValueError(f"Unsupported file extension: {ext}")
 
     def preprocess_text(
-        self, text: str, batch_size: int = 100, n_process: int = 1
+        self,
+        text: str,
+        batch_size: int = 100,
+        n_process: int = 1,
+        keywords: Iterable[str] | None = ("shall", "must", "should"),
     ) -> List[str]:
         """Καθαρίζει το κείμενο και το επεξεργάζεται τμηματικά με το spaCy.
 
         Το κείμενο χωρίζεται σε γραμμές, καθαρίζεται και στη συνέχεια
         επεξεργάζεται με την ``nlp.pipe`` ώστε να αποφεύγεται η φόρτωση
-        ολόκληρου του κειμένου στη μνήμη.
+        ολόκληρου του κειμένου στη μνήμη.  Αν δοθεί λίστα ``keywords``
+        τότε φιλτράρονται οι προτάσεις που τις περιέχουν.  Όταν
+        ``keywords`` είναι ``None`` δεν εφαρμόζεται φιλτράρισμα βάσει
+        λέξεων-κλειδιών.
         """
 
         lines = (line for line in text.splitlines() if line.strip())
         cleaned_iter = (clean_text(line) for line in lines)
+        keyword_set = {k.lower() for k in keywords} if keywords is not None else None
         sentences: List[str] = []
         for doc in self.nlp.pipe(cleaned_iter, batch_size=batch_size, n_process=n_process):
             for sent in doc.sents:
                 sent_text = sent.text.strip()
                 tokens_lower = {token.text.lower() for token in sent}
-                has_keyword = any(k in tokens_lower for k in {"shall", "must", "should"})
+                has_keyword = (
+                    keyword_set is not None and any(k in tokens_lower for k in keyword_set)
+                )
                 has_verb = any(token.pos_ in {"VERB", "AUX"} for token in sent)
+                if (
+                    keyword_set is None
+                    and not has_verb
+                    and all(token.pos_ == "" for token in sent)
+                ):
+                    # spaCy model without POS tagger; do not filter by verbs
+                    has_verb = True
                 if has_keyword or has_verb:
                     sentences.append(sent_text)
         # Remove duplicates while preserving order

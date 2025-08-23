@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 from rdflib import Graph
+from typing import Iterable
 
 import os, sys
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -15,6 +16,7 @@ def compare_metrics(
     gold_path: str,
     shapes_path: str = "shapes.ttl",
     base_iri: str = "http://lod.csd.auth.gr/atm/atm.ttl#",
+    keywords: Iterable[str] | None = None,
 ) -> dict:
     """Run the pipeline on requirements and compare against a gold TTL file.
 
@@ -40,6 +42,7 @@ def compare_metrics(
         base_iri,
         spacy_model="en",
         inference="none",
+        keywords=keywords,
     )
     predicted_ttl = result["combined_ttl"]
 
@@ -81,9 +84,21 @@ def main():
         default="http://lod.csd.auth.gr/atm/atm.ttl#",
         help="Base IRI for the generated ontology",
     )
+    parser.add_argument(
+        "--keywords",
+        default=None,
+        help="Comma-separated keywords for sentence filtering",
+    )
     args = parser.parse_args()
 
-    metrics = compare_metrics(args.requirements, args.gold, args.shapes, args.base_iri)
+    keywords = (
+        [k.strip() for k in args.keywords.split(",") if k.strip()]
+        if args.keywords
+        else None
+    )
+    metrics = compare_metrics(
+        args.requirements, args.gold, args.shapes, args.base_iri, keywords=keywords
+    )
     print(f"Precision: {metrics['precision']:.3f}")
     print(f"Recall: {metrics['recall']:.3f}")
     print(f"F1: {metrics['f1']:.3f}")

@@ -98,11 +98,17 @@ def evaluate_once(
     base_iri: str,
     ontologies: Sequence[str] | None = None,
     normalize_base: bool = False,
+    keywords: Iterable[str] | None = None,
     **settings: Any,
 ) -> Tuple[Dict[str, float], Dict[str, Any], Any]:
     """Run the pipeline once and compute evaluation metrics."""
     result = run_pipeline(
-        [requirements], shapes, base_iri, ontologies=ontologies, **settings
+        [requirements],
+        shapes,
+        base_iri,
+        ontologies=ontologies,
+        keywords=keywords,
+        **settings,
     )
     metrics = compute_metrics(
         result["combined_ttl"], gold, normalize_base=normalize_base
@@ -138,6 +144,7 @@ def run_evaluations(
     base_iri: str,
     output_dir: Path,
     normalize_base: bool = False,
+    keywords: Iterable[str] | None = None,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -158,6 +165,7 @@ def run_evaluations(
                     shapes,
                     base_iri,
                     normalize_base=normalize_base,
+                    keywords=keywords,
                     **pipeline_opts,
                 )
                 metrics_list.append(metrics)
@@ -248,6 +256,11 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         action="store_true",
         help="Normalize base IRIs before comparing graphs",
     )
+    parser.add_argument(
+        "--keywords",
+        default=None,
+        help="Comma-separated keywords for sentence filtering",
+    )
     args = parser.parse_args()
 
     pairs = [parse_pair(p) for p in args.pairs]
@@ -281,6 +294,11 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         if examples is not None:
             setting.setdefault("examples", examples)
 
+    keywords = (
+        [k.strip() for k in args.keywords.split(",") if k.strip()]
+        if args.keywords
+        else None
+    )
     run_evaluations(
         pairs,
         settings_list,
@@ -288,6 +306,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         args.base_iri,
         Path(args.output_dir),
         normalize_base=args.normalize_base,
+        keywords=keywords,
     )
 
 
