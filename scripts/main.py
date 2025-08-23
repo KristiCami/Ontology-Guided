@@ -261,23 +261,27 @@ def main():
     )
     args = parser.parse_args()
 
-    run_pipeline(
-        args.inputs,
-        args.shapes,
-        args.base_iri,
-        ontologies=args.ontologies,
-        ontology_dir=args.ontology_dir,
-        model=args.model,
-        repair=args.repair,
-        kmax=args.kmax,
-        reason=args.reason,
-        spacy_model=args.spacy_model,
-        inference=args.inference,
-        load_rbo=args.rbo,
-        load_lexical=args.lexical,
-        use_terms=not args.no_terms,
-        validate=not args.no_shacl,
-    )
+    try:
+        run_pipeline(
+            args.inputs,
+            args.shapes,
+            args.base_iri,
+            ontologies=args.ontologies,
+            ontology_dir=args.ontology_dir,
+            model=args.model,
+            repair=args.repair,
+            kmax=args.kmax,
+            reason=args.reason,
+            spacy_model=args.spacy_model,
+            inference=args.inference,
+            load_rbo=args.rbo,
+            load_lexical=args.lexical,
+            use_terms=not args.no_terms,
+            validate=not args.no_shacl,
+        )
+    except RuntimeError as exc:
+        logging.getLogger(__name__).error("Pipeline aborted: %s", exc)
+        raise SystemExit(1)
 
 if __name__ == "__main__":
     main()
