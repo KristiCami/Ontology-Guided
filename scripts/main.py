@@ -46,6 +46,7 @@ def run_pipeline(
     use_terms: bool = True,
     validate: bool = True,
     use_async: bool = False,
+    strict_terms: bool = False,
 ):
     """Execute the ontology drafting pipeline.
 
@@ -59,7 +60,8 @@ def run_pipeline(
     the maximum number of repair iterations, while ``reason`` and ``inference``
     control reasoning behaviour within the repair loop. ``use_terms`` controls
     whether ontology terms are supplied to the language model. ``validate``
-    toggles SHACL validation and the subsequent repair loop.
+    toggles SHACL validation and the subsequent repair loop. ``strict_terms``
+    discards triples that contain unknown ontology terms.
     """
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
@@ -140,6 +142,7 @@ def run_pipeline(
                         logger=logger,
                         requirement=sent,
                         snippet_index=snippet_counter,
+                        strict_terms=strict_terms,
                     )
                     builder.add_provenance(sent, triples)
                     if use_terms:
@@ -169,6 +172,7 @@ def run_pipeline(
                     logger=logger,
                     requirement=sent,
                     snippet_index=snippet_counter,
+                    strict_terms=strict_terms,
                 )
                 builder.add_provenance(sent, triples)
                 if use_terms:
@@ -291,6 +295,11 @@ def main():
         help="Skip SHACL validation and the repair loop",
     )
     parser.add_argument(
+        "--strict-terms",
+        action="store_true",
+        help="Απόρριψη triples με άγνωστους όρους",
+    )
+    parser.add_argument(
         "--async",
         dest="use_async",
         action="store_true",
@@ -322,6 +331,7 @@ def main():
             use_terms=not args.no_terms,
             validate=not args.no_shacl,
             use_async=args.use_async,
+            strict_terms=args.strict_terms,
         )
     except RuntimeError as exc:
         logging.getLogger(__name__).error("Pipeline aborted: %s", exc)
