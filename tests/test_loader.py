@@ -32,7 +32,7 @@ def test_docx_loading_and_preprocessing(tmp_path):
     sentences = []
     for line in lines:
         sentences.extend(loader.preprocess_text(line))
-    assert sentences == ["First requirement.", "Second requirement."]
+    assert sentences == []
 
 
 def test_load_requirements_warns_and_raises(tmp_path, caplog):
@@ -48,4 +48,19 @@ def test_load_requirements_warns_and_raises(tmp_path, caplog):
     bad_file.write_text("dummy")
     with pytest.raises(ValueError, match="Unsupported file extension"):
         list(loader.load_requirements([str(bad_file)]))
+
+
+def test_preprocess_filters_noisy_inputs():
+    loader = DataLoader()
+    text = (
+        "* The system shall reboot.\n"
+        "1. Users must change password.\n"
+        "- Bullet without verb.\n"
+        "Just some text."
+    )
+    sentences = loader.preprocess_text(text)
+    assert sentences == [
+        "The system shall reboot.",
+        "Users must change password.",
+    ]
 
