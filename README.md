@@ -176,6 +176,9 @@ python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.txt:eva
 Το script εκτελεί το pipeline με όλους τους συνδυασμούς των σημαιών `use_terms` και `validate`,
 αποθηκεύοντας τα αποτελέσματα σε πίνακες `table_<N>.csv` και `table_<N>.md` στον φάκελο `evaluation`.
 
+Η προαιρετική σημαία `--normalize-base` κανονικοποιεί τα base IRIs πριν τη σύγκριση,
+μειώνοντας ψευδείς αποκλίσεις όταν οι ίδιες τριπλέτες χρησιμοποιούν διαφορετικά base.
+
 Παράδειγμα με προσαρμοσμένη ρύθμιση που φορτώνει επιπλέον οντολογίες:
 
 ```bash

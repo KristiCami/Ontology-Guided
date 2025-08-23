@@ -25,6 +25,7 @@ from statistics import mean
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 from rdflib import Graph
+from rdflib.term import URIRef
 
 import os, sys
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -50,15 +51,33 @@ def parse_pair(text: str) -> Pair:
     return req, gold, shapes
 
 
-def compute_metrics(predicted_ttl: str, gold_path: str) -> Dict[str, float]:
+def _normalized_triples(graph: Graph) -> set[Tuple[str, str, str]]:
+    """Return triples with URIs normalised via the graph's namespace manager."""
+    nm = graph.namespace_manager
+
+    def norm(term):
+        if isinstance(term, URIRef):
+            return nm.normalizeUri(term)
+        return term.n3(nm)
+
+    return {tuple(norm(term) for term in triple) for triple in graph}
+
+
+def compute_metrics(
+    predicted_ttl: str, gold_path: str, normalize_base: bool = False
+) -> Dict[str, float]:
     """Return precision, recall and F1 between predicted and gold graphs."""
     pred_graph = Graph()
     pred_graph.parse(predicted_ttl, format="turtle")
     gold_graph = Graph()
     gold_graph.parse(gold_path, format="turtle")
 
-    pred_triples = set(pred_graph)
-    gold_triples = set(gold_graph)
+    if normalize_base:
+        pred_triples = _normalized_triples(pred_graph)
+        gold_triples = _normalized_triples(gold_graph)
+    else:
+        pred_triples = set(pred_graph)
+        gold_triples = set(gold_graph)
     intersection = pred_triples & gold_triples
 
     precision = len(intersection) / len(pred_triples) if pred_triples else 0.0
@@ -77,13 +96,16 @@ def evaluate_once(
     shapes: str,
     base_iri: str,
     ontologies: Sequence[str] | None = None,
+    normalize_base: bool = False,
     **settings: Any,
 ) -> Tuple[Dict[str, float], Dict[str, Any], Any]:
     """Run the pipeline once and compute evaluation metrics."""
     result = run_pipeline(
         [requirements], shapes, base_iri, ontologies=ontologies, **settings
     )
-    metrics = compute_metrics(result["combined_ttl"], gold)
+    metrics = compute_metrics(
+        result["combined_ttl"], gold, normalize_base=normalize_base
+    )
     violation_stats = result.get("violation_stats", {}) or {}
     shacl_conforms = result.get("shacl_conforms")
     return metrics, violation_stats, shacl_conforms
@@ -114,6 +136,7 @@ def run_evaluations(
     repeats: int,
     base_iri: str,
     output_dir: Path,
+    normalize_base: bool = False,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -129,7 +152,12 @@ def run_evaluations(
 
             for _ in range(repeats):
                 metrics, violations, conforms = evaluate_once(
-                    req, gold, shapes, base_iri, **pipeline_opts
+                    req,
+                    gold,
+                    shapes,
+                    base_iri,
+                    normalize_base=normalize_base,
+                    **pipeline_opts,
                 )
                 metrics_list.append(metrics)
                 violations_list.append(violations)
@@ -204,6 +232,11 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         default=None,
         help="List of ontology TTL files to include in each run",
     )
+    parser.add_argument(
+        "--normalize-base",
+        action="store_true",
+        help="Normalize base IRIs before comparing graphs",
+    )
     args = parser.parse_args()
 
     pairs = [parse_pair(p) for p in args.pairs]
@@ -223,7 +256,12 @@ def main() -> None:  # pragma: no cover - CLI wrapper
             setting.setdefault("ontologies", args.ontologies)
 
     run_evaluations(
-        pairs, settings_list, args.repeats, args.base_iri, Path(args.output_dir)
+        pairs,
+        settings_list,
+        args.repeats,
+        args.base_iri,
+        Path(args.output_dir),
+        normalize_base=args.normalize_base,
     )
 
 
