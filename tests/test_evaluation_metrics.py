@@ -10,7 +10,14 @@ def test_compare_metrics(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     monkeypatch.chdir(tmp_path)
 
-    def fake_generate_owl(self, sentences, prompt_template, available_terms=None):
+    def fake_generate_owl(
+        self,
+        sentences,
+        prompt_template,
+        available_terms=None,
+        base=None,
+        prefix=None,
+    ):
         snippet = (
             "<http://lod.csd.auth.gr/atm/atm.ttl> "
             "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> "

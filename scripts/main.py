@@ -17,7 +17,8 @@ from ontology_guided.validator import SHACLValidator
 from ontology_guided.repair_loop import RepairLoop
 
 PROMPT_TEMPLATE = (
-    "Convert the following requirement into OWL axioms in Turtle syntax:\n\n"
+    "Convert the following requirement into OWL axioms in Turtle syntax. "
+    "Use base IRI {base} and prefix {prefix}.\n\n"
     "Requirement: {sentence}\n\nOWL:"
 )
 
@@ -126,11 +127,19 @@ def run_pipeline(
         if len(batch) >= BATCH_SIZE:
             if use_async:
                 owl_batch = llm.async_generate_owl(
-                    batch, PROMPT_TEMPLATE, available_terms=avail_terms
+                    batch,
+                    PROMPT_TEMPLATE,
+                    base=base_iri,
+                    prefix=builder.prefix,
+                    available_terms=avail_terms,
                 )
             else:
                 owl_batch = llm.generate_owl(
-                    batch, PROMPT_TEMPLATE, available_terms=avail_terms
+                    batch,
+                    PROMPT_TEMPLATE,
+                    base=base_iri,
+                    prefix=builder.prefix,
+                    available_terms=avail_terms,
                 )
             for sent, snippet in zip(batch, owl_batch):
                 if len(snippets_preview) < PREVIEW_LIMIT:
@@ -156,11 +165,19 @@ def run_pipeline(
     if batch:
         if use_async:
             owl_batch = llm.async_generate_owl(
-                batch, PROMPT_TEMPLATE, available_terms=avail_terms
+                batch,
+                PROMPT_TEMPLATE,
+                base=base_iri,
+                prefix=builder.prefix,
+                available_terms=avail_terms,
             )
         else:
             owl_batch = llm.generate_owl(
-                batch, PROMPT_TEMPLATE, available_terms=avail_terms
+                batch,
+                PROMPT_TEMPLATE,
+                base=base_iri,
+                prefix=builder.prefix,
+                available_terms=avail_terms,
             )
         for sent, snippet in zip(batch, owl_batch):
             if len(snippets_preview) < PREVIEW_LIMIT:
