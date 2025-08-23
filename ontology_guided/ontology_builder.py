@@ -14,11 +14,18 @@ class InvalidTurtleError(ValueError):
 class OntologyBuilder:
     """Μετατρέπει τμήματα Turtle σε ενιαία οντολογία."""
 
-    def __init__(self, base_iri: str, prefix: Optional[str] = None, ontology_files=None):
+    def __init__(
+        self,
+        base_iri: str,
+        prefix: Optional[str] = None,
+        ontology_files=None,
+        lexical_namespace: str = "http://example.com/lexical#",
+    ):
         if not base_iri.endswith("#"):
             base_iri += "#"
         self.base_iri = base_iri
         self.prefix = prefix or base_iri.rstrip("#").split("/")[-1]
+        self.lexical_namespace = lexical_namespace
         self.graph = Graph()
         self.graph.bind(self.prefix, self.base_iri)
         if ontology_files:
@@ -76,10 +83,11 @@ class OntologyBuilder:
         self.domain_range_hints = hints
 
         # Extract synonym mappings from lexical ontology if present
-        LEX = Namespace("http://example.com/lexical#")
         syn_map: dict[str, str] = {}
-        for s, o in self.graph.subject_objects(LEX.synonym):
-            syn_map[nm.normalizeUri(s)] = nm.normalizeUri(o)
+        if self.lexical_namespace:
+            LEX = Namespace(self.lexical_namespace)
+            for s, o in self.graph.subject_objects(LEX.synonym):
+                syn_map[nm.normalizeUri(s)] = nm.normalizeUri(o)
         self.synonym_map = syn_map
 
     def get_available_terms(self):
