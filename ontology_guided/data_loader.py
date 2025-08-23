@@ -1,7 +1,7 @@
 import os
 import logging
 import re
-from typing import Iterable, Iterator, List
+from typing import Iterable, Iterator, List, Optional, Union
 import spacy
 from docx import Document  # pip install python-docx
 
@@ -55,7 +55,7 @@ class DataLoader:
         text: str,
         batch_size: int = 100,
         n_process: int = 1,
-        keywords: Iterable[str] | None = ("shall", "must", "should"),
+        keywords: Optional[Union[Iterable[str], None]] = ("shall", "must", "should"),
     ) -> List[str]:
         """Καθαρίζει το κείμενο και το επεξεργάζεται τμηματικά με το spaCy.
 

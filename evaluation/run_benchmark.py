@@ -23,7 +23,7 @@ import argparse
 import json
 from pathlib import Path
 from statistics import mean
-from typing import Any, Dict, Iterable, List, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Sequence, Tuple, Optional, Union
 
 from rdflib import Graph
 from rdflib.term import URIRef
@@ -96,9 +96,9 @@ def evaluate_once(
     gold: str,
     shapes: str,
     base_iri: str,
-    ontologies: Sequence[str] | None = None,
+    ontologies: Optional[Union[Sequence[str], None]] = None,
     normalize_base: bool = False,
-    keywords: Iterable[str] | None = None,
+    keywords: Optional[Union[Iterable[str], None]] = None,
     **settings: Any,
 ) -> Tuple[Dict[str, float], Dict[str, Any], Any]:
     """Run the pipeline once and compute evaluation metrics."""
@@ -144,7 +144,7 @@ def run_evaluations(
     base_iri: str,
     output_dir: Path,
     normalize_base: bool = False,
-    keywords: Iterable[str] | None = None,
+    keywords: Optional[Union[Iterable[str], None]] = None,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
