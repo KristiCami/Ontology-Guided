@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Generate a data flow diagram (docs/dfd.png) from the run_pipeline function.
+"""Generate the data flow diagram used in ``docs/section_3_4_2_dfd.md``.
 
-If Graphviz is available it is used for rendering, otherwise a simple PNG
-renderer implemented with the Python standard library is used.
+The script inspects ``run_pipeline`` and renders the resulting graph to
+``docs/dfd.png``. If Graphviz is available it is used for rendering,
+otherwise a simple PNG renderer implemented with the Python standard
+library is used.
 """
 from __future__ import annotations
 
