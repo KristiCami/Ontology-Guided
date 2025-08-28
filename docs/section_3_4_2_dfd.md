@@ -18,6 +18,12 @@
 
 ### Διάγραμμα DFD (Level 0)
 
+Το παρακάτω διάγραμμα παράγεται αυτόματα από το script
+[`scripts/generate_dfd.py`](../scripts/generate_dfd.py) και αποθηκεύεται ως
+`dfd.png`.
+
+![Διάγραμμα ροής δεδομένων](dfd.png)
+
 ```mermaid
 flowchart LR
     S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8
