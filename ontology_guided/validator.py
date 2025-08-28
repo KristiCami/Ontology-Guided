@@ -13,7 +13,7 @@ class SHACLValidator:
         self.inference = inference
 
     def run_validation(self):
-        """Επιστρέφει αποτελέσματα επικύρωσης ως δομημένη λίστα."""
+        """Επιστρέφει αποτελέσματα επικύρωσης ως δομημένη λίστα. """
         conforms, results_graph, _ = validate(
             data_graph=self.data_graph_path,
             shacl_graph=self.shapes_graph_path,
