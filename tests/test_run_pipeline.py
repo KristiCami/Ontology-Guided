@@ -329,3 +329,5 @@ def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
     assert result["reasoning_log"] == "Reasoner completed successfully"
     assert result["inconsistent_classes"]["iris"] == []
     assert pathlib.Path(result["inconsistent_classes"]["path"]).exists()
+    assert result["inconsistent_classes"]["count"] == 0
+    assert result["is_consistent"] is True
