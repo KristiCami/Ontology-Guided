@@ -24,7 +24,7 @@ except Exception:  # pragma: no cover - owlrl is optional at runtime
     OWLRL_Semantics = None
 
 # Type alias for sets of axioms represented as hashable tuples or nodes
-NormalizedAxiom = Union[str, Tuple[str, str]]
+NormalizedAxiom = Union[str, Tuple[str, ...]]
 AxiomSet = Set[NormalizedAxiom]
 
 # Mapping axiom type names to callables extracting corresponding sets from a graph
@@ -33,8 +33,8 @@ AXIOM_EXTRACTORS = {
     "ObjectProperty": lambda g: set(g.subjects(RDF.type, OWL.ObjectProperty)),
     "DatatypeProperty": lambda g: set(g.subjects(RDF.type, OWL.DatatypeProperty)),
     "SubClassOf": lambda g: set(g.subject_objects(RDFS.subClassOf)),
-    "Domain": lambda g: set(g.subject_objects(RDFS.domain)),
-    "Range": lambda g: set(g.subject_objects(RDFS.range)),
+    "Domain": lambda g: set(g.triples((None, RDFS.domain, None))),
+    "Range": lambda g: set(g.triples((None, RDFS.range, None))),
 }
 
 
