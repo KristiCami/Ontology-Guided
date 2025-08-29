@@ -227,6 +227,24 @@ class RepairLoop:
         first_success: Optional[int] = None
         k = 0
         initial_count = 0
+
+        # Run the reasoner on the initial data before any SHACL validation so we
+        # can record the baseline unsatisfiable class count and overall
+        # consistency.
+        is_consistent: Optional[bool] = None
+        unsat_classes: List[str] = []
+        try:
+            init_builder = OntologyBuilder(self.base_iri)
+            with open(current_data, "r", encoding="utf-8") as data_file:
+                init_builder.parse_turtle(data_file.read(), logger=logger)
+            init_owl = os.path.join("results", "initial_reason.owl")
+            init_builder.save(init_owl, fmt="xml")
+            _, is_consistent, unsat_classes = run_reasoner(init_owl)
+        except ReasonerError as exc:
+            logger.warning("Reasoner failed: %s", exc)
+            is_consistent = None
+            unsat_classes = []
+
         while True:
             validator = SHACLValidator(current_data, self.shapes_path, inference=inference)
             conforms, violations, summary = validator.run_validation()
@@ -239,6 +257,8 @@ class RepairLoop:
                 "iteration": k,
                 "total": summary.get("total", 0),
                 "bySeverity": summary.get("bySeverity", {}),
+                "is_consistent": is_consistent,
+                "unsat_count": len(unsat_classes),
             })
             if conforms and first_success is None:
                 first_success = k
@@ -268,13 +288,9 @@ class RepairLoop:
                 temp_builder.parse_turtle(data_file.read(), logger=logger)
             available_terms = temp_builder.get_available_terms()
 
-            inconsistent: List[str] = []
-            try:
-                temp_owl = os.path.join("results", f"pre_reason_{k}.owl")
-                temp_builder.save(temp_owl, fmt="xml")
-                _, _, inconsistent = run_reasoner(temp_owl)
-            except ReasonerError as exc:
-                logger.warning("Reasoner failed: %s", exc)
+            # ``unsat_classes`` already contains the inconsistent classes for the
+            # current data from the earlier reasoning run.
+            inconsistent = unsat_classes
 
             prompts = synthesize_repair_prompts(
                 violations, graph, available_terms, inconsistent, max_triples=max_triples
@@ -337,22 +353,35 @@ class RepairLoop:
             owl_path = os.path.join("results", f"repaired_{k + 1}.owl")
             self.builder.save(ttl_path, fmt="turtle")
             self.builder.save(owl_path, fmt="xml")
-            if reason:
-                try:
-                    _, _, inconsistent = run_reasoner(owl_path)
+
+            # Run the reasoner on the repaired ontology so that the next
+            # iteration (or final summary) can report consistency information.
+            try:
+                _, is_consistent, unsat_classes = run_reasoner(owl_path)
+                if reason:
                     inc_path = os.path.join(
                         "results", f"inconsistent_classes_{k + 1}.txt"
                     )
                     with open(inc_path, "w", encoding="utf-8") as f:
-                        for iri in inconsistent:
+                        for iri in unsat_classes:
                             f.write(iri + "\n")
-                except ReasonerError as exc:
-                    logger.warning("Reasoner failed: %s", exc)
+            except ReasonerError as exc:
+                logger.warning("Reasoner failed: %s", exc)
+                is_consistent = None
+                unsat_classes = []
+
             current_data = ttl_path
             k += 1
 
         post_count = final_summary.get("total", len(final_violations))
         reduction = 1 - (post_count / initial_count) if initial_count else 0.0
+        transitions: List[int] = []
+        prev = per_iter[0]["is_consistent"] if per_iter else None
+        for entry in per_iter[1:]:
+            if prev is False and entry["is_consistent"] is True:
+                transitions.append(entry["iteration"])
+            prev = entry["is_consistent"]
+
         stats: Dict[str, Any] = {
             "pre_count": initial_count,
             "post_count": post_count,
@@ -360,6 +389,9 @@ class RepairLoop:
             "first_conforms_iteration": first_success,
             "per_iteration": per_iter,
             "reduction": reduction,
+            "unsat_initial": per_iter[0]["unsat_count"] if per_iter else None,
+            "unsat_final": per_iter[-1]["unsat_count"] if per_iter else None,
+            "consistency_transitions": transitions,
         }
 
         return (
