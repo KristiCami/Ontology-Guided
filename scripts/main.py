@@ -211,7 +211,7 @@ def run_pipeline(
         try:
             from ontology_guided.reasoner import run_reasoner
 
-            _, inconsistent = run_reasoner(pipeline["combined_owl"])
+            _, _, inconsistent = run_reasoner(pipeline["combined_owl"])
             inconsistent_path = os.path.join("results", "inconsistent_classes.txt")
             with open(inconsistent_path, "w", encoding="utf-8") as f:
                 for iri in inconsistent:

@@ -64,7 +64,7 @@ atm:alice atm:knows atm:bob .""",
             return True, [], {"total": 0, "bySeverity": {}, "byShapePath": {}}
 
     monkeypatch.setattr(repair_loop, "SHACLValidator", FakeValidator)
-    monkeypatch.setattr(repair_loop, "run_reasoner", lambda path: (None, []))
+    monkeypatch.setattr(repair_loop, "run_reasoner", lambda path: (None, True, []))
 
     repairer = RepairLoop(str(data_path), str(shapes_path), api_key="dummy")
     ttl_path, report_path, violations, stats = repairer.run()
@@ -322,7 +322,7 @@ def test_repair_loop_logs_metrics_and_reduction(monkeypatch, tmp_path, caplog):
             return True, [], {"total": 0, "bySeverity": {}, "byShapePath": {}}
 
     monkeypatch.setattr(repair_loop, "SHACLValidator", FakeValidator)
-    monkeypatch.setattr(repair_loop, "run_reasoner", lambda path: (None, []))
+    monkeypatch.setattr(repair_loop, "run_reasoner", lambda path: (None, True, []))
 
     with caplog.at_level(logging.INFO):
         repairer = RepairLoop(str(data_path), str(shapes_path), api_key="dummy")
