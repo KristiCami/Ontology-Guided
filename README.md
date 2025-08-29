@@ -212,6 +212,72 @@ python -m evaluation.run_benchmark \
     --settings '[{"name":"table1","use_terms":true,"validate":true,"ontologies":["ontologies/rbo.ttl","ontologies/lexical.ttl"]}]'
 ```
 
+### Competency Questions
+
+Οι ερωτήσεις ικανότητας (Competency Questions) μετρούν κατά πόσο η παραγόμενη
+οντολογία μπορεί να απαντήσει σε βασικά ερωτήματα του domain.  Κάθε ερώτηση
+γράφεται ως SPARQL `ASK` query και αξιολογείται ως επιτυχία όταν το ερώτημα
+επιστρέφει `True`.
+
+* **Προετοιμασία**: αποθηκεύστε τα queries σε αρχείο `.rq`, χωρισμένα με κενές
+  γραμμές.  Παράδειγμα τεσσάρων ερωτήσεων για δύο domains:
+
+```sparql
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+
+# Every Withdrawal has a non-negative amount
+ASK {
+  FILTER NOT EXISTS {
+    ?w a atm:Withdrawal ;
+       atm:amount ?amt .
+    FILTER (?amt < 0)
+  }
+}
+
+# ATMs accept cash cards
+ASK {
+  atm:ATM atm:accepts ?card .
+}
+
+PREFIX hc: <http://example.com/healthcare#>
+
+# Every Observation is performed by a Doctor
+ASK {
+  FILTER NOT EXISTS {
+    ?o a hc:Observation ;
+       hc:performedBy ?x .
+    FILTER NOT EXISTS { ?x a hc:Doctor }
+  }
+}
+
+# Observations concern Patients
+ASK {
+  ?o a hc:Observation ;
+     hc:onPatient ?p .
+  ?p a hc:Patient .
+}
+```
+
+* **Εκτέλεση**: τρέξτε το script `evaluation/competency_questions.py` δίνοντας
+  το αρχείο οντολογίας και το αρχείο ερωτήσεων:
+
+```bash
+python3 - <<'PY'
+from evaluation.competency_questions import evaluate_cqs
+stats = evaluate_cqs("results/combined.ttl", "evaluation/atm_cqs.rq")
+print(stats)
+PY
+```
+
+Παράδειγμα ποσοστών επιτυχίας σε τέσσερις ερωτήσεις:
+
+| Baseline          | Pass rate |
+|-------------------|-----------|
+| LLM-only          | 25%       |
+| Symbolic-only     | 50%       |
+| Ours (no-repair)  | 75%       |
+| Ours (full)       | 100%      |
+
 ## 🔧 Εργαλεία
 - **spaCy** για τμηματοποίηση προτάσεων
 - **OpenAI API** για παραγωγή αρχικών τριπλετών
