@@ -33,6 +33,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from scripts.main import run_pipeline
+from .competency_questions import evaluate_cqs
 
 
 Pair = Tuple[str, str, str]
@@ -98,8 +99,9 @@ def evaluate_once(
     ontologies: Optional[Union[Sequence[str], None]] = None,
     normalize_base: bool = False,
     keywords: Optional[Union[Iterable[str], None]] = None,
+    cq_path: Optional[str] = None,
     **settings: Any,
-) -> Tuple[Dict[str, float], Dict[str, Any], Any]:
+) -> Tuple[Dict[str, float], Dict[str, Any], Any, Optional[float]]:
     """Run the pipeline once and compute evaluation metrics."""
     result = run_pipeline(
         [requirements],
@@ -114,7 +116,11 @@ def evaluate_once(
     )
     violation_stats = result.get("violation_stats", {}) or {}
     shacl_conforms = result.get("shacl_conforms")
-    return metrics, violation_stats, shacl_conforms
+    cq_rate = None
+    if cq_path:
+        cq_res = evaluate_cqs(result["combined_ttl"], cq_path)
+        cq_rate = cq_res["pass_rate"]
+    return metrics, violation_stats, shacl_conforms, cq_rate
 
 
 def write_csv(
@@ -144,6 +150,7 @@ def run_evaluations(
     output_dir: Path,
     normalize_base: bool = False,
     keywords: Optional[Union[Iterable[str], None]] = None,
+    cq_path: Optional[str] = None,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -156,20 +163,24 @@ def run_evaluations(
             metrics_list: List[Dict[str, float]] = []
             violations_list: List[Dict[str, Any]] = []
             conforms_list: List[Any] = []
+            cq_list: List[float] = []
 
             for _ in range(repeats):
-                metrics, violations, conforms = evaluate_once(
+                metrics, violations, conforms, cq_rate = evaluate_once(
                     req,
                     gold,
                     shapes,
                     base_iri,
                     normalize_base=normalize_base,
                     keywords=keywords,
+                    cq_path=cq_path,
                     **pipeline_opts,
                 )
                 metrics_list.append(metrics)
                 violations_list.append(violations)
                 conforms_list.append(conforms)
+                if cq_rate is not None:
+                    cq_list.append(cq_rate)
 
             def avg(key: str) -> float:
                 vals = [v.get(key) for v in violations_list if key in v]
@@ -190,6 +201,8 @@ def run_evaluations(
                 ),
                 "runs": repeats,
             }
+            if cq_list:
+                row["cq_pass_rate"] = mean(cq_list)
             table_rows.append(row)
 
         headers = [
@@ -203,6 +216,8 @@ def run_evaluations(
             "shacl_conforms_rate",
             "runs",
         ]
+        if cq_path:
+            headers.append("cq_pass_rate")
         write_csv(output_dir / f"{name}.csv", table_rows, headers)
         write_markdown(output_dir / f"{name}.md", table_rows, headers)
 
@@ -260,6 +275,11 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         default=None,
         help="Comma-separated keywords for sentence filtering",
     )
+    parser.add_argument(
+        "--cq-file",
+        default=None,
+        help="Path to file with SPARQL ASK competency questions",
+    )
     args = parser.parse_args()
 
     pairs = [parse_pair(p) for p in args.pairs]
@@ -306,6 +326,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         Path(args.output_dir),
         normalize_base=args.normalize_base,
         keywords=keywords,
+        cq_path=args.cq_file,
     )
 
 

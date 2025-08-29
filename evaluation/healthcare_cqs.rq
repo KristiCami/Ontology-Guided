@@ -1,0 +1,17 @@
+PREFIX hc: <http://example.com/healthcare#>
+
+# Every Observation is performed by a Doctor
+ASK {
+  FILTER NOT EXISTS {
+    ?o a hc:Observation ;
+       hc:performedBy ?x .
+    FILTER NOT EXISTS { ?x a hc:Doctor }
+  }
+}
+
+# Observations concern Patients
+ASK {
+  ?o a hc:Observation ;
+     hc:onPatient ?p .
+  ?p a hc:Patient .
+}
