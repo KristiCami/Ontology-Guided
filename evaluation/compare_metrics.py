@@ -7,6 +7,7 @@ python -m evaluation.compare_metrics \
 """
 
 import argparse
+import json
 from pathlib import Path
 from rdflib import Graph
 from typing import Iterable, Optional, Union
@@ -17,6 +18,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from scripts.main import run_pipeline
+from evaluation.axiom_metrics import evaluate_axioms
 
 
 def compare_metrics(
@@ -25,6 +27,8 @@ def compare_metrics(
     shapes_path: str = "shapes.ttl",
     base_iri: str = "http://lod.csd.auth.gr/atm/atm.ttl#",
     keywords: Optional[Union[Iterable[str], None]] = None,
+    micro: bool = False,
+    output_path: str = "results/axiom_metrics.json",
 ) -> dict:
     """Run the pipeline on requirements and compare against a gold TTL file.
 
@@ -72,14 +76,20 @@ def compare_metrics(
         else 0.0
     )
 
-    metrics = {"precision": precision, "recall": recall, "f1": f1}
+    axiom_metrics = evaluate_axioms(pred_graph, gold_graph, micro=micro)
+
+    # Include triple-level metrics for backward compatibility
+    axiom_metrics.update(
+        {"precision": precision, "recall": recall, "f1": f1}
+    )
 
     # Save metrics to a file for convenience
-    Path("results").mkdir(exist_ok=True)
-    with open("results/metrics.txt", "w", encoding="utf-8") as f:
-        f.write(f"precision: {precision}\nrecall: {recall}\nf1: {f1}\n")
+    out_path = Path(output_path)
+    out_path.parent.mkdir(exist_ok=True)
+    with out_path.open("w", encoding="utf-8") as f:
+        json.dump(axiom_metrics, f, indent=2)
 
-    return metrics
+    return axiom_metrics
 
 
 def main():
@@ -97,6 +107,16 @@ def main():
         default=None,
         help="Comma-separated keywords for sentence filtering",
     )
+    parser.add_argument(
+        "--micro",
+        action="store_true",
+        help="Compute micro-averaged precision/recall/F1",
+    )
+    parser.add_argument(
+        "--out",
+        default="results/axiom_metrics.json",
+        help="Path to save computed metrics",
+    )
     args = parser.parse_args()
 
     keywords = (
@@ -105,11 +125,28 @@ def main():
         else None
     )
     metrics = compare_metrics(
-        args.requirements, args.gold, args.shapes, args.base_iri, keywords=keywords
+        args.requirements,
+        args.gold,
+        args.shapes,
+        args.base_iri,
+        keywords=keywords,
+        micro=args.micro,
+        output_path=args.out,
     )
-    print(f"Precision: {metrics['precision']:.3f}")
-    print(f"Recall: {metrics['recall']:.3f}")
-    print(f"F1: {metrics['f1']:.3f}")
+
+    for axiom, vals in metrics.get("per_type", {}).items():
+        print(
+            f"{axiom}: P={vals['precision']:.3f} "
+            f"R={vals['recall']:.3f} F1={vals['f1']:.3f}"
+        )
+    print(f"Macro-F1: {metrics.get('macro_f1', 0.0):.3f}")
+    if args.micro:
+        print(f"Micro-F1: {metrics.get('micro_f1', 0.0):.3f}")
+
+    # also print triple-level metrics
+    print(f"Overall Precision: {metrics['precision']:.3f}")
+    print(f"Overall Recall: {metrics['recall']:.3f}")
+    print(f"Overall F1: {metrics['f1']:.3f}")
 
 
 if __name__ == "__main__":

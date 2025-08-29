@@ -1,5 +1,7 @@
 import pathlib
 import pytest
+from rdflib import Graph, OWL
+from rdflib.namespace import RDF
 
 from evaluation.compare_metrics import compare_metrics
 from ontology_guided.llm_interface import LLMInterface
@@ -55,8 +57,16 @@ def test_compare_metrics(monkeypatch, tmp_path):
     shapes = root / "shapes.ttl"
 
     metrics = compare_metrics(str(requirements), str(gold), str(shapes))
+
+    # overall precision/recall should reflect triple level metrics
     assert metrics["precision"] == pytest.approx(1.0)
-    assert metrics["recall"] == pytest.approx(0.001310615989515072)
+
+    gold_graph = Graph()
+    gold_graph.parse(str(gold), format="turtle")
+    obj_props = set(gold_graph.subjects(RDF.type, OWL.ObjectProperty))
+    expected_recall = 1 / len(obj_props)
+    assert metrics["per_type"]["ObjectProperty"]["precision"] == pytest.approx(1.0)
+    assert metrics["per_type"]["ObjectProperty"]["recall"] == pytest.approx(expected_recall)
 
 
 def test_compute_metrics_normalize_base(tmp_path):
