@@ -1,0 +1,15 @@
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+
+# Every Withdrawal has a non-negative amount
+ASK {
+  FILTER NOT EXISTS {
+    ?w a atm:Withdrawal ;
+       atm:amount ?amt .
+    FILTER (?amt < 0)
+  }
+}
+
+# ATMs accept cash cards
+ASK {
+  atm:ATM atm:accepts ?card .
+}
