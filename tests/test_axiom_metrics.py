@@ -78,3 +78,67 @@ def test_domain_and_range_metrics():
     expected_macro = (1 + 1) / 7  # two types with F1=1 out of seven
     assert metrics["macro_f1"] == pytest.approx(expected_macro)
 
+
+def test_all_axiom_type_metrics():
+    """Ensure every axiom type is scored correctly."""
+    pred_ttl = (
+        "@prefix : <http://example.com/> .\n"
+        "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n"
+        "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n"
+        ":A a owl:Class .\n"
+        ":C a owl:Class .\n"
+        ":p1 a owl:ObjectProperty ;\n"
+        "    rdfs:domain :A ;\n"
+        "    rdfs:range :B .\n"
+        ":d1 a owl:DatatypeProperty .\n"
+        ":A rdfs:subClassOf :B .\n"
+        ":B owl:equivalentClass :C .\n"
+    )
+    gold_ttl = (
+        "@prefix : <http://example.com/> .\n"
+        "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n"
+        "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n"
+        ":A a owl:Class .\n"
+        ":B a owl:Class .\n"
+        ":p1 a owl:ObjectProperty ;\n"
+        "    rdfs:domain :A ;\n"
+        "    rdfs:range :C .\n"
+        ":p2 a owl:ObjectProperty ;\n"
+        "    rdfs:domain :B ;\n"
+        "    rdfs:range :C .\n"
+        ":d2 a owl:DatatypeProperty .\n"
+        ":A rdfs:subClassOf :B .\n"
+        ":C rdfs:subClassOf :A .\n"
+        ":B owl:equivalentClass :C .\n"
+        ":A owl:equivalentClass :C .\n"
+    )
+    g_pred = Graph()
+    g_pred.parse(data=pred_ttl, format="turtle")
+    g_gold = Graph()
+    g_gold.parse(data=gold_ttl, format="turtle")
+
+    metrics = evaluate_axioms(g_pred, g_gold, micro=True)
+
+    expected = {
+        "Classes": {"precision": 0.5, "recall": 0.5, "f1": 0.5},
+        "ObjectProperty": {"precision": 1.0, "recall": 0.5, "f1": 2 / 3},
+        "DatatypeProperty": {"precision": 0.0, "recall": 0.0, "f1": 0.0},
+        "SubClassOf": {"precision": 1.0, "recall": 0.5, "f1": 2 / 3},
+        "Domain": {"precision": 1.0, "recall": 0.5, "f1": 2 / 3},
+        "Range": {"precision": 0.0, "recall": 0.0, "f1": 0.0},
+        "EquivalentClasses": {"precision": 1.0, "recall": 0.5, "f1": 2 / 3},
+    }
+
+    for axiom_type, vals in expected.items():
+        result = metrics["per_type"][axiom_type]
+        assert result["precision"] == pytest.approx(vals["precision"])
+        assert result["recall"] == pytest.approx(vals["recall"])
+        assert result["f1"] == pytest.approx(vals["f1"])
+
+    macro = sum(v["f1"] for v in expected.values()) / len(expected)
+    assert metrics["macro_f1"] == pytest.approx(macro)
+    assert metrics["micro_precision"] == pytest.approx(5 / 8)
+    assert metrics["micro_recall"] == pytest.approx(5 / 13)
+    micro_f1 = (2 * (5 / 8) * (5 / 13)) / ((5 / 8) + (5 / 13))
+    assert metrics["micro_f1"] == pytest.approx(micro_f1)
+
