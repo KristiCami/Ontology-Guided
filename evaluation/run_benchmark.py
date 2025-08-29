@@ -8,7 +8,7 @@ reproduce the evaluation tables (Tables 1–4) of the associated paper.
 Example
 -------
 python -m evaluation.run_benchmark \
-    --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" \
+    --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" \
     --examples evaluation/atm_examples.json \
     --base-iri http://lod.csd.auth.gr/atm/atm.ttl# \
     --repeats 1
@@ -213,7 +213,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
     parser.add_argument(
         "--pairs",
         nargs="+",
-        default=["evaluation/atm_requirements.txt:evaluation/atm_gold.ttl"],
+        default=["evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl"],
         help="List of requirements:gold[:shapes] triples",
     )
     parser.add_argument(

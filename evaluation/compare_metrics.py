@@ -1,3 +1,11 @@
+"""CLI to evaluate ontology generation against a gold standard.
+
+Example
+-------
+python -m evaluation.compare_metrics \
+    evaluation/atm_requirements.jsonl evaluation/atm_gold.ttl
+"""
+
 import argparse
 from pathlib import Path
 from rdflib import Graph
@@ -23,7 +31,7 @@ def compare_metrics(
     Parameters
     ----------
     requirements_path: str
-        Path to requirements text file.
+        Path to requirements JSONL file.
     gold_path: str
         Path to gold standard TTL file containing expected triples.
     shapes_path: str
@@ -76,7 +84,7 @@ def compare_metrics(
 
 def main():
     parser = argparse.ArgumentParser(description="Compare generated OWL with gold standard")
-    parser.add_argument("requirements", help="Path to requirements text file")
+    parser.add_argument("requirements", help="Path to requirements JSONL file")
     parser.add_argument("gold", help="Path to gold standard TTL file")
     parser.add_argument("--shapes", default="shapes.ttl", help="Path to SHACL shapes file")
     parser.add_argument(
