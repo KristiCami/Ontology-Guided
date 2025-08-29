@@ -272,7 +272,7 @@ class RepairLoop:
             try:
                 temp_owl = os.path.join("results", f"pre_reason_{k}.owl")
                 temp_builder.save(temp_owl, fmt="xml")
-                _, inconsistent = run_reasoner(temp_owl)
+                _, _, inconsistent = run_reasoner(temp_owl)
             except ReasonerError as exc:
                 logger.warning("Reasoner failed: %s", exc)
 
@@ -339,7 +339,7 @@ class RepairLoop:
             self.builder.save(owl_path, fmt="xml")
             if reason:
                 try:
-                    _, inconsistent = run_reasoner(owl_path)
+                    _, _, inconsistent = run_reasoner(owl_path)
                     inc_path = os.path.join(
                         "results", f"inconsistent_classes_{k + 1}.txt"
                     )

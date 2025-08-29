@@ -306,7 +306,7 @@ def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
 
     def fake_run_reasoner(path):
         called["path"] = path
-        return None, []
+        return None, True, []
 
     import ontology_guided.reasoner as reasoner
 

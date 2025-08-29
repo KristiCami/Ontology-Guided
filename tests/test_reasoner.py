@@ -16,11 +16,13 @@ def test_run_reasoner(tmp_path):
     onto.save(file=str(owl_path))
 
     try:
-        result, inconsistent = run_reasoner(str(owl_path))
+        result, is_consistent, inconsistent = run_reasoner(str(owl_path))
     except ReasonerError as exc:
         pytest.skip(str(exc))
         return
 
+    assert is_consistent
     assert inconsistent == []
     names = {c.name for c in result.classes()}
     assert {"A", "B"}.issubset(names)
+
