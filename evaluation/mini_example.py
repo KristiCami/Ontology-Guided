@@ -9,6 +9,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from rdflib import Graph
 from evaluation.axiom_metrics import evaluate_axioms
 from ontology_guided.validator import SHACLValidator
+from ontology_guided.reasoner import run_reasoner, ReasonerError
 
 
 def main() -> None:
@@ -33,6 +34,13 @@ def main() -> None:
         violations = summary.get("total", 0)
         violation_counts.append(violations)
 
+        try:
+            _, is_consistent, unsat_classes = run_reasoner(str(pred_path))
+        except ReasonerError as exc:
+            is_consistent = False
+            unsat_classes = []
+            print(f"  Reasoner error: {exc}")
+
         metrics = evaluate_axioms(pred_graph, gold_graph)
         subclass = metrics["per_type"].get("SubClassOf", {})
         range_metrics = metrics["per_type"].get("Range", {})
@@ -51,6 +59,13 @@ def main() -> None:
             f"F1={range_metrics.get('f1', 0.0):.3f}"
         )
         print(f"  Violations: {violations} (conforms={conforms})")
+        print(f"  Consistent: {is_consistent}")
+        if unsat_classes:
+            print("  Unsatisfiable classes:")
+            for cls in unsat_classes:
+                print(f"    - {cls}")
+        else:
+            print("  Unsatisfiable classes: none")
 
     # report violation reduction across iterations
     print("\nViolation counts (pre -> post repair):")
