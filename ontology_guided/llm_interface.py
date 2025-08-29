@@ -22,6 +22,7 @@ KNOWN_PREFIXES = {
     "schema": "http://schema.org/",
     "skos": "http://www.w3.org/2004/02/skos/core#",
     "foaf": "http://xmlns.com/foaf/0.1/",
+    "lex": "http://example.com/lexical#",
 }
 
 class LLMInterface:
@@ -221,9 +222,11 @@ class LLMInterface:
                     self.logger.warning("Invalid Turtle returned: %s", e)
                     if attempts > max_retries:
                         self.logger.error(
-                            "Failed to produce valid Turtle after %d retries", max_retries
+                            "Failed to produce valid Turtle after %d retries, returning empty output",
+                            max_retries,
                         )
-                        raise ValueError("LLM returned invalid Turtle") from e
+                        turtle_code = ""
+                        break
                     prompt = (
                         "Previous output was invalid Turtle; return only correct Turtle.\n"
                         + base_prompt
@@ -354,9 +357,11 @@ class LLMInterface:
                     self.logger.warning("Invalid Turtle returned: %s", e)
                     if attempts > max_retries:
                         self.logger.error(
-                            "Failed to produce valid Turtle after %d retries", max_retries
+                            "Failed to produce valid Turtle after %d retries, returning empty output",
+                            max_retries,
                         )
-                        raise ValueError("LLM returned invalid Turtle") from e
+                        turtle_code = ""
+                        break
                     prompt = (
                         "Previous output was invalid Turtle; return only correct Turtle.\n"
                         + base_prompt
