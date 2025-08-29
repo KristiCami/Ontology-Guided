@@ -29,6 +29,7 @@ def compare_metrics(
     keywords: Optional[Union[Iterable[str], None]] = None,
     micro: bool = False,
     output_path: str = "results/axiom_metrics.json",
+    match_mode: str = "syntactic",
 ) -> dict:
     """Run the pipeline on requirements and compare against a gold TTL file.
 
@@ -76,7 +77,9 @@ def compare_metrics(
         else 0.0
     )
 
-    axiom_metrics = evaluate_axioms(pred_graph, gold_graph, micro=micro)
+    axiom_metrics = evaluate_axioms(
+        pred_graph, gold_graph, micro=micro, match_mode=match_mode
+    )
 
     # Include triple-level metrics for backward compatibility
     axiom_metrics.update(
@@ -113,6 +116,12 @@ def main():
         help="Compute micro-averaged precision/recall/F1",
     )
     parser.add_argument(
+        "--match-mode",
+        choices=["syntactic", "semantic"],
+        default="syntactic",
+        help="Axiom matching mode (default: syntactic)",
+    )
+    parser.add_argument(
         "--out",
         default="results/axiom_metrics.json",
         help="Path to save computed metrics",
@@ -132,6 +141,7 @@ def main():
         keywords=keywords,
         micro=args.micro,
         output_path=args.out,
+        match_mode=args.match_mode,
     )
 
     for axiom, vals in metrics.get("per_type", {}).items():

@@ -173,6 +173,7 @@ python3 scripts/main.py \
 ```bash
 python3 evaluation/compare_metrics.py evaluation/atm_requirements.jsonl evaluation/atm_gold.ttl
 ```
+Μπορείτε να επιλέξετε στρατηγική αντιστοίχισης αξιωμάτων με την επιλογή `--match-mode` (`syntactic` ή `semantic`), με προεπιλογή το `syntactic`.
 
 Το script υπολογίζει **precision** και **recall** χρησιμοποιώντας τις απαιτήσεις από το `atm_requirements.jsonl` (μορφή JSON Lines) και αποθηκεύει τις μετρικές στο `results/metrics.txt`.
 
