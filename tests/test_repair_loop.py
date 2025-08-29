@@ -80,6 +80,10 @@ atm:alice atm:knows atm:bob .""",
     assert stats["first_conforms_iteration"] == 1
     assert stats["per_iteration"][0]["total"] == 1
     assert stats["per_iteration"][1]["total"] == 0
+    assert stats["per_iteration"][0]["is_consistent"] is True
+    assert stats["per_iteration"][0]["unsat_count"] == 0
+    assert stats["per_iteration"][1]["is_consistent"] is True
+    assert stats["per_iteration"][1]["unsat_count"] == 0
 
     report0 = tmp_path / "results" / "report_0.txt"
     content = report0.read_text(encoding="utf-8").strip()
