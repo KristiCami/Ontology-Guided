@@ -1,3 +1,4 @@
+import json
 import logging
 import pytest
 
@@ -33,6 +34,30 @@ def test_docx_loading_and_preprocessing(tmp_path):
     for line in lines:
         sentences.extend(loader.preprocess_text(line))
     assert sentences == []
+
+
+def test_jsonl_loading_and_preprocessing(tmp_path):
+    data = [
+        {"text": "* The system shall reboot."},
+        {"text": "1. Users must change password."},
+    ]
+    file_path = tmp_path / "reqs.jsonl"
+    with open(file_path, "w", encoding="utf-8") as f:
+        for obj in data:
+            json.dump(obj, f)
+            f.write("\n")
+
+    loader = DataLoader()
+    lines = list(loader.load_requirements([str(file_path)]))
+    assert lines == [obj["text"] for obj in data]
+
+    sentences = []
+    for line in lines:
+        sentences.extend(loader.preprocess_text(line))
+    assert sentences == [
+        "The system shall reboot.",
+        "Users must change password.",
+    ]
 
 
 def test_load_requirements_warns_and_raises(tmp_path, caplog):
