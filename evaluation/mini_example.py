@@ -8,6 +8,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from rdflib import Graph
 from evaluation.axiom_metrics import evaluate_axioms
+from evaluation.competency_questions import evaluate_cqs
 from ontology_guided.validator import SHACLValidator
 from ontology_guided.reasoner import run_reasoner, ReasonerError
 
@@ -18,6 +19,7 @@ def main() -> None:
     gold_graph = Graph()
     gold_graph.parse(gold_path, format="turtle")
     shapes_path = base / "mini_shapes.ttl"
+    cq_path = base / "mini_cqs.rq"
 
     # store violation counts for each iteration
     violation_counts = []
@@ -36,7 +38,7 @@ def main() -> None:
 
         try:
             _, is_consistent, unsat_classes = run_reasoner(str(pred_path))
-        except ReasonerError as exc:
+        except Exception as exc:
             is_consistent = False
             unsat_classes = []
             print(f"  Reasoner error: {exc}")
@@ -44,6 +46,7 @@ def main() -> None:
         metrics = evaluate_axioms(pred_graph, gold_graph)
         subclass = metrics["per_type"].get("SubClassOf", {})
         range_metrics = metrics["per_type"].get("Range", {})
+        cq_results = evaluate_cqs(pred_path, cq_path)
 
         print(f"Iteration {idx}")
         print(
@@ -66,6 +69,10 @@ def main() -> None:
                 print(f"    - {cls}")
         else:
             print("  Unsatisfiable classes: none")
+        print(
+            f"  CQs: {cq_results['passed']}/{cq_results['total']} "
+            f"({cq_results['pass_rate'] * 100:.1f}%) passed"
+        )
 
     # report violation reduction across iterations
     print("\nViolation counts (pre -> post repair):")
