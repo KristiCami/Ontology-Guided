@@ -103,6 +103,7 @@ def evaluate_axioms(
     gold_graph: Graph,
     micro: bool = False,
     match_mode: str = "syntactic",
+    equiv_as_subclass: bool = False,
 ) -> Dict[str, Dict[str, float]]:
     """Compute axiom-level metrics grouped by axiom type.
 
@@ -116,17 +117,44 @@ def evaluate_axioms(
         ``"syntactic"`` (default) performs exact IRI comparison after label
         normalisation. ``"semantic"`` expands both graphs with an OWL RL
         reasoner before comparison to account for entailed axioms.
+    equiv_as_subclass:
+        If ``True``, ``owl:equivalentClass`` axioms are scored as two
+        ``SubClassOf`` axioms. Otherwise they are evaluated under a separate
+        ``EquivalentClasses`` bucket.
     """
 
     if match_mode == "semantic":
         pred_graph = _semantic_closure(pred_graph)
         gold_graph = _semantic_closure(gold_graph)
 
+    axiom_extractors = dict(AXIOM_EXTRACTORS)
+    if equiv_as_subclass:
+        def _subclass_with_equiv(g: Graph):
+            base = set(g.subject_objects(RDFS.subClassOf))
+            for a, b in g.subject_objects(OWL.equivalentClass):
+                base.add((a, b))
+                base.add((b, a))
+            return base
+
+        axiom_extractors["SubClassOf"] = _subclass_with_equiv
+    else:
+        axiom_extractors["EquivalentClasses"] = (
+            lambda g: {
+                tuple(
+                    sorted(
+                        (a, b), key=lambda n: _normalise_term(n, g)
+                    )
+                )
+                for a, b in g.subject_objects(OWL.equivalentClass)
+                if a != b
+            }
+        )
+
     per_type: Dict[str, Dict[str, float]] = {}
     macro_f1_total = 0.0
     total_tp = total_pred = total_gold = 0
 
-    for axiom_type, extractor in AXIOM_EXTRACTORS.items():
+    for axiom_type, extractor in axiom_extractors.items():
         pred_set = _normalise_axioms(extractor(pred_graph), pred_graph)
         gold_set = _normalise_axioms(extractor(gold_graph), gold_graph)
         m = _metrics(pred_set, gold_set)
@@ -143,7 +171,7 @@ def evaluate_axioms(
 
     results: Dict[str, Dict[str, float]] = {
         "per_type": per_type,
-        "macro_f1": macro_f1_total / len(AXIOM_EXTRACTORS) if AXIOM_EXTRACTORS else 0.0,
+        "macro_f1": macro_f1_total / len(axiom_extractors) if axiom_extractors else 0.0,
     }
 
     if micro:

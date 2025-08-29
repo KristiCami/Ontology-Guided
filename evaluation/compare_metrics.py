@@ -30,6 +30,7 @@ def compare_metrics(
     micro: bool = False,
     output_path: str = "results/axiom_metrics.json",
     match_mode: str = "syntactic",
+    equiv_as_subclass: bool = False,
 ) -> dict:
     """Run the pipeline on requirements and compare against a gold TTL file.
 
@@ -43,6 +44,10 @@ def compare_metrics(
         Path to SHACL shapes file.
     base_iri: str
         Base IRI for the generated ontology.
+    equiv_as_subclass: bool
+        If ``True`` treat ``owl:equivalentClass`` axioms as two ``SubClassOf``
+        axioms. Otherwise they are evaluated separately under an
+        ``EquivalentClasses`` bucket.
 
     Returns
     -------
@@ -78,7 +83,11 @@ def compare_metrics(
     )
 
     axiom_metrics = evaluate_axioms(
-        pred_graph, gold_graph, micro=micro, match_mode=match_mode
+        pred_graph,
+        gold_graph,
+        micro=micro,
+        match_mode=match_mode,
+        equiv_as_subclass=equiv_as_subclass,
     )
 
     # Include triple-level metrics for backward compatibility
@@ -122,6 +131,11 @@ def main():
         help="Axiom matching mode (default: syntactic)",
     )
     parser.add_argument(
+        "--equiv-as-subclass",
+        action="store_true",
+        help="Score owl:equivalentClass axioms as two SubClassOf axioms",
+    )
+    parser.add_argument(
         "--out",
         default="results/axiom_metrics.json",
         help="Path to save computed metrics",
@@ -142,6 +156,7 @@ def main():
         micro=args.micro,
         output_path=args.out,
         match_mode=args.match_mode,
+        equiv_as_subclass=args.equiv_as_subclass,
     )
 
     for axiom, vals in metrics.get("per_type", {}).items():
