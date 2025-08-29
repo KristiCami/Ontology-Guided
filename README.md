@@ -212,6 +212,15 @@ python -m evaluation.run_benchmark \
     --settings '[{"name":"table1","use_terms":true,"validate":true,"ontologies":["ontologies/rbo.ttl","ontologies/lexical.ttl"]}]'
 ```
 
+### Mini Evaluation Example
+
+Για ένα μίνι παράδειγμα, χρησιμοποιήστε τα αρχεία στον φάκελο `evaluation` που ξεκινούν με `mini_`.
+Τρέξτε:
+```bash
+python3 evaluation/compare_metrics.py evaluation/mini_requirements.jsonl evaluation/mini_gold.ttl --shapes evaluation/mini_shapes.ttl --base-iri http://example.com/mini#
+```
+Αναμένονται μετρικές F1 περίπου 0.14 → 0.27 → 0.53 για τα αρχεία `mini_pred_iter0.ttl`, `mini_pred_iter1.ttl` και `mini_pred_iter2.ttl`.
+
 ### Competency Questions
 
 Οι ερωτήσεις ικανότητας (Competency Questions) μετρούν κατά πόσο η παραγόμενη

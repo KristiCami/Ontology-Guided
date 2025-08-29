@@ -1,0 +1,16 @@
+@prefix ex: <http://example.com/mini#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:WithdrawalShape a sh:NodeShape ;
+  sh:targetClass ex:Withdrawal ;
+  sh:property [
+    sh:path ex:performedBy ;
+    sh:class ex:Customer ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path ex:hasAmount ;
+    sh:datatype xsd:decimal ;
+    sh:minCount 1 ;
+  ] .

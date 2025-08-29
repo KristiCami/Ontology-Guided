@@ -1,0 +1,8 @@
+@prefix ex: <http://example.com/mini#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:w1 a ex:Withdrawal ;
+  ex:performedBy ex:atm1 ;
+  ex:hasAmount "100"^^xsd:decimal .
+
+ex:atm1 a ex:ATM .
