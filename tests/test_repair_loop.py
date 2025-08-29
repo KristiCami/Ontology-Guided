@@ -1,6 +1,7 @@
 import ontology_guided.repair_loop as repair_loop
 from ontology_guided.repair_loop import RepairLoop
 import json
+import logging
 from ontology_guided.llm_interface import LLMInterface
 from rdflib import Graph, URIRef
 
@@ -272,3 +273,62 @@ def test_local_context_trims_to_max_triples():
     )
     ctx_graph = Graph().parse(data=ctx, format="turtle")
     assert len(ctx_graph) == 10
+
+
+def test_repair_loop_logs_metrics_and_reduction(monkeypatch, tmp_path, caplog):
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+    monkeypatch.chdir(tmp_path)
+
+    data_path = tmp_path / "combined.ttl"
+    data_path.write_text(
+        """@prefix atm: <http://example.com/atm#> .\n""",
+        encoding="utf-8",
+    )
+    shapes_path = tmp_path / "shapes.ttl"
+    shapes_path.write_text("", encoding="utf-8")
+
+    def fake_generate_owl(self, sentences, prompt_template, available_terms=None, base=None, prefix=None):
+        return ["<http://example.com/atm#a> <http://example.com/atm#b> <http://example.com/atm#c> ."]
+
+    monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
+
+    class FakeValidator:
+        calls = 0
+
+        def __init__(self, data_path, shapes_path, inference="rdfs"):
+            self.data_path = data_path
+            self.shapes_path = shapes_path
+            self.inference = inference
+
+        def run_validation(self):
+            if FakeValidator.calls == 0:
+                FakeValidator.calls += 1
+                return (
+                    False,
+                    [
+                        {
+                            "focusNode": "http://example.com/atm#a",
+                            "resultPath": "http://example.com/atm#b",
+                            "message": "error",
+                            "sourceShape": "ex:Shape",
+                            "sourceConstraintComponent": "sh:MinCountConstraintComponent",
+                            "expected": "1",
+                            "value": "x",
+                        }
+                    ],
+                    {"total": 2, "bySeverity": {}, "byShapePath": {}},
+                )
+            FakeValidator.calls += 1
+            return True, [], {"total": 0, "bySeverity": {}, "byShapePath": {}}
+
+    monkeypatch.setattr(repair_loop, "SHACLValidator", FakeValidator)
+    monkeypatch.setattr(repair_loop, "run_reasoner", lambda path: (None, []))
+
+    with caplog.at_level(logging.INFO):
+        repairer = RepairLoop(str(data_path), str(shapes_path), api_key="dummy")
+        _, _, _, stats = repairer.run()
+
+    assert any("Validation summary at iteration 0" in r.message for r in caplog.records)
+    assert any("Validation summary at iteration 1" in r.message for r in caplog.records)
+    assert stats["first_conforms_iteration"] == 1
+    assert stats["reduction"] == 1.0
