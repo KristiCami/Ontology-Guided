@@ -1,6 +1,7 @@
 import os
 import logging
 import re
+import json
 from typing import Iterable, Iterator, List, Optional, Union
 import spacy
 from docx import Document  # pip install python-docx
@@ -37,6 +38,14 @@ class DataLoader:
         for para in doc.paragraphs:
             yield para.text
 
+    def load_jsonl_file(self, file_path: str) -> Iterator[str]:
+        """Yield the ``text`` field from each JSONL line."""
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    data = json.loads(line)
+                    yield data["text"]
+
     def load_requirements(self, input_paths: List[str]) -> Iterable[str]:
         for path in input_paths:
             if not os.path.exists(path):
@@ -47,6 +56,8 @@ class DataLoader:
                 yield from self.load_text_file(path)
             elif ext == ".docx":
                 yield from self.load_docx_file(path)
+            elif ext == ".jsonl":
+                yield from self.load_jsonl_file(path)
             else:
                 raise ValueError(f"Unsupported file extension: {ext}")
 
