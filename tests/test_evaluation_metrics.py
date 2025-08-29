@@ -4,6 +4,7 @@ import pytest
 from evaluation.compare_metrics import compare_metrics
 from ontology_guided.llm_interface import LLMInterface
 from evaluation.run_benchmark import compute_metrics
+from ontology_guided.data_loader import DataLoader
 
 
 def test_compare_metrics(monkeypatch, tmp_path):
@@ -30,8 +31,26 @@ def test_compare_metrics(monkeypatch, tmp_path):
 
     monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
 
+    def multiline_jsonl_loader(self, file_path):
+        import json
+
+        buffer = ""
+        depth = 0
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line in f:
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                buffer += line
+                depth += line.count("{") - line.count("}")
+                if depth == 0:
+                    yield json.loads(buffer)["text"]
+                    buffer = ""
+
+    monkeypatch.setattr(DataLoader, "load_jsonl_file", multiline_jsonl_loader)
+
     root = pathlib.Path(__file__).resolve().parent.parent
-    requirements = root / "evaluation" / "atm_requirements.txt"
+    requirements = root / "evaluation" / "atm_requirements.jsonl"
     gold = root / "evaluation" / "atm_gold.ttl"
     shapes = root / "shapes.ttl"
 
