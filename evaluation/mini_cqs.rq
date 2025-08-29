@@ -1,0 +1,20 @@
+PREFIX ex: <http://example.com/mini#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+ASK WHERE {
+  FILTER NOT EXISTS {
+    ?w a ex:Withdrawal ;
+       ex:hasAmount ?amount .
+    FILTER (?amount < "0"^^xsd:decimal)
+  }
+}
+
+PREFIX ex: <http://example.com/mini#>
+ASK WHERE {
+  FILTER NOT EXISTS {
+    ?w a ex:Withdrawal .
+    FILTER NOT EXISTS {
+      ?w ex:performedBy ?c .
+      ?c a ex:Customer .
+    }
+  }
+}
