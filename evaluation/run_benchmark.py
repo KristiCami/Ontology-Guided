@@ -210,12 +210,12 @@ def run_evaluations(
                 "prompts_per_iteration": (
                     efficiency.avg_prompts_per_iteration
                     if efficiency.avg_prompts_per_iteration is not None
-                    else ""
+                    else 0.0
                 ),
                 "prompt_success_rate": (
                     efficiency.success_rate_per_prompt
                     if efficiency.success_rate_per_prompt is not None
-                    else ""
+                    else 0.0
                 ),
                 "shacl_conforms_rate": (
                     sum(1 for c in conforms_list if c) / len(conforms_list)
@@ -223,7 +223,7 @@ def run_evaluations(
                     else 0.0
                 ),
                 "runs": repeats,
-                "cq_pass_rate": mean(cq_list) if cq_list else "",
+                "cq_pass_rate": mean(cq_list) if cq_list else 0.0,
             }
             table_rows.append(row)
 
