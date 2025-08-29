@@ -15,3 +15,12 @@ lex:BankAccount a lex:Word ;
 
 lex:FinancialInstitution a lex:Word ;
     lex:synonym :Bank .
+
+lex:Person a lex:Word ;
+    lex:synonym :Customer .
+
+lex:WithdrawalTransaction a lex:Word ;
+    lex:synonym :Withdrawal .
+
+lex:AccountHolder a lex:Word ;
+    lex:synonym :Customer .
