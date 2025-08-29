@@ -158,7 +158,7 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
             self.inference = inference
 
         def run_validation(self):
-            return False, "report"
+            return False, "report", {}
 
     monkeypatch.setattr(main, "SHACLValidator", FakeValidator)
 
@@ -233,7 +233,7 @@ def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
             pass
 
         def run_validation(self):
-            return False, "report"
+            return False, "report", {}
 
     monkeypatch.setattr(main, "SHACLValidator", FakeValidator)
 

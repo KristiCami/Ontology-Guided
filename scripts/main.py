@@ -226,7 +226,7 @@ def run_pipeline(
 
     if validate:
         validator = SHACLValidator(pipeline["combined_ttl"], shapes, inference=inference)
-        conforms, report = validator.run_validation()
+        conforms, report, summary = validator.run_validation()
         logger.info("Conforms: %s", conforms)
         logger.info("SHACL Report: %s", report)
         shacl_report_path = "results/shacl_report.txt"
@@ -235,6 +235,7 @@ def run_pipeline(
         pipeline["shacl_conforms"] = conforms
         pipeline["shacl_report"] = report
         pipeline["shacl_report_path"] = shacl_report_path
+        pipeline["shacl_summary"] = summary
 
         if not conforms and repair:
             logger.info("Running repair loop...")

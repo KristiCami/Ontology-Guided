@@ -12,8 +12,22 @@ class SHACLValidator:
         self.shapes_graph_path = shapes_graph_path
         self.inference = inference
 
+    def _summarize(self, results):
+        summary = {"total": len(results), "bySeverity": {}, "byShapePath": {}}
+        for r in results:
+            sev = r.get("resultSeverity")
+            if sev:
+                summary["bySeverity"][sev] = summary["bySeverity"].get(sev, 0) + 1
+            shape = r.get("sourceShape") or ""
+            path = r.get("resultPath") or ""
+            summary["byShapePath"].setdefault(shape, {})
+            summary["byShapePath"][shape][path] = (
+                summary["byShapePath"][shape].get(path, 0) + 1
+            )
+        return summary
+
     def run_validation(self):
-        """Επιστρέφει αποτελέσματα επικύρωσης ως δομημένη λίστα. """
+        """Επιστρέφει αποτελέσματα επικύρωσης ως δομημένη λίστα με σύνοψη."""
         conforms, results_graph, _ = validate(
             data_graph=self.data_graph_path,
             shacl_graph=self.shapes_graph_path,
@@ -22,10 +36,15 @@ class SHACLValidator:
         )
 
         results = []
+        seen = set()
         if not conforms:
             for result in results_graph.subjects(RDF.type, SH.ValidationResult):
                 focus = results_graph.value(result, SH.focusNode)
                 path = results_graph.value(result, SH.resultPath)
+                pair = (str(focus) if focus else None, str(path) if path else None)
+                if pair in seen:
+                    continue
+                seen.add(pair)
                 message = results_graph.value(result, SH.resultMessage)
                 source_shape = results_graph.value(result, SH.sourceShape)
                 severity = results_graph.value(result, SH.resultSeverity)
@@ -36,8 +55,8 @@ class SHACLValidator:
                 value = results_graph.value(result, SH.value)
                 results.append(
                     {
-                        "focusNode": str(focus) if focus else None,
-                        "resultPath": str(path) if path else None,
+                        "focusNode": pair[0],
+                        "resultPath": pair[1],
                         "message": str(message) if message else None,
                         "sourceShape": str(source_shape) if source_shape else None,
                         "resultSeverity": str(severity) if severity else None,
@@ -49,7 +68,8 @@ class SHACLValidator:
                     }
                 )
 
-        return conforms, results
+        summary = self._summarize(results)
+        return conforms, results, summary
 
 
 if __name__ == "__main__":
@@ -71,8 +91,9 @@ if __name__ == "__main__":
         exit(1)
 
     validator = SHACLValidator(args.data, args.shapes, inference=args.inference)
-    conforms, results = validator.run_validation()
+    conforms, results, summary = validator.run_validation()
     print("Conforms:", conforms)
+    print("Total Violations:", summary.get("total", 0))
     print("--- Validation Report ---")
     for r in results:
         print(

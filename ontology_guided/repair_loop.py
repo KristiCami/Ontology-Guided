@@ -226,7 +226,7 @@ class RepairLoop:
         initial_count = 0
         while True:
             validator = SHACLValidator(current_data, self.shapes_path, inference=inference)
-            conforms, violations = validator.run_validation()
+            conforms, violations, _ = validator.run_validation()
             if k == 0:
                 initial_count = len(violations)
             final_violations = violations
