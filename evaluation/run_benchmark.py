@@ -9,7 +9,6 @@ Example
 -------
 python -m evaluation.run_benchmark \
     --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" \
-    --examples evaluation/atm_examples.json \
     --base-iri http://lod.csd.auth.gr/atm/atm.ttl# \
     --repeats 1
 
