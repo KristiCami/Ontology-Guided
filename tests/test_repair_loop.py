@@ -73,7 +73,12 @@ atm:alice atm:knows atm:bob .""",
     assert ttl_path and ttl_path.endswith("results/repaired_1.ttl")
     assert report_path.endswith("results/report_1.txt")
     assert violations == []
-    assert stats == {"initial_count": 1, "final_count": 0, "iterations": 1}
+    assert stats["pre_count"] == 1
+    assert stats["post_count"] == 0
+    assert stats["iterations"] == 1
+    assert stats["first_conforms_iteration"] == 1
+    assert stats["per_iteration"][0]["total"] == 1
+    assert stats["per_iteration"][1]["total"] == 0
 
     report0 = tmp_path / "results" / "report_0.txt"
     content = report0.read_text(encoding="utf-8").strip()

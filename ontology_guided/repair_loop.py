@@ -216,20 +216,32 @@ class RepairLoop:
 
     def run(
         self, *, reason: bool = False, inference: str = "rdfs", max_triples: int = 50
-    ) -> Tuple[Optional[str], str, List[dict], Dict[str, int]]:
+    ) -> Tuple[Optional[str], str, List[dict], Dict[str, Any]]:
         logger = logging.getLogger(__name__)
         os.makedirs("results", exist_ok=True)
         current_data = self.data_path
         report_path = ""
         final_violations: List[dict] = []
+        final_summary: Dict[str, Any] = {}
+        per_iter: List[Dict[str, Any]] = []
+        first_success: Optional[int] = None
         k = 0
         initial_count = 0
         while True:
             validator = SHACLValidator(current_data, self.shapes_path, inference=inference)
-            conforms, violations, _ = validator.run_validation()
+            conforms, violations, summary = validator.run_validation()
+            logger.info("Validation summary at iteration %d: %s", k, summary)
             if k == 0:
-                initial_count = len(violations)
+                initial_count = summary.get("total", len(violations))
             final_violations = violations
+            final_summary = summary
+            per_iter.append({
+                "iteration": k,
+                "total": summary.get("total", 0),
+                "bySeverity": summary.get("bySeverity", {}),
+            })
+            if conforms and first_success is None:
+                first_success = k
             report_path = os.path.join("results", f"report_{k}.txt")
             with open(report_path, "w", encoding="utf-8") as f:
                 if conforms:
@@ -339,10 +351,15 @@ class RepairLoop:
             current_data = ttl_path
             k += 1
 
-        stats = {
-            "initial_count": initial_count,
-            "final_count": len(final_violations),
+        post_count = final_summary.get("total", len(final_violations))
+        reduction = 1 - (post_count / initial_count) if initial_count else 0.0
+        stats: Dict[str, Any] = {
+            "pre_count": initial_count,
+            "post_count": post_count,
             "iterations": k,
+            "first_conforms_iteration": first_success,
+            "per_iteration": per_iter,
+            "reduction": reduction,
         }
 
         return (
@@ -367,7 +384,9 @@ def main():
         api_key,
         kmax=kmax,
     )
-    repairer.run(reason=reason, inference=inference)
+    _, _, _, stats = repairer.run(reason=reason, inference=inference)
+    logger = logging.getLogger(__name__)
+    logger.info("Repair stats: %s", stats)
 
 
 if __name__ == "__main__":
