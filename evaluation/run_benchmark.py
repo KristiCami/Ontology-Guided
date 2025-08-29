@@ -35,6 +35,7 @@ if PROJECT_ROOT not in sys.path:
 
 from scripts.main import run_pipeline
 from .competency_questions import evaluate_cqs
+from .repair_efficiency import aggregate_repair_efficiency
 
 
 Pair = Tuple[str, str, str]
@@ -192,14 +193,30 @@ def run_evaluations(
                 vals = [v.get(key) for v in violations_list if key in v]
                 return mean(vals) if vals else 0.0
 
+            efficiency = aggregate_repair_efficiency(violations_list)
+
             row = {
                 "requirements": Path(req).name,
                 "precision": mean(m["precision"] for m in metrics_list),
                 "recall": mean(m["recall"] for m in metrics_list),
                 "f1": mean(m["f1"] for m in metrics_list),
-                "initial_violations": avg("initial_count"),
-                "final_violations": avg("final_count"),
-                "iterations": avg("iterations"),
+                "initial_violations": avg("pre_count"),
+                "final_violations": avg("post_count"),
+                "iterations": efficiency.mean_iterations,
+                "iter_1": efficiency.distribution.get("1", 0),
+                "iter_2": efficiency.distribution.get("2", 0),
+                "iter_3": efficiency.distribution.get("3", 0),
+                "iter_gt3": efficiency.distribution.get(">3", 0),
+                "prompts_per_iteration": (
+                    efficiency.avg_prompts_per_iteration
+                    if efficiency.avg_prompts_per_iteration is not None
+                    else ""
+                ),
+                "prompt_success_rate": (
+                    efficiency.success_rate_per_prompt
+                    if efficiency.success_rate_per_prompt is not None
+                    else ""
+                ),
                 "shacl_conforms_rate": (
                     sum(1 for c in conforms_list if c) / len(conforms_list)
                     if conforms_list
@@ -218,6 +235,12 @@ def run_evaluations(
             "initial_violations",
             "final_violations",
             "iterations",
+            "iter_1",
+            "iter_2",
+            "iter_3",
+            "iter_gt3",
+            "prompts_per_iteration",
+            "prompt_success_rate",
             "shacl_conforms_rate",
             "runs",
             "cq_pass_rate",
