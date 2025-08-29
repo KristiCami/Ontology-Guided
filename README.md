@@ -171,21 +171,23 @@ python3 scripts/main.py \
 Για να συγκρίνετε τα παραγόμενα OWL triples με ένα χρυσό πρότυπο, χρησιμοποιήστε το script:
 
 ```bash
-python3 evaluation/compare_metrics.py evaluation/atm_requirements.txt evaluation/atm_gold.ttl
+python3 evaluation/compare_metrics.py evaluation/atm_requirements.jsonl evaluation/atm_gold.ttl
 ```
 
-Το script υπολογίζει **precision** και **recall** και αποθηκεύει τις μετρικές στο `results/metrics.txt`.
+Το script υπολογίζει **precision** και **recall** χρησιμοποιώντας τις απαιτήσεις από το `atm_requirements.jsonl` (μορφή JSON Lines) και αποθηκεύει τις μετρικές στο `results/metrics.txt`.
 
 ### Μαζική αξιολόγηση
 
 Για την αναπαραγωγή πινάκων αξιολόγησης σε διαφορετικές ρυθμίσεις, υπάρχει το script:
 
 ```bash
-python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" --examples evaluation/atm_examples.json --repeats 1
+python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" --repeats 1
 ```
 
 Το script εκτελεί το pipeline με όλους τους συνδυασμούς των σημαιών `use_terms` και `validate`,
 αποθηκεύοντας τα αποτελέσματα σε πίνακες `table_<N>.csv` και `table_<N>.md` στον φάκελο `evaluation`.
+
+Προαιρετικά, μπορείτε να περάσετε παραδείγματα με `--examples path/to/examples.json`.
 
 Η προαιρετική σημαία `--normalize-base` κανονικοποιεί τα base IRIs πριν τη σύγκριση,
 μειώνοντας ψευδείς αποκλίσεις όταν οι ίδιες τριπλέτες χρησιμοποιούν διαφορετικά base.
@@ -196,8 +198,7 @@ python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.txt:eva
 
 ```bash
 python3 evaluation/run_benchmark.py \
-    --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" \
-    --examples evaluation/atm_examples.json \
+    --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" \
     --ontology-dir ontologies \
     --repeats 1
 ```
@@ -206,8 +207,7 @@ python3 evaluation/run_benchmark.py \
 
 ```bash
 python -m evaluation.run_benchmark \
-    --pairs "evaluation/atm_requirements.txt:evaluation/atm_gold.ttl" \
-    --examples evaluation/atm_examples.json \
+    --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" \
     --settings '[{"name":"table1","use_terms":true,"validate":true,"ontologies":["ontologies/rbo.ttl","ontologies/lexical.ttl"]}]'
 ```
 
