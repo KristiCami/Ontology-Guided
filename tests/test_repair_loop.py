@@ -45,18 +45,22 @@ atm:alice atm:knows atm:bob .""",
         def run_validation(self):
             FakeValidator.runs.append(self.data_path)
             if len(FakeValidator.runs) == 1:
-                return False, [
-                    {
-                        "focusNode": "http://example.com/atm#alice",
-                        "resultPath": "http://example.com/atm#knows",
-                        "message": "error",
-                        "sourceShape": "ex:Shape",
-                        "sourceConstraintComponent": "sh:MinCountConstraintComponent",
-                        "expected": "1",
-                        "value": "http://example.com/atm#bob",
-                    }
-                ]
-            return True, []
+                return (
+                    False,
+                    [
+                        {
+                            "focusNode": "http://example.com/atm#alice",
+                            "resultPath": "http://example.com/atm#knows",
+                            "message": "error",
+                            "sourceShape": "ex:Shape",
+                            "sourceConstraintComponent": "sh:MinCountConstraintComponent",
+                            "expected": "1",
+                            "value": "http://example.com/atm#bob",
+                        }
+                    ],
+                    {"total": 1, "bySeverity": {}, "byShapePath": {}},
+                )
+            return True, [], {"total": 0, "bySeverity": {}, "byShapePath": {}}
 
     monkeypatch.setattr(repair_loop, "SHACLValidator", FakeValidator)
     monkeypatch.setattr(repair_loop, "run_reasoner", lambda path: (None, []))

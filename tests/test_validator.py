@@ -35,9 +35,10 @@ atm:insert1 a atm:CardInsertion ;
     data_path = _write_temp(tmp_path, "valid.ttl", data)
     shapes_path = Path(__file__).resolve().parent.parent / "shapes.ttl"
     validator = SHACLValidator(data_path, str(shapes_path))
-    conforms, results = validator.run_validation()
+    conforms, results, summary = validator.run_validation()
     assert conforms
     assert results == []
+    assert summary == {"total": 0, "bySeverity": {}, "byShapePath": {}}
 
 
 def test_validation_non_conforming(tmp_path):
@@ -59,9 +60,10 @@ atm:atm1 a atm:ATM ;
     data_path = _write_temp(tmp_path, "invalid.ttl", data)
     shapes_path = Path(__file__).resolve().parent.parent / "shapes.ttl"
     validator = SHACLValidator(data_path, str(shapes_path))
-    conforms, results = validator.run_validation()
+    conforms, results, summary = validator.run_validation()
     assert not conforms
     assert isinstance(results, list)
+    assert summary["total"] == len(results)
     assert all(
         {
             "focusNode",
@@ -75,5 +77,11 @@ atm:atm1 a atm:ATM ;
         }
         <= r.keys()
         for r in results
+    )
+    assert summary["bySeverity"]["http://www.w3.org/ns/shacl#Violation"] == len(results)
+    path_key = "http://example.com/atm#logs"
+    assert any(
+        counts.get(path_key) == len(results)
+        for counts in summary["byShapePath"].values()
     )
 
