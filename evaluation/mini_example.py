@@ -11,6 +11,7 @@ from evaluation.axiom_metrics import evaluate_axioms
 from evaluation.competency_questions import evaluate_cqs
 from ontology_guided.validator import SHACLValidator
 from ontology_guided.reasoner import run_reasoner, ReasonerError
+from evaluation.repair_efficiency import aggregate_repair_efficiency
 
 
 def main() -> None:
@@ -21,8 +22,9 @@ def main() -> None:
     shapes_path = base / "mini_shapes.ttl"
     cq_path = base / "mini_cqs.rq"
 
-    # store violation counts for each iteration
+    # store violation counts and per-iteration stats
     violation_counts = []
+    per_iter_stats = []
 
     # iterate through predicted files in order
     for idx in range(3):
@@ -35,6 +37,7 @@ def main() -> None:
         conforms, _, summary = validator.run_validation()
         violations = summary.get("total", 0)
         violation_counts.append(violations)
+        per_iter_stats.append({"iteration": idx, "total": violations})
 
         try:
             _, is_consistent, unsat_classes = run_reasoner(str(pred_path))
@@ -89,9 +92,21 @@ def main() -> None:
     else:
         # check final iteration in case loop above didn't capture
         if violation_counts and violation_counts[-1] == 0:
-            print(f"Conformance achieved at iteration {len(violation_counts) - 1}")
+            first_conform = len(violation_counts) - 1
+            print(f"Conformance achieved at iteration {first_conform}")
         else:
             print("Conformance not achieved")
+
+    # aggregate repair efficiency metrics
+    violation_stats = {
+        "iterations": len(violation_counts),
+        "first_conforms_iteration": first_conform,
+        "per_iteration": per_iter_stats,
+    }
+    efficiency = aggregate_repair_efficiency([violation_stats])
+    print("\nAggregated repair efficiency:")
+    print(f"  Distribution: {efficiency.distribution}")
+    print(f"  Average iterations: {efficiency.mean_iterations:.2f}")
 
 
 if __name__ == "__main__":
