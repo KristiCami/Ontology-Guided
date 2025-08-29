@@ -183,6 +183,8 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
                     "first_conforms_iteration": 1,
                     "per_iteration": [],
                     "reduction": 1.0,
+                    "prompt_count": 2,
+                    "prompt_success_rate": 0.5,
                 },
             )
 
@@ -216,6 +218,8 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
     assert stats["pre_count"] == 1
     assert stats["post_count"] == 0
     assert stats["iterations"] == 1
+    assert stats["prompt_count"] == 2
+    assert stats["prompt_success_rate"] == 0.5
 
 
 def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
@@ -259,6 +263,8 @@ def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
                     "first_conforms_iteration": 0,
                     "per_iteration": [],
                     "reduction": 0.0,
+                    "prompt_count": 0,
+                    "prompt_success_rate": 0.0,
                 },
             )
 
@@ -284,6 +290,8 @@ def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
     assert stats["pre_count"] == 0
     assert stats["post_count"] == 0
     assert stats["iterations"] == 0
+    assert stats["prompt_count"] == 0
+    assert stats["prompt_success_rate"] == 0.0
 
 
 def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
