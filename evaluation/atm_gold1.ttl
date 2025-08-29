@@ -1,0 +1,58 @@
+@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Class hierarchy
+atm:Withdrawal rdfs:subClassOf atm:ATMTransaction .
+
+# Object properties
+atm:belongsToBank a owl:ObjectProperty ;
+  rdfs:domain atm:ATM ;
+  rdfs:range atm:Bank .
+
+atm:hasCashCard a owl:ObjectProperty ;
+  rdfs:domain atm:Customer ;
+  rdfs:range atm:CashCard .
+
+atm:holds a owl:ObjectProperty ;
+  rdfs:domain atm:Customer ;
+  rdfs:range atm:Account .
+
+atm:involves a owl:ObjectProperty ;
+  rdfs:domain atm:CashCard ;
+  rdfs:range atm:Account .
+
+atm:accepts a owl:ObjectProperty ;
+  rdfs:domain atm:ATM ;
+  rdfs:range atm:CashCard .
+
+atm:isLinkedToATM a owl:ObjectProperty ;
+  rdfs:domain atm:ATMTransaction ;
+  rdfs:range atm:ATM .
+
+atm:isLinkedTo a owl:ObjectProperty ;
+  rdfs:domain atm:ATMTransaction ;
+  rdfs:range atm:Account .
+
+# Example individuals
+atm:bank1 a atm:Bank .
+
+atm:atm1 a atm:ATM ;
+  atm:belongsToBank atm:bank1 ;
+  atm:accepts atm:card1 .
+
+atm:customer1 a atm:Customer ;
+  atm:hasCashCard atm:card1 ;
+  atm:holds atm:account1 .
+
+atm:card1 a atm:CashCard ;
+  atm:involves atm:account1 .
+
+atm:account1 a atm:Account .
+
+atm:withdrawal1 a atm:Withdrawal ;
+  atm:isLinkedToATM atm:atm1 ;
+  atm:isLinkedTo atm:account1 .
+
