@@ -245,6 +245,7 @@ def run_pipeline(
             repaired_ttl, repaired_report, violations, stats = repairer.run(
                 reason=reason, inference=inference
             )
+            logger.info("Repair loop stats: %s", stats)
             pipeline["repaired_report"] = {"path": repaired_report, "violations": violations}
             pipeline["violation_stats"] = stats
             if repaired_ttl:

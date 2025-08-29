@@ -176,7 +176,14 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
                 "fixed.ttl",
                 "final_report.txt",
                 ["v1"],
-                {"initial_count": 1, "final_count": 0, "iterations": 1},
+                {
+                    "pre_count": 1,
+                    "post_count": 0,
+                    "iterations": 1,
+                    "first_conforms_iteration": 1,
+                    "per_iteration": [],
+                    "reduction": 1.0,
+                },
             )
 
     monkeypatch.setattr(main, "RepairLoop", FakeRepairLoop)
@@ -205,11 +212,10 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
     assert result["repaired_ttl"] == "fixed.ttl"
     assert result["repaired_report"]["path"] == "final_report.txt"
     assert result["repaired_report"]["violations"] == ["v1"]
-    assert result["violation_stats"] == {
-        "initial_count": 1,
-        "final_count": 0,
-        "iterations": 1,
-    }
+    stats = result["violation_stats"]
+    assert stats["pre_count"] == 1
+    assert stats["post_count"] == 0
+    assert stats["iterations"] == 1
 
 
 def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
@@ -246,7 +252,14 @@ def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
                 None,
                 "final_report.txt",
                 [],
-                {"initial_count": 0, "final_count": 0, "iterations": 0},
+                {
+                    "pre_count": 0,
+                    "post_count": 0,
+                    "iterations": 0,
+                    "first_conforms_iteration": 0,
+                    "per_iteration": [],
+                    "reduction": 0.0,
+                },
             )
 
     monkeypatch.setattr(main, "RepairLoop", FakeRepairLoop)
@@ -267,11 +280,10 @@ def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
     assert "repaired_ttl" not in result
     assert result["repaired_report"]["path"] == "final_report.txt"
     assert result["repaired_report"]["violations"] == []
-    assert result["violation_stats"] == {
-        "initial_count": 0,
-        "final_count": 0,
-        "iterations": 0,
-    }
+    stats = result["violation_stats"]
+    assert stats["pre_count"] == 0
+    assert stats["post_count"] == 0
+    assert stats["iterations"] == 0
 
 
 def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
