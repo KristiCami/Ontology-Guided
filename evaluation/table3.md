@@ -1,3 +1,3 @@
 | requirements | precision | recall | f1 | initial_violations | final_violations | iterations | iter_1 | iter_2 | iter_3 | iter_gt3 | prompts_per_iteration | prompt_success_rate | shacl_conforms_rate | runs | cq_pass_rate |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| atm_requirements.jsonl | 0.022946859903381644 | 0.012483574244415242 | 0.01617021276595745 | 0.0 | 0.0 | 0 | 0 | 0 | 0 | 1 |  |  | 0.0 | 1 | 0.0 |
+| atm_requirements.jsonl | 0.026731470230862697 | 0.01445466491458607 | 0.018763326226012792 | 0.0 | 0.0 | 0 | 0 | 0 | 0 | 1 | 0.0 | 0.0 | 0.0 | 1 | 0.0 |

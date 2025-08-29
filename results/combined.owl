@@ -1,0 +1,1473 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns="http://lod.csd.auth.gr/atm/atm.ttl#"
+   xmlns:lex="http://example.com/lexical#"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasItemState">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Item"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#StateValue"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasResponseTime">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Minute"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasOperation">
+    <rdfs:range rdf:nodeID="n930b59f7edfb4f2cb00eb800d151d509b3"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#exceeds">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionLimit"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#validFor">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasAccount">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionRequest"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n8b80443f87fc41a19287c26de70d1585b4">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#verifies"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasInitialFunctionSequence">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Function"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasParameter">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Initialization"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb6">
+    <rdf:first rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb3"/>
+    <rdf:rest rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb7"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n5118c6d356b948a5aa884c97d307b9f5b1">
+    <rdfs:subClassOf rdf:nodeID="n5118c6d356b948a5aa884c97d307b9f5b4"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:equivalentClass rdf:nodeID="n5118c6d356b948a5aa884c97d307b9f5b2"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b2">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:unionOf rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b3"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n946b9606620c448fbf18b5d178b022d8b1">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AcceptsCard"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:allValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Nothing"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nf2913d4ed7b6457e95fa65cd413572d6b2">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#call"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#WithdrawalSequence">
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b8">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#dispenses"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#AutomatedTellerMachine">
+    <rdf:type rdf:resource="http://example.com/lexical#Word"/>
+    <lex:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadPassword">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ProblemWithAccount">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:nodeID="nf4419af10e5a405da08ae54eed592734b1"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n930b59f7edfb4f2cb00eb800d151d509b2">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ReturnCard"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasOperation"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isDisplayed">
+    <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:comment xml:lang="en">A property indicating that an error message is displayed.</rdfs:comment>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage"/>
+    <rdfs:label xml:lang="en">is displayed</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasBankCode">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Dispense">
+    <rdfs:subClassOf rdf:nodeID="n4261d2b4218942f89ada791ba4b2a35eb1"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isIssuedBy">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nf4419af10e5a405da08ae54eed592734b1">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasMessage"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#FailedTransaction">
+    <rdfs:label xml:lang="en">transaction failed</rdfs:label>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nf4419af10e5a405da08ae54eed592734b2">
+    <owl:intersectionOf rdf:nodeID="nf4419af10e5a405da08ae54eed592734b3"/>
+    <rdfs:subClassOf rdf:nodeID="nf4419af10e5a405da08ae54eed592734b6"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc604395602e5401189054d9e9442cf33b2">
+    <owl:intersectionOf rdf:nodeID="nc604395602e5401189054d9e9442cf33b6"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AccountOk"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initializeParameters">
+    <hasParameter rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#m"/>
+    <hasParameter rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t"/>
+    <hasParameter rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#k"/>
+    <hasParameter rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#n"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+    <rdf:type rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Initialization"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b7">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadPassword"/>
+    <rdf:rest rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b8"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isResultOf">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessageDisplayed"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CardEjected"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n512f9e2778fe49539ab156b2a846f73ab2">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasEjectedCard"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#EjectedCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#receives">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadAccount"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isValid">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasWrongPasswordEntry">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#WrongPasswordEntry"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasErrorMessage">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#UnsuccessfulTransaction"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#System"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n639781b431db48819cba103716079d7fb1">
+    <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">bad bank code</owl:hasValue>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasMessage"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasValidPassword">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessage">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nf4419af10e5a405da08ae54eed592734b4">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword"/>
+    <rdf:rest rdf:nodeID="nf4419af10e5a405da08ae54eed592734b5"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#receivesRequest">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#verifies">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Request"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasPassword">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#accepts">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasCard">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <rdfs:subClassOf rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b4"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isRestarted"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b7">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:intersectionOf rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b9"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc9fa883180784b268d49a7f29efa1dfab4">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#processes"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ProcessTransaction"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#WrongPasswordEntry">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#processedBy">
+    <owl:inverseOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#processes"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n5118c6d356b948a5aa884c97d307b9f5b2">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasInitialFunctionSequence"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:nodeID="n5118c6d356b948a5aa884c97d307b9f5b3"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc604395602e5401189054d9e9442cf33b7">
+    <rdf:rest rdf:nodeID="nc604395602e5401189054d9e9442cf33b8"/>
+    <rdf:first rdf:nodeID="nc604395602e5401189054d9e9442cf33b3"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationDialog">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasResponseFrom">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#WaitForResponse"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#from">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasEjectedCard">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#EjectedCard"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#UnsuccessfulTransaction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#System"/>
+    <rdfs:subClassOf rdf:nodeID="n639781b431db48819cba103716079d7fb2"/>
+    <rdfs:subClassOf rdf:nodeID="n8b80443f87fc41a19287c26de70d1585b2"/>
+    <rdfs:subClassOf rdf:nodeID="n1b64f4e7bb504ba9a9bfef3a16b99c31b2"/>
+    <rdfs:subClassOf rdf:nodeID="nc9fa883180784b268d49a7f29efa1dfab4"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidBankCode">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadPasswordMessage">
+    <rdfs:subClassOf rdf:nodeID="n1b64f4e7bb504ba9a9bfef3a16b99c31b1"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n5118c6d356b948a5aa884c97d307b9f5b4">
+    <owl:someValuesFrom rdf:nodeID="n5118c6d356b948a5aa884c97d307b9f5b5"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#shallSet"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Password">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:nodeID="n8b80443f87fc41a19287c26de70d1585b1"/>
+    <owl:equivalentClass rdf:nodeID="naba171dd078a4f4785d900947f3c714cb1"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n4261d2b4218942f89ada791ba4b2a35eb2">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasDispensed"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Dispense"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc604395602e5401189054d9e9442cf33b6">
+    <rdf:rest rdf:nodeID="nc604395602e5401189054d9e9442cf33b7"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#exceedsLimit">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Amount"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initializedWith">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#has">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n2815a6de56b04d75984c96dd9d5a0296b3">
+    <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#exceedsLimit"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#belongsToBank">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Transaction">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isCanceled"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+    <rdfs:subClassOf rdf:nodeID="n2815a6de56b04d75984c96dd9d5a0296b1"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#k">
+    <rdf:type rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Amount">
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:nodeID="n2815a6de56b04d75984c96dd9d5a0296b3"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Dispensed20Bills">
+    <rdfs:subClassOf rdf:nodeID="n9b30c9c54ed842c8aae65eda7dca32d8b1"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n7a4a1e7b85984303a643c7adfef303edb1">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Computer"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#providesSecurityFor"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne6774910321d4396a80d6a24fc6f5d13b4">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#DispenseMoney"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b3">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ATMResponse">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b9">
+    <rdf:rest rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b10"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationProcess">
+    <rdfs:subClassOf rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b1"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#DisplayError">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n4f1d37a9a5c44d8b888236acb81005f5b3">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#displays"/>
+    <owl:allValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InitialDisplay"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessageTo">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b11">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isResultOf"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical/example#fast">
+    <rdf:type rdf:resource="http://example.com/lexical#Word"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#BankCard">
+    <rdf:type rdf:resource="http://example.com/lexical#Word"/>
+    <lex:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#enterPassword">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationDialog"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#User"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nadd769786bfe42c6b2c40a2834274070b3">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#KeptCard"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nadd769786bfe42c6b2c40a2834274070b1">
+    <owl:someValuesFrom rdf:nodeID="nadd769786bfe42c6b2c40a2834274070b2"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasWrongPasswordEntry"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n7cbb9d5cba47463593f05ab2a4089247b2">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasBankCode"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne6774910321d4396a80d6a24fc6f5d13b1">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasTaken"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b10">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isResultOf"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sends">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Request"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadAccount"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#displays">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InitialDisplay"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Amount"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n7df99f4a00274542a44af93bb82ffcb8b4">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#dispense"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isCanceled">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Computer">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n1b64f4e7bb504ba9a9bfef3a16b99c31b1">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InvalidPassword"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#indicates"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#requestsVerification">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nf4419af10e5a405da08ae54eed592734b6">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessage"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n2815a6de56b04d75984c96dd9d5a0296b2">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#exceedsLimit"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</owl:hasValue>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc604395602e5401189054d9e9442cf33b8">
+    <rdf:rest rdf:nodeID="nc604395602e5401189054d9e9442cf33b9"/>
+    <rdf:first rdf:nodeID="nc604395602e5401189054d9e9442cf33b4"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9b30c9c54ed842c8aae65eda7dca32d8b2">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ResponseSent"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasResponse"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc9fa883180784b268d49a7f29efa1dfab1">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasAccount"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n7df99f4a00274542a44af93bb82ffcb8b1">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:nodeID="n7df99f4a00274542a44af93bb82ffcb8b2"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#receives"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc604395602e5401189054d9e9442cf33b5">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasAccount"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasCashCard">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Customer">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdfs:subClassOf rdf:nodeID="nf2913d4ed7b6457e95fa65cd413572d6b2"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionLimit">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#exceeds"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9b30c9c54ed842c8aae65eda7dca32d8b4">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ResponseSent"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasResponse"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nf10d63321b2b4414885a3f9a942cbd27b1">
+    <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">30</owl:hasValue>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#displayDuration"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Card">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sendMessage">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AccountOk">
+    <rdfs:subClassOf rdf:nodeID="nc604395602e5401189054d9e9442cf33b1"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#Person">
+    <rdf:type rdf:resource="http://example.com/lexical#Word"/>
+    <lex:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#shallSet">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Item"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne6774910321d4396a80d6a24fc6f5d13b2">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#dispense"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#DispenseMoneyRule">
+    <owl:equivalentClass rdf:nodeID="n7df99f4a00274542a44af93bb82ffcb8b4"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Update">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:nodeID="nad246942c527458eb3e33511f309ba16b1"/>
+    <rdfs:subClassOf rdf:nodeID="n4261d2b4218942f89ada791ba4b2a35eb2"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#entryCount">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#WrongPasswordEntry"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n4f1d37a9a5c44d8b888236acb81005f5b1">
+    <rdfs:subClassOf rdf:nodeID="n4f1d37a9a5c44d8b888236acb81005f5b3"/>
+    <owl:equivalentClass rdf:nodeID="n4f1d37a9a5c44d8b888236acb81005f5b2"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AcceptsCard">
+    <rdf:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdf:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ownsCard">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n2815a6de56b04d75984c96dd9d5a0296b1">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasAmount"/>
+    <owl:allValuesFrom rdf:nodeID="n2815a6de56b04d75984c96dd9d5a0296b2"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#enters">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationSuccess">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#succeeded">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+    <rdf:type rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#StateValue"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#DispenseMoney">
+    <owl:equivalentClass rdf:nodeID="ne6774910321d4396a80d6a24fc6f5d13b2"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#InvalidBankCode">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode"/>
+    <rdfs:subClassOf rdf:nodeID="n639781b431db48819cba103716079d7fb1"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n56ef4b36016e45d09fbf314fd456f7a2b1">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#checks"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb2">
+    <owl:intersectionOf rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb5"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ATM">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdfs:subClassOf rdf:nodeID="n930b59f7edfb4f2cb00eb800d151d509b1"/>
+    <rdfs:subClassOf rdf:nodeID="n930b59f7edfb4f2cb00eb800d151d509b2"/>
+    <rdfs:subClassOf rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb1"/>
+    <rdfs:subClassOf rdf:nodeID="nadd769786bfe42c6b2c40a2834274070b3"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#DispenseMoneyRule"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionSuccessRule"/>
+    <rdfs:subClassOf rdf:nodeID="n8b80443f87fc41a19287c26de70d1585b3"/>
+    <owl:equivalentClass rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b7"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n930b59f7edfb4f2cb00eb800d151d509b3">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:unionOf rdf:nodeID="n930b59f7edfb4f2cb00eb800d151d509b4"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n5118c6d356b948a5aa884c97d307b9f5b5">
+    <owl:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#initiated"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasItemState"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="na2267d4a18764d4dba09ff653cfbff92b2">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Log"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isLogged"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#dispenses">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#displayDuration">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CashCard">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:nodeID="na2267d4a18764d4dba09ff653cfbff92b1"/>
+    <rdfs:subClassOf rdf:nodeID="n7cbb9d5cba47463593f05ab2a4089247b2"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#AccountHolder">
+    <rdf:type rdf:resource="http://example.com/lexical#Word"/>
+    <lex:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b10">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasErrorMessage"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:equivalentClass rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b1"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb4">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasBankCode"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasResponse">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ResponseSent"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATMResponse"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#synonym">
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+    <rdfs:domain rdf:resource="http://example.com/lexical#Word"/>
+    <rdfs:range rdf:resource="http://example.com/lexical#Word"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#BankCustomer">
+    <rdf:type rdf:resource="http://example.com/lexical#Word"/>
+    <lex:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n930b59f7edfb4f2cb00eb800d151d509b1">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#DisplayError"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasOperation"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b1">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#receivesAcceptanceFrom"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n7cbb9d5cba47463593f05ab2a4089247b1">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isIssuedBy"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n392b3d91ed8c44b59d44db6d4942a702b1">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#receives"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#UnsuccessfulTransaction">
+    <rdfs:subClassOf rdf:nodeID="n512f9e2778fe49539ab156b2a846f73ab2"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+    <rdfs:subClassOf rdf:nodeID="n512f9e2778fe49539ab156b2a846f73ab1"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n512f9e2778fe49539ab156b2a846f73ab1">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasErrorMessage"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#fromATM">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne29723fcee5c485594c2d5295bbec67db1">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sendMessage"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n4f1d37a9a5c44d8b888236acb81005f5b2">
+    <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Nothing"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasCashCard"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasEnteredAmount">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasTaken">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b5">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadAccount"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidSerialNumber">
+    <rdfs:subClassOf rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b3"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n178299ee6ca7482ab7bda75082d3a0f7b1">
+    <owl:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationSuccess"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasStatus"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b9">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasResponseTime"/>
+    <rdf:rest rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b10"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b4">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal"/>
+    <rdf:rest rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b5"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Initialization">
+    <rdfs:subClassOf rdf:nodeID="n35b989c76b674eec8e97e9e018fb5ea2b1"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasAmount">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Amount"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionRequest"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b8">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadBankCode"/>
+    <rdf:rest rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b9"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initiates">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#WithdrawalSequence"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="na2267d4a18764d4dba09ff653cfbff92b1">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber"/>
+    <owl:someValuesFrom rdf:nodeID="na2267d4a18764d4dba09ff653cfbff92b2"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Message">
+    <rdfs:subClassOf rdf:nodeID="nf2913d4ed7b6457e95fa65cd413572d6b1"/>
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc9fa883180784b268d49a7f29efa1dfab2">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasAmount"/>
+    <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b7">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasMonthlyLimit">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n1b64f4e7bb504ba9a9bfef3a16b99c31b2">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessage"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadPasswordMessage"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b3">
+    <rdf:rest rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b4"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadPassword"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#transaction">
+    <rdf:type rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Item"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasRequest">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ProcessTransaction"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionRequest"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc604395602e5401189054d9e9442cf33b1">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessage"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b7">
+    <rdf:rest rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b8"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#FinancialInstitution">
+    <rdf:type rdf:resource="http://example.com/lexical#Word"/>
+    <lex:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasMessage">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InvalidBankCode"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#Noun">
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdfs:subClassOf rdf:resource="http://example.com/lexical#Word"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasStatus">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#FailedTransaction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n564d820c4278497686bd78522649b4eeb1">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Axiom"/>
+    <owl:propertyChainAxiom rdf:nodeID="n564d820c4278497686bd78522649b4eeb2"/>
+    <owl:equivalentProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#checks"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b6">
+    <rdf:rest rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b7"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationProcess"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#displayMessage">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message"/>
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Property"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#NoResponseFromBankComputer">
+    <rdfs:subClassOf rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b1"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Authorization">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b1"/>
+    <owl:equivalentClass rdf:nodeID="n178299ee6ca7482ab7bda75082d3a0f7b1"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#t">
+    <rdf:type rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n8b80443f87fc41a19287c26de70d1585b2">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#checks"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b2">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasErrorMessage"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasDailyLimit">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessageDisplayed">
+    <rdfs:subClassOf rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b11"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n639781b431db48819cba103716079d7fb2">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessageTo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="naba171dd078a4f4785d900947f3c714cb1">
+    <owl:unionOf rdf:nodeID="naba171dd078a4f4785d900947f3c714cb2"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b1">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:intersectionOf rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b4"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#valid">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b6">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:unionOf rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b7"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n4261d2b4218942f89ada791ba4b2a35eb1">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasUpdated"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Update"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="naba171dd078a4f4785d900947f3c714cb2">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword"/>
+    <rdf:rest rdf:nodeID="naba171dd078a4f4785d900947f3c714cb3"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n8b80443f87fc41a19287c26de70d1585b1">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#validFor"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#valid"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#LogFile">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CardEjected">
+    <rdfs:subClassOf rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b10"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#WaitForResponse">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Action"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasDispensed">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Dispense"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#call">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Property"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#cardIssuedBy">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b1">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasResponseTime"/>
+    <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</owl:hasValue>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:allValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Minute"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#m">
+    <rdf:type rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b2">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasPassword"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasValidCashCard">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidCashCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nadd769786bfe42c6b2c40a2834274070b2">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onDataRange rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#entryCount"/>
+    <owl:minQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3</owl:minQualifiedCardinality>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9b30c9c54ed842c8aae65eda7dca32d8b3">
+    <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n564d820c4278497686bd78522649b4eeb3">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasBankCode"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasMoneyDispensed">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATMResponse"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b8">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointProperties"/>
+    <owl:members rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b9"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb7">
+    <rdf:first rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb4"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nad246942c527458eb3e33511f309ba16b1">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#LogFile"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#updates"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#EjectedCard">
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n35b989c76b674eec8e97e9e018fb5ea2b1">
+    <owl:allValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasParameter"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#processes">
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ProcessTransaction"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionRequest"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc604395602e5401189054d9e9442cf33b3">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasCashCard"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b5">
+    <rdf:first rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b2"/>
+    <rdf:rest rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b6"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#successful">
+    <rdf:type rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#StateValue"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidCashCard">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+    <owl:equivalentClass rdf:nodeID="n56ef4b36016e45d09fbf314fd456f7a2b1"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n930b59f7edfb4f2cb00eb800d151d509b4">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#DisplayError"/>
+    <rdf:rest rdf:nodeID="n930b59f7edfb4f2cb00eb800d151d509b5"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isLogged">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Log"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc604395602e5401189054d9e9442cf33b4">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasPassword"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasStateValue">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#StateValue"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Function"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#processTransaction">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasUpdated">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Update"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n7df99f4a00274542a44af93bb82ffcb8b2">
+    <owl:someValuesFrom rdf:nodeID="n7df99f4a00274542a44af93bb82ffcb8b3"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#has"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb1">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isValid"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb2"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b6">
+    <rdf:first rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b3"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#n">
+    <rdf:type rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Bank">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdfs:subClassOf rdf:nodeID="n7a4a1e7b85984303a643c7adfef303edb2"/>
+    <rdfs:subClassOf rdf:nodeID="n7a4a1e7b85984303a643c7adfef303edb1"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne6774910321d4396a80d6a24fc6f5d13b3">
+    <rdf:rest rdf:nodeID="ne6774910321d4396a80d6a24fc6f5d13b4"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AfterTakingCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasProblemWithAccount">
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ProblemWithAccount"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword">
+    <rdfs:subClassOf rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b2"/>
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b2">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#processes"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b5">
+    <owl:intersectionOf rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b6"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:comment xml:lang="en">A class representing an error message that is displayed.</rdfs:comment>
+    <rdfs:label xml:lang="en">Error Message</rdfs:label>
+    <rdfs:subClassOf rdf:nodeID="nf10d63321b2b4414885a3f9a942cbd27b1"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#antonym">
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+    <rdfs:domain rdf:resource="http://example.com/lexical#Word"/>
+    <rdfs:range rdf:resource="http://example.com/lexical#Word"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b3">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#accepts"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b1">
+    <owl:someValuesFrom rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b2"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasError"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasError">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b6"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc604395602e5401189054d9e9442cf33b9">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:nodeID="nc604395602e5401189054d9e9442cf33b5"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b8">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidSerialNumber"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Item">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n5118c6d356b948a5aa884c97d307b9f5b3">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasStateValue"/>
+    <owl:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#successful"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b4">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+    <rdf:rest rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b5"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9b30c9c54ed842c8aae65eda7dca32d8b1">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ResponseSent"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasResponse"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b10">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:nodeID="nd4813f59e0c948d392414d10c08841c2b8"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Request">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:nodeID="n8b80443f87fc41a19287c26de70d1585b4"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#dispense">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#WithdrawalTransaction">
+    <rdf:type rdf:resource="http://example.com/lexical#Word"/>
+    <lex:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b4">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isStartedBy"/>
+    <owl:someValuesFrom rdf:nodeID="n9a55545d98154f388b9f1cb78a9ceaf3b5"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged">
+    <rdfs:subClassOf rdf:nodeID="n9b30c9c54ed842c8aae65eda7dca32d8b4"/>
+    <rdfs:subClassOf rdf:nodeID="n9b30c9c54ed842c8aae65eda7dca32d8b3"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#checks">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n8b80443f87fc41a19287c26de70d1585b3">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Request"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sends"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#RunningOutOfMoney">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:equivalentClass rdf:nodeID="n946b9606620c448fbf18b5d178b022d8b1"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="naba171dd078a4f4785d900947f3c714cb3">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InvalidPassword"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nf4419af10e5a405da08ae54eed592734b5">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ProblemWithAccount"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BankCode">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:nodeID="n7cbb9d5cba47463593f05ab2a4089247b1"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nc9fa883180784b268d49a7f29efa1dfab3">
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#processes"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionRequest"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b3">
+    <owl:members rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b4"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#updates">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Update"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#LogFile"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n7df99f4a00274542a44af93bb82ffcb8b3">
+    <owl:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#succeeded"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#from"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionRequest">
+    <rdfs:subClassOf rdf:nodeID="nc9fa883180784b268d49a7f29efa1dfab2"/>
+    <rdfs:subClassOf rdf:nodeID="nc9fa883180784b268d49a7f29efa1dfab1"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:nodeID="n9b30c9c54ed842c8aae65eda7dca32d8b2"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb3">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionSuccessRule">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:equivalentClass rdf:nodeID="n7df99f4a00274542a44af93bb82ffcb8b1"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n930b59f7edfb4f2cb00eb800d151d509b5">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ReturnCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AfterTakingCardThenDispenseMoney">
+    <owl:intersectionOf rdf:nodeID="ne6774910321d4396a80d6a24fc6f5d13b3"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#KeptCard">
+    <owl:equivalentClass rdf:nodeID="nadd769786bfe42c6b2c40a2834274070b1"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#SuccessfulTransaction">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:disjointWith rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#UnsuccessfulTransaction"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#indicates">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb5">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard"/>
+    <rdf:rest rdf:nodeID="ne9abd4cfe249406e80913fd9a46b048cb6"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b4">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadBankCode"/>
+    <rdf:rest rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b5"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nf2913d4ed7b6457e95fa65cd413572d6b1">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#displayMessage"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n7a4a1e7b85984303a643c7adfef303edb2">
+    <owl:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Software"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+    <owl:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#providesSecurityFor"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AccountRecord">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#User">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ProcessTransaction">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdfs:subClassOf rdf:nodeID="nc9fa883180784b268d49a7f29efa1dfab3"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadBankCode">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Log">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n564d820c4278497686bd78522649b4eeb2">
+    <rdf:rest rdf:nodeID="n564d820c4278497686bd78522649b4eeb3"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#requestsVerification"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isRestarted">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog"/>
+    <rdfs:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Account">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AfterTakingCard">
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <owl:equivalentClass rdf:nodeID="ne6774910321d4396a80d6a24fc6f5d13b1"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Software">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#BankAccount">
+    <rdf:type rdf:resource="http://example.com/lexical#Word"/>
+    <lex:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="ncd26c3523ab9444b851218d797f6eb57b9">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadAccount"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#InvalidPassword">
+    <rdfs:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Function">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ResponseSent">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionSuccess">
+    <rdfs:subClassOf rdf:nodeID="ne29723fcee5c485594c2d5295bbec67db1"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b5">
+    <rdf:rest rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b6"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Money">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="nf4419af10e5a405da08ae54eed592734b3">
+    <rdf:rest rdf:nodeID="nf4419af10e5a405da08ae54eed592734b4"/>
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidCashCard"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#providesSecurityFor">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadAccount">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdfs:subClassOf rdf:nodeID="n392b3d91ed8c44b59d44db6d4942a702b1"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Minute">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CardRejected">
+    <rdfs:subClassOf rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b2"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical/example#quick">
+    <rdf:type rdf:resource="http://example.com/lexical#Word"/>
+    <lex:synonym rdf:resource="http://example.com/lexical/example#fast"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ReturnCard">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b6">
+    <rdf:first rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Minute"/>
+    <rdf:rest rdf:nodeID="n70cd2d759274436aa09312795e8e79d3b7"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#InitialDisplay">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Parameter">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical/example#slow">
+    <rdf:type rdf:resource="http://example.com/lexical#Word"/>
+    <lex:antonym rdf:resource="http://example.com/lexical/example#fast"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.com/lexical#Word">
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#StateValue">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#withdrawal">
+    <rdf:type rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Function"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initiated">
+    <rdf:type rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#StateValue"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#System">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+</rdf:RDF>
