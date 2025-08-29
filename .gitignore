@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 results/
+!results/.gitkeep
 venv
 uploads/
 .pytest_cache/
