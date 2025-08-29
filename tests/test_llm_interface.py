@@ -225,7 +225,7 @@ def test_generate_owl_retry_on_invalid_turtle(monkeypatch, tmp_path):
     assert "Previous output was invalid Turtle" in prompts[1]
 
 
-def test_generate_owl_raises_after_invalid_turtle(monkeypatch, tmp_path):
+def test_generate_owl_returns_empty_after_invalid_turtle(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
 
     class FakeMessage:
@@ -247,8 +247,8 @@ def test_generate_owl_raises_after_invalid_turtle(monkeypatch, tmp_path):
     monkeypatch.setattr(time, "sleep", lambda *args, **kwargs: None)
 
     llm = LLMInterface(api_key="dummy", model="gpt-4", cache_dir=str(tmp_path))
-    with pytest.raises(ValueError):
-        llm.generate_owl(["irrelevant"], "{sentence}", max_retries=1, retry_delay=0)
+    result = llm.generate_owl(["irrelevant"], "{sentence}", max_retries=1, retry_delay=0)
+    assert result == [""]
 
 
 def test_generate_owl_passes_temperature_and_examples(monkeypatch, tmp_path):
