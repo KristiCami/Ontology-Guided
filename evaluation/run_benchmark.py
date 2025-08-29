@@ -9,6 +9,7 @@ Example
 -------
 python -m evaluation.run_benchmark \
     --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" \
+    --cqs evaluation/atm_cqs.rq \
     --base-iri http://lod.csd.auth.gr/atm/atm.ttl# \
     --repeats 1
 
@@ -150,7 +151,7 @@ def run_evaluations(
     output_dir: Path,
     normalize_base: bool = False,
     keywords: Optional[Union[Iterable[str], None]] = None,
-    cq_path: Optional[str] = None,
+    cq_paths: Optional[Sequence[Optional[str]]] = None,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -159,7 +160,12 @@ def run_evaluations(
         pipeline_opts = {k: v for k, v in setting.items() if k not in {"name"}}
         table_rows: List[Dict[str, Any]] = []
 
-        for req, gold, shapes in pairs:
+        for dataset_idx, (req, gold, shapes) in enumerate(pairs):
+            cq_path = (
+                cq_paths[dataset_idx]
+                if cq_paths and dataset_idx < len(cq_paths)
+                else None
+            )
             metrics_list: List[Dict[str, float]] = []
             violations_list: List[Dict[str, Any]] = []
             conforms_list: List[Any] = []
@@ -200,9 +206,8 @@ def run_evaluations(
                     else 0.0
                 ),
                 "runs": repeats,
+                "cq_pass_rate": mean(cq_list) if cq_list else "",
             }
-            if cq_list:
-                row["cq_pass_rate"] = mean(cq_list)
             table_rows.append(row)
 
         headers = [
@@ -215,9 +220,8 @@ def run_evaluations(
             "iterations",
             "shacl_conforms_rate",
             "runs",
+            "cq_pass_rate",
         ]
-        if cq_path:
-            headers.append("cq_pass_rate")
         write_csv(output_dir / f"{name}.csv", table_rows, headers)
         write_markdown(output_dir / f"{name}.md", table_rows, headers)
 
@@ -276,9 +280,10 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         help="Comma-separated keywords for sentence filtering",
     )
     parser.add_argument(
-        "--cq-file",
+        "--cqs",
+        nargs="*",
         default=None,
-        help="Path to file with SPARQL ASK competency questions",
+        help="List of files with SPARQL ASK competency questions, one per dataset",
     )
     args = parser.parse_args()
 
@@ -318,6 +323,9 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         if args.keywords
         else None
     )
+    if args.cqs is not None and len(args.cqs) != len(pairs):
+        raise ValueError("--cqs requires the same number of paths as --pairs")
+
     run_evaluations(
         pairs,
         settings_list,
@@ -326,7 +334,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         Path(args.output_dir),
         normalize_base=args.normalize_base,
         keywords=keywords,
-        cq_path=args.cq_file,
+        cq_paths=args.cqs,
     )
 
 
