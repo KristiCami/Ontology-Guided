@@ -244,6 +244,30 @@ def run_pipeline(
         pipeline["shacl_report_path"] = shacl_report_path
         pipeline["shacl_summary"] = summary
 
+        pipeline["violation_stats"] = {
+            "pre_count": summary.get("total", 0),
+            "post_count": summary.get("total", 0),
+            "iterations": 0,
+            "first_conforms_iteration": 0 if conforms else None,
+            "per_iteration": [
+                {
+                    "iteration": 0,
+                    "total": summary.get("total", 0),
+                    "bySeverity": summary.get("bySeverity", {}),
+                    "is_consistent": pipeline.get("is_consistent"),
+                    "unsat_count": pipeline.get("inconsistent_classes", {}).get("count", 0),
+                    "prompt_count": 0,
+                    "prompt_success_rate": 0.0,
+                }
+            ],
+            "reduction": 0.0,
+            "unsat_initial": pipeline.get("inconsistent_classes", {}).get("count", 0),
+            "unsat_final": pipeline.get("inconsistent_classes", {}).get("count", 0),
+            "consistency_transitions": [],
+            "prompt_count": 0,
+            "prompt_success_rate": 0.0,
+        }
+
         if not conforms and repair:
             logger.info("Running repair loop...")
             repairer = RepairLoop(

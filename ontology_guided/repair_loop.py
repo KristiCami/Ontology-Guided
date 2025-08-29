@@ -253,13 +253,16 @@ class RepairLoop:
                 initial_count = summary.get("total", len(violations))
             final_violations = violations
             final_summary = summary
-            per_iter.append({
+            per_iter_entry = {
                 "iteration": k,
                 "total": summary.get("total", 0),
                 "bySeverity": summary.get("bySeverity", {}),
                 "is_consistent": is_consistent,
                 "unsat_count": len(unsat_classes),
-            })
+                "prompt_count": 0,
+                "prompt_success_rate": 0.0,
+            }
+            per_iter.append(per_iter_entry)
             if conforms and first_success is None:
                 first_success = k
             report_path = os.path.join("results", f"report_{k}.txt")
@@ -281,6 +284,10 @@ class RepairLoop:
             graph = Graph()
             graph.parse(current_data, format="turtle")
 
+            violation_texts = {
+                canonicalize_violation(v)["text"] for v in violations
+            }
+
             # Extract available ontology terms, domain/range hints, and synonyms
             # from the current data using an OntologyBuilder instance.
             temp_builder = OntologyBuilder(self.base_iri)
@@ -295,6 +302,7 @@ class RepairLoop:
             prompts = synthesize_repair_prompts(
                 violations, graph, available_terms, inconsistent, max_triples=max_triples
             )
+            per_iter_entry["prompt_count"] = len(prompts)
             with open(current_data, "r", encoding="utf-8") as f:
                 original = f.read()
 
@@ -354,6 +362,18 @@ class RepairLoop:
             self.builder.save(ttl_path, fmt="turtle")
             self.builder.save(owl_path, fmt="xml")
 
+            # Revalidate to determine how many prompts fixed their violations.
+            post_validator = SHACLValidator(ttl_path, self.shapes_path, inference=inference)
+            post_conforms, post_violations, post_summary = post_validator.run_validation()
+            remaining_texts = {
+                canonicalize_violation(v)["text"] for v in post_violations
+            }
+            resolved = len(violation_texts - remaining_texts)
+            count = per_iter_entry["prompt_count"]
+            per_iter_entry["prompt_success_rate"] = (
+                resolved / count if count else 0.0
+            )
+
             # Run the reasoner on the repaired ontology so that the next
             # iteration (or final summary) can report consistency information.
             try:
@@ -372,6 +392,32 @@ class RepairLoop:
 
             current_data = ttl_path
             k += 1
+            logger.info("Validation summary at iteration %d: %s", k, post_summary)
+            report_path = os.path.join("results", f"report_{k}.txt")
+            with open(report_path, "w", encoding="utf-8") as f:
+                if post_conforms:
+                    f.write("Conforms\n")
+                else:
+                    for v in post_violations:
+                        f.write(canonicalize_violation(v)["text"] + "\n")
+            final_violations = post_violations
+            final_summary = post_summary
+            if post_conforms:
+                per_iter.append(
+                    {
+                        "iteration": k,
+                        "total": post_summary.get("total", 0),
+                        "bySeverity": post_summary.get("bySeverity", {}),
+                        "is_consistent": is_consistent,
+                        "unsat_count": len(unsat_classes),
+                        "prompt_count": 0,
+                        "prompt_success_rate": 0.0,
+                    }
+                )
+                if first_success is None:
+                    first_success = k
+                logger.info("SHACL validation passed on iteration %d", k)
+                break
 
         post_count = final_summary.get("total", len(final_violations))
         reduction = 1 - (post_count / initial_count) if initial_count else 0.0
@@ -381,6 +427,13 @@ class RepairLoop:
             if prev is False and entry["is_consistent"] is True:
                 transitions.append(entry["iteration"])
             prev = entry["is_consistent"]
+
+        total_prompts = sum(e.get("prompt_count", 0) for e in per_iter)
+        total_successes = sum(
+            e.get("prompt_count", 0) * e.get("prompt_success_rate", 0.0)
+            for e in per_iter
+        )
+        overall_rate = total_successes / total_prompts if total_prompts else 0.0
 
         stats: Dict[str, Any] = {
             "pre_count": initial_count,
@@ -392,6 +445,8 @@ class RepairLoop:
             "unsat_initial": per_iter[0]["unsat_count"] if per_iter else None,
             "unsat_final": per_iter[-1]["unsat_count"] if per_iter else None,
             "consistency_transitions": transitions,
+            "prompt_count": total_prompts,
+            "prompt_success_rate": overall_rate,
         }
 
         return (
