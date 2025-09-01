@@ -28,6 +28,8 @@ class OntologyBuilder:
         self.lexical_namespace = lexical_namespace
         self.graph = Graph()
         self.graph.bind(self.prefix, self.base_iri)
+        ontology_iri = URIRef(self.base_iri.rstrip("#"))
+        self.graph.add((ontology_iri, RDF.type, OWL.Ontology))
         if ontology_files:
             for path in ontology_files:
                 self.graph.parse(path)
@@ -47,9 +49,9 @@ class OntologyBuilder:
         for prefix, uri in self.graph.namespaces():
             if prefix and prefix not in prefixes:
                 prefixes[prefix] = str(uri)
-        self.header = "".join(
-            f"@prefix {p}: <{u}> .\n" for p, u in prefixes.items()
-        )
+        header_lines = [f"@base <{self.base_iri}> .\n"]
+        header_lines += [f"@prefix {p}: <{u}> .\n" for p, u in prefixes.items()]
+        self.header = "".join(header_lines)
 
     def _extract_available_terms(self):
         nm = self.graph.namespace_manager
@@ -190,7 +192,7 @@ class OntologyBuilder:
 
     def save(self, file_path: str, fmt: str = "turtle"):
         """Αποθηκεύει την οντολογία σε αρχείο."""
-        self.graph.serialize(destination=file_path, format=fmt)
+        self.graph.serialize(destination=file_path, format=fmt, base=self.base_iri)
 
 
 if __name__ == "__main__":

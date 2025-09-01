@@ -10,9 +10,10 @@ def test_parse_turtle_with_prefix():
     ob = OntologyBuilder('http://example.com/atm#')
     ttl = """@prefix ex: <http://example.com/> .\nex:A ex:B ex:C ."""
     logger = logging.getLogger(__name__)
+    initial_len = len(ob.graph)
     triples = ob.parse_turtle(ttl, logger=logger)
     ob.add_provenance("req", triples)
-    assert len(ob.graph) == 1
+    assert len(ob.graph) == initial_len + 1
     assert ob.triple_provenance
 
 
@@ -126,3 +127,12 @@ def test_parse_turtle_applies_synonym():
     assert (ex_fast, lex_antonym, ex_fast) in ob.graph
     assert (ex_quick, lex_antonym, ex_quick) not in ob.graph
     assert triples == [(ex_fast, lex_antonym, ex_fast)]
+
+
+def test_save_includes_base_and_ontology(tmp_path):
+    ob = OntologyBuilder('http://example.com/atm#')
+    out = tmp_path / 'out.ttl'
+    ob.save(out, fmt='turtle')
+    content = out.read_text(encoding='utf-8')
+    assert '@base <http://example.com/atm#> .' in content
+    assert '<http://example.com/atm> a owl:Ontology .' in content
