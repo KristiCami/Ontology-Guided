@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from ontology_guided.ontology_builder import OntologyBuilder, InvalidTurtleError
+from rdflib import URIRef
 
 
 def test_parse_turtle_with_prefix():
@@ -126,6 +127,20 @@ def test_parse_turtle_applies_synonym():
     assert (ex_fast, lex_antonym, ex_fast) in ob.graph
     assert (ex_quick, lex_antonym, ex_quick) not in ob.graph
     assert triples == [(ex_fast, lex_antonym, ex_fast)]
+
+
+def test_normalizes_placeholder_iris():
+    ob = OntologyBuilder("http://example.com/atm#")
+    ttl = "<Actor:Customer> <Function:dispense> <Item:card> ."
+    triples = ob.parse_turtle(ttl)
+    base = "http://example.com/atm#"
+    expected = (
+        URIRef(base + "Customer"),
+        URIRef(base + "dispense"),
+        URIRef(base + "card"),
+    )
+    assert triples == [expected]
+    assert expected in ob.graph
 
 
 def test_save_includes_base_and_ontology(tmp_path):

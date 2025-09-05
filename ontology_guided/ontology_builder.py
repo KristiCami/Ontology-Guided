@@ -190,10 +190,15 @@ class OntologyBuilder:
         canonical_triples = []
         for s, p, o in triples:
             if isinstance(s, URIRef):
+                s = self._normalize_uri(s)
+            if isinstance(s, URIRef):
                 s_norm = nm.normalizeUri(s)
                 if s_norm in syn_map:
                     s = nm.expand_curie(syn_map[s_norm])
+            if isinstance(p, URIRef):
+                p = self._normalize_uri(p)
             if isinstance(o, URIRef):
+                o = self._normalize_uri(o)
                 o_norm = nm.normalizeUri(o)
                 if o_norm in syn_map:
                     o = nm.expand_curie(syn_map[o_norm])
@@ -201,6 +206,15 @@ class OntologyBuilder:
             canonical_triples.append((s, p, o))
         self._extract_available_terms()
         return canonical_triples
+
+    def _normalize_uri(self, uri: URIRef) -> URIRef:
+        """Map placeholder IRIs like ``Actor:Customer`` to the base namespace."""
+        text = str(uri)
+        if text.startswith(("http://", "https://", "urn:", "file:")):
+            return uri
+        if ":" in text:
+            text = text.split(":", 1)[1]
+        return URIRef(self.base_iri + text)
 
     def add_provenance(self, requirement: str, triples):
         """Map generated triples to the originating requirement."""

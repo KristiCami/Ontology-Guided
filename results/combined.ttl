@@ -63,11 +63,11 @@ lex:Word a rdfs:Class .
     rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty :hasSerialNumber ;
             owl:someValuesFrom :SerialNumber ] .
-<Actor:Customer> a owl:Class ;
+:Customer a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <Function:dispense> ;
-            owl:someValuesFrom <Item:card> ] .
-<System:bank_computer> a owl:Class .
+            owl:onProperty :dispense ;
+            owl:someValuesFrom :card ] .
+:bank_computer a owl:Class .
 lex:AccountHolder a lex:Word ;
     lex:synonym :Customer .
 lex:AutomatedTellerMachine a lex:Word ;
@@ -212,22 +212,22 @@ ex:slow a lex:Word ;
 :waitForResponse a owl:ObjectProperty ;
     rdfs:domain :System ;
     rdfs:range :Response .
-<Flow:message> a owl:Class .
-<Item:card> a owl:Class .
-<Item:transaction> a owl:Class .
-<StateValue:succeeded> a owl:Class .
-<System:ATM> a owl:Class ;
+ :message a owl:Class .
+:card a owl:Class .
+:transaction a owl:Class .
+:succeeded a owl:Class .
+:ATM a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <Function:dispense> ;
-            owl:someValuesFrom <Item:money> ],
+            owl:onProperty :dispense ;
+            owl:someValuesFrom :money ],
         [ a owl:Restriction ;
-            owl:onProperty <Flow:message> ;
+            owl:onProperty :message ;
             owl:someValuesFrom [ a owl:Restriction ;
-                    owl:hasValue <StateValue:succeeded> ;
-                    owl:onProperty <Item:transaction> ] ],
+                    owl:hasValue :succeeded ;
+                    owl:onProperty :transaction ] ],
         [ a owl:Restriction ;
-            owl:onProperty <Function:dispense> ;
-            owl:someValuesFrom <Item:money> ] .
+            owl:onProperty :dispense ;
+            owl:someValuesFrom :money ] .
 :ATMOperation a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty :hasOutcome ;
@@ -483,11 +483,11 @@ ex:fast a lex:Word .
     rdfs:range :BankComputer,
         :Password .
 :withdrawal a :Function .
-<Function:dispense> a owl:Class,
+:dispense a owl:Class,
         owl:ObjectProperty ;
-    rdfs:domain <System:ATM> ;
-    rdfs:range <Item:money> .
-<Item:money> a owl:Class .
+    rdfs:domain :ATM ;
+    rdfs:range :money .
+:money a owl:Class .
 :BadAccount a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty :sends ;
