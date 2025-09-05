@@ -141,6 +141,10 @@ class OntologyBuilder:
           datatype property declaration is removed.
         """
         type_map: dict = defaultdict(set)
+        # collect existing type assertions from the graph so that conflicts
+        # can be detected across multiple snippets
+        for s, o in self.graph.subject_objects(RDF.type):
+            type_map[s].add(o)
         for s, p, o in triples:
             if p == RDF.type:
                 type_map[s].add(o)
@@ -150,14 +154,39 @@ class OntologyBuilder:
             if p == RDF.type:
                 types = type_map[s]
                 # classes or individuals take precedence over property types
-                if (OWL.Class in types or RDFS.Class in types or OWL.NamedIndividual in types) and (
+                if (
+                    OWL.Class in types
+                    or RDFS.Class in types
+                    or OWL.NamedIndividual in types
+                ) and (
                     o in (OWL.ObjectProperty, OWL.DatatypeProperty, OWL.AnnotationProperty)
                 ):
                     continue
                 # prefer object properties when both are present
-                if OWL.ObjectProperty in types and OWL.DatatypeProperty in types and o == OWL.DatatypeProperty:
+                if (
+                    OWL.ObjectProperty in types
+                    and OWL.DatatypeProperty in types
+                    and o == OWL.DatatypeProperty
+                ):
                     continue
             cleaned.append((s, p, o))
+
+        # remove conflicting property type declarations already stored in the graph
+        for s, types in type_map.items():
+            if (
+                OWL.Class in types
+                or RDFS.Class in types
+                or OWL.NamedIndividual in types
+            ):
+                for t in (
+                    OWL.ObjectProperty,
+                    OWL.DatatypeProperty,
+                    OWL.AnnotationProperty,
+                ):
+                    self.graph.remove((s, RDF.type, t))
+            elif OWL.ObjectProperty in types and OWL.DatatypeProperty in types:
+                self.graph.remove((s, RDF.type, OWL.DatatypeProperty))
+
         return cleaned
 
     def _filter_invalid_iris(self, triples):

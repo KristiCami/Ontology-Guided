@@ -140,6 +140,19 @@ def test_conflicting_types_are_removed():
     assert (ex_foo, RDF.type, OWL.DatatypeProperty) not in ob.graph
 
 
+def test_conflicting_types_across_snippets():
+    """Later declarations should clean up earlier conflicting ones."""
+    ob = OntologyBuilder('http://example.com/atm#')
+    ttl1 = "@prefix ex: <http://example.com/> .\nex:Bar a owl:DatatypeProperty ."
+    ttl2 = "@prefix ex: <http://example.com/> .\nex:Bar a owl:Class ."
+    ob.parse_turtle(ttl1)
+    ob.parse_turtle(ttl2)
+    ex = Namespace("http://example.com/")
+    ex_bar = ex.Bar
+    assert (ex_bar, RDF.type, OWL.Class) in ob.graph
+    assert (ex_bar, RDF.type, OWL.DatatypeProperty) not in ob.graph
+
+
 def test_save_includes_base_and_ontology(tmp_path):
     ob = OntologyBuilder('http://example.com/atm#')
     out = tmp_path / 'out.ttl'
