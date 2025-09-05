@@ -70,9 +70,13 @@ class OntologyBuilder:
             ("swrlb", "http://www.w3.org/2003/11/swrlb#"),
             ("protege", "http://protege.stanford.edu/plugins/owl/protege#"),
         ]
-        lines = [f"@prefix {p}: <{u}> .\n" for p, u in ordered + self.extra_prefixes]
-        lines.append(f"@base <{self.base_iri}> .\n\n")
-        self.header = "".join(lines)
+        # store prefix and base lines separately so save() can control ordering
+        self.prefix_lines = [
+            f"@prefix {p}: <{u}> .\n" for p, u in ordered + self.extra_prefixes
+        ]
+        self.base_line = f"@base <{self.base_iri}> .\n"
+        # header is used when parsing snippets and expects a blank line after @base
+        self.header = "".join(self.prefix_lines + [self.base_line, "\n"])
 
     def _extract_available_terms(self):
         nm = self.graph.namespace_manager
@@ -228,7 +232,9 @@ class OntologyBuilder:
                 if line and not line.startswith("@prefix") and not line.startswith("@base")
             ]
             with open(file_path, "w", encoding="utf-8") as fh:
-                fh.write(self.header)
+                for line in self.prefix_lines:
+                    fh.write(line)
+                fh.write(self.base_line)
                 fh.write(f"<{ontology_iri}> rdf:type owl:Ontology .\n")
                 for line in body_lines:
                     fh.write(line + "\n")
