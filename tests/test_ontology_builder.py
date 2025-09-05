@@ -4,6 +4,8 @@ from pathlib import Path
 import pytest
 
 from ontology_guided.ontology_builder import OntologyBuilder, InvalidTurtleError
+from rdflib import Namespace
+from rdflib.namespace import RDF, OWL
 
 
 def test_parse_turtle_with_prefix():
@@ -126,6 +128,16 @@ def test_parse_turtle_applies_synonym():
     assert (ex_fast, lex_antonym, ex_fast) in ob.graph
     assert (ex_quick, lex_antonym, ex_quick) not in ob.graph
     assert triples == [(ex_fast, lex_antonym, ex_fast)]
+
+
+def test_conflicting_types_are_removed():
+    ob = OntologyBuilder('http://example.com/atm#')
+    ttl = """@prefix ex: <http://example.com/> .\nex:Foo a owl:Class, owl:DatatypeProperty ."""
+    ob.parse_turtle(ttl)
+    ex = Namespace("http://example.com/")
+    ex_foo = ex.Foo
+    assert (ex_foo, RDF.type, OWL.Class) in ob.graph
+    assert (ex_foo, RDF.type, OWL.DatatypeProperty) not in ob.graph
 
 
 def test_save_includes_base_and_ontology(tmp_path):

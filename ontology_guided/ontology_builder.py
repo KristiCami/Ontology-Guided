@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from typing import Optional
 
 from rdflib import Graph, URIRef
@@ -126,6 +127,39 @@ class OntologyBuilder:
             "synonyms": self.synonym_map,
         }
 
+    def _remove_conflicting_types(self, triples):
+        """Filter out rdf:type triples that declare incompatible types.
+
+        LLM generated snippets occasionally assign both class and property
+        types to the same resource (e.g. `ex:Foo a owl:Class, owl:DatatypeProperty`).
+        Such declarations cause Protégé to fail when loading the ontology. This
+        helper keeps a single, sensible type:
+
+        * If an entity is declared as a class or individual, property types are
+          dropped.
+        * If an entity is declared as both object and datatype property, the
+          datatype property declaration is removed.
+        """
+        type_map: dict = defaultdict(set)
+        for s, p, o in triples:
+            if p == RDF.type:
+                type_map[s].add(o)
+
+        cleaned = []
+        for s, p, o in triples:
+            if p == RDF.type:
+                types = type_map[s]
+                # classes or individuals take precedence over property types
+                if (OWL.Class in types or RDFS.Class in types or OWL.NamedIndividual in types) and (
+                    o in (OWL.ObjectProperty, OWL.DatatypeProperty, OWL.AnnotationProperty)
+                ):
+                    continue
+                # prefer object properties when both are present
+                if OWL.ObjectProperty in types and OWL.DatatypeProperty in types and o == OWL.DatatypeProperty:
+                    continue
+            cleaned.append((s, p, o))
+        return cleaned
+
     def parse_turtle(
         self,
         turtle_str: str,
@@ -186,6 +220,8 @@ class OntologyBuilder:
                         o.n3(nm),
                     )
             triples = kept_triples
+        # remove conflicting rdf:type declarations that confuse OWL editors
+        triples = self._remove_conflicting_types(triples)
         nm = self.graph.namespace_manager
         syn_map = self.synonym_map
         canonical_triples = []
