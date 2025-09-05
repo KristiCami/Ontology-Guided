@@ -2,6 +2,8 @@ import logging
 from collections import defaultdict
 from typing import Optional
 
+import re
+
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, RDFS, OWL, XSD, Namespace
 from rdflib.plugins.parsers.notation3 import BadSyntax
@@ -322,6 +324,7 @@ class OntologyBuilder:
                 temp.add((s, p, o))
 
             body = temp.serialize(format="turtle")
+            body = re.sub(r"(?<=\s)a(?=\s)", "rdf:type", body)
             body_lines = [
                 line
                 for line in body.splitlines()
