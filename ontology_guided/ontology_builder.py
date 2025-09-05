@@ -74,7 +74,7 @@ class OntologyBuilder:
         self.prefix_lines = [
             f"@prefix {p}: <{u}> .\n" for p, u in ordered + self.extra_prefixes
         ]
-        self.base_line = f"@base <{self.base_iri}> .\n"
+        self.base_line = f"@base <{self.base_iri.rstrip('#')}> .\n"
         # header is used when parsing snippets and expects a blank line after @base
         self.header = "".join(self.prefix_lines + [self.base_line, "\n"])
 
@@ -235,6 +235,7 @@ class OntologyBuilder:
                 for line in self.prefix_lines:
                     fh.write(line)
                 fh.write(self.base_line)
+                fh.write("\n")
                 fh.write(f"<{ontology_iri}> rdf:type owl:Ontology .\n")
                 for line in body_lines:
                     fh.write(line + "\n")

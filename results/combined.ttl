@@ -10,7 +10,8 @@
 @prefix protege: <http://protege.stanford.edu/plugins/owl/protege#> .
 @prefix lex: <http://example.com/lexical#> .
 @prefix ex: <http://example.com/lexical/example#> .
-@base <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@base <http://lod.csd.auth.gr/atm/atm.ttl> .
+
 <http://lod.csd.auth.gr/atm/atm.ttl> rdf:type owl:Ontology .
 lex:Noun a rdfs:Class ;
     rdfs:subClassOf lex:Word .
