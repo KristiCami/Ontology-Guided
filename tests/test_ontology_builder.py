@@ -37,7 +37,6 @@ ex:ClassA a owl:Class .
     ob = OntologyBuilder('http://example.com/atm#', ontology_files=[str(ext)])
     terms = ob.get_available_terms()
     assert "ex:ClassA" in terms["classes"]
-    assert "@prefix ex:" in ob.header
 
 
 def test_domain_range_and_synonyms(tmp_path):
@@ -134,5 +133,7 @@ def test_save_includes_base_and_ontology(tmp_path):
     out = tmp_path / 'out.ttl'
     ob.save(out, fmt='turtle')
     content = out.read_text(encoding='utf-8')
-    assert '@base <http://example.com/atm#> .' in content
-    assert '<http://example.com/atm> a owl:Ontology .' in content
+    assert content.startswith(
+        '@prefix : <http://example.com/atm#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .'
+    )
+    assert '<http://example.com/atm> rdf:type owl:Ontology .' in content

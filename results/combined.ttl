@@ -1,879 +1,692 @@
-@base <http://lod.csd.auth.gr/atm/atm.ttl#> .
 @prefix : <http://lod.csd.auth.gr/atm/atm.ttl#> .
-@prefix ex: <http://example.com/lexical/example#> .
-@prefix lex: <http://example.com/lexical#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xsp: <http://www.owl-ontologies.com/2005/08/07/xsp.owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
+@prefix protege: <http://protege.stanford.edu/plugins/owl/protege#> .
+@base <http://lod.csd.auth.gr/atm/atm.ttl#> .
 
+<http://lod.csd.auth.gr/atm/atm.ttl> rdf:type owl:Ontology .
 lex:Noun a rdfs:Class ;
     rdfs:subClassOf lex:Word .
-
 lex:Word a rdfs:Class .
-
-<ATM> a rdfs:Class,
+ns1:ATM a rdfs:Class,
         owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasOperation> ;
-            owl:someValuesFrom <DisplayError> ],
+            owl:onProperty ns1:hasOperation ;
+            owl:someValuesFrom ns1:DisplayError ],
         [ a owl:Restriction ;
-            owl:onProperty <hasOperation> ;
-            owl:someValuesFrom <ReturnCard> ],
+            owl:onProperty ns1:sends ;
+            owl:someValuesFrom ns1:Request ],
         [ a owl:Restriction ;
-            owl:onProperty <hasCard> ;
-            owl:someValuesFrom <KeptCard> ],
+            owl:onProperty ns1:hasOperation ;
+            owl:someValuesFrom ns1:ReturnCard ],
         [ a owl:Restriction ;
-            owl:onProperty <isValid> ;
+            owl:onProperty ns1:hasCard ;
+            owl:someValuesFrom ns1:KeptCard ],
+        [ a owl:Restriction ;
+            owl:onProperty ns1:isValid ;
             owl:someValuesFrom [ a owl:Class ;
-                    owl:intersectionOf ( <CashCard> [ a owl:Restriction ;
-                                owl:onProperty <hasSerialNumber> ;
+                    owl:intersectionOf ( ns1:CashCard [ a owl:Restriction ;
+                                owl:onProperty ns1:hasSerialNumber ;
                                 owl:someValuesFrom xsd:string ] [ a owl:Restriction ;
-                                owl:onProperty <hasBankCode> ;
+                                owl:onProperty ns1:hasBankCode ;
                                 owl:someValuesFrom xsd:string ] ) ] ],
-        [ a owl:Restriction ;
-            owl:onProperty <sends> ;
-            owl:someValuesFrom <Request> ],
-        <DispenseMoneyRule>,
-        <TransactionSuccessRule> ;
+        ns1:DispenseMoneyRule,
+        ns1:TransactionSuccessRule ;
     owl:equivalentClass [ a owl:Class ;
-            owl:intersectionOf ( <ATM> [ a owl:Restriction ;
-                        owl:onProperty <dispenses> ;
-                        owl:someValuesFrom <Money> ] ) ] .
-
-<Amount> a rdfs:Class,
+            owl:intersectionOf ( ns1:ATM [ a owl:Restriction ;
+                        owl:onProperty ns1:dispenses ;
+                        owl:someValuesFrom ns1:Money ] ) ] .
+ns1:Amount a rdfs:Class,
         owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <exceedsLimit> ;
+            owl:onProperty ns1:exceedsLimit ;
             owl:someValuesFrom xsd:boolean ] .
-
-<BadAccount> a rdfs:Class,
+ns1:BadAccount a rdfs:Class,
         owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <receives> ;
-            owl:someValuesFrom <Bank> ] .
-
-<Bank> a rdfs:Class,
+            owl:onProperty ns1:receives ;
+            owl:someValuesFrom ns1:Bank ] .
+ns1:Bank a rdfs:Class,
         owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <providesSecurityFor> ;
-            owl:someValuesFrom <Computer> ],
+            owl:onProperty ns1:providesSecurityFor ;
+            owl:someValuesFrom ns1:Computer ],
         [ a owl:Restriction ;
-            owl:onProperty <providesSecurityFor> ;
-            owl:someValuesFrom <Software> ] .
-
-<Customer> a rdfs:Class,
+            owl:onProperty ns1:providesSecurityFor ;
+            owl:someValuesFrom ns1:Software ] .
+ns1:Customer a rdfs:Class,
         owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <call> ;
-            owl:someValuesFrom <Bank> ] .
-
-<Message> a rdfs:Class,
+            owl:onProperty ns1:call ;
+            owl:someValuesFrom ns1:Bank ] .
+ns1:Message a rdfs:Class,
         owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <displayMessage> ;
-            owl:someValuesFrom <Customer> ] .
-
-<WithdrawalSequence> a rdfs:Class .
-
+            owl:onProperty ns1:displayMessage ;
+            owl:someValuesFrom ns1:Customer ] .
+ns1:WithdrawalSequence a rdfs:Class .
 lex:AccountHolder a lex:Word ;
-    lex:synonym <Customer> .
-
+    lex:synonym ns1:Customer .
 lex:AutomatedTellerMachine a lex:Word ;
-    lex:synonym <ATM> .
-
+    lex:synonym ns1:ATM .
 lex:BankAccount a lex:Word ;
-    lex:synonym <Account> .
-
+    lex:synonym ns1:Account .
 lex:BankCard a lex:Word ;
-    lex:synonym <CashCard> .
-
+    lex:synonym ns1:CashCard .
 lex:BankCustomer a lex:Word ;
-    lex:synonym <Customer> .
-
+    lex:synonym ns1:Customer .
 lex:FinancialInstitution a lex:Word ;
-    lex:synonym <Bank> .
-
+    lex:synonym ns1:Bank .
 lex:Person a lex:Word ;
-    lex:synonym <Customer> .
-
+    lex:synonym ns1:Customer .
 lex:WithdrawalTransaction a lex:Word ;
-    lex:synonym <Withdrawal> .
-
+    lex:synonym ns1:Withdrawal .
 lex:antonym a rdf:Property ;
     rdfs:domain lex:Word ;
     rdfs:range lex:Word .
-
 lex:synonym a rdf:Property ;
     rdfs:domain lex:Word ;
     rdfs:range lex:Word .
-
 ex:quick a lex:Word ;
     lex:synonym ex:fast .
-
 ex:slow a lex:Word ;
     lex:antonym ex:fast .
-
-<http://lod.csd.auth.gr/atm/atm.ttl> a owl:Ontology .
-
-<AccountRecord> a owl:Class .
-
-<AfterTakingCardThenDispenseMoney> a owl:Class ;
-    owl:intersectionOf ( <AfterTakingCard> <DispenseMoney> ) .
-
-<CardRejected> a owl:Class ;
+ns1:AccountRecord a owl:Class .
+ns1:AfterTakingCardThenDispenseMoney a owl:Class ;
+    owl:intersectionOf ( ns1:AfterTakingCard ns1:DispenseMoney ) .
+ns1:CardRejected a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasErrorMessage> ;
-            owl:someValuesFrom <ErrorMessage> ] .
-
-<Dispensed20Bills> a owl:Class ;
+            owl:onProperty ns1:hasErrorMessage ;
+            owl:someValuesFrom ns1:ErrorMessage ] .
+ns1:Dispensed20Bills a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasResponse> ;
-            owl:someValuesFrom <ResponseSent> ] .
-
-<NoResponseFromBankComputer> a owl:Class ;
+            owl:onProperty ns1:hasResponse ;
+            owl:someValuesFrom ns1:ResponseSent ] .
+ns1:NoResponseFromBankComputer a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom <Minute> ;
+            owl:allValuesFrom ns1:Minute ;
             owl:hasValue 2 ;
-            owl:onProperty <hasResponseTime> ] .
-
-<RunningOutOfMoney> a owl:Class ;
+            owl:onProperty ns1:hasResponseTime ] .
+ns1:RunningOutOfMoney a owl:Class ;
     owl:equivalentClass [ a owl:Restriction ;
             owl:allValuesFrom owl:Nothing ;
-            owl:onProperty <AcceptsCard> ] .
-
-<SuccessfulTransaction> a owl:Class ;
-    owl:disjointWith <UnsuccessfulTransaction> .
-
-<TransactionSuccess> a owl:Class ;
+            owl:onProperty ns1:AcceptsCard ] .
+ns1:SuccessfulTransaction a owl:Class ;
+    owl:disjointWith ns1:UnsuccessfulTransaction .
+ns1:TransactionSuccess a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <sendMessage> ;
-            owl:someValuesFrom <ATM> ] .
-
-<ValidBankCode> a owl:Class ;
-    rdfs:subClassOf <BankCode> .
-
-<belongsToBank> a owl:ObjectProperty ;
-    rdfs:domain <ATM> ;
-    rdfs:range <Bank> .
-
-<cardIssuedBy> a owl:ObjectProperty ;
-    rdfs:domain <CashCard> ;
-    rdfs:range <Bank> .
-
-<enterPassword> a owl:ObjectProperty ;
-    rdfs:domain <User> ;
-    rdfs:range <AuthorizationDialog> .
-
-<enters> a owl:ObjectProperty ;
-    rdfs:domain <Customer> ;
-    rdfs:range <CashCard> .
-
-<fromATM> a owl:ObjectProperty ;
-    rdfs:domain <Transaction> ;
-    rdfs:range <ATM> .
-
-<hasDailyLimit> a owl:DatatypeProperty ;
-    rdfs:domain <Account> ;
+            owl:onProperty ns1:sendMessage ;
+            owl:someValuesFrom ns1:ATM ] .
+ns1:ValidBankCode a owl:Class ;
+    rdfs:subClassOf ns1:BankCode .
+ns1:belongsToBank a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM ;
+    rdfs:range ns1:Bank .
+ns1:cardIssuedBy a owl:ObjectProperty ;
+    rdfs:domain ns1:CashCard ;
+    rdfs:range ns1:Bank .
+ns1:enterPassword a owl:ObjectProperty ;
+    rdfs:domain ns1:User ;
+    rdfs:range ns1:AuthorizationDialog .
+ns1:enters a owl:ObjectProperty ;
+    rdfs:domain ns1:Customer ;
+    rdfs:range ns1:CashCard .
+ns1:fromATM a owl:ObjectProperty ;
+    rdfs:domain ns1:Transaction ;
+    rdfs:range ns1:ATM .
+ns1:hasDailyLimit a owl:DatatypeProperty ;
+    rdfs:domain ns1:Account ;
     rdfs:range xsd:decimal .
-
-<hasEnteredAmount> a owl:ObjectProperty ;
-    rdfs:domain <Customer> ;
-    rdfs:range <Transaction> .
-
-<hasMoneyDispensed> a owl:ObjectProperty ;
-    rdfs:domain <ATMResponse> ;
-    rdfs:range <MoneyDispensed> .
-
-<hasMonthlyLimit> a owl:DatatypeProperty ;
-    rdfs:domain <Account> ;
+ns1:hasEnteredAmount a owl:ObjectProperty ;
+    rdfs:domain ns1:Customer ;
+    rdfs:range ns1:Transaction .
+ns1:hasMoneyDispensed a owl:ObjectProperty ;
+    rdfs:domain ns1:ATMResponse ;
+    rdfs:range ns1:MoneyDispensed .
+ns1:hasMonthlyLimit a owl:DatatypeProperty ;
+    rdfs:domain ns1:Account ;
     rdfs:range xsd:decimal .
-
-<hasProblemWithAccount> a owl:ObjectProperty ;
-    rdfs:domain <Bank> ;
-    rdfs:range <ProblemWithAccount> .
-
-<hasRequest> a owl:ObjectProperty ;
-    rdfs:domain <ProcessTransaction> ;
-    rdfs:range <TransactionRequest> .
-
-<hasResponseFrom> a owl:ObjectProperty ;
-    rdfs:domain <WaitForResponse> ;
-    rdfs:range <BankComputer> .
-
-<hasValidCashCard> a owl:ObjectProperty ;
-    rdfs:domain <Bank> ;
-    rdfs:range <ValidCashCard> .
-
-<hasValidPassword> a owl:ObjectProperty ;
-    rdfs:domain <Bank> ;
-    rdfs:range <ValidPassword> .
-
-<initializeParameters> a <Initialization>,
+ns1:hasProblemWithAccount a owl:ObjectProperty ;
+    rdfs:domain ns1:Bank ;
+    rdfs:range ns1:ProblemWithAccount .
+ns1:hasRequest a owl:ObjectProperty ;
+    rdfs:domain ns1:ProcessTransaction ;
+    rdfs:range ns1:TransactionRequest .
+ns1:hasResponseFrom a owl:ObjectProperty ;
+    rdfs:domain ns1:WaitForResponse ;
+    rdfs:range ns1:BankComputer .
+ns1:hasValidCashCard a owl:ObjectProperty ;
+    rdfs:domain ns1:Bank ;
+    rdfs:range ns1:ValidCashCard .
+ns1:hasValidPassword a owl:ObjectProperty ;
+    rdfs:domain ns1:Bank ;
+    rdfs:range ns1:ValidPassword .
+ns1:initializeParameters a ns1:Initialization,
         owl:NamedIndividual ;
-    <hasParameter> <k>,
-        <m>,
-        <n>,
-        <t> .
-
-<initializedWith> a owl:ObjectProperty ;
-    rdfs:domain <ATM> ;
+    ns1:hasParameter ns1:k,
+        ns1:m,
+        ns1:n,
+        ns1:t .
+ns1:initializedWith a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM ;
     rdfs:range xsd:decimal .
-
-<initiates> a rdf:Property ;
-    rdfs:domain <ATM> ;
-    rdfs:range <WithdrawalSequence> .
-
-<isDisplayed> a owl:ObjectProperty ;
+ns1:initiates a rdf:Property ;
+    rdfs:domain ns1:ATM ;
+    rdfs:range ns1:WithdrawalSequence .
+ns1:isDisplayed a owl:ObjectProperty ;
     rdfs:label "is displayed"@en ;
     rdfs:comment "A property indicating that an error message is displayed."@en ;
-    rdfs:domain <ErrorMessage> ;
+    rdfs:domain ns1:ErrorMessage ;
     rdfs:range owl:Thing .
-
-<ownsCard> a owl:ObjectProperty ;
-    rdfs:domain <Customer> ;
-    rdfs:range <CashCard> .
-
-<processTransaction> a owl:ObjectProperty ;
-    rdfs:domain <BankComputer> ;
-    rdfs:range <Transaction> .
-
-<processedBy> a owl:ObjectProperty ;
-    rdfs:domain <Transaction> ;
-    rdfs:range <ATM> ;
-    owl:inverseOf <processes> .
-
-<receivesRequest> a owl:ObjectProperty ;
-    rdfs:domain <BankComputer> ;
-    rdfs:range <Transaction> .
-
-<transaction> a <Item> .
-
-<withdrawal> a <Function> .
-
-<AcceptsCard> a owl:ObjectProperty ;
-    rdf:domain <ATM> ;
-    rdf:range <Card> .
-
-<AccountOk> a owl:Class ;
+ns1:ownsCard a owl:ObjectProperty ;
+    rdfs:domain ns1:Customer ;
+    rdfs:range ns1:CashCard .
+ns1:processTransaction a owl:ObjectProperty ;
+    rdfs:domain ns1:BankComputer ;
+    rdfs:range ns1:Transaction .
+ns1:processedBy a owl:ObjectProperty ;
+    rdfs:domain ns1:Transaction ;
+    rdfs:range ns1:ATM ;
+    owl:inverseOf ns1:processes .
+ns1:receivesRequest a owl:ObjectProperty ;
+    rdfs:domain ns1:BankComputer ;
+    rdfs:range ns1:Transaction .
+ns1:transaction a ns1:Item .
+ns1:withdrawal a ns1:Function .
+ns1:AcceptsCard a owl:ObjectProperty ;
+    rdf:domain ns1:ATM ;
+    rdf:range ns1:Card .
+ns1:AccountOk a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <sendsMessage> ;
-            owl:someValuesFrom <ATM> ] .
-
-<AfterTakingCard> a owl:Class ;
-    rdfs:subClassOf <Customer> ;
+            owl:onProperty ns1:sendsMessage ;
+            owl:someValuesFrom ns1:ATM ] .
+ns1:AfterTakingCard a owl:Class ;
+    rdfs:subClassOf ns1:Customer ;
     owl:equivalentClass [ a owl:Restriction ;
-            owl:onProperty <hasTaken> ;
-            owl:someValuesFrom <Card> ] .
-
-<AuthorizationDialog> a owl:Class .
-
-<AuthorizationProcess> a owl:Class ;
+            owl:onProperty ns1:hasTaken ;
+            owl:someValuesFrom ns1:Card ] .
+ns1:AuthorizationDialog a owl:Class .
+ns1:AuthorizationProcess a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <receivesAcceptanceFrom> ;
-            owl:someValuesFrom <BankComputer> ] .
-
-<AuthorizationSuccess> a owl:Class .
-
-<BadPasswordMessage> a owl:Class ;
+            owl:onProperty ns1:receivesAcceptanceFrom ;
+            owl:someValuesFrom ns1:BankComputer ] .
+ns1:AuthorizationSuccess a owl:Class .
+ns1:BadPasswordMessage a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <indicates> ;
-            owl:someValuesFrom <InvalidPassword> ],
-        <Message> .
-
-<CardEjected> a owl:Class ;
+            owl:onProperty ns1:indicates ;
+            owl:someValuesFrom ns1:InvalidPassword ],
+        ns1:Message .
+ns1:CardEjected a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <isResultOf> ;
-            owl:someValuesFrom <Authorization> ] .
-
-<Computer> a owl:Class .
-
-<DispenseMoney> a owl:Class ;
-    rdfs:subClassOf <ATM> ;
+            owl:onProperty ns1:isResultOf ;
+            owl:someValuesFrom ns1:Authorization ] .
+ns1:Computer a owl:Class .
+ns1:DispenseMoney a owl:Class ;
+    rdfs:subClassOf ns1:ATM ;
     owl:equivalentClass [ a owl:Restriction ;
-            owl:onProperty <dispense> ;
-            owl:someValuesFrom <Money> ] .
-
-<DispenseMoneyRule> a owl:Class ;
+            owl:onProperty ns1:dispense ;
+            owl:someValuesFrom ns1:Money ] .
+ns1:DispenseMoneyRule a owl:Class ;
     owl:equivalentClass [ a owl:Restriction ;
-            owl:onProperty <dispense> ;
-            owl:someValuesFrom <Money> ] .
-
-<ErrorMessageDisplayed> a owl:Class ;
+            owl:onProperty ns1:dispense ;
+            owl:someValuesFrom ns1:Money ] .
+ns1:ErrorMessageDisplayed a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <isResultOf> ;
-            owl:someValuesFrom <Authorization> ] .
-
-<FailedTransaction> a owl:Class,
+            owl:onProperty ns1:isResultOf ;
+            owl:someValuesFrom ns1:Authorization ] .
+ns1:FailedTransaction a owl:Class,
         owl:NamedIndividual ;
     rdfs:label "transaction failed"@en .
-
-<InvalidBankCode> a owl:Class ;
+ns1:InvalidBankCode a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:hasValue "bad bank code"^^xsd:string ;
-            owl:onProperty <hasMessage> ],
-        <BankCode> .
-
-<KeptCard> a owl:Class ;
+            owl:onProperty ns1:hasMessage ],
+        ns1:BankCode .
+ns1:KeptCard a owl:Class ;
     owl:equivalentClass [ a owl:Restriction ;
-            owl:onProperty <hasWrongPasswordEntry> ;
+            owl:onProperty ns1:hasWrongPasswordEntry ;
             owl:someValuesFrom [ a owl:Restriction ;
                     owl:minQualifiedCardinality 3 ;
                     owl:onDataRange xsd:integer ;
-                    owl:onProperty <entryCount> ] ] .
-
-<MoneyDispensed> a owl:Class ;
+                    owl:onProperty ns1:entryCount ] ] .
+ns1:MoneyDispensed a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasResponse> ;
-            owl:someValuesFrom <ResponseSent> ] .
-
-<Software> a owl:Class .
-
-<TransactionLimit> a owl:Class,
+            owl:onProperty ns1:hasResponse ;
+            owl:someValuesFrom ns1:ResponseSent ] .
+ns1:Software a owl:Class .
+ns1:TransactionLimit a owl:Class,
         owl:Restriction ;
-    owl:onProperty <exceeds> ;
-    owl:someValuesFrom <Transaction> .
-
-<TransactionSuccessRule> a owl:Class ;
+    owl:onProperty ns1:exceeds ;
+    owl:someValuesFrom ns1:Transaction .
+ns1:TransactionSuccessRule a owl:Class ;
     owl:equivalentClass [ a owl:Restriction ;
-            owl:onProperty <receives> ;
+            owl:onProperty ns1:receives ;
             owl:someValuesFrom [ a owl:Restriction ;
-                    owl:onProperty <has> ;
+                    owl:onProperty ns1:has ;
                     owl:someValuesFrom [ a owl:Restriction ;
-                            owl:hasValue <succeeded> ;
-                            owl:onProperty <from> ] ] ] .
-
-<User> a owl:Class .
-
-<ValidSerialNumber> a owl:Class ;
+                            owl:hasValue ns1:succeeded ;
+                            owl:onProperty ns1:from ] ] ] .
+ns1:User a owl:Class .
+ns1:ValidSerialNumber a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasSerialNumber> ;
-            owl:someValuesFrom <SerialNumber> ] .
-
-<WaitForResponse> a owl:Class ;
-    rdfs:subClassOf <Action> .
-
-<accepts> a owl:ObjectProperty ;
-    rdfs:domain <Bank> ;
-    rdfs:range <Withdrawal> .
-
-<call> a rdfs:Property ;
-    rdfs:domain <Customer> ;
-    rdfs:range <Bank> .
-
-<dispenses> a owl:ObjectProperty ;
-    rdfs:domain <ATM> ;
-    rdfs:range <Money> .
-
-<displayDuration> a owl:DatatypeProperty ;
-    rdfs:domain <ErrorMessage> ;
+            owl:onProperty ns1:hasSerialNumber ;
+            owl:someValuesFrom ns1:SerialNumber ] .
+ns1:WaitForResponse a owl:Class ;
+    rdfs:subClassOf ns1:Action .
+ns1:accepts a owl:ObjectProperty ;
+    rdfs:domain ns1:Bank ;
+    rdfs:range ns1:Withdrawal .
+ns1:call a rdfs:Property ;
+    rdfs:domain ns1:Customer ;
+    rdfs:range ns1:Bank .
+ns1:dispenses a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM ;
+    rdfs:range ns1:Money .
+ns1:displayDuration a owl:DatatypeProperty ;
+    rdfs:domain ns1:ErrorMessage ;
     rdfs:range xsd:integer .
-
-<displayMessage> a rdfs:Property ;
-    rdfs:domain <Message> ;
-    rdfs:range <Customer> .
-
-<displays> a rdf:Property,
+ns1:displayMessage a rdfs:Property ;
+    rdfs:domain ns1:Message ;
+    rdfs:range ns1:Customer .
+ns1:displays a rdf:Property,
         owl:ObjectProperty ;
-    rdfs:domain <ATM> ;
-    rdfs:range <Amount>,
-        <InitialDisplay> .
-
-<entryCount> a owl:DatatypeProperty ;
-    rdfs:domain <WrongPasswordEntry> ;
+    rdfs:domain ns1:ATM ;
+    rdfs:range ns1:Amount,
+        ns1:InitialDisplay .
+ns1:entryCount a owl:DatatypeProperty ;
+    rdfs:domain ns1:WrongPasswordEntry ;
     rdfs:range xsd:integer .
-
-<exceeds> a owl:ObjectProperty ;
-    rdfs:domain <Transaction> ;
-    rdfs:range <TransactionLimit> .
-
-<from> a owl:ObjectProperty ;
-    rdfs:domain <Message> ;
-    rdfs:range <BankComputer> .
-
-<has> a owl:ObjectProperty ;
-    rdfs:domain <Message> ;
-    rdfs:range <Transaction> .
-
-<hasCard> a owl:ObjectProperty ;
-    rdfs:domain <ATM> ;
-    rdfs:range <Card> .
-
-<hasDispensed> a owl:ObjectProperty ;
-    rdfs:domain <Money> ;
-    rdfs:range <Dispense> .
-
-<hasEjectedCard> a owl:ObjectProperty ;
-    rdfs:domain <UnsuccessfulTransaction> ;
-    rdfs:range <EjectedCard> .
-
-<hasError> a owl:ObjectProperty ;
-    rdfs:domain <Authorization> ;
+ns1:exceeds a owl:ObjectProperty ;
+    rdfs:domain ns1:Transaction ;
+    rdfs:range ns1:TransactionLimit .
+ns1:from a owl:ObjectProperty ;
+    rdfs:domain ns1:Message ;
+    rdfs:range ns1:BankComputer .
+ns1:has a owl:ObjectProperty ;
+    rdfs:domain ns1:Message ;
+    rdfs:range ns1:Transaction .
+ns1:hasCard a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM ;
+    rdfs:range ns1:Card .
+ns1:hasDispensed a owl:ObjectProperty ;
+    rdfs:domain ns1:Money ;
+    rdfs:range ns1:Dispense .
+ns1:hasEjectedCard a owl:ObjectProperty ;
+    rdfs:domain ns1:UnsuccessfulTransaction ;
+    rdfs:range ns1:EjectedCard .
+ns1:hasError a owl:ObjectProperty ;
+    rdfs:domain ns1:Authorization ;
     rdfs:range [ a owl:Class ;
-            owl:unionOf ( <BadPassword> <BadBankCode> <BadAccount> ) ] .
-
-<hasInitialFunctionSequence> a owl:ObjectProperty ;
-    rdfs:domain <ATM> ;
-    rdfs:range <Function> .
-
-<hasItemState> a owl:ObjectProperty ;
-    rdfs:domain <Item> ;
-    rdfs:range <StateValue> .
-
-<hasParameter> a owl:ObjectProperty ;
-    rdfs:domain <Initialization> ;
-    rdfs:range <Parameter> .
-
-<hasStateValue> a owl:ObjectProperty ;
-    rdfs:domain <Function> ;
-    rdfs:range <StateValue> .
-
-<hasStatus> a owl:ObjectProperty ;
-    rdfs:domain <Transaction> ;
-    rdfs:range <FailedTransaction> .
-
-<hasTaken> a owl:ObjectProperty ;
-    rdfs:domain <Customer> ;
-    rdfs:range <Card> .
-
-<hasUpdated> a owl:ObjectProperty ;
-    rdfs:domain <Account> ;
-    rdfs:range <Update> .
-
-<hasWrongPasswordEntry> a owl:ObjectProperty ;
-    rdfs:domain <Card> ;
-    rdfs:range <WrongPasswordEntry> .
-
-<indicates> a owl:ObjectProperty ;
-    rdfs:domain <Message> ;
-    rdfs:range <Password> .
-
-<initiated> a <StateValue> .
-
-<isCanceled> a owl:ObjectProperty ;
-    rdfs:domain <Transaction> ;
-    rdfs:range <Transaction> .
-
-<isIssuedBy> a owl:ObjectProperty ;
-    rdfs:domain <CashCard> ;
-    rdfs:range <Bank> .
-
-<isLogged> a owl:ObjectProperty ;
-    rdfs:domain <SerialNumber> ;
-    rdfs:range <Log> .
-
-<isRestarted> a owl:ObjectProperty ;
-    rdfs:domain <TransactionDialog> ;
-    rdfs:range <TransactionDialog> .
-
-<isValid> a owl:ObjectProperty ;
-    rdfs:domain <CashCard> ;
+            owl:unionOf ( ns1:BadPassword ns1:BadBankCode ns1:BadAccount ) ] .
+ns1:hasInitialFunctionSequence a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM ;
+    rdfs:range ns1:Function .
+ns1:hasItemState a owl:ObjectProperty ;
+    rdfs:domain ns1:Item ;
+    rdfs:range ns1:StateValue .
+ns1:hasParameter a owl:ObjectProperty ;
+    rdfs:domain ns1:Initialization ;
+    rdfs:range ns1:Parameter .
+ns1:hasStateValue a owl:ObjectProperty ;
+    rdfs:domain ns1:Function ;
+    rdfs:range ns1:StateValue .
+ns1:hasStatus a owl:ObjectProperty ;
+    rdfs:domain ns1:Transaction ;
+    rdfs:range ns1:FailedTransaction .
+ns1:hasTaken a owl:ObjectProperty ;
+    rdfs:domain ns1:Customer ;
+    rdfs:range ns1:Card .
+ns1:hasUpdated a owl:ObjectProperty ;
+    rdfs:domain ns1:Account ;
+    rdfs:range ns1:Update .
+ns1:hasWrongPasswordEntry a owl:ObjectProperty ;
+    rdfs:domain ns1:Card ;
+    rdfs:range ns1:WrongPasswordEntry .
+ns1:indicates a owl:ObjectProperty ;
+    rdfs:domain ns1:Message ;
+    rdfs:range ns1:Password .
+ns1:initiated a ns1:StateValue .
+ns1:isCanceled a owl:ObjectProperty ;
+    rdfs:domain ns1:Transaction ;
+    rdfs:range ns1:Transaction .
+ns1:isIssuedBy a owl:ObjectProperty ;
+    rdfs:domain ns1:CashCard ;
+    rdfs:range ns1:Bank .
+ns1:isLogged a owl:ObjectProperty ;
+    rdfs:domain ns1:SerialNumber ;
+    rdfs:range ns1:Log .
+ns1:isRestarted a owl:ObjectProperty ;
+    rdfs:domain ns1:TransactionDialog ;
+    rdfs:range ns1:TransactionDialog .
+ns1:isValid a owl:ObjectProperty ;
+    rdfs:domain ns1:CashCard ;
     rdfs:range xsd:boolean .
-
-<k> a <Parameter> .
-
-<m> a <Parameter> .
-
-<n> a <Parameter> .
-
-<requestsVerification> a owl:ObjectProperty ;
-    rdfs:domain <ATM> ;
-    rdfs:range <Card> .
-
-<sendMessage> a owl:ObjectProperty ;
-    rdfs:domain <BankComputer> ;
-    rdfs:range <ATM> .
-
-<sends> a rdf:Property,
+ns1:k a ns1:Parameter .
+ns1:m a ns1:Parameter .
+ns1:n a ns1:Parameter .
+ns1:requestsVerification a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM ;
+    rdfs:range ns1:Card .
+ns1:sendMessage a owl:ObjectProperty ;
+    rdfs:domain ns1:BankComputer ;
+    rdfs:range ns1:ATM .
+ns1:sends a rdf:Property,
         owl:ObjectProperty ;
-    rdfs:domain <ATM>,
-        <Bank> ;
-    rdfs:range <BadAccount>,
-        <Request> .
-
-<sendsMessageTo> a owl:ObjectProperty ;
-    rdfs:domain <BankComputer> ;
-    rdfs:range <ATM> .
-
-<shallSet> a owl:ObjectProperty ;
-    rdfs:domain <ATM> ;
-    rdfs:range <Item> .
-
-<succeeded> a <StateValue>,
+    rdfs:domain ns1:ATM,
+        ns1:Bank ;
+    rdfs:range ns1:BadAccount,
+        ns1:Request .
+ns1:sendsMessageTo a owl:ObjectProperty ;
+    rdfs:domain ns1:BankComputer ;
+    rdfs:range ns1:ATM .
+ns1:shallSet a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM ;
+    rdfs:range ns1:Item .
+ns1:succeeded a ns1:StateValue,
         owl:NamedIndividual .
-
-<successful> a <StateValue> .
-
-<t> a <Parameter> .
-
-<updates> a owl:ObjectProperty ;
-    rdfs:domain <Update> ;
-    rdfs:range <LogFile> .
-
-<valid> a owl:Class,
+ns1:successful a ns1:StateValue .
+ns1:t a ns1:Parameter .
+ns1:updates a owl:ObjectProperty ;
+    rdfs:domain ns1:Update ;
+    rdfs:range ns1:LogFile .
+ns1:valid a owl:Class,
         owl:DatatypeProperty ;
-    rdfs:domain <BankCode> ;
+    rdfs:domain ns1:BankCode ;
     rdfs:range rdf:XMLLiteral ;
-    rdfs:subClassOf <CashCard> .
-
-<validFor> a owl:ObjectProperty ;
-    rdfs:domain <Password> ;
-    rdfs:range <CashCard> .
-
-<verifies> a owl:ObjectProperty ;
-    rdfs:domain <ATM>,
-        <Request> ;
-    rdfs:range <BankComputer>,
-        <Password> .
-
+    rdfs:subClassOf ns1:CashCard .
+ns1:validFor a owl:ObjectProperty ;
+    rdfs:domain ns1:Password ;
+    rdfs:range ns1:CashCard .
+ns1:verifies a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM,
+        ns1:Request ;
+    rdfs:range ns1:BankComputer,
+        ns1:Password .
 ex:fast a lex:Word .
-
-<ATMResponse> a owl:Class .
-
-<AmountLogged> a owl:Class ;
+ns1:ATMResponse a owl:Class .
+ns1:AmountLogged a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasSerialNumber> ;
+            owl:onProperty ns1:hasSerialNumber ;
             owl:someValuesFrom xsd:string ],
         [ a owl:Restriction ;
-            owl:onProperty <hasResponse> ;
-            owl:someValuesFrom <ResponseSent> ] .
-
-<BadBankCode> a owl:Class .
-
-<BadPassword> a owl:Class .
-
-<Dispense> a owl:Class ;
+            owl:onProperty ns1:hasResponse ;
+            owl:someValuesFrom ns1:ResponseSent ] .
+ns1:BadBankCode a owl:Class .
+ns1:BadPassword a owl:Class .
+ns1:Dispense a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasUpdated> ;
-            owl:someValuesFrom <Update> ] .
-
-<DisplayError> a owl:Class .
-
-<EjectedCard> a owl:Class ;
-    rdfs:subClassOf <Card> .
-
-<InitialDisplay> a owl:Class .
-
-<Initialization> a owl:Class ;
+            owl:onProperty ns1:hasUpdated ;
+            owl:someValuesFrom ns1:Update ] .
+ns1:DisplayError a owl:Class .
+ns1:EjectedCard a owl:Class ;
+    rdfs:subClassOf ns1:Card .
+ns1:InitialDisplay a owl:Class .
+ns1:Initialization a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom <Parameter> ;
-            owl:onProperty <hasParameter> ] .
-
-<InvalidPassword> a owl:Class ;
-    rdfs:subClassOf <Password> .
-
-<Log> a owl:Class .
-
-<LogFile> a owl:Class .
-
-<ProblemWithAccount> a owl:Class ;
+            owl:allValuesFrom ns1:Parameter ;
+            owl:onProperty ns1:hasParameter ] .
+ns1:InvalidPassword a owl:Class ;
+    rdfs:subClassOf ns1:Password .
+ns1:Log a owl:Class .
+ns1:LogFile a owl:Class .
+ns1:ProblemWithAccount a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasMessage> ;
-            owl:someValuesFrom <Message> ] .
-
-<ReturnCard> a owl:Class .
-
-<System> a owl:Class .
-
-<ValidCashCard> a owl:Class ;
-    rdfs:subClassOf <CashCard> ;
+            owl:onProperty ns1:hasMessage ;
+            owl:someValuesFrom ns1:Message ] .
+ns1:ReturnCard a owl:Class .
+ns1:System a owl:Class .
+ns1:ValidCashCard a owl:Class ;
+    rdfs:subClassOf ns1:CashCard ;
     owl:equivalentClass [ a owl:Restriction ;
-            owl:onProperty <checks> ;
-            owl:someValuesFrom <CashCard> ] .
-
-<WrongPasswordEntry> a owl:Class .
-
-<dispense> a owl:ObjectProperty ;
-    rdfs:domain <ATM> ;
-    rdfs:range <Money> .
-
-<exceedsLimit> a owl:DatatypeProperty ;
-    rdfs:domain <Amount> ;
+            owl:onProperty ns1:checks ;
+            owl:someValuesFrom ns1:CashCard ] .
+ns1:WrongPasswordEntry a owl:Class .
+ns1:dispense a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM ;
+    rdfs:range ns1:Money .
+ns1:exceedsLimit a owl:DatatypeProperty ;
+    rdfs:domain ns1:Amount ;
     rdfs:range xsd:boolean .
-
-<hasAccount> a owl:ObjectProperty ;
-    rdfs:domain <Bank>,
-        <BankComputer>,
-        <Customer>,
-        <TransactionRequest> ;
-    rdfs:range <Account> .
-
-<hasAmount> a owl:DatatypeProperty,
+ns1:hasAccount a owl:ObjectProperty ;
+    rdfs:domain ns1:Bank,
+        ns1:BankComputer,
+        ns1:Customer,
+        ns1:TransactionRequest ;
+    rdfs:range ns1:Account .
+ns1:hasAmount a owl:DatatypeProperty,
         owl:ObjectProperty ;
-    rdfs:domain <Transaction>,
-        <TransactionRequest> ;
-    rdfs:range <Amount>,
+    rdfs:domain ns1:Transaction,
+        ns1:TransactionRequest ;
+    rdfs:range ns1:Amount,
         xsd:decimal .
-
-<hasCashCard> a owl:ObjectProperty ;
-    rdfs:domain <ATM>,
-        <BankComputer> ;
-    rdfs:range <CashCard> .
-
-<hasMessage> a owl:ObjectProperty ;
-    rdfs:domain <ATM>,
-        <InvalidBankCode> ;
-    rdfs:range <Message>,
+ns1:hasCashCard a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM,
+        ns1:BankComputer ;
+    rdfs:range ns1:CashCard .
+ns1:hasMessage a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM,
+        ns1:InvalidBankCode ;
+    rdfs:range ns1:Message,
         xsd:string .
-
-<hasOperation> a owl:ObjectProperty ;
-    rdfs:domain <ATM> ;
+ns1:hasOperation a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM ;
     rdfs:range [ a owl:Class ;
-            owl:unionOf ( <DisplayError> <ReturnCard> ) ] .
-
-<hasPassword> a owl:ObjectProperty ;
-    rdfs:domain <BankComputer> ;
-    rdfs:range <Password> .
-
-<hasResponseTime> a owl:ObjectProperty ;
-    rdfs:domain <BankComputer> ;
-    rdfs:range <Minute> .
-
-<isResultOf> a owl:ObjectProperty ;
-    rdfs:domain <CardEjected>,
-        <ErrorMessageDisplayed> ;
-    rdfs:range <Authorization> .
-
-<providesSecurityFor> a owl:ObjectProperty .
-
-<receives> a rdf:Property,
+            owl:unionOf ( ns1:DisplayError ns1:ReturnCard ) ] .
+ns1:hasPassword a owl:ObjectProperty ;
+    rdfs:domain ns1:BankComputer ;
+    rdfs:range ns1:Password .
+ns1:hasResponseTime a owl:ObjectProperty ;
+    rdfs:domain ns1:BankComputer ;
+    rdfs:range ns1:Minute .
+ns1:isResultOf a owl:ObjectProperty ;
+    rdfs:domain ns1:CardEjected,
+        ns1:ErrorMessageDisplayed ;
+    rdfs:range ns1:Authorization .
+ns1:providesSecurityFor a owl:ObjectProperty .
+ns1:receives a rdf:Property,
         owl:ObjectProperty ;
-    rdfs:domain <ATM> ;
-    rdfs:range <BadAccount>,
-        <Message> .
-
-<Function> a owl:Class .
-
-<Item> a owl:Class .
-
-<Minute> a owl:Class .
-
-<ProcessTransaction> a owl:Class ;
+    rdfs:domain ns1:ATM ;
+    rdfs:range ns1:BadAccount,
+        ns1:Message .
+ns1:Function a owl:Class .
+ns1:Item a owl:Class .
+ns1:Minute a owl:Class .
+ns1:ProcessTransaction a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <processes> ;
-            owl:someValuesFrom <TransactionRequest> ] .
-
-<Request> a owl:Class ;
+            owl:onProperty ns1:processes ;
+            owl:someValuesFrom ns1:TransactionRequest ] .
+ns1:Request a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <verifies> ;
-            owl:someValuesFrom <Password> ] .
-
-<SerialNumber> a owl:Class .
-
-<TransactionDialog> a owl:Class,
+            owl:onProperty ns1:verifies ;
+            owl:someValuesFrom ns1:Password ] .
+ns1:SerialNumber a owl:Class .
+ns1:TransactionDialog a owl:Class,
         owl:Restriction ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <isStartedBy> ;
+            owl:onProperty ns1:isStartedBy ;
             owl:someValuesFrom [ a owl:Class ;
-                    owl:intersectionOf ( <AuthorizationProcess> <ValidPassword> <ValidSerialNumber> ) ] ] ;
-    owl:onProperty <isRestarted> ;
-    owl:someValuesFrom <TransactionDialog> .
-
-<UnsuccessfulTransaction> a owl:Class ;
+                    owl:intersectionOf ( ns1:AuthorizationProcess ns1:ValidPassword ns1:ValidSerialNumber ) ] ] ;
+    owl:onProperty ns1:isRestarted ;
+    owl:someValuesFrom ns1:TransactionDialog .
+ns1:UnsuccessfulTransaction a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasErrorMessage> ;
-            owl:someValuesFrom <ErrorMessage> ],
+            owl:onProperty ns1:hasErrorMessage ;
+            owl:someValuesFrom ns1:ErrorMessage ],
         [ a owl:Restriction ;
-            owl:onProperty <hasEjectedCard> ;
-            owl:someValuesFrom <EjectedCard> ],
-        <Transaction> .
-
-<Update> a owl:Class ;
+            owl:onProperty ns1:hasEjectedCard ;
+            owl:someValuesFrom ns1:EjectedCard ],
+        ns1:Transaction .
+ns1:Update a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <updates> ;
-            owl:someValuesFrom <LogFile> ],
+            owl:onProperty ns1:updates ;
+            owl:someValuesFrom ns1:LogFile ],
         [ a owl:Restriction ;
-            owl:onProperty <hasDispensed> ;
-            owl:someValuesFrom <Dispense> ] .
-
-<checks> a owl:ObjectProperty ;
-    rdfs:domain <ATM>,
-        <BankComputer> ;
-    rdfs:range <BankCode>,
-        <CashCard>,
-        <Password> .
-
-<hasBankCode> a owl:ObjectProperty ;
-    rdfs:domain <BankComputer>,
-        <Card>,
-        <CashCard>,
-        <Transaction> ;
-    rdfs:range <BankCode>,
+            owl:onProperty ns1:hasDispensed ;
+            owl:someValuesFrom ns1:Dispense ] .
+ns1:checks a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM,
+        ns1:BankComputer ;
+    rdfs:range ns1:BankCode,
+        ns1:CashCard,
+        ns1:Password .
+ns1:hasBankCode a owl:ObjectProperty ;
+    rdfs:domain ns1:BankComputer,
+        ns1:Card,
+        ns1:CashCard,
+        ns1:Transaction ;
+    rdfs:range ns1:BankCode,
         xsd:string .
-
-<hasErrorMessage> a owl:ObjectProperty ;
-    rdfs:domain <Card>,
-        <System>,
-        <UnsuccessfulTransaction> ;
-    rdfs:range <ErrorMessage> .
-
-<hasResponse> a owl:ObjectProperty ;
-    rdfs:domain <ATM>,
-        <AmountLogged> ;
-    rdfs:range <ATMResponse>,
-        <ResponseSent> .
-
-<sendsMessage> a owl:ObjectProperty ;
-    rdfs:domain <Bank>,
-        <BankComputer> ;
-    rdfs:range <ATM>,
-        <Message> .
-
-<Authorization> a owl:Class ;
+ns1:hasErrorMessage a owl:ObjectProperty ;
+    rdfs:domain ns1:Card,
+        ns1:System,
+        ns1:UnsuccessfulTransaction ;
+    rdfs:range ns1:ErrorMessage .
+ns1:hasResponse a owl:ObjectProperty ;
+    rdfs:domain ns1:ATM,
+        ns1:AmountLogged ;
+    rdfs:range ns1:ATMResponse,
+        ns1:ResponseSent .
+ns1:sendsMessage a owl:ObjectProperty ;
+    rdfs:domain ns1:Bank,
+        ns1:BankComputer ;
+    rdfs:range ns1:ATM,
+        ns1:Message .
+ns1:Authorization a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasError> ;
+            owl:onProperty ns1:hasError ;
             owl:someValuesFrom [ a owl:Class ;
-                    owl:unionOf ( <BadPassword> <BadBankCode> <BadAccount> ) ] ] ;
+                    owl:unionOf ( ns1:BadPassword ns1:BadBankCode ns1:BadAccount ) ] ] ;
     owl:equivalentClass [ a owl:Restriction ;
-            owl:hasValue <AuthorizationSuccess> ;
-            owl:onProperty <hasStatus> ] .
-
-<ResponseSent> a owl:Class .
-
-<ValidPassword> a owl:Class ;
+            owl:hasValue ns1:AuthorizationSuccess ;
+            owl:onProperty ns1:hasStatus ] .
+ns1:ResponseSent a owl:Class .
+ns1:ValidPassword a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasPassword> ;
-            owl:someValuesFrom <Password> ],
-        <Password> .
-
-<Withdrawal> a owl:Class ;
+            owl:onProperty ns1:hasPassword ;
+            owl:someValuesFrom ns1:Password ],
+        ns1:Password .
+ns1:Withdrawal a owl:Class ;
     owl:equivalentClass [ a owl:Class ;
-            owl:intersectionOf ( <Withdrawal> [ a owl:Restriction ;
-                        owl:onProperty <processes> ;
-                        owl:someValuesFrom <Bank> ] [ a owl:Restriction ;
-                        owl:onProperty <accepts> ;
-                        owl:someValuesFrom <Bank> ] ) ] .
-
-<hasSerialNumber> a owl:DatatypeProperty,
+            owl:intersectionOf ( ns1:Withdrawal [ a owl:Restriction ;
+                        owl:onProperty ns1:processes ;
+                        owl:someValuesFrom ns1:Bank ] [ a owl:Restriction ;
+                        owl:onProperty ns1:accepts ;
+                        owl:someValuesFrom ns1:Bank ] ) ] .
+ns1:hasSerialNumber a owl:DatatypeProperty,
         owl:ObjectProperty ;
-    rdfs:domain <AmountLogged>,
-        <CashCard> ;
-    rdfs:range <SerialNumber>,
+    rdfs:domain ns1:AmountLogged,
+        ns1:CashCard ;
+    rdfs:range ns1:SerialNumber,
         xsd:string .
-
-<processes> a owl:ObjectProperty ;
-    rdfs:domain <Bank>,
-        <ProcessTransaction> ;
-    rdfs:range <Transaction>,
-        <TransactionRequest>,
-        <Withdrawal> .
-
-<StateValue> a owl:Class .
-
-<TransactionRequest> a owl:Class ;
+ns1:processes a owl:ObjectProperty ;
+    rdfs:domain ns1:Bank,
+        ns1:ProcessTransaction ;
+    rdfs:range ns1:Transaction,
+        ns1:TransactionRequest,
+        ns1:Withdrawal .
+ns1:StateValue a owl:Class .
+ns1:TransactionRequest a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasAccount> ;
-            owl:someValuesFrom <Account> ],
+            owl:onProperty ns1:hasAccount ;
+            owl:someValuesFrom ns1:Account ],
         [ a owl:Restriction ;
-            owl:onProperty <hasAmount> ;
+            owl:onProperty ns1:hasAmount ;
             owl:someValuesFrom xsd:decimal ] .
-
-<BankCode> a owl:Class ;
+ns1:BankCode a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <isIssuedBy> ;
-            owl:someValuesFrom <Bank> ] .
-
-<ErrorMessage> a owl:Class ;
+            owl:onProperty ns1:isIssuedBy ;
+            owl:someValuesFrom ns1:Bank ] .
+ns1:ErrorMessage a owl:Class ;
     rdfs:label "Error Message"@en ;
     rdfs:comment "A class representing an error message that is displayed."@en ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:allValuesFrom xsd:integer ;
             owl:hasValue 30 ;
-            owl:onProperty <displayDuration> ] .
-
-<Money> a owl:Class .
-
-<Parameter> a owl:Class .
-
-<Account> a owl:Class .
-
-<Card> a owl:Class .
-
-<Password> a owl:Class ;
+            owl:onProperty ns1:displayDuration ] .
+ns1:Money a owl:Class .
+ns1:Parameter a owl:Class .
+ns1:Account a owl:Class .
+ns1:Card a owl:Class .
+ns1:Password a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <validFor> ;
-            owl:someValuesFrom <valid> ] ;
+            owl:onProperty ns1:validFor ;
+            owl:someValuesFrom ns1:valid ] ;
     owl:equivalentClass [ a owl:Class ;
-            owl:unionOf ( <ValidPassword> <InvalidPassword> ) ] .
-
-<CashCard> a owl:Class ;
+            owl:unionOf ( ns1:ValidPassword ns1:InvalidPassword ) ] .
+ns1:CashCard a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <hasBankCode> ;
-            owl:someValuesFrom <BankCode> ],
+            owl:onProperty ns1:hasBankCode ;
+            owl:someValuesFrom ns1:BankCode ],
         [ a owl:Restriction ;
-            owl:onProperty <hasSerialNumber> ;
+            owl:onProperty ns1:hasSerialNumber ;
             owl:someValuesFrom [ a owl:Restriction ;
-                    owl:onProperty <isLogged> ;
-                    owl:someValuesFrom <Log> ] ] .
-
-<Transaction> a owl:Class,
+                    owl:onProperty ns1:isLogged ;
+                    owl:someValuesFrom ns1:Log ] ] .
+ns1:Transaction a owl:Class,
         owl:Restriction ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:allValuesFrom [ a owl:Restriction ;
                     owl:hasValue false ;
-                    owl:onProperty <exceedsLimit> ] ;
-            owl:onProperty <hasAmount> ] ;
-    owl:onProperty <isCanceled> ;
-    owl:someValuesFrom <Transaction> .
-
-<BankComputer> a owl:Class ;
+                    owl:onProperty ns1:exceedsLimit ] ;
+            owl:onProperty ns1:hasAmount ] ;
+    owl:onProperty ns1:isCanceled ;
+    owl:someValuesFrom ns1:Transaction .
+ns1:BankComputer a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <processes> ;
-            owl:someValuesFrom <ProcessTransaction> ],
+            owl:onProperty ns1:processes ;
+            owl:someValuesFrom ns1:ProcessTransaction ],
         [ a owl:Restriction ;
-            owl:onProperty <sendsMessage> ;
-            owl:someValuesFrom <BadPasswordMessage> ],
+            owl:onProperty ns1:sendsMessage ;
+            owl:someValuesFrom ns1:BadPasswordMessage ],
         [ a owl:Restriction ;
-            owl:onProperty <sendsMessageTo> ;
-            owl:someValuesFrom <ATM> ],
+            owl:onProperty ns1:sendsMessageTo ;
+            owl:someValuesFrom ns1:ATM ],
         [ a owl:Restriction ;
-            owl:onProperty <checks> ;
-            owl:someValuesFrom <Password> ],
-        <System> .
-
-[] a owl:AllDisjointClasses ;
-    owl:members ( <BankComputer> <Card> <Minute> <ErrorMessage> ) .
-
+            owl:onProperty ns1:checks ;
+            owl:someValuesFrom ns1:Password ],
+        ns1:System .
 [] a owl:AllDisjointProperties ;
-    owl:members ( <hasResponseTime> <hasErrorMessage> ) .
-
+    owl:members ( ns1:hasResponseTime ns1:hasErrorMessage ) .
 [] a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <shallSet> ;
+            owl:onProperty ns1:shallSet ;
             owl:someValuesFrom [ a owl:Restriction ;
-                    owl:hasValue <initiated> ;
-                    owl:onProperty <hasItemState> ] ] ;
+                    owl:hasValue ns1:initiated ;
+                    owl:onProperty ns1:hasItemState ] ] ;
     owl:equivalentClass [ a owl:Restriction ;
-            owl:onProperty <hasInitialFunctionSequence> ;
+            owl:onProperty ns1:hasInitialFunctionSequence ;
             owl:someValuesFrom [ a owl:Restriction ;
-                    owl:hasValue <successful> ;
-                    owl:onProperty <hasStateValue> ] ] .
-
+                    owl:hasValue ns1:successful ;
+                    owl:onProperty ns1:hasStateValue ] ] .
 [] a owl:Class ;
-    rdfs:subClassOf <AccountOk> ;
-    owl:intersectionOf ( <BankComputer> [ a owl:Restriction ;
-                owl:onProperty <hasCashCard> ;
-                owl:someValuesFrom <CashCard> ] [ a owl:Restriction ;
-                owl:onProperty <hasPassword> ;
-                owl:someValuesFrom <Password> ] [ a owl:Restriction ;
-                owl:onProperty <hasAccount> ;
-                owl:someValuesFrom <Account> ] ) .
-
+    rdfs:subClassOf ns1:AccountOk ;
+    owl:intersectionOf ( ns1:BankComputer [ a owl:Restriction ;
+                owl:onProperty ns1:hasCashCard ;
+                owl:someValuesFrom ns1:CashCard ] [ a owl:Restriction ;
+                owl:onProperty ns1:hasPassword ;
+                owl:someValuesFrom ns1:Password ] [ a owl:Restriction ;
+                owl:onProperty ns1:hasAccount ;
+                owl:someValuesFrom ns1:Account ] ) .
 [] a owl:Axiom ;
-    owl:equivalentProperty <checks> ;
-    owl:propertyChainAxiom ( <requestsVerification> <hasBankCode> ) .
-
+    owl:equivalentProperty ns1:checks ;
+    owl:propertyChainAxiom ( ns1:requestsVerification ns1:hasBankCode ) .
 [] a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom <InitialDisplay> ;
-            owl:onProperty <displays> ] ;
+            owl:allValuesFrom ns1:InitialDisplay ;
+            owl:onProperty ns1:displays ] ;
     owl:equivalentClass [ a owl:Restriction ;
-            owl:onProperty <hasCashCard> ;
+            owl:onProperty ns1:hasCashCard ;
             owl:someValuesFrom owl:Nothing ] .
-
 [] a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <sendsMessage> ;
-            owl:someValuesFrom <ATM> ] ;
-    owl:intersectionOf ( <ValidCashCard> <ValidPassword> <ProblemWithAccount> ) .
-
+            owl:onProperty ns1:sendsMessage ;
+            owl:someValuesFrom ns1:ATM ] ;
+    owl:intersectionOf ( ns1:ValidCashCard ns1:ValidPassword ns1:ProblemWithAccount ) .
+[] a owl:AllDisjointClasses ;
+    owl:members ( ns1:BankComputer ns1:Card ns1:Minute ns1:ErrorMessage ) .
