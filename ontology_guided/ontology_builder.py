@@ -4,6 +4,7 @@ from typing import Optional
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, RDFS, OWL, XSD, Namespace
 from rdflib.plugins.parsers.notation3 import BadSyntax
+from xml.etree import ElementTree as ET
 
 
 class InvalidTurtleError(ValueError):
@@ -24,34 +25,54 @@ class OntologyBuilder:
         if not base_iri.endswith("#"):
             base_iri += "#"
         self.base_iri = base_iri
-        self.prefix = prefix or base_iri.rstrip("#").split("/")[-1]
+        # default prefix is empty so that output uses ':'
+        self.prefix = prefix if prefix is not None else ""
         self.lexical_namespace = lexical_namespace
         self.graph = Graph()
         self.graph.bind(self.prefix, self.base_iri)
+        # bind common prefixes for consistent header generation
+        self.graph.bind("owl", OWL)
+        self.graph.bind("rdf", RDF)
+        self.graph.bind("xml", Namespace("http://www.w3.org/XML/1998/namespace"))
+        self.graph.bind("xsd", XSD)
+        self.graph.bind("xsp", Namespace("http://www.owl-ontologies.com/2005/08/07/xsp.owl#"))
+        self.graph.bind("rdfs", RDFS)
+        self.graph.bind("swrl", Namespace("http://www.w3.org/2003/11/swrl#"))
+        self.graph.bind("swrlb", Namespace("http://www.w3.org/2003/11/swrlb#"))
+        self.graph.bind("protege", Namespace("http://protege.stanford.edu/plugins/owl/protege#"))
+        initial_ns = {p for p, _ in self.graph.namespaces()}
+
         ontology_iri = URIRef(self.base_iri.rstrip("#"))
         self.graph.add((ontology_iri, RDF.type, OWL.Ontology))
         if ontology_files:
             for path in ontology_files:
                 self.graph.parse(path)
+        extra = []
+        for p, u in self.graph.namespaces():
+            if p and p not in initial_ns:
+                extra.append((p, str(u)))
+        self.extra_prefixes = extra
         self._build_header()
         self._extract_available_terms()
         self.triple_provenance: dict[str, dict] = {}
         self._triple_counter = 0
 
     def _build_header(self):
-        prefixes = {
-            self.prefix: self.base_iri,
-            "rdf": str(RDF),
-            "rdfs": str(RDFS),
-            "owl": str(OWL),
-            "xsd": str(XSD),
-        }
-        for prefix, uri in self.graph.namespaces():
-            if prefix and prefix not in prefixes:
-                prefixes[prefix] = str(uri)
-        header_lines = [f"@base <{self.base_iri}> .\n"]
-        header_lines += [f"@prefix {p}: <{u}> .\n" for p, u in prefixes.items()]
-        self.header = "".join(header_lines)
+        ordered = [
+            (self.prefix, self.base_iri),
+            ("owl", str(OWL)),
+            ("rdf", str(RDF)),
+            ("xml", "http://www.w3.org/XML/1998/namespace"),
+            ("xsd", str(XSD)),
+            ("xsp", "http://www.owl-ontologies.com/2005/08/07/xsp.owl#"),
+            ("rdfs", str(RDFS)),
+            ("swrl", "http://www.w3.org/2003/11/swrl#"),
+            ("swrlb", "http://www.w3.org/2003/11/swrlb#"),
+            ("protege", "http://protege.stanford.edu/plugins/owl/protege#"),
+        ]
+        lines = [f"@prefix {p}: <{u}> .\n" for p, u in ordered + self.extra_prefixes]
+        lines.append(f"@base <{self.base_iri}> .\n\n")
+        self.header = "".join(lines)
 
     def _extract_available_terms(self):
         nm = self.graph.namespace_manager
@@ -192,7 +213,45 @@ class OntologyBuilder:
 
     def save(self, file_path: str, fmt: str = "turtle"):
         """Αποθηκεύει την οντολογία σε αρχείο."""
-        self.graph.serialize(destination=file_path, format=fmt, base=self.base_iri)
+        ontology_iri = URIRef(self.base_iri.rstrip("#"))
+        if fmt == "turtle":
+            temp = Graph()
+            for pfx, uri in self.graph.namespaces():
+                temp.bind(pfx, uri)
+            for s, p, o in self.graph.triples((None, None, None)):
+                if (s, p, o) != (ontology_iri, RDF.type, OWL.Ontology):
+                    temp.add((s, p, o))
+            body = temp.serialize(format="turtle")
+            body_lines = [
+                line
+                for line in body.splitlines()
+                if line and not line.startswith("@prefix") and not line.startswith("@base")
+            ]
+            with open(file_path, "w", encoding="utf-8") as fh:
+                fh.write(self.header)
+                fh.write(f"<{ontology_iri}> rdf:type owl:Ontology .\n")
+                for line in body_lines:
+                    fh.write(line + "\n")
+        elif fmt == "xml":
+            xml_graph = Graph()
+            for triple in self.graph.triples((None, None, None)):
+                xml_graph.add(triple)
+            xml_data = xml_graph.serialize(format="pretty-xml", xml_base=self.base_iri)
+            root = ET.fromstring(xml_data)
+            ontology_elem = None
+            others = []
+            for child in list(root):
+                if child.tag.endswith("Ontology"):
+                    ontology_elem = child
+                else:
+                    others.append(child)
+            if ontology_elem is not None:
+                root[:] = [ontology_elem] + others
+            xml_bytes = ET.tostring(root, encoding="utf-8", xml_declaration=True)
+            with open(file_path, "wb") as fh:
+                fh.write(xml_bytes)
+        else:
+            self.graph.serialize(destination=file_path, format=fmt, base=self.base_iri)
 
 
 if __name__ == "__main__":
