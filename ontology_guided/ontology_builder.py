@@ -235,6 +235,7 @@ class OntologyBuilder:
                 for line in self.prefix_lines:
                     fh.write(line)
                 fh.write(self.base_line)
+                fh.write("\n")
                 fh.write(f"<{ontology_iri}> rdf:type owl:Ontology .\n")
                 for line in body_lines:
                     fh.write(line + "\n")
