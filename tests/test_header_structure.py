@@ -3,8 +3,10 @@ from ontology_guided.ontology_builder import OntologyBuilder
 
 def test_header_and_ontology_elements(tmp_path):
     ob = OntologyBuilder('http://lod.csd.auth.gr/atm/atm.ttl#')
-    ttl_file = tmp_path / 'combined.ttl'
-    owl_file = tmp_path / 'combined.owl'
+    results_dir = tmp_path / 'results'
+    results_dir.mkdir()
+    ttl_file = results_dir / 'combined.ttl'
+    owl_file = results_dir / 'combined.owl'
     ob.save(ttl_file, fmt='turtle')
     ob.save(owl_file, fmt='xml')
 
@@ -21,10 +23,12 @@ def test_header_and_ontology_elements(tmp_path):
         '@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .',
         '@prefix protege: <http://protege.stanford.edu/plugins/owl/protege#> .',
         '@base <http://lod.csd.auth.gr/atm/atm.ttl#> .',
-        '',
         '<http://lod.csd.auth.gr/atm/atm.ttl> rdf:type owl:Ontology .',
     ]
     assert ttl_lines[: len(expected_header)] == expected_header
+
+    non_prefix = [line for line in ttl_lines if not line.startswith('@')]
+    assert non_prefix[0] == '<http://lod.csd.auth.gr/atm/atm.ttl> rdf:type owl:Ontology .'
 
     import xml.etree.ElementTree as ET
     root = ET.fromstring(owl_file.read_text(encoding='utf-8'))
