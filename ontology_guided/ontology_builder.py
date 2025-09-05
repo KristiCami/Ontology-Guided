@@ -30,36 +30,8 @@ class OntologyBuilder:
         self.prefix = prefix if prefix is not None else ""
         self.lexical_namespace = lexical_namespace
         self.graph = Graph()
-        self.graph.bind(self.prefix, self.base_iri)
         # bind common prefixes for consistent header generation
-        self.graph.bind("owl", OWL)
-        self.graph.bind("rdf", RDF)
-        self.graph.bind("xml", Namespace("http://www.w3.org/XML/1998/namespace"))
-        self.graph.bind("xsd", XSD)
-        self.graph.bind("xsp", Namespace("http://www.owl-ontologies.com/2005/08/07/xsp.owl#"))
-        self.graph.bind("rdfs", RDFS)
-        self.graph.bind("swrl", Namespace("http://www.w3.org/2003/11/swrl#"))
-        self.graph.bind("swrlb", Namespace("http://www.w3.org/2003/11/swrlb#"))
-        self.graph.bind("protege", Namespace("http://protege.stanford.edu/plugins/owl/protege#"))
-        initial_ns = {p for p, _ in self.graph.namespaces()}
-
-        ontology_iri = URIRef(self.base_iri.rstrip("#"))
-        self.graph.add((ontology_iri, RDF.type, OWL.Ontology))
-        if ontology_files:
-            for path in ontology_files:
-                self.graph.parse(path)
-        extra = []
-        for p, u in self.graph.namespaces():
-            if p and p not in initial_ns:
-                extra.append((p, str(u)))
-        self.extra_prefixes = extra
-        self._build_header()
-        self._extract_available_terms()
-        self.triple_provenance: dict[str, dict] = {}
-        self._triple_counter = 0
-
-    def _build_header(self):
-        ordered = [
+        self.standard_prefixes = [
             (self.prefix, self.base_iri),
             ("owl", str(OWL)),
             ("rdf", str(RDF)),
@@ -71,9 +43,28 @@ class OntologyBuilder:
             ("swrlb", "http://www.w3.org/2003/11/swrlb#"),
             ("protege", "http://protege.stanford.edu/plugins/owl/protege#"),
         ]
+        for p, u in self.standard_prefixes:
+            self.graph.bind(p, Namespace(u))
+        # capture the allowed prefixes so later saves avoid leaking extra ones
+        self.allowed_prefixes = {p for p, _ in self.graph.namespaces()}
+
+        ontology_iri = URIRef(self.base_iri.rstrip("#"))
+        self.graph.add((ontology_iri, RDF.type, OWL.Ontology))
+        # build the header before parsing external ontologies so only standard
+        # prefixes appear in the output header
+        self._build_header()
+
+        if ontology_files:
+            for path in ontology_files:
+                self.graph.parse(path)
+        self._extract_available_terms()
+        self.triple_provenance: dict[str, dict] = {}
+        self._triple_counter = 0
+
+    def _build_header(self):
         # store prefix and base lines separately so save() can control ordering
         self.prefix_lines = [
-            f"@prefix {p}: <{u}> .\n" for p, u in ordered + self.extra_prefixes
+            f"@prefix {p}: <{u}> .\n" for p, u in self.standard_prefixes
         ]
 
         self.base_line = f"@base <{self.base_iri}> .\n"
@@ -218,7 +209,13 @@ class OntologyBuilder:
     ):
         lines = [line for line in turtle_str.splitlines() if line.strip()]
         cleaned = "\n".join(lines)
-        data = self.header + "\n" + cleaned
+
+        extra_prefix = []
+        for p, u in self.graph.namespaces():
+            if p and p not in self.allowed_prefixes:
+                extra_prefix.append(f"@prefix {p}: <{u}> .\n")
+        parse_header = self.header + "".join(extra_prefix)
+        data = parse_header + "\n" + cleaned
         if logger:
             logger.debug("=== Turtle input to rdflib.parse ===")
             logger.debug(data)
@@ -307,11 +304,23 @@ class OntologyBuilder:
         ontology_iri = URIRef(self.base_iri.rstrip("#"))
         if fmt == "turtle":
             temp = Graph()
-            for pfx, uri in self.graph.namespaces():
-                temp.bind(pfx, uri)
+            for p, u in self.standard_prefixes:
+                temp.bind(p, Namespace(u))
+
+            ignore = [self.lexical_namespace]
+            if self.lexical_namespace.endswith("#"):
+                ignore.append(self.lexical_namespace.rsplit("#", 1)[0] + "/example#")
+
+            def in_ignore(term):
+                return isinstance(term, URIRef) and any(str(term).startswith(ns) for ns in ignore)
+
             for s, p, o in self.graph.triples((None, None, None)):
-                if (s, p, o) != (ontology_iri, RDF.type, OWL.Ontology):
-                    temp.add((s, p, o))
+                if (s, p, o) == (ontology_iri, RDF.type, OWL.Ontology):
+                    continue
+                if in_ignore(s) or in_ignore(p) or in_ignore(o):
+                    continue
+                temp.add((s, p, o))
+
             body = temp.serialize(format="turtle")
             body_lines = [
                 line
