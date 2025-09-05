@@ -1,51 +1,165 @@
 <?xml version='1.0' encoding='utf-8'?>
-<rdf:RDF xmlns:ns1="http://www.w3.org/2002/07/owl#" xmlns:ns2="http://www.w3.org/2000/01/rdf-schema#" xmlns:ns3="http://example.com/lexical#" xmlns:ns4="http://lod.csd.auth.gr/atm/atm.ttl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xml:base="http://lod.csd.auth.gr/atm/atm.ttl#">
+<rdf:RDF xmlns:ns1="http://www.w3.org/2002/07/owl#" xmlns:ns2="http://lod.csd.auth.gr/atm/atm.ttl#" xmlns:ns3="http://www.w3.org/2000/01/rdf-schema#" xmlns:ns4="http://example.com/lexical#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xml:base="http://lod.csd.auth.gr/atm/atm.ttl#">
   <ns1:Ontology rdf:about="http://lod.csd.auth.gr/atm/atm.ttl" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#UpdateLogFile">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#LogFile" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#LogFile" />
+  <ns1:Axiom rdf:nodeID="ne28d77978162429ab3d08087373bd1f9b7">
+    <ns1:consequent>
+      <ns1:Restriction rdf:nodeID="ne28d77978162429ab3d08087373bd1f9b9">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasItemState" />
+        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#initiated" />
+      </ns1:Restriction>
+    </ns1:consequent>
+    <ns1:antecedent>
+      <ns1:Restriction rdf:nodeID="ne28d77978162429ab3d08087373bd1f9b8">
+        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#transaction" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#setsItem" />
+      </ns1:Restriction>
+    </ns1:antecedent>
+  </ns1:Axiom>
+  <ns2:Parameter rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#n">
+    <ns2:setParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
+    <ns2:initializeParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
+  </ns2:Parameter>
+  <ns1:Axiom rdf:nodeID="ne28d77978162429ab3d08087373bd1f9b4">
+    <ns1:consequent>
+      <ns1:Restriction rdf:nodeID="ne28d77978162429ab3d08087373bd1f9b6">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#setsItem" />
+        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#transaction" />
+      </ns1:Restriction>
+    </ns1:consequent>
+    <ns1:antecedent>
+      <ns1:Restriction rdf:nodeID="ne28d77978162429ab3d08087373bd1f9b5">
+        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#withdrawal" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasInitialFunctionSequence" />
+      </ns1:Restriction>
+    </ns1:antecedent>
+  </ns1:Axiom>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CreateAccountRecord">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AccountRecord" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
   </ns1:ObjectProperty>
-  <ns3:Word rdf:about="http://example.com/lexical#WithdrawalTransaction">
-    <ns3:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal" />
-  </ns3:Word>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#receivesRequest">
-    <ns2:range>
-      <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#processTransaction">
-        <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-        <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-      </ns1:ObjectProperty>
-    </ns2:range>
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+  <rdf:Property rdf:about="http://example.com/lexical#antonym">
+    <ns3:domain rdf:resource="http://example.com/lexical#Word" />
+    <ns3:range rdf:resource="http://example.com/lexical#Word" />
+  </rdf:Property>
+  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasDailyLimit">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
+    <ns3:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+  </ns1:DatatypeProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionSuccess">
+    <ns1:equivalentClass>
+      <ns1:Restriction rdf:nodeID="ncbc5d188c02b4181b870551739af79f5b1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasStatus" />
+        <ns1:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">succeeded</ns1:hasValue>
+      </ns1:Restriction>
+    </ns1:equivalentClass>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="ncbc5d188c02b4181b870551739af79f5b3">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputerSendsSuccessMessage" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sends" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessageDisplayed">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n2aad1ee576e14cba82f93b45149eae1fb7">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isResultOf" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns1:Class rdf:nodeID="n788f5557e6f84d21916cb0f681cf1279b5">
+    <ns1:equivalentClass>
+      <ns1:Restriction rdf:nodeID="n788f5557e6f84d21916cb0f681cf1279b6">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sendMessage" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AccountOK" />
+      </ns1:Restriction>
+    </ns1:equivalentClass>
+    <ns1:intersectionOf rdf:parseType="Collection">
+      <ns1:Restriction rdf:nodeID="n788f5557e6f84d21916cb0f681cf1279b7">
+        <ns1:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ns1:hasValue>
+        <ns1:onProperty>
+          <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isValid">
+            <ns3:domain>
+              <ns1:Class rdf:nodeID="n788f5557e6f84d21916cb0f681cf1279b1">
+                <ns1:unionOf rdf:parseType="Collection">
+                  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+                  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
+                  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
+                </ns1:unionOf>
+              </ns1:Class>
+            </ns3:domain>
+            <ns3:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Literal" />
+          </ns1:ObjectProperty>
+        </ns1:onProperty>
+      </ns1:Restriction>
+    </ns1:intersectionOf>
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+  </ns1:Class>
+  <ns4:Word rdf:about="http://example.com/lexical#AutomatedTellerMachine">
+    <ns4:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+  </ns4:Word>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#enters">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
   </ns1:ObjectProperty>
-  <ns4:Parameter rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#n">
-    <ns4:initializeParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
-    <ns4:setParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
-  </ns4:Parameter>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initializedWith">
+    <ns3:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+  </ns1:ObjectProperty>
+  <ns4:Word rdf:about="http://example.com/lexical#BankAccount">
+    <ns4:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
+  </ns4:Word>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initiates">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#WithdrawalSequence" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+  </ns1:ObjectProperty>
+  <ns4:Word rdf:about="http://example.com/lexical#AccountHolder">
+    <ns4:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
+  </ns4:Word>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionFailure">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n035c35badd644a288b8812be69cd19d1b5">
+        <ns1:someValuesFrom>
+          <ns1:Class rdf:nodeID="n035c35badd644a288b8812be69cd19d1b6">
+            <ns1:intersectionOf rdf:parseType="Collection">
+              <ns1:Restriction rdf:nodeID="n035c35badd644a288b8812be69cd19d1b7">
+                <ns1:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ns1:hasValue>
+                <ns1:onProperty>
+                  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#exceedsLimit">
+                    <ns3:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean" />
+                  </ns1:DatatypeProperty>
+                </ns1:onProperty>
+              </ns1:Restriction>
+            </ns1:intersectionOf>
+          </ns1:Class>
+        </ns1:someValuesFrom>
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasRequestedAmount" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+  </ns1:Class>
+  <rdf:Property rdf:about="http://example.com/lexical#synonym">
+    <ns3:range rdf:resource="http://example.com/lexical#Word" />
+    <ns3:domain rdf:resource="http://example.com/lexical#Word" />
+  </rdf:Property>
+  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasMonthlyLimit">
+    <ns3:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
+  </ns1:DatatypeProperty>
   <ns1:Restriction rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Transaction">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nec5f76d167164a21a59df6df81d28d35b3">
-        <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#amount" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nd850643285c248198bedbefb837efcacb5">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#displayErrorMessage" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nec5f76d167164a21a59df6df81d28d35b4">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n39bc830c490942b7aa7e89c51bb3a199b4">
         <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#onAccount" />
         <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nd850643285c248198bedbefb837efcacb1">
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="nf82604a33c5c4015b00ff82338023aceb1">
         <ns1:someValuesFrom>
-          <ns1:Class rdf:nodeID="nd850643285c248198bedbefb837efcacb2">
+          <ns1:Class rdf:nodeID="nf82604a33c5c4015b00ff82338023aceb2">
             <ns1:complementOf>
-              <ns1:DataRange rdf:nodeID="nd850643285c248198bedbefb837efcacb3">
+              <ns1:DataRange rdf:nodeID="nf82604a33c5c4015b00ff82338023aceb3">
                 <ns1:oneOf rdf:parseType="Collection">
                   <rdf:Description rdf:about="true" />
                 </ns1:oneOf>
@@ -55,334 +169,32 @@
         </ns1:someValuesFrom>
         <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isSuccessful" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nd850643285c248198bedbefb837efcacb6">
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="nf82604a33c5c4015b00ff82338023aceb6">
         <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
         <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ejectCard" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n4e72fdca4b11469196331f36b69841d1b1">
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="nf82604a33c5c4015b00ff82338023aceb5">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#displayErrorMessage" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n39bc830c490942b7aa7e89c51bb3a199b3">
+        <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#amount" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n035c35badd644a288b8812be69cd19d1b1">
         <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasRequestedAmount" />
         <ns1:someValuesFrom>
-          <ns1:Class rdf:nodeID="n4e72fdca4b11469196331f36b69841d1b2">
+          <ns1:Class rdf:nodeID="n035c35badd644a288b8812be69cd19d1b2">
             <ns1:intersectionOf rdf:parseType="Collection">
-              <ns1:Restriction rdf:nodeID="n4e72fdca4b11469196331f36b69841d1b3">
-                <ns1:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ns1:hasValue>
-                <ns1:onProperty>
-                  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#exceedsLimit">
-                    <ns2:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean" />
-                  </ns1:DatatypeProperty>
-                </ns1:onProperty>
-              </ns1:Restriction>
-            </ns1:intersectionOf>
-          </ns1:Class>
-        </ns1:someValuesFrom>
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns1:onProperty>
-      <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isCanceled">
-        <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-        <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-      </ns1:ObjectProperty>
-    </ns1:onProperty>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class" />
-    <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-    <ns1:inverseOf>
-      <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#processedBy">
-        <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-        <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-      </ns1:ObjectProperty>
-    </ns1:inverseOf>
-  </ns1:Restriction>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CardEjected">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n13bfaddde38e4446964ab4e85b682801b6">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isResultOf" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <ns1:Class rdf:nodeID="n14f0b2c757b4417e8cc8aaa547027807b5">
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
-    <ns1:intersectionOf rdf:parseType="Collection">
-      <ns1:Restriction rdf:nodeID="n14f0b2c757b4417e8cc8aaa547027807b7">
-        <ns1:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ns1:hasValue>
-        <ns1:onProperty>
-          <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isValid">
-            <ns2:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Literal" />
-            <ns2:domain>
-              <ns1:Class rdf:nodeID="n14f0b2c757b4417e8cc8aaa547027807b1">
-                <ns1:unionOf rdf:parseType="Collection">
-                  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
-                  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
-                  <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
-                </ns1:unionOf>
-              </ns1:Class>
-            </ns2:domain>
-          </ns1:ObjectProperty>
-        </ns1:onProperty>
-      </ns1:Restriction>
-    </ns1:intersectionOf>
-    <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="n14f0b2c757b4417e8cc8aaa547027807b6">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sendMessage" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AccountOK" />
-      </ns1:Restriction>
-    </ns1:equivalentClass>
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#RunningOutOfMoney">
-    <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="ne16a2ca3a20840ccb447171e91c76200b1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AcceptsCard" />
-        <ns1:allValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Nothing" />
-      </ns1:Restriction>
-    </ns1:equivalentClass>
-  </ns1:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initializeParameters">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initializedWith">
-    <ns2:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#returnsBankCode">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-  </ns1:ObjectProperty>
-  <ns4:Parameter rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#k">
-    <ns4:initializeParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
-    <ns4:setParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
-  </ns4:Parameter>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog">
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction" />
-    <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog" />
-    <ns1:onProperty>
-      <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isRestarted">
-        <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog" />
-        <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog" />
-      </ns1:ObjectProperty>
-    </ns1:onProperty>
-  </ns1:Class>
-  <ns3:Word rdf:about="http://example.com/lexical#AccountHolder">
-    <ns3:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
-  </ns3:Word>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionSuccess">
-    <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="n98cf40a42fe74f009b016c31e92b9194b1">
-        <ns1:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string">succeeded</ns1:hasValue>
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasStatus" />
-      </ns1:Restriction>
-    </ns1:equivalentClass>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n98cf40a42fe74f009b016c31e92b9194b3">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputerSendsSuccessMessage" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sends" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-  </ns1:Class>
-  <ns3:Word rdf:about="http://example.com/lexical#BankCustomer">
-    <ns3:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
-  </ns3:Word>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidBankCode">
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode" />
-  </ns1:Class>
-  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasDailyLimit">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
-    <ns2:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
-  </ns1:DatatypeProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#waitForResponse">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Response" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#System" />
-  </ns1:ObjectProperty>
-  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasMonthlyLimit">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
-    <ns2:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
-  </ns1:DatatypeProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasRequest">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionRequest" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ProcessTransaction" />
-  </ns1:ObjectProperty>
-  <ns1:Axiom rdf:nodeID="nd0767cea8afc47168de58b131cb473feb1">
-    <ns1:antecedent>
-      <ns1:Restriction rdf:nodeID="nd0767cea8afc47168de58b131cb473feb2">
-        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#withdrawal" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasInitialFunctionSequence" />
-      </ns1:Restriction>
-    </ns1:antecedent>
-    <ns1:consequent>
-      <ns1:Restriction rdf:nodeID="nd0767cea8afc47168de58b131cb473feb3">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasStateValue" />
-        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#successful" />
-      </ns1:Restriction>
-    </ns1:consequent>
-  </ns1:Axiom>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CreateAccountRecord">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AccountRecord" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasEnteredAmount">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasValidPassword">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-  </ns1:ObjectProperty>
-  <ns3:Word rdf:about="http://example.com/lexical/example#quick">
-    <ns3:synonym>
-      <ns3:Word rdf:about="http://example.com/lexical/example#fast" />
-    </ns3:synonym>
-  </ns3:Word>
-  <ns2:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#StartTransactionDialog">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="ne75ac8080faa447d82bfa5b52e70c1b3b4">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isStartedBy" />
-        <ns1:someValuesFrom>
-          <ns1:Class rdf:nodeID="ne75ac8080faa447d82bfa5b52e70c1b3b5">
-            <ns1:intersectionOf rdf:parseType="Collection">
-              <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationProcess" />
-              <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword" />
-              <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidSerialNumber" />
-            </ns1:intersectionOf>
-          </ns1:Class>
-        </ns1:someValuesFrom>
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns2:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#setParameters">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter" />
-  </ns1:ObjectProperty>
-  <ns1:Axiom rdf:nodeID="nd0767cea8afc47168de58b131cb473feb7">
-    <ns1:antecedent>
-      <ns1:Restriction rdf:nodeID="nd0767cea8afc47168de58b131cb473feb8">
-        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#transaction" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#setsItem" />
-      </ns1:Restriction>
-    </ns1:antecedent>
-    <ns1:consequent>
-      <ns1:Restriction rdf:nodeID="nd0767cea8afc47168de58b131cb473feb9">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasItemState" />
-        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#initiated" />
-      </ns1:Restriction>
-    </ns1:consequent>
-  </ns1:Axiom>
-  <ns1:Class rdf:nodeID="n126698c552324bb2aebf07c953c055ecb1">
-    <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="n126698c552324bb2aebf07c953c055ecb2">
-        <ns1:someValuesFrom>
-          <ns1:Class rdf:nodeID="n126698c552324bb2aebf07c953c055ecb3">
-            <ns1:intersectionOf rdf:parseType="Collection">
-              <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
-              <ns1:Restriction rdf:nodeID="n126698c552324bb2aebf07c953c055ecb4">
-                <ns1:onProperty>
-                  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#readsSerialNumber">
-                    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-                    <ns2:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
-                  </ns1:ObjectProperty>
-                </ns1:onProperty>
-                <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
-              </ns1:Restriction>
-              <ns1:Restriction rdf:nodeID="n126698c552324bb2aebf07c953c055ecb5">
-                <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
-                <ns1:onProperty>
-                  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#readsBankCode">
-                    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-                    <ns2:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
-                  </ns1:ObjectProperty>
-                </ns1:onProperty>
-              </ns1:Restriction>
-            </ns1:intersectionOf>
-          </ns1:Class>
-        </ns1:someValuesFrom>
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasValidCashCard" />
-      </ns1:Restriction>
-    </ns1:equivalentClass>
-  </ns1:Class>
-  <ns3:Word rdf:about="http://example.com/lexical#Person">
-    <ns3:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
-  </ns3:Word>
-  <ns1:Axiom rdf:nodeID="nd0767cea8afc47168de58b131cb473feb4">
-    <ns1:antecedent>
-      <ns1:Restriction rdf:nodeID="nd0767cea8afc47168de58b131cb473feb5">
-        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#withdrawal" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasInitialFunctionSequence" />
-      </ns1:Restriction>
-    </ns1:antecedent>
-    <ns1:consequent>
-      <ns1:Restriction rdf:nodeID="nd0767cea8afc47168de58b131cb473feb6">
-        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#transaction" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#setsItem" />
-      </ns1:Restriction>
-    </ns1:consequent>
-  </ns1:Axiom>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessageDisplayed">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n13bfaddde38e4446964ab4e85b682801b7">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isResultOf" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasMoney">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasProblemWithAccount">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ProblemWithAccount" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasAccount">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
-  </ns1:ObjectProperty>
-  <ns3:Word rdf:about="http://example.com/lexical#BankAccount">
-    <ns3:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
-  </ns3:Word>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#NoCashCardInATM">
-    <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="n77d50298364b4b788453a4687f2f2ce2b1">
-        <ns1:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">0</ns1:cardinality>
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasCashCard" />
-      </ns1:Restriction>
-    </ns1:equivalentClass>
-    <ns1:equivalentClass rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ShouldDisplayInitialDisplay" />
-  </ns1:Class>
-  <ns3:Word rdf:about="http://example.com/lexical#FinancialInstitution">
-    <ns3:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-  </ns3:Word>
-  <rdf:Property rdf:about="http://example.com/lexical#synonym">
-    <ns2:domain rdf:resource="http://example.com/lexical#Word" />
-    <ns2:range rdf:resource="http://example.com/lexical#Word" />
-  </rdf:Property>
-  <ns3:Word rdf:about="http://example.com/lexical#BankCard">
-    <ns3:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
-  </ns3:Word>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ATMRequestVerification">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n7b3695d9bb7c4e94a93afad14c7e69c1b1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#requestsVerificationOf" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <rdf:Property rdf:about="http://example.com/lexical#antonym">
-    <ns2:range rdf:resource="http://example.com/lexical#Word" />
-    <ns2:domain rdf:resource="http://example.com/lexical#Word" />
-  </rdf:Property>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionFailure">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n4e72fdca4b11469196331f36b69841d1b5">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasRequestedAmount" />
-        <ns1:someValuesFrom>
-          <ns1:Class rdf:nodeID="n4e72fdca4b11469196331f36b69841d1b6">
-            <ns1:intersectionOf rdf:parseType="Collection">
-              <ns1:Restriction rdf:nodeID="n4e72fdca4b11469196331f36b69841d1b7">
+              <ns1:Restriction rdf:nodeID="n035c35badd644a288b8812be69cd19d1b3">
                 <ns1:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ns1:hasValue>
                 <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#exceedsLimit" />
               </ns1:Restriction>
@@ -390,162 +202,611 @@
           </ns1:Class>
         </ns1:someValuesFrom>
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-  </ns1:Class>
-  <ns2:Class rdf:about="http://example.com/lexical#Noun">
-    <ns2:subClassOf rdf:resource="http://example.com/lexical#Word" />
-  </ns2:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#from">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Response" />
+    </ns3:subClassOf>
+    <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class" />
+    <ns1:inverseOf>
+      <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#processedBy">
+        <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+        <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+      </ns1:ObjectProperty>
+    </ns1:inverseOf>
+    <ns1:onProperty>
+      <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isCanceled">
+        <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+        <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+      </ns1:ObjectProperty>
+    </ns1:onProperty>
+  </ns1:Restriction>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#waitForResponse">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Response" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#System" />
   </ns1:ObjectProperty>
-  <ns3:Word rdf:about="http://example.com/lexical/example#slow">
-    <ns3:antonym rdf:resource="http://example.com/lexical/example#fast" />
-  </ns3:Word>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#displays">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AmountOfMoney" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#belongsToBank">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="Actor:Customer">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="na628cbc1003b4e06848351acacae04cdb1">
-        <ns1:someValuesFrom rdf:resource="Item:card" />
-        <ns1:onProperty rdf:resource="Function:dispense" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <ns4:Parameter rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#m">
-    <ns4:setParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
-    <ns4:initializeParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
-  </ns4:Parameter>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initiates">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#WithdrawalSequence" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-  </ns1:ObjectProperty>
-  <ns3:Word rdf:about="http://example.com/lexical#AutomatedTellerMachine">
-    <ns3:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-  </ns3:Word>
-  <ns1:Class rdf:about="System:bank_computer" />
   <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ownsCard">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
   </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#enters">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
+  <ns3:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#StartTransactionDialog">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n26f100af8d784754802094f2a4dcfc15b4">
+        <ns1:someValuesFrom>
+          <ns1:Class rdf:nodeID="n26f100af8d784754802094f2a4dcfc15b5">
+            <ns1:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationProcess" />
+              <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword" />
+              <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidSerialNumber" />
+            </ns1:intersectionOf>
+          </ns1:Class>
+        </ns1:someValuesFrom>
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isStartedBy" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns3:Class>
+  <ns2:Parameter rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#k">
+    <ns2:initializeParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
+    <ns2:setParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
+  </ns2:Parameter>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasValidPassword">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
   </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#cardIssuedBy">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+  <ns1:Restriction rdf:nodeID="n59e4f3b5c6934ea8a11c04412378da1ab1">
+    <ns1:someValuesFrom>
+      <ns1:Restriction rdf:nodeID="n59e4f3b5c6934ea8a11c04412378da1ab2" />
+    </ns1:someValuesFrom>
+  </ns1:Restriction>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasMoney">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
   </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#checks">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasEnteredAmount">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
   </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasMoneyDispensed">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATMResponse" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#displays">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AmountOfMoney" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
   </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Dispense">
+  <ns2:Parameter rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#m">
+    <ns2:initializeParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
+    <ns2:setParameters rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#t" />
+  </ns2:Parameter>
+  <ns1:Restriction rdf:nodeID="nc4848eb106e84d788a82a12e34bec616b2" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#NoCashCardInATM">
+    <ns1:equivalentClass rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ShouldDisplayInitialDisplay" />
     <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="n0865ee8591464a668e9b647f03a35e92b1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#after" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Update" />
+      <ns1:Restriction rdf:nodeID="n98253ae325dd4c209f5ba18a54494109b1">
+        <ns1:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">0</ns1:cardinality>
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasCashCard" />
       </ns1:Restriction>
     </ns1:equivalentClass>
   </ns1:Class>
-  <ns2:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationProcess">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="ne75ac8080faa447d82bfa5b52e70c1b3b1">
+  <ns1:Restriction rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog">
+    <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog" />
+    <ns1:onProperty>
+      <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isRestarted">
+        <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog" />
+        <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog" />
+      </ns1:ObjectProperty>
+    </ns1:onProperty>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class" />
+  </ns1:Restriction>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#cardIssuedBy">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#receivesRequest">
+    <ns3:range>
+      <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#processTransaction">
+        <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+        <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+      </ns1:ObjectProperty>
+    </ns3:range>
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+  </ns1:ObjectProperty>
+  <ns1:Restriction rdf:nodeID="n59e4f3b5c6934ea8a11c04412378da1ab3" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasProblemWithAccount">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ProblemWithAccount" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:nodeID="nc5f342e0b0264841947b9c129ecdcfe1b1">
+    <ns1:equivalentClass>
+      <ns1:Restriction rdf:nodeID="nc5f342e0b0264841947b9c129ecdcfe1b2">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasValidCashCard" />
+        <ns1:someValuesFrom>
+          <ns1:Class rdf:nodeID="nc5f342e0b0264841947b9c129ecdcfe1b3">
+            <ns1:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+              <ns1:Restriction rdf:nodeID="nc5f342e0b0264841947b9c129ecdcfe1b4">
+                <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+                <ns1:onProperty>
+                  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#readsSerialNumber">
+                    <ns3:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+                    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+                  </ns1:ObjectProperty>
+                </ns1:onProperty>
+              </ns1:Restriction>
+              <ns1:Restriction rdf:nodeID="nc5f342e0b0264841947b9c129ecdcfe1b5">
+                <ns1:onProperty>
+                  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#readsBankCode">
+                    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+                    <ns3:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+                  </ns1:ObjectProperty>
+                </ns1:onProperty>
+                <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+              </ns1:Restriction>
+            </ns1:intersectionOf>
+          </ns1:Class>
+        </ns1:someValuesFrom>
+      </ns1:Restriction>
+    </ns1:equivalentClass>
+  </ns1:Class>
+  <ns4:Word rdf:about="http://example.com/lexical/example#slow">
+    <ns4:antonym>
+      <ns4:Word rdf:about="http://example.com/lexical/example#fast" />
+    </ns4:antonym>
+  </ns4:Word>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasAccount">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#belongsToBank">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initializeParameters">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#returnsBankCode">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode" />
+  </ns1:ObjectProperty>
+  <ns1:Axiom rdf:nodeID="ne28d77978162429ab3d08087373bd1f9b1">
+    <ns1:antecedent>
+      <ns1:Restriction rdf:nodeID="ne28d77978162429ab3d08087373bd1f9b2">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasInitialFunctionSequence" />
+        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#withdrawal" />
+      </ns1:Restriction>
+    </ns1:antecedent>
+    <ns1:consequent>
+      <ns1:Restriction rdf:nodeID="ne28d77978162429ab3d08087373bd1f9b3">
+        <ns1:hasValue rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#successful" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasStateValue" />
+      </ns1:Restriction>
+    </ns1:consequent>
+  </ns1:Axiom>
+  <ns4:Word rdf:about="http://example.com/lexical/example#quick">
+    <ns4:synonym rdf:resource="http://example.com/lexical/example#fast" />
+  </ns4:Word>
+  <ns4:Word rdf:about="http://example.com/lexical#WithdrawalTransaction">
+    <ns4:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal" />
+  </ns4:Word>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#UpdateLogFile">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#LogFile" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#LogFile" />
+  </ns1:ObjectProperty>
+  <ns1:Restriction rdf:nodeID="nc4848eb106e84d788a82a12e34bec616b1" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#from">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Response" />
+  </ns1:ObjectProperty>
+  <ns4:Word rdf:about="http://example.com/lexical#Person">
+    <ns4:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
+  </ns4:Word>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasRequest">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ProcessTransaction" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionRequest" />
+  </ns1:ObjectProperty>
+  <ns4:Word rdf:about="http://example.com/lexical#BankCustomer">
+    <ns4:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
+  </ns4:Word>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CardEjected">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n2aad1ee576e14cba82f93b45149eae1fb6">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isResultOf" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#RunningOutOfMoney">
+    <ns1:equivalentClass>
+      <ns1:Restriction rdf:nodeID="n8a3dfade4d2f4c87b7db6f08d77a776eb1">
+        <ns1:allValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Nothing" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AcceptsCard" />
+      </ns1:Restriction>
+    </ns1:equivalentClass>
+  </ns1:Class>
+  <ns4:Word rdf:about="http://example.com/lexical#FinancialInstitution">
+    <ns4:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+  </ns4:Word>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidBankCode">
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode" />
+  </ns1:Class>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#setParameters">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Parameter" />
+  </ns1:ObjectProperty>
+  <ns3:Class rdf:about="http://example.com/lexical#Noun">
+    <ns3:subClassOf rdf:resource="http://example.com/lexical#Word" />
+  </ns3:Class>
+  <ns4:Word rdf:about="http://example.com/lexical#BankCard">
+    <ns4:synonym rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+  </ns4:Word>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ATMRequestVerification">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n4dc5fbd719e242cc8b14dce145c96a79b1">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#requestsVerificationOf" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns3:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationProcess">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n26f100af8d784754802094f2a4dcfc15b1">
         <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#receivesAcceptanceFrom" />
         <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns2:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasErrorMessage">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#System" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isSuccessful">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization" />
-    <ns2:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Literal" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#SuccessfulAuthorization" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n1e038681a4ce4476a4d13eeb3bb628deb2">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadPasswordMessage" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessage" />
+    </ns3:subClassOf>
+  </ns3:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Card">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n4dc5fbd719e242cc8b14dce145c96a79b2">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber" />
+        <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="na4455828d01440ce880fedac6fcf8ac6b2">
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n4dc5fbd719e242cc8b14dce145c96a79b3">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasPassword" />
+        <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n2cd991e8c927414c9cefed7de3b61603b2">
+        <ns1:someValuesFrom>
+          <ns1:Restriction rdf:nodeID="n2cd991e8c927414c9cefed7de3b61603b3">
+            <ns1:onClass rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#WrongPasswordEntry" />
+            <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasWrongPasswordEntry" />
+            <ns1:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">3</ns1:qualifiedCardinality>
+          </ns1:Restriction>
+        </ns1:someValuesFrom>
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasCard" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns1:equivalentClass>
+      <ns1:Restriction rdf:nodeID="ne3fc8b9c830345e79dc6572b4a852216b2">
+        <ns1:someValuesFrom>
+          <ns1:Restriction rdf:nodeID="ne3fc8b9c830345e79dc6572b4a852216b3">
+            <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage" />
+            <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasErrorMessage" />
+          </ns1:Restriction>
+        </ns1:someValuesFrom>
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasBankComputerResponse" />
+      </ns1:Restriction>
+    </ns1:equivalentClass>
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadAccount">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n26df1943c0954d4a98699b672586435bb1">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sends" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n26df1943c0954d4a98699b672586435bb2">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#receives" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasMessage">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InvalidBankCode" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
+  </ns1:ObjectProperty>
+  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#displayDuration">
+    <ns3:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage" />
+  </ns1:DatatypeProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionFailed">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="ne64d6a550e294e4bb0112f80630fa0d9b1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasStatus" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#InvalidPassword">
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#DisplayError" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasValidCashCard">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidCashCard" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Parameter" />
+  <ns1:NamedIndividual rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AccountOK">
+    <rdf:type rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
+  </ns1:NamedIndividual>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage">
+    <ns3:comment xml:lang="en">An error message is displayed.</ns3:comment>
+    <ns3:label xml:lang="en">Error Message</ns3:label>
+    <ns1:equivalentClass>
+      <ns1:Restriction rdf:nodeID="n77f80d0a17af4559a31f7d7a3896a8bab1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#displayDuration" />
+        <ns1:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
+        <ns1:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">30</ns1:hasValue>
+      </ns1:Restriction>
+    </ns1:equivalentClass>
+  </ns1:Class>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ejectCard">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#setsItem">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Item" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ATM">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="nbecf7f2a6fc14d7086f01f26e12a931bb1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#verifies" />
+        <ns1:someValuesFrom>
+          <ns1:Class rdf:nodeID="nbecf7f2a6fc14d7086f01f26e12a931bb2">
+            <ns1:intersectionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+              <ns1:Restriction rdf:nodeID="nbecf7f2a6fc14d7086f01f26e12a931bb3">
+                <ns1:onProperty>
+                  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasBankCode">
+                    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+                    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode" />
+                    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+                    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+                    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty" />
+                  </ns1:DatatypeProperty>
+                </ns1:onProperty>
+                <ns1:someValuesFrom rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Literal" />
+              </ns1:Restriction>
+              <ns1:Restriction rdf:nodeID="nbecf7f2a6fc14d7086f01f26e12a931bb4">
+                <ns1:someValuesFrom rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Literal" />
+                <ns1:onProperty>
+                  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasPassword">
+                    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty" />
+                    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
+                    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+                  </ns1:ObjectProperty>
+                </ns1:onProperty>
+              </ns1:Restriction>
+            </ns1:intersectionOf>
+          </ns1:Class>
+        </ns1:someValuesFrom>
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n510bb23e6b1544359e23b4335068543fb3">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sends" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Request" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n6160cc876cab4f1196e1f4e71c39b75db1">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidCashCard" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#checks" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns1:NamedIndividual rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class" />
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n2c3b6551cf0a450294dc13c52d0b2a4db2">
         <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessageTo" />
         <ns1:allValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n7b3695d9bb7c4e94a93afad14c7e69c1b4">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#checks" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode" />
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="ncfa8f25c2f0a4a5ba2cf71f94e3288a2b2">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadPasswordMessage" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessage" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nec5f76d167164a21a59df6df81d28d35b2">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#processes" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nf2ed8ed93eba437e99351a0e287fdf42b2">
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n510bb23e6b1544359e23b4335068543fb2">
         <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
         <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#checks" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n1e038681a4ce4476a4d13eeb3bb628deb1">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InvalidPassword" />
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="ncfa8f25c2f0a4a5ba2cf71f94e3288a2b1">
         <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasPassword" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InvalidPassword" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual" />
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidCashCard">
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadBankCode" />
-  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Password">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nf2ed8ed93eba437e99351a0e287fdf42b1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#validFor" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#valid" />
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n4dc5fbd719e242cc8b14dce145c96a79b4">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#checks" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Class rdf:nodeID="nb4f2dd31b42844999169d8b6296b8124b1">
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n39bc830c490942b7aa7e89c51bb3a199b2">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#processes" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:NamedIndividual>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasWrongPasswordEntry">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#WrongPasswordEntry" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#validFor">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Bank">
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class" />
+    <ns1:equivalentClass>
+      <ns1:Restriction rdf:nodeID="n1e7ae5749655463190828ef3f440f4aab1">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Computer" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#providesSecurity" />
+      </ns1:Restriction>
+    </ns1:equivalentClass>
+    <ns1:equivalentClass>
+      <ns1:Restriction rdf:nodeID="n1e7ae5749655463190828ef3f440f4aab2">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Software" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#providesSecurity" />
+      </ns1:Restriction>
+    </ns1:equivalentClass>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n9e2f95f0d3ca4a3eaf444358a663cc6ab1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasBankCode" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:label xml:lang="en">Bank</ns3:label>
+  </ns1:Class>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sends">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadAccount" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Request" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#dispenses">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Dispensed20DollarBill" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#valid">
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n3c516f01ecb84e29bdb4b4bda323cba4b2">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#processes" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n3c516f01ecb84e29bdb4b4bda323cba4b3">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#accepts" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n3c516f01ecb84e29bdb4b4bda323cba4b1">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#dispenses" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessage">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BankCode">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty" />
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n4dc5fbd719e242cc8b14dce145c96a79b5">
+        <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isValid" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isSuccessful">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization" />
+    <ns3:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Literal" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#SuccessfulAuthorization" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#WithdrawalSequence" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#System" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasItemState">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Item" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#StateValue" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#checks">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasBankComputerResponse">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputerResponse" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AmountOfMoney" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasMoneyDispensed">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATMResponse" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#displayErrorMessage">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage" />
+  </ns1:ObjectProperty>
+  <rdf:Property rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#displayMessage">
+    <ns3:label xml:lang="en">display message</ns3:label>
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+  </rdf:Property>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#processes">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasStateValue">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#StateValue" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Function" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessageTo">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ATMOperation">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n75506fc541e942df945d2a6ece7f458fb2">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ReturnCard" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasOutcome" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n75506fc541e942df945d2a6ece7f458fb1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasOutcome" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#DisplayError" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasUpdate">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Update" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasOutcome">
+    <ns3:range>
+      <ns1:Class rdf:nodeID="n75506fc541e942df945d2a6ece7f458fb3">
         <ns1:unionOf rdf:parseType="Collection">
-          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword" />
-          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#InvalidPassword" />
+          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#DisplayError" />
+          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ReturnCard" />
         </ns1:unionOf>
       </ns1:Class>
-    </ns2:subClassOf>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class" />
-  </ns1:DatatypeProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ProcessTransaction" />
+    </ns3:range>
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATMOperation" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#InitialDisplay" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Computer" />
   <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Authorization">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n13bfaddde38e4446964ab4e85b682801b1">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n2aad1ee576e14cba82f93b45149eae1fb1">
         <ns1:someValuesFrom>
-          <rdf:Description rdf:nodeID="n13bfaddde38e4446964ab4e85b682801b2">
+          <rdf:Description rdf:nodeID="n2aad1ee576e14cba82f93b45149eae1fb2">
             <ns1:unionOf rdf:parseType="Collection">
               <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadPassword" />
               <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadBankCode" />
@@ -555,163 +816,64 @@
         </ns1:someValuesFrom>
         <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#receives" />
       </ns1:Restriction>
-    </ns2:subClassOf>
+    </ns3:subClassOf>
   </ns1:Class>
-  <ns1:Class rdf:about="System:ATM">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nb0a9931fe46d46ff8387f0a07db7dbd1b3">
-        <ns1:someValuesFrom rdf:resource="Item:money" />
-        <ns1:onProperty rdf:resource="Function:dispense" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationDialog">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="nae675c333db4472ba8ac1a12642a8e32b1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#requestsUserToEnter" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nb0a9931fe46d46ff8387f0a07db7dbd1b1">
-        <ns1:onProperty rdf:resource="Flow:message" />
-        <ns1:someValuesFrom>
-          <ns1:Restriction rdf:nodeID="nb0a9931fe46d46ff8387f0a07db7dbd1b2">
-            <ns1:onProperty rdf:resource="Item:transaction" />
-            <ns1:hasValue rdf:resource="StateValue:succeeded" />
-          </ns1:Restriction>
-        </ns1:someValuesFrom>
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="na628cbc1003b4e06848351acacae04cdb2">
-        <ns1:someValuesFrom rdf:resource="Item:money" />
-        <ns1:onProperty rdf:resource="Function:dispense" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
+    </ns3:subClassOf>
   </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Card">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n7b3695d9bb7c4e94a93afad14c7e69c1b2">
-        <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n7b3695d9bb7c4e94a93afad14c7e69c1b3">
-        <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+  <ns3:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n26f100af8d784754802094f2a4dcfc15b2">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
         <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasPassword" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n711762b3e5374a31a81b4630ef5657a1b2">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasCard" />
+    </ns3:subClassOf>
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class" />
+  </ns3:Class>
+  <ns1:Restriction rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionLimit">
+    <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+    <ns1:onProperty>
+      <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#exceeds">
+        <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+        <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionLimit" />
+      </ns1:ObjectProperty>
+    </ns1:onProperty>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class" />
+  </ns1:Restriction>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BankComputerSendsSuccessMessage">
+    <ns1:equivalentClass>
+      <ns1:Restriction rdf:nodeID="ncbc5d188c02b4181b870551739af79f5b2">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#transactionSucceeded" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sends" />
+      </ns1:Restriction>
+    </ns1:equivalentClass>
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+  </ns1:Class>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#verifies">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Request" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+  </ns1:ObjectProperty>
+  <ns3:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidSerialNumber">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n26f100af8d784754802094f2a4dcfc15b3">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns3:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Message">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="nf1316080cffe4f7dad43f2398315328bb1">
         <ns1:someValuesFrom>
-          <ns1:Restriction rdf:nodeID="n711762b3e5374a31a81b4630ef5657a1b3">
-            <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasWrongPasswordEntry" />
-            <ns1:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">3</ns1:qualifiedCardinality>
-            <ns1:onClass rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#WrongPasswordEntry" />
-          </ns1:Restriction>
-        </ns1:someValuesFrom>
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="na302690da5464fb19ebdea2bb962b76cb2">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasBankComputerResponse" />
-        <ns1:someValuesFrom>
-          <ns1:Restriction rdf:nodeID="na302690da5464fb19ebdea2bb962b76cb3">
-            <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasErrorMessage" />
-            <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage" />
-          </ns1:Restriction>
-        </ns1:someValuesFrom>
-      </ns1:Restriction>
-    </ns1:equivalentClass>
-  </ns1:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessage">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Bank">
-    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class" />
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n7eaf4dd14ea44889b44bf352e4434034b1">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasBankCode" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="n2a052bfd6f4f4f4fb9bebf69d8fe1157b1">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Computer" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#providesSecurity" />
-      </ns1:Restriction>
-    </ns1:equivalentClass>
-    <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="n2a052bfd6f4f4f4fb9bebf69d8fe1157b2">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#providesSecurity" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Software" />
-      </ns1:Restriction>
-    </ns1:equivalentClass>
-    <ns2:label xml:lang="en">Bank</ns2:label>
-  </ns1:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasInitialFunctionSequence">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Function" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Log" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ejectCard">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ATMResponse">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n7ac361f1cc3640e38a414c9fc8b2fcfdb1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasMoneyDispensed" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ShouldDisplayInitialDisplay">
-    <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="n77d50298364b4b788453a4687f2f2ce2b2">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#display" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InitialDisplay" />
-      </ns1:Restriction>
-    </ns1:equivalentClass>
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Dispensed20DollarBill">
-    <ns1:equivalentClass>
-      <ns1:Class rdf:nodeID="n9de1bb104e514920adb0270ca7362b37b1">
-        <ns1:intersectionOf rdf:parseType="Collection">
-          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed" />
-          <ns1:Restriction rdf:nodeID="n9de1bb104e514920adb0270ca7362b37b2">
-            <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed" />
-            <ns1:onProperty>
-              <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#dispenses">
-                <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed" />
-                <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
-                <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Dispensed20DollarBill" />
-                <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-              </ns1:ObjectProperty>
-            </ns1:onProperty>
-          </ns1:Restriction>
-        </ns1:intersectionOf>
-      </ns1:Class>
-    </ns1:equivalentClass>
-  </ns1:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#accepts">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ReturnCard" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#SuccessfulAuthorization">
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization" />
-  </ns1:Class>
-  <ns2:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Message">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nf0643a50741843df92295d18d03fa94eb1">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#displayMessage" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n477daaa9ebb0438a9a480f98c71e2c7bb1">
-        <ns1:someValuesFrom>
-          <ns1:Class rdf:nodeID="n477daaa9ebb0438a9a480f98c71e2c7bb2">
+          <ns1:Class rdf:nodeID="nf1316080cffe4f7dad43f2398315328bb2">
             <ns1:intersectionOf rdf:parseType="Collection">
               <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidCashCard" />
               <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword" />
@@ -721,477 +883,280 @@
         </ns1:someValuesFrom>
         <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasMessage" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:label xml:lang="en">Message</ns2:label>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class" />
-  </ns2:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasCashCard">
-    <rdf:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
-    <rdf:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="nb37c0edcf11b4cdda08619235911a83cb1">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#displayMessage" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class" />
+    <ns3:label xml:lang="en">Message</ns3:label>
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadPasswordMessage">
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Customer">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="nb37c0edcf11b4cdda08619235911a83cb2">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#callBank" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:label xml:lang="en">Customer</ns3:label>
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class" />
+  </ns1:Class>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#logs">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged" />
   </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasMessage">
-    <ns2:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InvalidBankCode" />
-  </ns1:ObjectProperty>
-  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasStatus">
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionFailed" />
-    <ns2:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-  </ns1:DatatypeProperty>
-  <rdf:Property rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#callBank">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-    <ns2:label xml:lang="en">call bank</ns2:label>
-  </rdf:Property>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#verifies">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Request" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sendsResponse">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ResponseSent" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged" />
-  </ns1:ObjectProperty>
+  <ns3:Class rdf:about="http://example.com/lexical#Word" />
   <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged">
     <ns1:equivalentClass>
-      <ns1:Class rdf:nodeID="n9de1bb104e514920adb0270ca7362b37b9">
+      <ns1:Class rdf:nodeID="n3d2915f8cbed471d85e678e04b899980b9">
         <ns1:intersectionOf rdf:parseType="Collection">
           <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ResponseSent" />
-          <ns1:Restriction rdf:nodeID="n9de1bb104e514920adb0270ca7362b37b10">
-            <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sendsResponse" />
+          <ns1:Restriction rdf:nodeID="n3d2915f8cbed471d85e678e04b899980b10">
+            <ns1:onProperty>
+              <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sendsResponse">
+                <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged" />
+                <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ResponseSent" />
+              </ns1:ObjectProperty>
+            </ns1:onProperty>
             <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ResponseSent" />
           </ns1:Restriction>
         </ns1:intersectionOf>
       </ns1:Class>
     </ns1:equivalentClass>
   </ns1:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasBankCode">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Software" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#display">
+    <rdf:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InitialDisplay" />
+    <rdf:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
   </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sends">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Request" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadAccount" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#WithdrawalSequence" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasWrongPasswordEntry">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#WrongPasswordEntry" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadPasswordMessage">
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#InitialDisplay" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#validFor">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword">
-    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class" />
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="ne75ac8080faa447d82bfa5b52e70c1b3b2">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasPassword" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
-  </ns1:Class>
-  <ns4:Function rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#withdrawal" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasPassword">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage">
-    <ns2:label xml:lang="en">Error Message</ns2:label>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadPassword" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Update">
     <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="n44794376f6d2426591b3ee95b2e66e11b1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#displayDuration" />
-        <ns1:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">30</ns1:hasValue>
-        <ns1:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
+      <ns1:Restriction rdf:nodeID="na5cbdade322e415a99515d1ec5618e8bb2">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasUpdate" />
       </ns1:Restriction>
     </ns1:equivalentClass>
-    <ns2:comment xml:lang="en">An error message is displayed.</ns2:comment>
   </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadAccount">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nec7b7d85160e487dad40d01b45cb8ef6b1">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sends" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nec7b7d85160e487dad40d01b45cb8ef6b2">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#receives" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#SuccessfulAuthorization">
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Authorization" />
   </ns1:Class>
-  <ns2:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidSerialNumber">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="ne75ac8080faa447d82bfa5b52e70c1b3b3">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isLogged">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Log" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasErrorMessage">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#System" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasCashCard">
+    <rdf:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <rdf:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ATMResponse">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="ne8d5bd7cafa942c2af6994756fa9c6fbb1">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasMoneyDispensed" />
       </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns2:Class>
-  <ns2:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Customer">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nf0643a50741843df92295d18d03fa94eb2">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#callBank" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:label xml:lang="en">Customer</ns2:label>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sendMessage">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#accepts">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+  </ns1:ObjectProperty>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#receives">
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadAccount" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+  </ns1:ObjectProperty>
+  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasStatus">
+    <ns3:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionFailed" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty" />
+  </ns1:DatatypeProperty>
+  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Password">
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class" />
-  </ns2:Class>
-  <ns4:Item rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#transaction" />
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n510bb23e6b1544359e23b4335068543fb1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#validFor" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#valid" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Class rdf:nodeID="n1e9babd0e887451da28e3c3484d8a6a0b1">
+        <ns1:unionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidPassword" />
+          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#InvalidPassword" />
+        </ns1:unionOf>
+      </ns1:Class>
+    </ns3:subClassOf>
+  </ns1:DatatypeProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#LogFile" />
   <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber" />
   </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#after">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Update" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Dispense" />
-  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#InvalidBankCode">
+    <ns1:equivalentClass>
+      <ns1:Restriction rdf:nodeID="n2c3b6551cf0a450294dc13c52d0b2a4db1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasMessage" />
+        <ns1:hasValue>bad bank code</ns1:hasValue>
+      </ns1:Restriction>
+    </ns1:equivalentClass>
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode" />
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
+  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasResponseTime">
+    <ns3:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputerResponse" />
+  </ns1:DatatypeProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#StateValue" />
   <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#CashCard">
     <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="nea3afafe641d49e4a878fa5ac2974357b1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber" />
+      <ns1:Restriction rdf:nodeID="n2054d0b03c714f9f81a4b4f32eb62562b1">
         <ns1:someValuesFrom>
-          <ns1:Restriction rdf:nodeID="nea3afafe641d49e4a878fa5ac2974357b2">
-            <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Log" />
+          <ns1:Restriction rdf:nodeID="n2054d0b03c714f9f81a4b4f32eb62562b2">
             <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isLogged" />
+            <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Log" />
           </ns1:Restriction>
         </ns1:someValuesFrom>
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasSerialNumber" />
       </ns1:Restriction>
     </ns1:equivalentClass>
   </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed">
+  <rdf:Property rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#callBank">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Customer" />
+    <ns3:label xml:lang="en">call bank</ns3:label>
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
+  </rdf:Property>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadBankCode" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#providesSecurity" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AcceptsCard">
+    <rdf:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
+    <rdf:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Dispense">
     <ns1:equivalentClass>
-      <ns1:Class rdf:nodeID="n9de1bb104e514920adb0270ca7362b37b5">
+      <ns1:Restriction rdf:nodeID="na5cbdade322e415a99515d1ec5618e8bb1">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Update" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#after" />
+      </ns1:Restriction>
+    </ns1:equivalentClass>
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ValidCashCard">
+    <ns3:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Request">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n39bc830c490942b7aa7e89c51bb3a199b1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#processes" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n510bb23e6b1544359e23b4335068543fb4">
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#verifies" />
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Dispensed20DollarBill">
+    <ns1:equivalentClass>
+      <ns1:Class rdf:nodeID="n3d2915f8cbed471d85e678e04b899980b1">
         <ns1:intersectionOf rdf:parseType="Collection">
-          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged" />
-          <ns1:Restriction rdf:nodeID="n9de1bb104e514920adb0270ca7362b37b6">
-            <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged" />
-            <ns1:onProperty>
-              <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#logs">
-                <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged" />
-                <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed" />
-              </ns1:ObjectProperty>
-            </ns1:onProperty>
+          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed" />
+          <ns1:Restriction rdf:nodeID="n3d2915f8cbed471d85e678e04b899980b2">
+            <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#dispenses" />
+            <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed" />
           </ns1:Restriction>
         </ns1:intersectionOf>
       </ns1:Class>
     </ns1:equivalentClass>
   </ns1:Class>
+  <ns2:Message rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#transactionSucceeded">
+    <ns3:label xml:lang="en">transaction succeeded</ns3:label>
+  </ns2:Message>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionRequest" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#after">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Dispense" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Update" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#requestsUserToEnter">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationDialog" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ProblemWithAccount" />
   <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BankComputerResponse">
     <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="na302690da5464fb19ebdea2bb962b76cb1">
+      <ns1:Restriction rdf:nodeID="ne3fc8b9c830345e79dc6572b4a852216b1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasResponseTime" />
         <ns1:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</ns1:hasValue>
         <ns1:datatype rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasResponseTime" />
       </ns1:Restriction>
     </ns1:equivalentClass>
   </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n904670e1b4f1487a98ada30560e049f2b2">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#processes" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n904670e1b4f1487a98ada30560e049f2b3">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#accepts" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n904670e1b4f1487a98ada30560e049f2b1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#dispenses" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasValidCashCard">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidCashCard" />
-  </ns1:ObjectProperty>
-  <ns1:Restriction rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionLimit">
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class" />
-    <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-    <ns1:onProperty>
-      <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#exceeds">
-        <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-        <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#TransactionLimit" />
-      </ns1:ObjectProperty>
-    </ns1:onProperty>
-  </ns1:Restriction>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AcceptsCard">
-    <rdf:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <rdf:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Function" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ATMOperation">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n7098a16423ac4962859591c7d9cbe213b1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasOutcome" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#DisplayError" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n7098a16423ac4962859591c7d9cbe213b2">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasOutcome" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ReturnCard" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AccountRecord" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BankCode">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n7b3695d9bb7c4e94a93afad14c7e69c1b5">
-        <ns1:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#boolean" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#isValid" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty" />
-  </ns1:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sendMessage">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
-  </ns1:ObjectProperty>
-  <ns2:Class rdf:about="http://example.com/lexical#Word" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#sendsMessageTo">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#InvalidBankCode">
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankCode" />
-    <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="na4455828d01440ce880fedac6fcf8ac6b1">
-        <ns1:hasValue>bad bank code</ns1:hasValue>
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasMessage" />
-      </ns1:Restriction>
-    </ns1:equivalentClass>
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#InvalidPassword">
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
-  </ns1:Class>
-  <ns1:Class rdf:about="Flow:message" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Item" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasItemState">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Item" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#StateValue" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasStateValue">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Function" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#StateValue" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#processes">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#requestsUserToEnter">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationDialog" />
-  </ns1:ObjectProperty>
-  <ns4:Message rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#transactionSucceeded">
-    <ns2:label xml:lang="en">transaction succeeded</ns2:label>
-  </ns4:Message>
-  <ns1:Class rdf:about="Item:money" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Computer" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#display">
-    <rdf:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <rdf:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InitialDisplay" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#WrongPasswordEntry">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n711762b3e5374a31a81b4630ef5657a1b1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasWrongPasswordEntry" />
-        <ns1:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">3</ns1:qualifiedCardinality>
-        <ns1:onClass rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#receives">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BadAccount" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#isLogged">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#SerialNumber" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Log" />
-  </ns1:ObjectProperty>
-  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#displayDuration">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage" />
-    <ns2:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
-  </ns1:DatatypeProperty>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasBankComputerResponse">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputerResponse" />
-  </ns1:ObjectProperty>
-  <ns1:ObjectProperty rdf:about="Function:dispense">
-    <ns2:range rdf:resource="Item:money" />
-    <ns2:domain rdf:resource="System:ATM" />
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#StateValue" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#providesSecurity" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasRequestedAmount" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#setsItem">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Item" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
-  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasResponseTime">
-    <ns2:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputerResponse" />
-  </ns1:DatatypeProperty>
-  <ns4:Message rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AccountOK">
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual" />
-  </ns4:Message>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasUpdate">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Update" />
-  </ns1:ObjectProperty>
   <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasCard">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
   </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionRequest" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#TransactionFailed">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n9779446c31ae407b8cc4716974e5e1a6b1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasStatus" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Update">
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Item" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#MoneyDispensed">
     <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="n0865ee8591464a668e9b647f03a35e92b2">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasUpdate" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Account" />
-      </ns1:Restriction>
-    </ns1:equivalentClass>
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ATM">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nf26b28cf29c247af9d0b6069ffa4f88db1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#checks" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ValidCashCard" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nebc00aa5c40b485980c6700b89d0d338b1">
-        <ns1:someValuesFrom>
-          <ns1:Class rdf:nodeID="nebc00aa5c40b485980c6700b89d0d338b2">
-            <ns1:intersectionOf rdf:parseType="Collection">
-              <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
-              <ns1:Restriction rdf:nodeID="nebc00aa5c40b485980c6700b89d0d338b3">
-                <ns1:someValuesFrom rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Literal" />
-                <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasBankCode" />
-              </ns1:Restriction>
-              <ns1:Restriction rdf:nodeID="nebc00aa5c40b485980c6700b89d0d338b4">
-                <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasPassword" />
-                <ns1:someValuesFrom rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Literal" />
-              </ns1:Restriction>
-            </ns1:intersectionOf>
-          </ns1:Class>
-        </ns1:someValuesFrom>
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#verifies" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nf2ed8ed93eba437e99351a0e287fdf42b3">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sends" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Request" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationDialog">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="n77359f007f6a49789116a4d95fe85746b1">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#requestsUserToEnter" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#System" />
-  <ns1:Class rdf:about="Item:transaction" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#LogFile" />
-  <ns4:StateValue rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#successful" />
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasOutcome">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATMOperation" />
-    <ns2:range>
-      <ns1:Class rdf:nodeID="n7098a16423ac4962859591c7d9cbe213b3">
-        <ns1:unionOf rdf:parseType="Collection">
-          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#DisplayError" />
-          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ReturnCard" />
-        </ns1:unionOf>
+      <ns1:Class rdf:nodeID="n3d2915f8cbed471d85e678e04b899980b5">
+        <ns1:intersectionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged" />
+          <ns1:Restriction rdf:nodeID="n3d2915f8cbed471d85e678e04b899980b6">
+            <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#AmountLogged" />
+            <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#logs" />
+          </ns1:Restriction>
+        </ns1:intersectionOf>
       </ns1:Class>
-    </ns2:range>
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#valid">
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#CashCard" />
+    </ns1:equivalentClass>
   </ns1:Class>
-  <ns4:StateValue rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initiated" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BankComputerSendsSuccessMessage">
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ShouldDisplayInitialDisplay">
     <ns1:equivalentClass>
-      <ns1:Restriction rdf:nodeID="n98cf40a42fe74f009b016c31e92b9194b2">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#sends" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#transactionSucceeded" />
+      <ns1:Restriction rdf:nodeID="n98253ae325dd4c209f5ba18a54494109b2">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#display" />
+        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#InitialDisplay" />
       </ns1:Restriction>
     </ns1:equivalentClass>
-    <ns2:subClassOf rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#BankComputer" />
   </ns1:Class>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Parameter" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Software" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#DisplayError" />
-  <rdf:Property rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#displayMessage">
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Bank" />
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Message" />
-    <ns2:label xml:lang="en">display message</ns2:label>
-  </rdf:Property>
-  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#displayErrorMessage">
-    <ns2:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessage" />
-    <ns2:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-  </ns1:ObjectProperty>
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Request">
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nf2ed8ed93eba437e99351a0e287fdf42b4">
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#verifies" />
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Password" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-    <ns2:subClassOf>
-      <ns1:Restriction rdf:nodeID="nec5f76d167164a21a59df6df81d28d35b1">
-        <ns1:someValuesFrom rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Transaction" />
-        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#processes" />
-      </ns1:Restriction>
-    </ns2:subClassOf>
-  </ns1:Class>
-  <ns1:Class rdf:about="StateValue:succeeded" />
-  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#amount" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#BadPassword" />
   <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Response" />
-  <ns1:Class rdf:about="Item:card" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Money" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ProblemWithAccount" />
+  <ns2:Item rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#transaction" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AccountRecord" />
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasInitialFunctionSequence">
+    <ns3:domain rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#ATM" />
+    <ns3:range rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Function" />
+  </ns1:ObjectProperty>
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ReturnCard" />
+  <ns2:StateValue rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#initiated" />
   <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ResponseSent" />
-  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#AmountOfMoney" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Log" />
+  <ns2:StateValue rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#successful" />
+  <ns2:Function rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#withdrawal" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#WrongPasswordEntry">
+    <ns3:subClassOf>
+      <ns1:Restriction rdf:nodeID="n2cd991e8c927414c9cefed7de3b61603b1">
+        <ns1:onProperty rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#hasWrongPasswordEntry" />
+        <ns1:onClass rdf:resource="http://lod.csd.auth.gr/atm/atm.ttl#Card" />
+        <ns1:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">3</ns1:qualifiedCardinality>
+      </ns1:Restriction>
+    </ns3:subClassOf>
+  </ns1:Class>
+  <ns1:ObjectProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#hasRequestedAmount" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#ProcessTransaction" />
+  <ns1:Class rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#Function" />
+  <ns1:DatatypeProperty rdf:about="http://lod.csd.auth.gr/atm/atm.ttl#amount" />
 </rdf:RDF>
