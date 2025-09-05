@@ -42,12 +42,12 @@ lex:Word a rdfs:Class .
         owl:Class ;
     rdfs:label "Message"@en ;
     rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty :displayMessage ;
+            owl:someValuesFrom :Bank ],
+        [ a owl:Restriction ;
             owl:onProperty :hasMessage ;
             owl:someValuesFrom [ a owl:Class ;
-                    owl:intersectionOf ( :ValidCashCard :ValidPassword :ProblemWithAccount ) ] ],
-        [ a owl:Restriction ;
-            owl:onProperty :displayMessage ;
-            owl:someValuesFrom :Bank ] .
+                    owl:intersectionOf ( :ValidCashCard :ValidPassword :ProblemWithAccount ) ] ] .
 :StartTransactionDialog a rdfs:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty :isStartedBy ;
@@ -63,11 +63,6 @@ lex:Word a rdfs:Class .
     rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty :hasSerialNumber ;
             owl:someValuesFrom :SerialNumber ] .
-<Actor:Customer> a owl:Class ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <Function:dispense> ;
-            owl:someValuesFrom <Item:card> ] .
-<System:bank_computer> a owl:Class .
 lex:AccountHolder a lex:Word ;
     lex:synonym :Customer .
 lex:AutomatedTellerMachine a lex:Word ;
@@ -212,22 +207,6 @@ ex:slow a lex:Word ;
 :waitForResponse a owl:ObjectProperty ;
     rdfs:domain :System ;
     rdfs:range :Response .
-<Flow:message> a owl:Class .
-<Item:card> a owl:Class .
-<Item:transaction> a owl:Class .
-<StateValue:succeeded> a owl:Class .
-<System:ATM> a owl:Class ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty <Function:dispense> ;
-            owl:someValuesFrom <Item:money> ],
-        [ a owl:Restriction ;
-            owl:onProperty <Flow:message> ;
-            owl:someValuesFrom [ a owl:Restriction ;
-                    owl:hasValue <StateValue:succeeded> ;
-                    owl:onProperty <Item:transaction> ] ],
-        [ a owl:Restriction ;
-            owl:onProperty <Function:dispense> ;
-            owl:someValuesFrom <Item:money> ] .
 :ATMOperation a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty :hasOutcome ;
@@ -483,11 +462,6 @@ ex:fast a lex:Word .
     rdfs:range :BankComputer,
         :Password .
 :withdrawal a :Function .
-<Function:dispense> a owl:Class,
-        owl:ObjectProperty ;
-    rdfs:domain <System:ATM> ;
-    rdfs:range <Item:money> .
-<Item:money> a owl:Class .
 :BadAccount a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty :sends ;
@@ -633,12 +607,6 @@ ex:fast a lex:Word .
 :Transaction a owl:Class,
         owl:Restriction ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty :hasRequestedAmount ;
-            owl:someValuesFrom [ a owl:Class ;
-                    owl:intersectionOf ( [ a owl:Restriction ;
-                                owl:hasValue true ;
-                                owl:onProperty :exceedsLimit ] ) ] ],
-        [ a owl:Restriction ;
             owl:onProperty :isSuccessful ;
             owl:someValuesFrom [ a owl:Class ;
                     owl:complementOf [ a owl:DataRange ;
@@ -654,7 +622,13 @@ ex:fast a lex:Word .
             owl:someValuesFrom xsd:decimal ],
         [ a owl:Restriction ;
             owl:onProperty :onAccount ;
-            owl:someValuesFrom :Account ] ;
+            owl:someValuesFrom :Account ],
+        [ a owl:Restriction ;
+            owl:onProperty :hasRequestedAmount ;
+            owl:someValuesFrom [ a owl:Class ;
+                    owl:intersectionOf ( [ a owl:Restriction ;
+                                owl:hasValue true ;
+                                owl:onProperty :exceedsLimit ] ) ] ] ;
     owl:inverseOf :processedBy ;
     owl:onProperty :isCanceled ;
     owl:someValuesFrom :Transaction .
@@ -711,3 +685,8 @@ ex:fast a lex:Word .
     owl:consequent [ a owl:Restriction ;
             owl:hasValue :initiated ;
             owl:onProperty :hasItemState ] .
+[] a owl:Restriction .
+[] a owl:Restriction .
+[] a owl:Restriction ;
+    owl:someValuesFrom [ a owl:Restriction ] .
+[] a owl:Restriction .

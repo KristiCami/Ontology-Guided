@@ -160,6 +160,25 @@ class OntologyBuilder:
             cleaned.append((s, p, o))
         return cleaned
 
+    def _filter_invalid_iris(self, triples):
+        """Drop triples containing IRIs that are not absolute.
+
+        LLM generated snippets sometimes use placeholders such as
+        ``<Actor:Customer>`` which are parsed by rdflib but later cause
+        OWL editors like Protégé to fail when loading the ontology.
+        These IRIs lack a valid scheme (e.g. ``http`` or ``https``).
+        To keep the resulting file robust we simply discard any triple
+        where a subject, predicate or object IRI does not start with an
+        absolute HTTP(S) scheme.
+        """
+
+        def is_valid(term):
+            if isinstance(term, URIRef):
+                return str(term).startswith(("http://", "https://"))
+            return True
+
+        return [t for t in triples if all(is_valid(part) for part in t)]
+
     def parse_turtle(
         self,
         turtle_str: str,
@@ -222,6 +241,8 @@ class OntologyBuilder:
             triples = kept_triples
         # remove conflicting rdf:type declarations that confuse OWL editors
         triples = self._remove_conflicting_types(triples)
+        # and drop any triples that use non-absolute IRIs
+        triples = self._filter_invalid_iris(triples)
         nm = self.graph.namespace_manager
         syn_map = self.synonym_map
         canonical_triples = []
