@@ -23,11 +23,12 @@ def test_header_and_ontology_elements(tmp_path):
         '@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .',
         '@prefix protege: <http://protege.stanford.edu/plugins/owl/protege#> .',
         '@base <http://lod.csd.auth.gr/atm/atm.ttl#> .',
+        '',
         '<http://lod.csd.auth.gr/atm/atm.ttl> rdf:type owl:Ontology .',
     ]
     assert ttl_lines[: len(expected_header)] == expected_header
 
-    non_prefix = [line for line in ttl_lines if not line.startswith('@')]
+    non_prefix = [line for line in ttl_lines if line and not line.startswith('@')]
     assert non_prefix[0] == '<http://lod.csd.auth.gr/atm/atm.ttl> rdf:type owl:Ontology .'
 
     import xml.etree.ElementTree as ET
