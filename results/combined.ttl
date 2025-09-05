@@ -10,7 +10,7 @@
 @prefix protege: <http://protege.stanford.edu/plugins/owl/protege#> .
 @prefix lex: <http://example.com/lexical#> .
 @prefix ex: <http://example.com/lexical/example#> .
-@base <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@base <http://lod.csd.auth.gr/atm/atm.ttl> .
 <http://lod.csd.auth.gr/atm/atm.ttl> rdf:type owl:Ontology .
 lex:Noun a rdfs:Class ;
     rdfs:subClassOf lex:Word .
@@ -41,12 +41,12 @@ lex:Word a rdfs:Class .
         owl:Class ;
     rdfs:label "Message"@en ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty :displayMessage ;
-            owl:someValuesFrom :Bank ],
-        [ a owl:Restriction ;
             owl:onProperty :hasMessage ;
             owl:someValuesFrom [ a owl:Class ;
-                    owl:intersectionOf ( :ValidCashCard :ValidPassword :ProblemWithAccount ) ] ] .
+                    owl:intersectionOf ( :ValidCashCard :ValidPassword :ProblemWithAccount ) ] ],
+        [ a owl:Restriction ;
+            owl:onProperty :displayMessage ;
+            owl:someValuesFrom :Bank ] .
 :StartTransactionDialog a rdfs:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty :isStartedBy ;
@@ -579,17 +579,17 @@ ex:fast a lex:Word .
 :Parameter a owl:Class .
 :Card a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty :hasCard ;
-            owl:someValuesFrom [ a owl:Restriction ;
-                    owl:onClass :WrongPasswordEntry ;
-                    owl:onProperty :hasWrongPasswordEntry ;
-                    owl:qualifiedCardinality "3"^^xsd:nonNegativeInteger ] ],
-        [ a owl:Restriction ;
             owl:onProperty :hasSerialNumber ;
             owl:someValuesFrom xsd:string ],
         [ a owl:Restriction ;
             owl:onProperty :hasPassword ;
-            owl:someValuesFrom xsd:string ] ;
+            owl:someValuesFrom xsd:string ],
+        [ a owl:Restriction ;
+            owl:onProperty :hasCard ;
+            owl:someValuesFrom [ a owl:Restriction ;
+                    owl:onClass :WrongPasswordEntry ;
+                    owl:onProperty :hasWrongPasswordEntry ;
+                    owl:qualifiedCardinality "3"^^xsd:nonNegativeInteger ] ] ;
     owl:equivalentClass [ a owl:Restriction ;
             owl:onProperty :hasBankComputerResponse ;
             owl:someValuesFrom [ a owl:Restriction ;
@@ -598,19 +598,19 @@ ex:fast a lex:Word .
 :Account a owl:Class .
 :Password a owl:Class,
         owl:DatatypeProperty ;
-    rdfs:subClassOf [ a owl:Restriction ;
+    rdfs:subClassOf [ a owl:Class ;
+            owl:unionOf ( :ValidPassword :InvalidPassword ) ],
+        [ a owl:Restriction ;
             owl:onProperty :validFor ;
-            owl:someValuesFrom :valid ],
-        [ a owl:Class ;
-            owl:unionOf ( :ValidPassword :InvalidPassword ) ] .
+            owl:someValuesFrom :valid ] .
 :BankComputer a owl:Class,
         owl:NamedIndividual ;
     rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty :checks ;
+            owl:someValuesFrom :BankCode ],
+        [ a owl:Restriction ;
             owl:onProperty :processes ;
             owl:someValuesFrom :Transaction ],
-        [ a owl:Restriction ;
-            owl:onProperty :checks ;
-            owl:someValuesFrom :Password ],
         [ a owl:Restriction ;
             owl:onProperty :hasPassword ;
             owl:someValuesFrom :InvalidPassword ],
@@ -619,7 +619,7 @@ ex:fast a lex:Word .
             owl:someValuesFrom :BadPasswordMessage ],
         [ a owl:Restriction ;
             owl:onProperty :checks ;
-            owl:someValuesFrom :BankCode ],
+            owl:someValuesFrom :Password ],
         [ a owl:Restriction ;
             owl:allValuesFrom :ATM ;
             owl:onProperty :sendsMessageTo ] .
@@ -659,27 +659,19 @@ ex:fast a lex:Word .
     owl:someValuesFrom :Transaction .
 :ATM a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty :checks ;
-            owl:someValuesFrom :ValidCashCard ],
-        [ a owl:Restriction ;
-            owl:onProperty :sends ;
-            owl:someValuesFrom :Request ],
-        [ a owl:Restriction ;
             owl:onProperty :verifies ;
             owl:someValuesFrom [ a owl:Class ;
                     owl:intersectionOf ( :BankComputer [ a owl:Restriction ;
                                 owl:onProperty :hasBankCode ;
                                 owl:someValuesFrom rdf:Literal ] [ a owl:Restriction ;
                                 owl:onProperty :hasPassword ;
-                                owl:someValuesFrom rdf:Literal ] ) ] ] .
-[] a owl:Class ;
-    rdfs:subClassOf :BankComputer ;
-    owl:equivalentClass [ a owl:Restriction ;
-            owl:onProperty :sendMessage ;
-            owl:someValuesFrom :AccountOK ] ;
-    owl:intersectionOf ( [ a owl:Restriction ;
-                owl:hasValue true ;
-                owl:onProperty :isValid ] ) .
+                                owl:someValuesFrom rdf:Literal ] ) ] ],
+        [ a owl:Restriction ;
+            owl:onProperty :sends ;
+            owl:someValuesFrom :Request ],
+        [ a owl:Restriction ;
+            owl:onProperty :checks ;
+            owl:someValuesFrom :ValidCashCard ] .
 [] a owl:Class ;
     owl:equivalentClass [ a owl:Restriction ;
             owl:onProperty :hasValidCashCard ;
@@ -710,3 +702,11 @@ ex:fast a lex:Word .
     owl:consequent [ a owl:Restriction ;
             owl:hasValue :initiated ;
             owl:onProperty :hasItemState ] .
+[] a owl:Class ;
+    rdfs:subClassOf :BankComputer ;
+    owl:equivalentClass [ a owl:Restriction ;
+            owl:onProperty :sendMessage ;
+            owl:someValuesFrom :AccountOK ] ;
+    owl:intersectionOf ( [ a owl:Restriction ;
+                owl:hasValue true ;
+                owl:onProperty :isValid ] ) .

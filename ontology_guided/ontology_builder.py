@@ -74,7 +74,8 @@ class OntologyBuilder:
         self.prefix_lines = [
             f"@prefix {p}: <{u}> .\n" for p, u in ordered + self.extra_prefixes
         ]
-        self.base_line = f"@base <{self.base_iri}> .\n"
+
+        self.base_line = f"@base <{self.base_iri.rstrip('#')}> .\n"
         # header is used when parsing snippets and expects a blank line after @base
         self.header = "".join(self.prefix_lines + [self.base_line, "\n"])
 
