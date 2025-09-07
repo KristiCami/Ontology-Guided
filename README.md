@@ -188,7 +188,7 @@ python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.jsonl:e
 Το script εκτελεί το pipeline με όλους τους συνδυασμούς των σημαιών `use_terms` και `validate`,
 αποθηκεύοντας τα αποτελέσματα σε πίνακες `table_<N>.csv` και `table_<N>.md` στον φάκελο `evaluation`.
 
-Προαιρετικά, μπορείτε να περάσετε παραδείγματα με `--examples path/to/examples.json`.
+Το script φορτώνει αυτόματα παραδείγματα από το dev split (`splits/dev.txt`).
 
 Η προαιρετική σημαία `--normalize-base` κανονικοποιεί τα base IRIs πριν τη σύγκριση,
 μειώνοντας ψευδείς αποκλίσεις όταν οι ίδιες τριπλέτες χρησιμοποιούν διαφορετικά base.

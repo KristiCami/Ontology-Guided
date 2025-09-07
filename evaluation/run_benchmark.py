@@ -3,7 +3,8 @@
 
 This script executes the pipeline for multiple datasets and settings and
 summarises the results in CSV and Markdown tables.  It is intended to
-reproduce the evaluation tables (Tables 1–4) of the associated paper.
+reproduce the evaluation tables (Tables 1–4) of the associated paper. Few-
+shot examples from the dev split are loaded automatically.
 
 Example
 -------
@@ -33,12 +34,14 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from scripts.main import run_pipeline
+from scripts.main import run_pipeline, load_dev_examples
 from .competency_questions import evaluate_cqs
 from .repair_efficiency import aggregate_repair_efficiency
 from .compare_metrics import filter_by_ids
 from ontology_guided.validator import SHACLValidator
 from ontology_guided.reasoner import run_reasoner
+
+DEV_EXAMPLES, DEV_SENTENCE_IDS = load_dev_examples()
 
 
 Pair = Tuple[str, str, str]
@@ -106,6 +109,7 @@ def evaluate_once(
     keywords: Optional[Union[Iterable[str], None]] = None,
     cq_path: Optional[str] = None,
     test_ids: Optional[Iterable[str]] = None,
+    dev_sentence_ids: Optional[Iterable[str]] = None,
     **settings: Any,
 ) -> Tuple[Dict[str, float], Dict[str, Any], Any, Optional[float]]:
     """Run the pipeline once and compute evaluation metrics."""
@@ -115,6 +119,8 @@ def evaluate_once(
         base_iri,
         ontologies=ontologies,
         keywords=keywords,
+        allowed_ids=test_ids,
+        dev_sentence_ids=dev_sentence_ids,
         **settings,
     )
 
@@ -249,6 +255,7 @@ def run_evaluations(
     keywords: Optional[Union[Iterable[str], None]] = None,
     cq_paths: Optional[Sequence[Optional[str]]] = None,
     split_paths: Optional[Sequence[Optional[str]]] = None,
+    dev_sentence_ids: Optional[Iterable[str]] = None,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -267,6 +274,12 @@ def run_evaluations(
             if split_paths and dataset_idx < len(split_paths) and split_paths[dataset_idx]:
                 with open(split_paths[dataset_idx], "r", encoding="utf-8") as f:
                     test_ids = [line.strip() for line in f if line.strip()]
+                if dev_sentence_ids is not None:
+                    overlap = set(test_ids) & set(dev_sentence_ids)
+                    if overlap:
+                        raise ValueError(
+                            f"Test IDs overlap with dev IDs: {sorted(overlap)}"
+                        )
             metrics_list: List[Dict[str, float]] = []
             violations_list: List[Dict[str, Any]] = []
             conforms_list: List[Any] = []
@@ -282,6 +295,7 @@ def run_evaluations(
                     keywords=keywords,
                     cq_path=cq_path,
                     test_ids=test_ids,
+                    dev_sentence_ids=dev_sentence_ids,
                     **pipeline_opts,
                 )
                 metrics_list.append(metrics)
@@ -359,11 +373,6 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         help="List of requirements:gold[:shapes] triples",
     )
     parser.add_argument(
-        "--examples",
-        default=None,
-        help="Path to JSON file with few-shot examples",
-    )
-    parser.add_argument(
         "--settings",
         type=str,
         default=None,
@@ -439,14 +448,9 @@ def main() -> None:  # pragma: no cover - CLI wrapper
             "ontologies/lexical.ttl",
             "ontologies/lexical_atm.ttl",
         ]
-    examples = None
-    if args.examples:
-        with open(args.examples, "r", encoding="utf-8") as f:
-            examples = json.load(f)
     for setting in settings_list:
         setting.setdefault("ontologies", ontology_list)
-        if examples is not None:
-            setting.setdefault("examples", examples)
+        setting.setdefault("examples", DEV_EXAMPLES)
 
     keywords = (
         [k.strip() for k in args.keywords.split(",") if k.strip()]
@@ -468,6 +472,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         keywords=keywords,
         cq_paths=args.cqs,
         split_paths=args.splits,
+        dev_sentence_ids=DEV_SENTENCE_IDS,
     )
 
 
