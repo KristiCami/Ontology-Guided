@@ -9,7 +9,6 @@ import json
 from pathlib import Path
 import logging
 from rdflib import Graph
-import random
 from .exemplar_selector import select_examples
 
 
@@ -44,6 +43,8 @@ def build_prompt(
         advertised as the allowed vocabulary.
     exemplars:
         Few-shot examples as dictionaries with ``user`` and ``assistant`` keys.
+        The first ``k`` examples (with ``k`` clamped between 3 and 6) are used
+        so that the exemplars remain fixed across test runs.
     """
 
     classes = vocab.get("classes", []) if vocab else []
@@ -66,11 +67,11 @@ def build_prompt(
     ]
 
     if exemplars:
-        k = min(6, len(exemplars))
-        if k >= 3:
-            sample = random.sample(exemplars, k)
-        else:
-            sample = exemplars
+        # Use a deterministic slice so that prompts are stable across runs.
+        # Clamp ``k`` to the [3, 6] range to keep a reasonable number of
+        # exemplars while ensuring reproducibility.
+        k = max(3, min(6, len(exemplars)))
+        sample = exemplars[:k]
         for ex in sample:
             user_msg = ex.get("user") or ex.get("sentence")
             assistant_msg = ex.get("assistant") or ex.get("owl")
