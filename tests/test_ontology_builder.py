@@ -135,6 +135,27 @@ ex:knownProp a owl:ObjectProperty .
     assert "UnknownClass" in caplog.text
 
 
+def test_strips_named_individuals(tmp_path):
+    ext = tmp_path / "ext.ttl"
+    ext.write_text(
+        """@prefix ex: <http://example.com/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+ex:A a owl:Class .
+ex:prop a owl:ObjectProperty .
+ex:i a owl:NamedIndividual , ex:A ;
+    ex:prop ex:i .
+""",
+        encoding="utf-8",
+    )
+    ob = OntologyBuilder('http://example.com/base#', ontology_files=[str(ext)])
+    nm = ob.graph.namespace_manager
+    ex_i = nm.expand_curie("ex:i")
+    assert not list(ob.graph.triples((ex_i, None, None)))
+    terms = ob.get_available_terms()
+    assert "ex:i" not in terms["classes"]
+    assert "ex:i" not in terms["properties"]
+
+
 def test_parse_turtle_applies_synonym():
     lex = Path(__file__).resolve().parent.parent / "ontologies" / "lexical.ttl"
     ob = OntologyBuilder('http://example.com/atm#', ontology_files=[str(lex)])

@@ -467,7 +467,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         ontology_list.extend(str(p) for p in sorted(dir_path.glob("*.ttl")))
     if not ontology_list:
         ontology_list = [
-            "ontologies/atm_domain.ttl",
+            "evaluation/atm_gold.ttl",
             "ontologies/lexical.ttl",
             "ontologies/lexical_atm.ttl",
         ]

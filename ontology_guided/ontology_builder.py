@@ -82,6 +82,7 @@ class OntologyBuilder:
         if ontology_files:
             for path in ontology_files:
                 self.graph.parse(path)
+            self._remove_abox_triples()
         self._extract_available_terms()
         self.triple_provenance: dict[str, dict] = {}
         self._triple_counter = 0
@@ -95,6 +96,13 @@ class OntologyBuilder:
         self.base_line = f"@base <{self.base_iri}> .\n"
         # header is used when parsing snippets and expects a blank line after @base
         self.header = "".join(self.prefix_lines + [self.base_line, "\n"])
+
+    def _remove_abox_triples(self):
+        """Drop triples about named individuals to avoid leaking ABox data."""
+        individuals = list(self.graph.subjects(RDF.type, OWL.NamedIndividual))
+        for ind in individuals:
+            self.graph.remove((ind, None, None))
+            self.graph.remove((None, None, ind))
 
     def _extract_available_terms(self):
         nm = self.graph.namespace_manager
