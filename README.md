@@ -168,21 +168,72 @@ python3 scripts/main.py \
 
 ## 📊 Αξιολόγηση
 
-Για να συγκρίνετε τα παραγόμενα OWL triples με ένα χρυσό πρότυπο, χρησιμοποιήστε το script:
+### Δομή Δεδομένων
+
+Η διαδικασία αξιολόγησης βασίζεται στην ακόλουθη διάταξη φακέλων:
+
+```
+data/requirements.jsonl   # όλες οι απαιτήσεις με πεδία sentence_id
+gold/atm_gold.ttl         # χρυσή οντολογία (ή άλλα αρχεία στο gold/)
+splits/dev.txt            # sentence_id για παραδείγματα few-shot
+splits/test.txt           # sentence_id που αξιολογούνται
+```
+
+Τα `sentence_id` στο `requirements.jsonl` αντιστοιχούν στα ίδια IDs που
+χρησιμοποιούνται στο χρυσό αρχείο και στα αρχεία split.  Οι προτάσεις του
+`dev.txt` αξιοποιούνται ως παραδείγματα στο prompt και δεν πρέπει να
+εμφανίζονται στο `test.txt`.
+
+### Dev παραδείγματα και Retrieval
+
+Το `scripts/main.py` φορτώνει αυτόματα τις προτάσεις του dev split για
+few-shot prompts.  Με την επιλογή `--use-retrieval` ο επιλογέας
+παραδειγμάτων αναζητά τα πιο όμοια dev παραδείγματα από ένα JSON αρχείο
+(`--dev-pool`) και καταγράφει τα IDs στο `--prompt-log` ώστε η επιλογή να
+παγώνει και να αναπαράγεται σε μελλοντικά runs.
+
+### Αξιολόγηση μόνο στο test split
+
+Κατά την αξιολόγηση χρησιμοποιούνται αποκλειστικά οι προτάσεις από το
+`splits/test.txt`.  Οι επιλογές CLI `--split` (φιλτράρισμα εισόδων) και
+`--dev` (φόρτωση dev παραδειγμάτων) ελέγχουν ότι δεν υπάρχει επικάλυψη
+μεταξύ dev και test IDs.
+
+#### Παραδείγματα εντολών
 
 ```bash
-python3 evaluation/compare_metrics.py evaluation/atm_requirements.jsonl evaluation/atm_gold.ttl
+# Εκτέλεση pipeline μόνο σε test IDs με παγωμένο retrieval
+python3 scripts/main.py --inputs data/requirements.jsonl --shapes shapes.ttl \
+    --split splits/test.txt --use-retrieval --dev-pool data/dev_examples.json \
+    --retrieve-k 4 --prompt-log results/prompts.log
 ```
-Μπορείτε να επιλέξετε στρατηγική αντιστοίχισης αξιωμάτων με την επιλογή `--match-mode` (`syntactic` ή `semantic`), με προεπιλογή το `syntactic`.
 
-Το script υπολογίζει **precision** και **recall** χρησιμοποιώντας τις απαιτήσεις από το `atm_requirements.jsonl` (μορφή JSON Lines) και αποθηκεύει τις μετρικές στο `results/metrics.txt`.
+```bash
+# Υπολογισμός μετρικών με dev παραδείγματα και test split
+python3 evaluation/compare_metrics.py data/requirements.jsonl gold/atm_gold.ttl \
+    --shapes shapes.ttl --split splits/test.txt --dev splits/dev.txt
+```
+
+```bash
+# Benchmark με retrieval και test split
+python3 evaluation/run_benchmark.py --pairs "data/requirements.jsonl:gold/atm_gold.ttl" \
+    --splits splits/test.txt --use-retrieval --dev-pool data/dev_examples.json \
+    --prompt-log results/prompts.log
+```
+
+Μπορείτε να επιλέξετε στρατηγική αντιστοίχισης αξιωμάτων με την επιλογή
+`--match-mode` (`syntactic` ή `semantic`), με προεπιλογή το `syntactic`.
+
+Το script υπολογίζει **precision** και **recall** και αποθηκεύει τις
+μετρικές στο `results/metrics.txt`.
 
 ### Μαζική αξιολόγηση
 
 Για την αναπαραγωγή πινάκων αξιολόγησης σε διαφορετικές ρυθμίσεις, υπάρχει το script:
 
 ```bash
-python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" --repeats 1
+python3 evaluation/run_benchmark.py --pairs "data/requirements.jsonl:gold/atm_gold.ttl" \
+    --splits splits/test.txt --repeats 1
 ```
 
 Το script εκτελεί το pipeline με όλους τους συνδυασμούς των σημαιών `use_terms` και `validate`,
@@ -200,9 +251,10 @@ python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.jsonl:e
 
 ```bash
 python3 evaluation/run_benchmark.py \
-    --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" \
-    --ontologies evaluation/atm_gold.ttl \
+    --pairs "data/requirements.jsonl:gold/atm_gold.ttl" \
+    --ontologies gold/atm_gold.ttl \
     --ontology-dir ontologies \
+    --splits splits/test.txt \
     --repeats 1
 ```
 
@@ -210,8 +262,8 @@ python3 evaluation/run_benchmark.py \
 
 ```bash
 python -m evaluation.run_benchmark \
-    --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" \
-    --settings '[{"name":"table1","use_terms":true,"validate":true,"ontologies":["evaluation/atm_gold.ttl","ontologies/rbo.ttl","ontologies/lexical.ttl"]}]'
+    --pairs "data/requirements.jsonl:gold/atm_gold.ttl" \
+    --settings '[{"name":"table1","use_terms":true,"validate":true,"ontologies":["gold/atm_gold.ttl","ontologies/rbo.ttl","ontologies/lexical.ttl"]}]'
 ```
 
 ### Mini Evaluation Example
