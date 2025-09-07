@@ -55,10 +55,11 @@ def load_dev_examples(requirements_path: str, split_path: str) -> tuple[list[dic
     dev_ids = set(dev_ids_list)
 
     examples: list[dict[str, str]] = []
+    found_ids: set[str] = set()
     with open(requirements_path, "r", encoding="utf-8") as f:
         for line in f:
             record = json.loads(line)
-            sid = record.get("sentence_id")
+            sid = str(record.get("sentence_id"))
             if sid not in dev_ids:
                 continue
             sentence = record.get("meta", {}).get("description") or record.get("text", "")
@@ -75,6 +76,10 @@ def load_dev_examples(requirements_path: str, split_path: str) -> tuple[list[dic
                     "sentence_id": sid,
                 }
             )
+            found_ids.add(sid)
+    missing = dev_ids - found_ids
+    if missing:
+        raise RuntimeError("Missing dev IDs: " + ", ".join(sorted(missing)))
     return examples, dev_ids_list
 
 # Default ontology locations used by optional command-line flags
@@ -140,10 +145,21 @@ def run_pipeline(
     failed_snippets = pipeline["failed_snippets"] = []
 
     loader = DataLoader(spacy_model=spacy_model)
+    if examples is not None and dev_sentence_ids is None:
+        raise RuntimeError("dev_sentence_ids must be provided when examples are supplied")
     if allowed_ids is not None and dev_sentence_ids is not None:
         overlap = set(allowed_ids).intersection(dev_sentence_ids)
         if overlap:
             raise RuntimeError("Dev and test IDs must be disjoint")
+    if examples is not None and allowed_ids is not None:
+        example_ids = {
+            ex.get("sentence_id")
+            for ex in examples
+            if ex.get("sentence_id") is not None
+        }
+        overlap = set(example_ids).intersection(allowed_ids)
+        if overlap:
+            raise RuntimeError("Examples and allowed_ids must be disjoint")
     texts_iter = loader.load_requirements(inputs, allowed_ids=allowed_ids)
     pipeline["texts"] = []
 
@@ -527,13 +543,27 @@ def main():
         requirements_path = os.path.join(PROJECT_ROOT, "evaluation", "atm_requirements.jsonl")
         split_path = os.path.join(PROJECT_ROOT, "splits", "dev.txt")
         examples, dev_sentence_ids = load_dev_examples(requirements_path, split_path)
+        if examples and not dev_sentence_ids:
+            raise RuntimeError("dev_sentence_ids required when examples are provided")
         if args.examples:
             logging.getLogger(__name__).warning(
                 "--examples is ignored; using dev split examples only"
             )
+        with open(requirements_path, "r", encoding="utf-8") as f:
+            all_sentence_ids = {
+                str(json.loads(line).get("sentence_id"))
+                for line in f
+                if line.strip()
+            }
         test_path = os.path.join(PROJECT_ROOT, "splits", "test.txt")
         with open(test_path, "r", encoding="utf-8") as f:
             test_sentence_ids = [line.strip() for line in f if line.strip()]
+        missing_test = set(test_sentence_ids) - all_sentence_ids
+        if missing_test:
+            raise RuntimeError(
+                "Test IDs not found in requirements: "
+                + ", ".join(sorted(missing_test))
+            )
         overlap_examples = set(dev_sentence_ids) & set(test_sentence_ids)
         if overlap_examples:
             raise RuntimeError(
@@ -549,12 +579,30 @@ def main():
         if args.split:
             with open(args.split, "r", encoding="utf-8") as f:
                 allowed_ids = [line.strip() for line in f if line.strip()]
+            missing_allowed = set(allowed_ids) - all_sentence_ids
+            if missing_allowed:
+                raise RuntimeError(
+                    "Input sentence IDs not found in requirements: "
+                    + ", ".join(sorted(missing_allowed))
+                )
             overlap_inputs = set(allowed_ids) & set(dev_sentence_ids)
             if overlap_inputs:
                 raise RuntimeError(
                     "Input sentence IDs are in dev split: "
                     + ", ".join(sorted(overlap_inputs))
                 )
+            if examples:
+                example_ids = {
+                    ex.get("sentence_id")
+                    for ex in examples
+                    if ex.get("sentence_id") is not None
+                }
+                overlap_ex_allowed = example_ids & set(allowed_ids)
+                if overlap_ex_allowed:
+                    raise RuntimeError(
+                        "Few-shot examples overlap with allowed IDs: "
+                        + ", ".join(sorted(overlap_ex_allowed))
+                    )
         run_pipeline(
             args.inputs,
             args.shapes,
