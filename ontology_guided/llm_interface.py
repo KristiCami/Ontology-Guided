@@ -10,6 +10,7 @@ from pathlib import Path
 import logging
 from rdflib import Graph
 import random
+from .exemplar_selector import select_examples
 
 
 # Common namespace prefixes that may appear in LLM output. If a prefix is used
@@ -82,6 +83,11 @@ def build_prompt(
     messages.append({"role": "user", "content": sentence})
     return messages
 
+
+# Keep a reference to the base prompt builder so that the LLMInterface class can
+# define a method with the same name without causing recursion.
+_BASE_PROMPT_BUILDER = build_prompt
+
 class LLMInterface:
     def __init__(
         self,
@@ -90,6 +96,11 @@ class LLMInterface:
         cache_dir: Optional[str] = None,
         temperature: float = 0.0,
         examples: Optional[Union[List[Dict[str, str]], str, Path]] = None,
+        *,
+        use_retrieval: bool = False,
+        dev_pool: Optional[Union[List[Dict[str, str]], str, Path]] = None,
+        retrieve_k: int = 3,
+        prompt_log: Optional[Union[str, Path]] = None,
     ):
         openai.api_key = api_key
         self.model = model
@@ -103,6 +114,49 @@ class LLMInterface:
             with open(examples, "r", encoding="utf-8") as f:
                 examples = json.load(f)
         self.examples = examples or []
+        # Retrieval-specific configuration
+        if isinstance(dev_pool, (str, Path)):
+            with open(dev_pool, "r", encoding="utf-8") as f:
+                dev_pool = json.load(f)
+        self.dev_pool = dev_pool or []
+        self.use_retrieval = use_retrieval
+        self.retrieve_k = retrieve_k
+        self.prompt_log = Path(
+            prompt_log
+            or Path(__file__).resolve().parent.parent / "results" / "prompts.log"
+        )
+        if self.use_retrieval:
+            self.prompt_log.parent.mkdir(parents=True, exist_ok=True)
+
+    def build_prompt(
+        self,
+        sentence: str,
+        vocab: Optional[Dict[str, List[str]]],
+        *,
+        sentence_id: Optional[str] = None,
+        raw_sentence: Optional[str] = None,
+        log_examples: bool = True,
+    ) -> List[Dict[str, str]]:
+        """Build the prompt for a given sentence.
+
+        When ``use_retrieval`` is True, the ``k`` most similar examples from
+        ``dev_pool`` are selected; otherwise ``self.examples`` are used.  When a
+        ``sentence_id`` is provided the IDs of the retrieved examples are logged
+        in ``prompt_log``.
+        """
+
+        query = raw_sentence or sentence
+        if self.use_retrieval and self.dev_pool:
+            exemplars = select_examples(query, self.dev_pool, self.retrieve_k)
+        else:
+            exemplars = self.examples
+
+        if log_examples and sentence_id is not None:
+            ids = [ex.get("sentence_id") for ex in exemplars if ex.get("sentence_id") is not None]
+            with self.prompt_log.open("a", encoding="utf-8") as f:
+                f.write(json.dumps({"sentence_id": sentence_id, "examples": ids}) + "\n")
+
+        return _BASE_PROMPT_BUILDER(sentence, vocab, exemplars)
 
     def _cache_file(
         self,
@@ -160,7 +214,7 @@ class LLMInterface:
 
     def generate_owl_sync(
         self,
-        sentences: List[str],
+        sentences: List[Union[str, Dict[str, Any]]],
         prompt_template: str,
         *,
         available_terms: Optional[Dict[str, Any]] = None,
@@ -183,15 +237,33 @@ class LLMInterface:
             synonyms = available_terms.get("synonyms", {})
         vocab = {"classes": classes, "properties": properties}
         for sent in sentences:
-            cached = self._load_cache(sent, available_terms, base, prefix)
+            sent_text = sent.get("text") if isinstance(sent, dict) else sent
+            sid = sent.get("sentence_id") if isinstance(sent, dict) else None
+            cached = self._load_cache(sent_text, available_terms, base, prefix)
             if cached is not None:
                 results.append(cached)
                 continue
             user_prompt = prompt_template.format(
-                sentence=sent, base=base, prefix=prefix
+                sentence=sent_text, base=base, prefix=prefix
             )
+            if classes:
+                user_prompt += "\n" + ", ".join(classes)
+            if properties:
+                user_prompt += "\n" + ", ".join(properties)
+            for prop, info in hints.items():
+                dom = ", ".join(info.get("domain", []))
+                ran = ", ".join(info.get("range", []))
+                if dom:
+                    user_prompt += f"\n{prop} domain {dom}"
+                if ran:
+                    user_prompt += f"\n{prop} range {ran}"
+            for syn, real in synonyms.items():
+                user_prompt += f"\n{syn} -> {real}"
+
             base_prompt = user_prompt
-            messages = build_prompt(user_prompt, vocab, self.examples)
+            messages = self.build_prompt(
+                user_prompt, vocab, sentence_id=sid, raw_sentence=sent_text
+            )
             attempts = 0
             current_delay = retry_delay
             while True:
@@ -252,17 +324,23 @@ class LLMInterface:
                         "Previous output was invalid Turtle; return only correct Turtle.\n"
                         + base_prompt
                     )
-                    messages = build_prompt(user_prompt, vocab, self.examples)
+                    messages = self.build_prompt(
+                        user_prompt,
+                        vocab,
+                        sentence_id=sid,
+                        raw_sentence=sent_text,
+                        log_examples=False,
+                    )
                     time.sleep(current_delay)
                     current_delay = min(current_delay * 2, max_retry_delay)
 
-            self._save_cache(sent, available_terms, base, prefix, turtle_code)
+            self._save_cache(sent_text, available_terms, base, prefix, turtle_code)
             results.append(turtle_code)
         return results
 
     async def _generate_owl_async(
         self,
-        sentences: List[str],
+        sentences: List[Union[str, Dict[str, Any]]],
         prompt_template: str,
         *,
         available_terms: Optional[Dict[str, Any]] = None,
@@ -285,16 +363,34 @@ class LLMInterface:
             synonyms = available_terms.get("synonyms", {})
         vocab = {"classes": classes, "properties": properties}
 
-        async def process(sent: str) -> str:
-            cached = self._load_cache(sent, available_terms, base, prefix)
+        async def process(sent: Any) -> str:
+            sent_text = sent.get("text") if isinstance(sent, dict) else sent
+            sid = sent.get("sentence_id") if isinstance(sent, dict) else None
+            cached = self._load_cache(sent_text, available_terms, base, prefix)
             if cached is not None:
                 return cached
 
             user_prompt = prompt_template.format(
-                sentence=sent, base=base, prefix=prefix
+                sentence=sent_text, base=base, prefix=prefix
             )
+            if classes:
+                user_prompt += "\n" + ", ".join(classes)
+            if properties:
+                user_prompt += "\n" + ", ".join(properties)
+            for prop, info in hints.items():
+                dom = ", ".join(info.get("domain", []))
+                ran = ", ".join(info.get("range", []))
+                if dom:
+                    user_prompt += f"\n{prop} domain {dom}"
+                if ran:
+                    user_prompt += f"\n{prop} range {ran}"
+            for syn, real in synonyms.items():
+                user_prompt += f"\n{syn} -> {real}"
+
             base_prompt = user_prompt
-            messages = build_prompt(user_prompt, vocab, self.examples)
+            messages = self.build_prompt(
+                user_prompt, vocab, sentence_id=sid, raw_sentence=sent_text
+            )
             attempts = 0
             current_delay = retry_delay
             while True:
@@ -355,11 +451,17 @@ class LLMInterface:
                         "Previous output was invalid Turtle; return only correct Turtle.\n"
                         + base_prompt
                     )
-                    messages = build_prompt(user_prompt, vocab, self.examples)
+                    messages = self.build_prompt(
+                        user_prompt,
+                        vocab,
+                        sentence_id=sid,
+                        raw_sentence=sent_text,
+                        log_examples=False,
+                    )
                     await asyncio.sleep(current_delay)
                     current_delay = min(current_delay * 2, max_retry_delay)
 
-            self._save_cache(sent, available_terms, base, prefix, turtle_code)
+            self._save_cache(sent_text, available_terms, base, prefix, turtle_code)
             return turtle_code
 
         tasks = [process(sent) for sent in sentences]
@@ -367,7 +469,7 @@ class LLMInterface:
 
     def async_generate_owl(
         self,
-        sentences: List[str],
+        sentences: List[Union[str, Dict[str, Any]]],
         prompt_template: str,
         *,
         available_terms: Optional[Dict[str, Any]] = None,
@@ -394,7 +496,7 @@ class LLMInterface:
 
     def generate_owl(
         self,
-        sentences: List[str],
+        sentences: List[Union[str, Dict[str, Any]]],
         prompt_template: str,
         *,
         available_terms: Optional[Dict[str, Any]] = None,
