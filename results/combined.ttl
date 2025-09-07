@@ -11,552 +11,892 @@
 @base <http://lod.csd.auth.gr/atm/atm.ttl#> .
 
 <http://lod.csd.auth.gr/atm/atm.ttl> rdf:type owl:Ontology .
-:AuthorizationProcess rdf:type rdfs:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :receivesAcceptanceFrom ;
-            owl:someValuesFrom :BankComputer ] .
-:Bank rdf:type rdfs:Class,
-        owl:Class ;
-    rdfs:label "Bank"@en ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :hasBankCode ;
-            owl:someValuesFrom :CashCard ] ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:onProperty :providesSecurity ;
-            owl:someValuesFrom :Computer ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :providesSecurity ;
-            owl:someValuesFrom :Software ] .
-:Customer rdf:type rdfs:Class,
-        owl:Class ;
-    rdfs:label "Customer"@en ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :callBank ;
-            owl:someValuesFrom :Bank ] .
-:Message rdf:type rdfs:Class,
-        owl:Class ;
-    rdfs:label "Message"@en ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :hasMessage ;
-            owl:someValuesFrom [ rdf:type owl:Class ;
-                    owl:intersectionOf ( :ValidCashCard :ValidPassword :ProblemWithAccount ) ] ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :displayMessage ;
-            owl:someValuesFrom :Bank ] .
-:StartTransactionDialog rdf:type rdfs:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :isStartedBy ;
-            owl:someValuesFrom [ rdf:type owl:Class ;
-                    owl:intersectionOf ( :AuthorizationProcess :ValidPassword :ValidSerialNumber ) ] ] .
-:ValidPassword rdf:type rdfs:Class,
-        owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :hasPassword ;
-            owl:someValuesFrom :Password ],
-        :Password .
-:ValidSerialNumber rdf:type rdfs:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :hasSerialNumber ;
-            owl:someValuesFrom :SerialNumber ] .
 :ATMRequestVerification rdf:type owl:Class ;
     rdfs:subClassOf [ rdf:type owl:Restriction ;
             owl:onProperty :requestsVerificationOf ;
             owl:someValuesFrom :Card ] .
-:CardEjected rdf:type owl:Class ;
+:Angstorm rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:Audio rdf:type owl:Class ;
+    rdfs:subClassOf :Codec .
+:BankComputer rdf:type owl:Class ;
     rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :isResultOf ;
-            owl:someValuesFrom :Authorization ] .
-:CreateAccountRecord rdf:type owl:ObjectProperty ;
-    rdfs:domain :Account ;
-    rdfs:range :AccountRecord .
-:ErrorMessageDisplayed rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :isResultOf ;
-            owl:someValuesFrom :Authorization ] .
-:NoCashCardInATM rdf:type owl:Class ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:cardinality "0"^^xsd:nonNegativeInteger ;
-            owl:onProperty :hasCashCard ],
-        :ShouldDisplayInitialDisplay .
-:RunningOutOfMoney rdf:type owl:Class ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:allValuesFrom owl:Nothing ;
-            owl:onProperty :AcceptsCard ] .
-:UpdateLogFile rdf:type owl:ObjectProperty ;
-    rdfs:domain :LogFile ;
-    rdfs:range :LogFile .
+            owl:onProperty :checks ;
+            owl:someValuesFrom :BankCode ] .
+:Bit rdf:type owl:Class ;
+    rdfs:subClassOf :Information_unit .
+:BusinessWorkflowSoftware rdf:type owl:Class ;
+    rdfs:subClassOf :EnterpriseInfrastructureSoftware .
+:Byte rdf:type owl:Class ;
+    rdfs:subClassOf :Information_unit .
+:CDMA rdf:type owl:Class ;
+    rdfs:subClassOf :AccessMethodProtocol .
+:CSMA rdf:type owl:Class ;
+    rdfs:subClassOf :AccessMethodProtocol .
+:CabinetCover rdf:type owl:Class ;
+    rdfs:subClassOf :HardwareComponent .
+:Cable rdf:type owl:Class ;
+    rdfs:subClassOf :MaritimeLength .
+:Candela_per_square_meter rdf:type owl:Class ;
+    rdfs:subClassOf :Luminance_Unit .
+:CentiMorgan rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:CentiRay rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:Centimeter rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:Chain rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:Chroma_sampling_unit rdf:type owl:Class ;
+    rdfs:subClassOf :Image_resolution .
+:ComputerProgrammingTools rdf:type owl:Class ;
+    rdfs:subClassOf :Software .
+:Conditional rdf:type owl:Class ;
+    rdfs:subClassOf :BoilerPlateParts .
+:CurrentAccount rdf:type owl:Class ;
+    rdfs:subClassOf :Account .
+:DatabaseManagementSystem rdf:type owl:Class ;
+    rdfs:subClassOf :EnterpriseInfrastructureSoftware .
+:Decibel rdf:type owl:Class ;
+    rdfs:subClassOf :Ratio .
+:Degree rdf:type owl:Class ;
+    rdfs:subClassOf :Plane_angle_unit .
+:Deposit rdf:type owl:Class ;
+    rdfs:subClassOf :ATMTransaction .
+:DialUp rdf:type owl:Class ;
+    rdfs:subClassOf :InternetAccess .
+:DigitalAssetManagement rdf:type owl:Class ;
+    rdfs:subClassOf :EnterpriseInfrastructureSoftware .
+:Dots_per_inch rdf:type owl:Class ;
+    rdfs:subClassOf :Spatial_resolution_unit .
+:Dynamic_range_unit rdf:type owl:Class ;
+    rdfs:subClassOf :Image_resolution .
+:ElectricPotentialDifferenceUnit rdf:type owl:Class ;
+    rdfs:subClassOf :Unit .
+:Else rdf:type owl:Class ;
+    rdfs:subClassOf :BoilerPlateParts .
+:EncryptionStandard rdf:type owl:Class ;
+    rdfs:subClassOf :InformationStandard .
+:Fathom rdf:type owl:Class ;
+    rdfs:subClassOf :MaritimeLength .
+:FiberGlass rdf:type owl:Class ;
+    rdfs:subClassOf :Material .
+:Foot rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:FunctionalKey rdf:type owl:Class ;
+    rdfs:subClassOf :Keys .
+:Furlong rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:Gigabyte rdf:type owl:Class ;
+    rdfs:subClassOf :Information_unit .
+:Height rdf:type owl:Class ;
+    rdfs:subClassOf :Length .
+:IFBBThenBBElseBB rdf:type owl:Class ;
+    rdfs:subClassOf :ComplexRequirement .
+:IfBBThenBB rdf:type owl:Class ;
+    rdfs:subClassOf :ComplexRequirement .
+:Inch rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:InvalidBankCode rdf:type owl:Class ;
+    rdfs:subClassOf :BankCode .
+:Kibibyte rdf:type owl:Class ;
+    rdfs:subClassOf :Information_unit .
+:Kilobyte rdf:type owl:Class ;
+    rdfs:subClassOf :Information_unit .
+:League rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:MagneticCardReader rdf:type owl:Class ;
+    rdfs:subClassOf :CardReader .
+:Mebibyte rdf:type owl:Class ;
+    rdfs:subClassOf :Information_unit .
+:Megabyte rdf:type owl:Class ;
+    rdfs:subClassOf :Information_unit .
+:Micrometer rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:Micron_pixel rdf:type owl:Class ;
+    rdfs:subClassOf :Spatial_resolution_unit .
+:Mile rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:MilliMeter rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:Mole_fraction rdf:type owl:Class ;
+    rdfs:subClassOf :Fraction .
+:MoneyUnit rdf:type owl:Class ;
+    rdfs:subClassOf :Unit .
+:NanoMeter rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:NauticalMile rdf:type owl:Class ;
+    rdfs:subClassOf :MaritimeLength .
+:Negative rdf:type owl:Class ;
+    rdfs:subClassOf :Response .
+:NonVotalite rdf:type owl:Class ;
+    rdfs:subClassOf :Memory .
+:OSI rdf:type owl:Class ;
+    rdfs:subClassOf :NetworkSuites .
+:PicoMeter rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:Pixels_per_inch rdf:type owl:Class ;
+    rdfs:subClassOf :Spatial_resolution_unit .
+:Pixels_per_millimeter rdf:type owl:Class ;
+    rdfs:subClassOf :Spatial_resolution_unit .
+:Positive rdf:type owl:Class ;
+    rdfs:subClassOf :Response .
+:ProcessSuccessfulStatus rdf:type owl:Class ;
+    rdfs:subClassOf :ProcessStatus .
+:ProcessUnwantedStatus rdf:type owl:Class ;
+    rdfs:subClassOf :ProcessStatus .
+:QualitativeCost rdf:type owl:Class ;
+    rdfs:subClassOf :Cost .
+:Radian rdf:type owl:Class ;
+    rdfs:subClassOf :Plane_angle_unit .
+:Request rdf:type owl:Class ;
+    rdfs:subClassOf :Interaction .
+:SavingAccount rdf:type owl:Class ;
+    rdfs:subClassOf :Account .
+:SecurityCamera rdf:type owl:Class ;
+    rdfs:subClassOf :HardwareComponent .
+:SecurityStandard rdf:type owl:Class ;
+    rdfs:subClassOf :InformationStandard .
+:Server rdf:type owl:Class ;
+    rdfs:subClassOf :Computer .
+:ServerWorkLoad rdf:type owl:Class ;
+    rdfs:subClassOf :WorkLoad .
+:Service rdf:type owl:Class .
+:SmartCardReader rdf:type owl:Class ;
+    rdfs:subClassOf :CardReader .
+:Speaker rdf:type owl:Class ;
+    rdfs:subClassOf :HardwareComponent .
+:Steredian rdf:type owl:Class ;
+    rdfs:subClassOf :Solid_angle_unit .
+:SubjectVerbObject rdf:type owl:Class ;
+    rdfs:subClassOf :BasicRequirement .
+:SubjectVerbObjectOfEntity rdf:type owl:Class ;
+    rdfs:subClassOf :BasicRequirement .
+:SuccessfulSates rdf:type owl:Class ;
+    rdfs:subClassOf :CashCardStatus .
+:SystemSoftware rdf:type owl:Class ;
+    rdfs:subClassOf :Software .
+<http://lod.csd.auth.gr/atm/atm.ttl#TCP/IP> rdf:type owl:Class ;
+    rdfs:subClassOf :NetworkSuites .
+:TFTP rdf:type owl:Class ;
+    rdfs:subClassOf :FTP .
+:Terabyte rdf:type owl:Class ;
+    rdfs:subClassOf :Information_unit .
+:Text rdf:type owl:Class ;
+    rdfs:subClassOf :Codec .
+:Thickness rdf:type owl:Class ;
+    rdfs:subClassOf :Length .
+:Thou rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:TransactionByBank rdf:type owl:Class ;
+    rdfs:subClassOf :Transaction .
+:TransactionDialog rdf:type owl:Class ;
+    rdfs:subClassOf :Process .
+:Transfer rdf:type owl:Class ;
+    rdfs:subClassOf :ATMTransaction .
+:Transmission rdf:type owl:Class ;
+    rdfs:subClassOf :Function .
+:UnWantedStates rdf:type owl:Class ;
+    rdfs:subClassOf :CashCardStatus .
+:UnwantedATMStatus rdf:type owl:Class ;
+    rdfs:subClassOf :ATMStatus .
+:UnwantedPowerSupplyStatus rdf:type owl:Class ;
+    rdfs:subClassOf :StatusPowerSupplyStatus .
 :ValidBankCode rdf:type owl:Class ;
     rdfs:subClassOf :BankCode .
-:belongsToBank rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range :Bank .
-:cardIssuedBy rdf:type owl:ObjectProperty ;
-    rdfs:domain :CashCard ;
-    rdfs:range :Bank .
-:displays rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range :AmountOfMoney .
-:enters rdf:type owl:ObjectProperty ;
-    rdfs:domain :Customer ;
-    rdfs:range :CashCard .
-:from rdf:type owl:ObjectProperty ;
-    rdfs:domain :Response ;
-    rdfs:range :BankComputer .
-:hasAccount rdf:type owl:ObjectProperty ;
-    rdfs:domain :Bank,
-        :Customer ;
-    rdfs:range :Account .
-:hasAmount rdf:type owl:DatatypeProperty ;
-    rdfs:domain :TransactionRequest ;
-    rdfs:range xsd:decimal .
-:hasDailyLimit rdf:type owl:DatatypeProperty ;
+:Validation rdf:type owl:Class ;
+    rdfs:subClassOf :Process .
+:Verification rdf:type owl:Class ;
+    rdfs:subClassOf :Function .
+:Video rdf:type owl:Class ;
+    rdfs:subClassOf :Codec .
+:Volalite rdf:type owl:Class ;
+    rdfs:subClassOf :Memory .
+:WantedATMStatus rdf:type owl:Class ;
+    rdfs:subClassOf :ATMStatus .
+:Watt rdf:type owl:Class ;
+    rdfs:subClassOf :Power_unit .
+:WebTransaction rdf:type owl:Class ;
+    rdfs:subClassOf :Transaction .
+:Width rdf:type owl:Class ;
+    rdfs:subClassOf :Length .
+:Withdrawal rdf:type owl:Class ;
+    rdfs:subClassOf :ATMTransaction .
+:Yard rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:aTMAccountBalanceDisplayTime rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:double .
+:aTMAddress rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+:aTMBankName rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+:aTMBranch rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+:aTMCardVerificationTime rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:double .
+:aTMCashCardId rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+:aTMId rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+:aTMName rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+:aTMPinVerificationTime rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:double .
+:aTMtotalFund rdf:type owl:DatatypeProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf [ rdf:rest ( :ATMtotalFundOfATM ) ] ] ;
+    rdfs:range xsd:integer .
+:accepts rdf:type owl:ObjectProperty ;
+    owl:propertyDisjointWith :not_accepts .
+:accountBalance rdf:type owl:DatatypeProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :Account :AccountBalanceOFAccount ) ] ;
+    rdfs:range xsd:double .
+:accountCountFailPin rdf:type owl:DatatypeProperty ;
+    rdfs:domain :AccountCountFailPinOfAccount ;
+    rdfs:range xsd:integer .
+:accountMaxWithdrawalPerDayAndAccount rdf:type owl:DatatypeProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :Account :AccountMaxWithdrawalPerDayAndAccountOfAccount :Maintainer :Money ) ] ;
+    rdfs:range xsd:integer .
+:accountNumber rdf:type owl:DatatypeProperty ;
     rdfs:domain :Account ;
-    rdfs:range xsd:decimal .
-:hasEnteredAmount rdf:type owl:ObjectProperty ;
-    rdfs:domain :Customer ;
-    rdfs:range :Transaction .
-:hasMoney rdf:type owl:ObjectProperty ;
+    rdfs:range xsd:string .
+:accountType rdf:type owl:DatatypeProperty ;
     rdfs:domain :Account ;
+    rdfs:range xsd:string .
+:address rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PersonOrPhysicalEntity ;
+    rdfs:range xsd:string .
+:bankAddress rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Bank ;
+    rdfs:range xsd:string .
+:bankCode rdf:type owl:DatatypeProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf [ rdf:rest ( :BankCodeOfBank ) ] ] ;
+    rdfs:range xsd:integer .
+:bankMaxWithdrawalPerTransaction rdf:type owl:DatatypeProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :BankMaxWithdrawalPerTransactionOfBank :Money ) ] ;
+    rdfs:range xsd:integer .
+:bankMinCashPerTransaction rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Bank ;
+    rdfs:range xsd:integer .
+:bankName rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Bank ;
+    rdfs:range xsd:string .
+:bankTotalFundStartOfDay rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Bank ;
+    rdfs:range xsd:integer .
+:cardBankName rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Card ;
+    rdfs:range xsd:string .
+:cardCvv rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Card ;
+    rdfs:range xsd:integer .
+:cardExpiryDate rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Card ;
+    rdfs:range xsd:dateTime .
+:cardId rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Card ;
+    rdfs:range xsd:string .
+:cardType rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Card ;
+    rdfs:range xsd:string .
+:city rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PersonOrPhysicalEntity ;
+    rdfs:range xsd:string .
+:complies_with rdf:type owl:ObjectProperty ;
+    rdfs:domain :Function ;
+    rdfs:range :InformationStandard .
+:computerID rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+:computerType rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+:condition rdf:type owl:ObjectProperty ;
+    rdfs:domain :ComplexRequirement ;
+    rdfs:range :BasicRequirement .
+:consistOfKeys rdf:type owl:ObjectProperty ;
+    rdfs:domain :Keypad ;
+    rdfs:range :Keys ;
+    owl:inverseOf :ispartOfKeypad .
+:customerID rdf:type owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+:dateOfBirth rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PersonOrPhysicalEntity ;
+    rdfs:range xsd:dateTime .
+:dispenses rdf:type owl:ObjectProperty ;
     rdfs:range :Money .
-:hasMonthlyLimit rdf:type owl:DatatypeProperty ;
-    rdfs:domain :Account ;
-    rdfs:range xsd:decimal .
-:hasProblemWithAccount rdf:type owl:ObjectProperty ;
-    rdfs:domain :Bank ;
-    rdfs:range :ProblemWithAccount .
-:hasRequest rdf:type owl:ObjectProperty ;
-    rdfs:domain :ProcessTransaction ;
-    rdfs:range :TransactionRequest .
-:hasValidPassword rdf:type owl:ObjectProperty ;
-    rdfs:domain :Bank ;
-    rdfs:range :ValidPassword .
-:initializeParameters rdf:type owl:ObjectProperty ;
-    rdfs:domain :Parameter ;
-    rdfs:range :Parameter .
-:initializedWith rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range xsd:decimal .
-:initiates rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range :WithdrawalSequence .
-:k rdf:type :Parameter ;
-    :initializeParameters :t ;
-    :setParameters :t .
-:m rdf:type :Parameter ;
-    :initializeParameters :t ;
-    :setParameters :t .
-:n rdf:type :Parameter ;
-    :initializeParameters :t ;
-    :setParameters :t .
-:ownsCard rdf:type owl:ObjectProperty ;
-    rdfs:domain :Customer ;
-    rdfs:range :CashCard .
-:receivesRequest rdf:type owl:ObjectProperty ;
-    rdfs:domain :BankComputer ;
-    rdfs:range :processTransaction .
+:display rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Display ;
+    rdfs:range xsd:string .
+:dotMatrixPrinterColumn rdf:type owl:DatatypeProperty ;
+    rdfs:domain :DotMatrixPrinter ;
+    rdfs:range xsd:integer .
+:else rdf:type owl:ObjectProperty ;
+    rdfs:domain :ComplexRequirement ;
+    rdfs:range :BasicRequirement .
+:email rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PersonOrPhysicalEntity ;
+    rdfs:range xsd:string .
+:employeeId rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Employee ;
+    rdfs:range xsd:string .
+:enters rdf:type owl:ObjectProperty ;
+    rdfs:range [ rdf:type owl:Class ;
+            owl:unionOf [ rdf:rest ( :TransactionAmountOfTransaction ) ] ] .
+:firstName rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PersonOrPhysicalEntity ;
+    rdfs:range xsd:string .
+:forTime rdf:type owl:ObjectProperty ;
+    rdfs:domain :Display ;
+    rdfs:range :DisplayTime .
+:fromATM rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :TransactionAmountOfTransactionFromATM :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM ) ] .
+:fromBankComputer rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :InteractionFromBankComputer :ResponseFromBankComputer :StatusInteractionFromBankComputer ) ] .
+:gender rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PersonOrPhysicalEntity ;
+    rdfs:range xsd:string .
+:hasAccountBalanceDisplayTime rdf:type owl:ObjectProperty ;
+    rdfs:range :Time .
+:hasAccountBalanceTransferTime rdf:type owl:ObjectProperty ;
+    rdfs:range :Time .
+:hasBackUpPowerSupply rdf:type owl:ObjectProperty ;
+    rdfs:range :PowerSupply .
+:hasButtonResponseTime rdf:type owl:ObjectProperty ;
+    rdfs:range :Time .
+:hasCardVerificationTime rdf:type owl:ObjectProperty ;
+    rdfs:range :Time .
+:hasCashCard rdf:type owl:ObjectProperty .
+:hasCashWithdrawalTransactionTime rdf:type owl:ObjectProperty ;
+    rdfs:range :Time .
+:hasCost rdf:type owl:ObjectProperty ;
+    rdfs:domain :InternetAccess .
+:hasCreditCardAdvanceTime rdf:type owl:ObjectProperty ;
+    rdfs:range :Time .
+:hasDepositTransactionTime rdf:type owl:ObjectProperty ;
+    rdfs:range :Time .
+:hasDisplayTime rdf:type owl:ObjectProperty ;
+    rdfs:domain :ErrorDisplay ;
+    rdfs:range :TimeUnit .
+:hasInitialDisplay rdf:type owl:ObjectProperty ;
+    rdfs:domain :ATMTransaction ;
+    rdfs:range :Display .
+:hasInput rdf:type owl:ObjectProperty ;
+    rdfs:domain :PowerSupply ;
+    rdfs:range :PowerSource .
+:hasMainPowerSupply rdf:type owl:ObjectProperty ;
+    rdfs:range :PowerSupply .
+:hasPinVerificationTime rdf:type owl:ObjectProperty ;
+    rdfs:range :Time .
+:hasReceipt rdf:type owl:ObjectProperty ;
+    rdfs:domain :Printer ;
+    rdfs:range :Receipt .
+:hasReceiptPrintingTime rdf:type owl:ObjectProperty ;
+    rdfs:range :Time .
+:hasTouchScreenTime rdf:type owl:ObjectProperty ;
+    rdfs:range :Time .
+:hasUnit rdf:type owl:ObjectProperty ;
+    rdfs:domain :PhysicalQuantity ;
+    rdfs:range :Unit .
+:hasValue rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PhysicalQuantity .
+:hasVolatge rdf:type owl:ObjectProperty ;
+    rdfs:domain :PowerSupply .
+:haskey rdf:type owl:ObjectProperty ;
+    rdfs:domain :Keypad ;
+    rdfs:range "Cls(@A30_a11812dd_067e_426f_ac5e_bc9bd91e7a95)"^^<java:edu.stanford.smi.protege.model.DefaultCls>,
+        "Cls(@A31_a11812dd_067e_426f_ac5e_bc9bd91e7a95)"^^<java:edu.stanford.smi.protege.model.DefaultCls> .
+:holds rdf:type owl:ObjectProperty ;
+    rdfs:range :Account ;
+    owl:inverseOf :isHold .
+:initializes rdf:type owl:ObjectProperty ;
+    rdfs:domain :Maintainer ;
+    rdfs:range :AccountMaxWithdrawalPerDayAndAccountOfAccount .
+:interactionTimeStamp rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Interaction ;
+    rdfs:range xsd:dateTimeStamp .
+:internet_AccessFormCost rdf:type owl:DatatypeProperty ;
+    rdfs:domain :InternetAccess .
+:isLessThan rdf:type owl:ObjectProperty ;
+    rdfs:domain :Money ;
+    rdfs:range :AccountMaxWithdrawalPerDayAndAccountOfAccount .
+:isLinkedTo rdf:type owl:ObjectProperty ;
+    rdfs:domain :ATMTransaction ;
+    rdfs:range :Account .
+:isLinkedToATM rdf:type owl:ObjectProperty ;
+    rdfs:domain :ATMTransaction .
+:isLinkedToCard rdf:type owl:ObjectProperty ;
+    rdfs:domain :ATMTransaction ;
+    rdfs:range :Card .
+:isPartOf rdf:type owl:ObjectProperty ;
+    rdfs:domain :Printer .
+:isPartOfATM rdf:type owl:ObjectProperty ;
+    rdfs:domain :Screen .
+:isPerformedByCustomer rdf:type owl:ObjectProperty ;
+    rdfs:domain :ATMTransaction .
+:is_checking rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf [ rdf:rest [ rdf:rest () ] ] ] ;
+    rdfs:range [ rdf:type owl:Class ;
+            owl:unionOf [ rdf:first :CardSerialNumberOfCashCard ;
+                    rdf:rest [ rdf:rest ( :PasswordOfCustomer :TypedPasswordOfCustomer ) ] ] ] .
+:is_greater_than rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :AccountCountFailPinOfAccount :TransactionAmountOfTransaction ) ] ;
+    rdfs:range [ rdf:type owl:Class ;
+            owl:unionOf ( :BankMaxWithdrawalPerTransactionOfBank :Count ) ] .
+:is_in rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf [ rdf:rest ( :Money ) ] ] .
+:is_less_than_or_equals_to rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :Money :TransactionAmountOfTransaction ) ] ;
+    rdfs:range [ rdf:type owl:Class ;
+            owl:unionOf ( :AccountMaxWithdrawalPerDayAndAccountOfAccount :BankMaxWithdrawalPerTransactionOfBank ) ] .
+:is_not_state rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf [ rdf:rest [ rdf:rest ( :Process ) ] ] ] ;
+    rdfs:range :Status .
+:isperformedByATMTransaction rdf:type owl:ObjectProperty ;
+    rdfs:range :ATMTransaction .
+:keeps rdf:type owl:ObjectProperty .
+:lastName rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PersonOrPhysicalEntity ;
+    rdfs:range xsd:string .
+:lockingSystemPartOf rdf:type owl:ObjectProperty ;
+    rdfs:domain :LockingSystem ;
+    rdfs:range :CashVault .
+:maintainerId rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Maintainer ;
+    rdfs:range xsd:string .
+:meter rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:middleName rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PersonOrPhysicalEntity ;
+    rdfs:range xsd:string .
+:mobileNumber rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PersonOrPhysicalEntity ;
+    rdfs:range xsd:integer .
+:object rdf:type owl:ObjectProperty ;
+    rdfs:domain :BasicRequirement ;
+    rdfs:range :Object .
+:ofATM rdf:type owl:ObjectProperty ;
+    rdfs:domain :ATMtotalFundOfATM .
+:ofAccount rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :AccountBalanceOFAccount :AccountCountFailPinOfAccount :AccountMaxWithdrawalPerDayAndAccountOfAccount ) ] ;
+    rdfs:range :Account .
+:ofBank rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :BankCodeOfBank :BankMaxWithdrawalPerTransactionOfBank ) ] ;
+    rdfs:range :Bank .
+:ofCashCard rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :CardSerialNumberOfCashCard :ReadableBankCodeOfCashCard :TransactionAmountOfTransactionCardSerialNumberOfCashCard :TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer ) ] .
+:ofCustomer rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :PasswordOfCustomer :TypedPasswordOfCustomer :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer :TypedPasswordOfCustomerToBankComputer ) ] .
+:ofEntity rdf:type owl:ObjectProperty ;
+    rdfs:domain :BasicRequirement ;
+    rdfs:range :OfEntity .
+:ofInteraction rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :InteractionFromBankComputer :InteractionToATM :StatusInteractionFromBankComputer :StatusInteractionToATM ) ] ;
+    rdfs:range :Interaction .
+:ofResponse rdf:type owl:ObjectProperty ;
+    rdfs:domain :ResponseFromBankComputer ;
+    rdfs:range :Response .
+:ofStatus rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :StatusInteractionFromBankComputer :StatusInteractionToATM ) ] ;
+    rdfs:range :Status .
+:ofTransaction rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :TransactionAmountOfTransaction :TransactionAmountOfTransactionCardSerialNumberOfCashCard :TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer :TransactionAmountOfTransactionFromATM :TransactionAmountOfTransactionToBankComputer ) ] ;
+    rdfs:range :ATMTransaction .
+:phoneNumber rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PersonOrPhysicalEntity ;
+    rdfs:range xsd:integer .
+:powerSourceType rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PowerSource ;
+    rdfs:range [ rdf:type rdfs:Datatype ;
+            owl:oneOf [ rdf:type rdf:List ;
+                    rdf:first "ac" ;
+                    rdf:rest [ rdf:type rdf:List ;
+                            rdf:first "dc" ;
+                            rdf:rest () ] ] ] .
+:powerSourceVoltage rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PowerSource ;
+    rdfs:range xsd:integer .
+:powerSupplySwitch rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PowerSupply ;
+    rdfs:range [ rdf:type rdfs:Datatype ;
+            owl:oneOf [ rdf:type rdf:List ;
+                    rdf:first " manual " ;
+                    rdf:rest () ] ] .
+:prints rdf:type owl:ObjectProperty ;
+    rdfs:range :Receipt .
+:productID rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Product ;
+    rdfs:range xsd:string .
+:productName rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Product ;
+    rdfs:range xsd:string .
+:productType rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Product ;
+    rdfs:range xsd:string .
+:productionDate rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Product ;
+    rdfs:range xsd:dateTime .
+:readableBankCode rdf:type owl:DatatypeProperty ;
+    rdfs:domain :ReadableBankCodeOfCashCard ;
+    rdfs:range xsd:string .
+:reads rdf:type owl:ObjectProperty ;
+    rdfs:range [ rdf:type owl:Class ;
+            owl:unionOf ( :BankCodeOfBank :CardSerialNumberOfCashCard ) ] .
+:receives rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf [ rdf:rest [ rdf:rest () ] ] ] ;
+    rdfs:range [ rdf:type owl:Class ;
+            owl:unionOf ( :InteractionFromBankComputer :StatusInteractionFromBankComputer :TransactionAmountOfTransactionFromATM :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM ) ] .
+:recordValue rdf:type owl:DatatypeProperty ;
+    rdfs:domain :CardSerialNumberOfCashCard .
 :returnsBankCode rdf:type owl:ObjectProperty ;
     rdfs:domain :ATM ;
     rdfs:range :BankCode .
-:setParameters rdf:type owl:ObjectProperty ;
-    rdfs:domain :Parameter ;
-    rdfs:range :Parameter .
-:waitForResponse rdf:type owl:ObjectProperty ;
-    rdfs:domain :System ;
-    rdfs:range :Response .
-:ATMOperation rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :hasOutcome ;
-            owl:someValuesFrom :DisplayError ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :hasOutcome ;
-            owl:someValuesFrom :ReturnCard ] .
-:ATMResponse rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :hasMoneyDispensed ;
-            owl:someValuesFrom :Money ] .
-:AcceptsCard rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range :Card .
-:AccountOK rdf:type :Message,
-        owl:NamedIndividual .
-:AccountRecord rdf:type owl:Class .
-:AmountOfMoney rdf:type owl:Class .
-:AuthorizationDialog rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :requestsUserToEnter ;
-            owl:someValuesFrom :Password ] .
-:BadBankCode rdf:type owl:Class .
-:BadPassword rdf:type owl:Class .
-:BadPasswordMessage rdf:type owl:Class ;
-    rdfs:subClassOf :Message .
-:Computer rdf:type owl:Class .
-:Dispense rdf:type owl:Class ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:onProperty :after ;
-            owl:someValuesFrom :Update ] .
-:Dispensed20DollarBill rdf:type owl:Class ;
-    owl:equivalentClass [ rdf:type owl:Class ;
-            owl:intersectionOf ( :MoneyDispensed [ rdf:type owl:Restriction ;
-                        owl:onProperty :dispenses ;
-                        owl:someValuesFrom :MoneyDispensed ] ) ] .
-:InvalidBankCode rdf:type owl:Class ;
-    rdfs:subClassOf :BankCode ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:hasValue "bad bank code" ;
-            owl:onProperty :hasMessage ] .
-:ProcessTransaction rdf:type owl:Class .
-:ShouldDisplayInitialDisplay rdf:type owl:Class ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:onProperty :display ;
-            owl:someValuesFrom :InitialDisplay ] .
-:Software rdf:type owl:Class .
-:SuccessfulAuthorization rdf:type owl:Class ;
-    rdfs:subClassOf :Authorization .
-:TransactionFailed rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :hasStatus ;
-            owl:someValuesFrom :Transaction ] .
-:TransactionLimit rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :exceeds ;
-            owl:someValuesFrom :Transaction ] .
-:TransactionSucceeded rdf:type :Message,
-        owl:NamedIndividual ;
-    rdfs:label "transaction succeeded" .
-:WithdrawalSequence rdf:type owl:Class .
-:WrongPasswordEntry rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :hasWrongPasswordEntry ] .
-:accepts rdf:type owl:ObjectProperty ;
-    rdfs:domain :Bank ;
-    rdfs:range :Withdrawal .
-:after rdf:type owl:ObjectProperty ;
-    rdfs:domain :Dispense ;
-    rdfs:range :Update .
-:callBank rdf:type rdf:Property ;
-    rdfs:label "call bank"@en ;
-    rdfs:domain :Customer ;
-    rdfs:range :Bank .
-:display rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range :InitialDisplay .
-:displayDuration rdf:type owl:DatatypeProperty ;
-    rdfs:domain :ErrorMessage ;
+:salary rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Employee ;
+    rdfs:range xsd:float .
+:shouldBeLogged rdf:type owl:ObjectProperty .
+:subject rdf:type owl:ObjectProperty ;
+    rdfs:domain :BasicRequirement ;
+    rdfs:range :Subject .
+:timeConstraint rdf:type owl:DatatypeProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :DisplayTime :InteractionTime ) ] ;
+    rdfs:range [ rdf:type rdfs:Datatype ;
+            owl:oneOf [ rdf:type rdf:List ;
+                    rdf:first " is_less_than" ;
+                    rdf:rest [ rdf:type rdf:List ;
+                            rdf:first "atleast" ;
+                            rdf:rest [ rdf:type rdf:List ;
+                                    rdf:first "atmost" ;
+                                    rdf:rest [ rdf:type rdf:List ;
+                                            rdf:first "is_greater_than" ;
+                                            rdf:rest () ] ] ] ] ] .
+:toATM rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :InteractionToATM :StatusInteractionToATM ) ] .
+:toBankComputer rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer :TransactionAmountOfTransactionToBankComputer :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer :TypedPasswordOfCustomerToBankComputer ) ] .
+:toEntity rdf:type owl:ObjectProperty ;
+    rdfs:domain :BasicRequirement ;
+    rdfs:range :ToEntity .
+:tranacactionId rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Transaction ;
+    rdfs:range xsd:string .
+:transactionAmount rdf:type owl:DatatypeProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf ( :ATMTransaction :TransactionAmountOfTransaction :TransactionAmountOfTransactionCardSerialNumberOfCashCard :TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer :TransactionAmountOfTransactionFromATM :TransactionAmountOfTransactionToBankComputer ) ] ;
     rdfs:range xsd:integer .
+:transactionTimestamp rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Transaction ;
+    rdfs:range xsd:dateTimeStamp .
+:transactionType rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Transaction ;
+    rdfs:range xsd:string .
+:transcactionDate rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Transaction ;
+    rdfs:range xsd:dateTime .
+:transcactionStatus rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Transaction ;
+    rdfs:range xsd:string .
+:typedpassword rdf:type owl:DatatypeProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf [ rdf:rest ( :TypedPasswordOfCustomer :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer ) ] ] ;
+    rdfs:range xsd:string .
+:types rdf:type owl:ObjectProperty ;
+    rdfs:range [ rdf:type owl:Class ;
+            owl:unionOf ( :PasswordOfCustomer :TransactionAmountOfTransaction ) ] .
+:updates rdf:type owl:ObjectProperty ;
+    rdfs:domain [ rdf:type owl:Class ;
+            owl:unionOf [ rdf:rest [ rdf:rest () ] ] ] ;
+    rdfs:range [ rdf:type owl:Class ;
+            owl:unionOf ( :ATMtotalFundOfATM :AccountBalanceOFAccount :AccountCountFailPinOfAccount :AccountMaxWithdrawalPerDayAndAccountOfAccount ) ] .
+:verb rdf:type owl:ObjectProperty ;
+    rdfs:domain :BasicRequirement ;
+    rdfs:range :Verb .
+:waits rdf:type owl:ObjectProperty ;
+    rdfs:range :ResponseFromBankComputer .
+:workload rdf:type owl:DatatypeProperty ;
+    rdfs:domain :Computer .
+:works rdf:type owl:ObjectProperty ;
+    rdfs:domain :Maintainer ;
+    rdfs:range "Cls(@A147_a11812dd_067e_426f_ac5e_bc9bd91e7a95)"^^<java:edu.stanford.smi.protege.model.DefaultCls> .
+:zipCode rdf:type owl:DatatypeProperty ;
+    rdfs:domain :PersonOrPhysicalEntity ;
+    rdfs:range xsd:integer .
+rdfs:range rdf:type owl:AnnotationProperty .
+<java:edu.stanford.smi.protege.model.DefaultCls> rdf:type rdfs:Datatype .
+:ApplicationSoftware rdf:type owl:Class ;
+    rdfs:subClassOf :Software .
+:Authorization rdf:type owl:Class ;
+    rdfs:subClassOf :Process .
+:CashVault rdf:type owl:Class ;
+    rdfs:subClassOf :HardwareComponent .
+:Company rdf:type owl:Class ;
+    rdfs:subClassOf :LegalEntity .
+:Count rdf:type owl:Class ;
+    rdfs:subClassOf :PhysicalQuantity .
+:DataTransferProtocol rdf:type owl:Class ;
+    rdfs:subClassOf :Protocol .
+:Diomensionless_unit rdf:type owl:Class ;
+    rdfs:subClassOf :Unit .
+:DotMatrixPrinter rdf:type owl:Class ;
+    rdfs:subClassOf :Printer .
+:FTP rdf:type owl:Class ;
+    rdfs:subClassOf :DataTransferProtocol .
+:Fraction rdf:type owl:Class ;
+    rdfs:subClassOf :Ratio .
+:InteractionTime rdf:type owl:Class ;
+    rdfs:subClassOf :Time .
+:LegalEntity rdf:type owl:Class ;
+    rdfs:subClassOf :Entity .
+:Light_Unit rdf:type owl:Class ;
+    rdfs:subClassOf :Unit .
+:LockingSystem rdf:type owl:Class ;
+    rdfs:subClassOf :HardwareComponent .
+:Luminance_Unit rdf:type owl:Class ;
+    rdfs:subClassOf :Light_Unit .
+:Material rdf:type owl:Class ;
+    rdfs:subClassOf :Resource .
+:NormalDisplay rdf:type owl:Class ;
+    rdfs:subClassOf :Display .
+:Object rdf:type owl:Class ;
+    rdfs:subClassOf :BoilerPlateParts .
+:OfEntity rdf:type owl:Class ;
+    rdfs:subClassOf :BoilerPlateParts .
+:Percent rdf:type owl:Class ;
+    rdfs:subClassOf :Ratio .
+:Power_unit rdf:type owl:Class ;
+    rdfs:subClassOf :Unit .
+:Screen rdf:type owl:Class ;
+    rdfs:subClassOf :HardwareComponent .
+:Solid_angle_unit rdf:type owl:Class ;
+    rdfs:subClassOf :Angle_unit .
+:StatusPowerSupplyStatus rdf:type owl:Class ;
+    rdfs:subClassOf :Status .
+:Subject rdf:type owl:Class ;
+    rdfs:subClassOf :BoilerPlateParts .
+:TimeUnit rdf:type owl:Class ;
+    rdfs:subClassOf :Unit .
+:ToEntity rdf:type owl:Class ;
+    rdfs:subClassOf :BoilerPlateParts .
+:Verb rdf:type owl:Class ;
+    rdfs:subClassOf :BoilerPlateParts .
+:WorkLoad rdf:type owl:Class ;
+    rdfs:subClassOf :PhysicalQuantity .
+:belongsToBank rdf:type owl:ObjectProperty ;
+    rdfs:range [ rdf:type owl:Restriction ;
+            owl:allValuesFrom :Bank ;
+            owl:onProperty :belongsToBank ] ;
+    owl:inverseOf :isBelongedBy .
+:belongsToCashCard rdf:type owl:ObjectProperty ;
+    rdfs:range [ rdf:type owl:Restriction ;
+            owl:onProperty :belongsToCashCard ] ;
+    rdfs:subPropertyOf owl:topObjectProperty .
+:consistOfBankComputer rdf:type owl:ObjectProperty ;
+    rdfs:domain :Bank ;
+    rdfs:range [ rdf:type owl:Restriction ;
+            owl:onProperty :consistOfBankComputer ] .
 :displayErrorMessage rdf:type owl:ObjectProperty ;
     rdfs:domain :Transaction ;
     rdfs:range :ErrorMessage .
-:displayMessage rdf:type rdf:Property ;
-    rdfs:label "display message"@en ;
-    rdfs:domain :Bank ;
-    rdfs:range :Message .
 :ejectCard rdf:type owl:ObjectProperty ;
     rdfs:domain :Transaction ;
     rdfs:range :Card .
-:exceeds rdf:type owl:ObjectProperty ;
-    rdfs:domain :Transaction ;
-    rdfs:range :TransactionLimit .
-:hasBankComputerResponse rdf:type owl:ObjectProperty ;
-    rdfs:domain :Card ;
-    rdfs:range :BankComputerResponse .
-:hasCard rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range :Card .
-:hasCashCard rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range :CashCard .
-:hasErrorMessage rdf:type owl:ObjectProperty ;
-    rdfs:domain :Card,
-        :System ;
-    rdfs:range :ErrorMessage .
-:hasItemState rdf:type owl:ObjectProperty ;
-    rdfs:domain :Item ;
-    rdfs:range :StateValue .
-:hasLimit rdf:type owl:DatatypeProperty ;
-    rdfs:domain :Transaction ;
-    rdfs:range xsd:decimal .
-:hasMoneyDispensed rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATMResponse ;
-    rdfs:range :Money .
-:hasResponseTime rdf:type owl:DatatypeProperty ;
-    rdfs:domain :BankComputerResponse ;
-    rdfs:range xsd:integer .
-:hasStateValue rdf:type owl:ObjectProperty ;
-    rdfs:domain :Function ;
-    rdfs:range :StateValue .
-:hasStatus rdf:type owl:ObjectProperty ;
-    rdfs:domain :Transaction ;
-    rdfs:range :TransactionFailed .
-:hasTransactionRequest rdf:type owl:ObjectProperty ;
-    rdfs:domain :Account ;
-    rdfs:range :TransactionRequest .
-:hasUpdate rdf:type owl:ObjectProperty ;
-    rdfs:domain :Account ;
-    rdfs:range :Update .
-:hasValidCashCard rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM,
-        :Bank ;
-    rdfs:range :CashCard,
-        :ValidCashCard .
-:initiated rdf:type :StateValue .
-:isCanceled rdf:type owl:ObjectProperty ;
-    rdfs:domain :Transaction ;
-    rdfs:range :Transaction .
-:isLogged rdf:type owl:ObjectProperty ;
-    rdfs:domain :SerialNumber ;
-    rdfs:range :Log .
-:isRestarted rdf:type owl:ObjectProperty ;
-    rdfs:domain :TransactionDialog ;
-    rdfs:range :TransactionDialog .
-:isSuccessful rdf:type owl:ObjectProperty ;
-    rdfs:domain :Authorization,
-        :Transaction ;
-    rdfs:range :SuccessfulAuthorization,
-        rdf:Literal .
-:logs rdf:type owl:ObjectProperty ;
-    rdfs:domain :MoneyDispensed ;
-    rdfs:range :AmountLogged .
-:processTransaction rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range :Transaction .
-:processedBy rdf:type owl:ObjectProperty ;
-    rdfs:domain :Transaction ;
-    rdfs:range :ATM .
-:processes rdf:type owl:ObjectProperty ;
-    rdfs:domain :Bank ;
-    rdfs:range :Transaction,
-        :Withdrawal .
-:processesTransaction rdf:type owl:ObjectProperty ;
-    rdfs:domain :BankComputer ;
-    rdfs:range :Transaction .
-:readsBankCode rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range xsd:string .
-:readsSerialNumber rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range xsd:string .
-:requestedAmount rdf:type owl:DatatypeProperty ;
-    rdfs:domain :Transaction ;
-    rdfs:range xsd:decimal .
-:requestsUserToEnter rdf:type owl:ObjectProperty ;
-    rdfs:domain :AuthorizationDialog ;
-    rdfs:range :Password .
-:sendMessage rdf:type owl:ObjectProperty ;
-    rdfs:domain :BankComputer ;
-    rdfs:range :Message .
-:sendsMessageTo rdf:type owl:ObjectProperty ;
-    rdfs:domain :BankComputer ;
-    rdfs:range :ATM .
-:sendsResponse rdf:type owl:ObjectProperty ;
-    rdfs:domain :AmountLogged ;
-    rdfs:range :ResponseSent .
-:successful rdf:type :StateValue .
-:valid rdf:type owl:Class ;
-    rdfs:subClassOf :CashCard .
-:validFor rdf:type owl:ObjectProperty ;
-    rdfs:domain :Password ;
-    rdfs:range :CashCard .
-:BankComputerResponse rdf:type owl:Class ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:hasValue 2 ;
-            owl:onProperty :hasResponseTime ] .
-:DisplayError rdf:type owl:Class .
-:InitialDisplay rdf:type owl:Class .
-:InvalidPassword rdf:type owl:Class ;
-    rdfs:subClassOf :Password .
-:Log rdf:type owl:Class .
-:LogFile rdf:type owl:Class .
-:ProblemWithAccount rdf:type owl:Class .
-:Response rdf:type owl:Class .
-:ReturnCard rdf:type owl:Class .
-:System rdf:type owl:Class .
-:Withdrawal rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :dispenses ;
-            owl:someValuesFrom :Money ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :processes ;
-            owl:someValuesFrom :Bank ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :accepts ;
-            owl:someValuesFrom :Bank ] .
-:dispenses rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM,
-        :Dispensed20DollarBill ;
-    rdfs:range :Money,
-        :MoneyDispensed .
 :hasBankCode rdf:type owl:ObjectProperty ;
-    rdfs:domain :BankComputer,
-        :CashCard ;
-    rdfs:range :Bank,
-        :BankCode .
-:hasInitialFunctionSequence rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range :Function .
-:hasMessage rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM,
-        :InvalidBankCode ;
-    rdfs:range :Message,
-        rdfs:Literal .
-:hasOutcome rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATMOperation ;
-    rdfs:range [ rdf:type owl:Class ;
-            owl:unionOf ( :DisplayError :ReturnCard ) ] .
-:hasWrongPasswordEntry rdf:type owl:ObjectProperty ;
-    rdfs:domain :Card ;
-    rdfs:range :WrongPasswordEntry .
-:isValid rdf:type owl:ObjectProperty ;
-    rdfs:domain [ rdf:type owl:Class ;
-            owl:unionOf ( :CashCard :Password :Account ) ] ;
-    rdfs:range rdf:Literal .
-:providesSecurity rdf:type owl:ObjectProperty .
-:receives rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range :BadAccount .
-:sends rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM,
-        :Bank ;
-    rdfs:range :BadAccount,
-        :Request .
-:sendsMessage rdf:type owl:ObjectProperty ;
-    rdfs:domain :Bank,
-        :BankComputer ;
-    rdfs:range :ATM,
-        :Message .
-:setsItem rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM ;
-    rdfs:range :Item .
-:transaction rdf:type :Item .
-:verifies rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM,
-        :Request ;
-    rdfs:range :BankComputer,
-        :Password .
-:withdrawal rdf:type :Function .
-:BadAccount rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :sends ;
-            owl:someValuesFrom :Bank ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :receives ;
-            owl:someValuesFrom :ATM ] .
-:Function rdf:type owl:Class .
-:Item rdf:type owl:Class .
-:Request rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :verifies ;
-            owl:someValuesFrom :Password ] .
-:ResponseSent rdf:type owl:Class .
-:SerialNumber rdf:type owl:Class .
-:TransactionDialog rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :isRestarted ;
-            owl:someValuesFrom :TransactionDialog ] .
-:TransactionRequest rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :hasTransactionRequest ;
-            owl:someValuesFrom :Account ] .
-:Update rdf:type owl:Class ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:onProperty :hasUpdate ;
-            owl:someValuesFrom :Account ] .
-:ValidCashCard rdf:type owl:Class ;
-    rdfs:subClassOf :CashCard .
-:checks rdf:type owl:ObjectProperty ;
-    rdfs:domain :ATM,
-        :BankComputer ;
-    rdfs:range :CashCard,
-        :Password .
-:hasSerialNumber rdf:type owl:ObjectProperty ;
     rdfs:domain :CashCard ;
-    rdfs:range :SerialNumber .
-:AmountLogged rdf:type owl:Class ;
-    owl:equivalentClass [ rdf:type owl:Class ;
-            owl:intersectionOf ( :ResponseSent [ rdf:type owl:Restriction ;
-                        owl:onProperty :sendsResponse ;
-                        owl:someValuesFrom :ResponseSent ] ) ] .
-:Authorization rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :receives ;
-            owl:someValuesFrom [ owl:unionOf ( :BadPassword :BadBankCode :BadAccount ) ] ] .
-:MoneyDispensed rdf:type owl:Class ;
-    owl:equivalentClass [ rdf:type owl:Class ;
-            owl:intersectionOf ( :AmountLogged [ rdf:type owl:Restriction ;
-                        owl:onProperty :logs ;
-                        owl:someValuesFrom :AmountLogged ] ) ] .
-:StateValue rdf:type owl:Class .
-:hasPassword rdf:type owl:ObjectProperty ;
-    rdfs:domain :BankComputer ;
-    rdfs:range :Password .
+    rdfs:range :Bank .
+:hasCustomer rdf:type owl:IrreflexiveProperty,
+        owl:ObjectProperty ;
+    rdfs:domain :Bank ;
+    rdfs:range [ rdf:type owl:Restriction ;
+            owl:onProperty :hasCustomer ] .
+:hasFunctionalKey rdf:type owl:ObjectProperty ;
+    rdfs:domain :Keypad ;
+    rdfs:range [ rdf:type owl:Restriction ;
+            owl:onClass :Keys ;
+            owl:onProperty :hasFunctionalKey ;
+            owl:qualifiedCardinality "8"^^xsd:nonNegativeInteger ] .
+:hasProduct rdf:type owl:ObjectProperty ;
+    rdfs:range [ rdf:type owl:Restriction ;
+            owl:onProperty :hasProduct ;
+            owl:someValuesFrom :Product ] .
+:involves rdf:type owl:ObjectProperty ;
+    rdfs:range [ rdf:type owl:Restriction ;
+            owl:onProperty :involves ;
+            owl:someValuesFrom :Account ] .
+:isMaintained rdf:type owl:ObjectProperty ;
+    rdfs:range [ rdf:type owl:Restriction ;
+            owl:onProperty :isMaintained ;
+            owl:someValuesFrom :Maintainer ] ;
+    owl:inverseOf :maintains .
+:isSuccessful rdf:type owl:ObjectProperty ;
+    rdfs:domain :Transaction ;
+    rdfs:range rdf:Literal .
+:ispartOfKeypad rdf:type owl:ObjectProperty ;
+    rdfs:domain :Keys ;
+    rdfs:range :Keypad .
+:not_accepts rdf:type owl:ObjectProperty .
+:ATMStatus rdf:type owl:Class ;
+    rdfs:subClassOf :Status .
+:AccessMethodProtocol rdf:type owl:Class ;
+    rdfs:subClassOf :Protocol .
+:Angle_unit rdf:type owl:Class ;
+    rdfs:subClassOf :Unit .
+:CardReader rdf:type owl:Class ;
+    rdfs:subClassOf :DataInput .
+:CashCard rdf:type owl:Class .
+:CashCardStatus rdf:type owl:Class ;
+    rdfs:subClassOf :Status .
+:Computer rdf:type owl:Class .
+:Cost rdf:type owl:Class ;
+    rdfs:subClassOf :PhysicalQuantity .
+:DisplayTime rdf:type owl:Class ;
+    rdfs:subClassOf :Time .
+:Entity rdf:type owl:Class .
+:ErrorDisplay rdf:type owl:Class ;
+    rdfs:subClassOf :Display .
+:ErrorMessage rdf:type owl:Class .
+:Memory rdf:type owl:Class ;
+    rdfs:subClassOf :HardwareComponent .
+:NetworkSuites rdf:type owl:Class .
+:Plane_angle_unit rdf:type owl:Class ;
+    rdfs:subClassOf :Angle_unit .
+:ProcessStatus rdf:type owl:Class ;
+    rdfs:subClassOf :Status .
+:Protocol rdf:type owl:Class .
+:Receipt rdf:type owl:Class .
+:Requirement rdf:type owl:Class .
+:Resource rdf:type owl:Class .
+:isBelongedBy rdf:type owl:ObjectProperty ;
+    rdfs:domain :Bank ;
+    rdfs:range [ rdf:type owl:Restriction ;
+            owl:onProperty :isBelongedBy ] .
+:isHold rdf:type owl:ObjectProperty ;
+    rdfs:domain :Account ;
+    rdfs:range [ rdf:type owl:Restriction ;
+            owl:onProperty :isHold ] .
+:maintains rdf:type owl:ObjectProperty ;
+    rdfs:domain :Maintainer .
+xsd:dateTimeStamp rdf:type owl:Class .
+:ATMtotalFundOfATM rdf:type owl:Class .
+:AccountBalanceOFAccount rdf:type owl:Class .
+:Codec rdf:type owl:Class ;
+    rdfs:subClassOf :InformationStandard .
+:DataInput rdf:type owl:Class ;
+    rdfs:subClassOf :HardwareComponent .
+:Employee rdf:type owl:Class ;
+    rdfs:subClassOf :PersonOrPhysicalEntity .
+:EnterpriseInfrastructureSoftware rdf:type owl:Class ;
+    rdfs:subClassOf :ApplicationSoftware .
+:Function rdf:type owl:Class .
+:Image_resolution rdf:type owl:Class ;
+    rdfs:subClassOf :Information_unit .
+:InteractionFromBankComputer rdf:type owl:Class .
+:InteractionToATM rdf:type owl:Class .
+:InternetAccess rdf:type owl:Class .
+:Length rdf:type owl:Class ;
+    rdfs:subClassOf :PhysicalQuantity .
+:MaritimeLength rdf:type owl:Class ;
+    rdfs:subClassOf :Length_Unit .
+:PowerSource rdf:type owl:Class ;
+    rdfs:subClassOf :Resource .
+:Printer rdf:type owl:Class ;
+    rdfs:subClassOf :HardwareComponent .
+:Ratio rdf:type owl:Class ;
+    rdfs:subClassOf :Diomensionless_unit,
+        :Percent .
+:ReadableBankCodeOfCashCard rdf:type owl:Class .
+:Response rdf:type owl:Class ;
+    rdfs:subClassOf :Interaction .
+:ResponseFromBankComputer rdf:type owl:Class .
+:Software rdf:type owl:Class .
+:TypedPasswordOfCustomerToBankComputer rdf:type owl:Class .
+:AccountCountFailPinOfAccount rdf:type owl:Class .
 :BankCode rdf:type owl:Class ;
     rdfs:subClassOf [ rdf:type owl:Restriction ;
             owl:onProperty :isValid ;
             owl:someValuesFrom xsd:boolean ] .
-:ErrorMessage rdf:type owl:Class ;
-    rdfs:label "Error Message"@en ;
-    rdfs:comment "An error message is displayed."@en ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:allValuesFrom xsd:integer ;
-            owl:hasValue 30 ;
-            owl:onProperty :displayDuration ] .
-:Money rdf:type owl:Class .
-:Parameter rdf:type owl:Class .
+:BankCodeOfBank rdf:type owl:Class .
+:BankMaxWithdrawalPerTransactionOfBank rdf:type owl:Class .
+:ComplexRequirement rdf:type owl:Class ;
+    rdfs:subClassOf :Requirement .
+:InformationStandard rdf:type owl:Class .
+:Interaction rdf:type owl:Class .
+:Keypad rdf:type owl:Class ;
+    rdfs:subClassOf :DataInput .
+:Keys rdf:type owl:Class ;
+    rdfs:subClassOf :DataInput .
+:Process rdf:type owl:Class .
+:Spatial_resolution_unit rdf:type owl:Class ;
+    rdfs:subClassOf :Image_resolution .
+:StatusInteractionFromBankComputer rdf:type owl:Class .
+:StatusInteractionToATM rdf:type owl:Class .
+:TransactionAmountOfTransactionFromATM rdf:type owl:Class .
+:TransactionAmountOfTransactionToBankComputer rdf:type owl:Class .
+:TypedPasswordOfCustomer rdf:type owl:Class .
+:Display rdf:type owl:Class .
+:PasswordOfCustomer rdf:type owl:Class .
+:PowerSupply rdf:type owl:Class ;
+    rdfs:subClassOf :HardwareComponent .
+:TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer rdf:type owl:Class .
+:AccountMaxWithdrawalPerDayAndAccountOfAccount rdf:type owl:Class .
+:CardSerialNumberOfCashCard rdf:type owl:Class .
+:Maintainer rdf:type owl:Class ;
+    rdfs:subClassOf [ rdf:type owl:Restriction ;
+            owl:onProperty :maintains ],
+        :Employee .
+:Product rdf:type owl:Class .
+:Status rdf:type owl:Class .
+:TransactionAmountOfTransaction rdf:type owl:Class .
+:TransactionAmountOfTransactionCardSerialNumberOfCashCard rdf:type owl:Class .
+:TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM rdf:type owl:Class .
+:TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer rdf:type owl:Class .
+:BoilerPlateParts rdf:type owl:Class .
+:Money rdf:type owl:Class ;
+    rdfs:subClassOf :Cost .
+:PhysicalQuantity rdf:type owl:Class .
+:BasicRequirement rdf:type owl:Class ;
+    rdfs:subClassOf :Requirement .
 :Card rdf:type owl:Class ;
     rdfs:subClassOf [ rdf:type owl:Restriction ;
             owl:onProperty :hasSerialNumber ;
             owl:someValuesFrom xsd:string ],
         [ rdf:type owl:Restriction ;
             owl:onProperty :hasPassword ;
-            owl:someValuesFrom xsd:string ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :hasCard ;
-            owl:someValuesFrom [ rdf:type owl:Restriction ;
-                    owl:onProperty :hasWrongPasswordEntry ] ] ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:onProperty :hasBankComputerResponse ;
-            owl:someValuesFrom [ rdf:type owl:Restriction ;
-                    owl:onProperty :hasErrorMessage ;
-                    owl:someValuesFrom :ErrorMessage ] ] .
-:Account rdf:type owl:Class .
-:Password rdf:type owl:Class ;
+            owl:someValuesFrom xsd:string ] .
+:Information_unit rdf:type owl:Class ;
+    rdfs:subClassOf :Unit .
+:Bank rdf:type owl:Class ;
     rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :validFor ;
-            owl:someValuesFrom :valid ],
-        [ rdf:type owl:Class ;
-            owl:unionOf ( :ValidPassword :InvalidPassword ) ] .
-:BankComputer rdf:type owl:Class,
-        owl:NamedIndividual ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:hasValue :TransactionSucceeded ;
-            owl:onProperty :processesTransaction,
-                :sendsMessage ;
-            owl:someValuesFrom :Transaction ],
-        [ rdf:type owl:Restriction ;
-            owl:allValuesFrom :ATM ;
-            owl:onProperty :sendsMessageTo ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :hasPassword ;
-            owl:someValuesFrom :InvalidPassword ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :sendsMessage ;
-            owl:someValuesFrom :BadPasswordMessage ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :checks ;
-            owl:someValuesFrom :Password ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :checks ;
-            owl:someValuesFrom :BankCode ] .
-:CashCard rdf:type owl:Class ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:onProperty :hasSerialNumber ;
-            owl:someValuesFrom [ rdf:type owl:Restriction ;
-                    owl:onProperty :isLogged ;
-                    owl:someValuesFrom :Log ] ] .
+            owl:onProperty :hasBankCode ;
+            owl:someValuesFrom :CashCard ],
+        :Company .
+:HardwareComponent rdf:type owl:Class .
+:Unit rdf:type owl:Class .
+:ATMTransaction rdf:type owl:Class ;
+    rdfs:subClassOf :Transaction .
+:Account rdf:type owl:Class ;
+    rdfs:subClassOf :Product .
 :Transaction rdf:type owl:Class ;
     rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :isCanceled ;
-            owl:someValuesFrom :Transaction ],
-        [ rdf:type owl:Restriction ;
             owl:onProperty :isSuccessful ;
             owl:someValuesFrom [ rdf:type owl:Class ;
                     owl:complementOf [ rdf:type owl:DataRange ] ] ],
@@ -565,61 +905,36 @@
             owl:someValuesFrom :ErrorMessage ],
         [ rdf:type owl:Restriction ;
             owl:onProperty :ejectCard ;
-            owl:someValuesFrom :Card ] ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:onProperty :requestedAmount ] ;
-    owl:inverseOf :processedBy .
-:ATM rdf:type owl:Class ;
-    rdfs:subClassOf [ rdf:type owl:Restriction ;
-            owl:onProperty :sends ;
-            owl:someValuesFrom :Request ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :checks ;
-            owl:someValuesFrom :ValidCashCard ],
-        [ rdf:type owl:Restriction ;
-            owl:onProperty :verifies ;
-            owl:someValuesFrom [ rdf:type owl:Class ;
-                    owl:intersectionOf ( :BankComputer [ rdf:type owl:Restriction ;
-                                owl:onProperty :hasBankCode ;
-                                owl:someValuesFrom rdf:Literal ] [ rdf:type owl:Restriction ;
-                                owl:onProperty :hasPassword ;
-                                owl:someValuesFrom rdf:Literal ] ) ] ] .
+            owl:someValuesFrom :Card ] .
+:PersonOrPhysicalEntity rdf:type owl:Class ;
+    rdfs:subClassOf :Entity .
+:Time rdf:type owl:Class ;
+    rdfs:subClassOf :PhysicalQuantity .
+:Length_Unit rdf:type owl:Class ;
+    rdfs:subClassOf :Unit .
 [] rdf:type owl:Class ;
-    rdfs:subClassOf :BankComputer ;
-    owl:equivalentClass [ rdf:type owl:Restriction ;
-            owl:onProperty :sendMessage ;
-            owl:someValuesFrom :AccountOK ] ;
-    owl:intersectionOf ( [ rdf:type owl:Restriction ;
-                owl:hasValue true ;
-                owl:onProperty :isValid ] ) .
-[] rdf:type owl:Restriction ;
-    owl:allValuesFrom xsd:decimal ;
-    owl:onProperty :hasLimit .
-[] rdf:type owl:Restriction ;
-    owl:hasValue :withdrawal ;
-    owl:onProperty :hasInitialFunctionSequence .
-[] rdf:type owl:Restriction ;
-    owl:hasValue :successful ;
-    owl:onProperty :hasStateValue .
-[] rdf:type owl:Restriction ;
-    owl:hasValue :withdrawal ;
-    owl:onProperty :hasInitialFunctionSequence .
-[] rdf:type owl:Restriction ;
-    owl:hasValue :transaction ;
-    owl:onProperty :setsItem .
-[] rdf:type owl:Restriction ;
-    owl:hasValue :transaction ;
-    owl:onProperty :setsItem .
-[] rdf:type owl:Restriction ;
-    owl:hasValue :initiated ;
-    owl:onProperty :hasItemState .
-[] rdf:type owl:Restriction ;
-    owl:onProperty :hasValidCashCard ;
-    owl:someValuesFrom [ rdf:type owl:Class ;
-            owl:intersectionOf ( :CashCard [ rdf:type owl:Restriction ;
-                        owl:onProperty :readsSerialNumber ;
-                        owl:someValuesFrom xsd:string ] [ rdf:type owl:Restriction ;
-                        owl:onProperty :readsBankCode ;
-                        owl:someValuesFrom xsd:string ] ) ] .
+    owl:unionOf [ rdf:rest [ rdf:rest () ] ] .
+[] rdf:type owl:Class ;
+    owl:unionOf ( :CardSerialNumberOfCashCard :TransactionAmountOfTransactionCardSerialNumberOfCashCard ) .
+[] rdf:type owl:Class ;
+    owl:unionOf [ rdf:rest [ rdf:rest () ] ] .
+[] rdf:type owl:Class ;
+    owl:unionOf ( :InteractionToATM :StatusInteractionToATM :TransactionAmountOfTransactionCardSerialNumberOfCashCard :TransactionAmountOfTransactionToBankComputer :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer :TypedPasswordOfCustomerToBankComputer ) .
+[] rdf:type owl:Class ;
+    owl:unionOf [ rdf:first :CardSerialNumberOfCashCard ;
+            rdf:rest [ rdf:rest ( :TransactionAmountOfTransactionCardSerialNumberOfCashCard :TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer ) ] ] .
+[] rdf:type owl:Class ;
+    owl:unionOf [ rdf:rest ( :PasswordOfCustomer ) ] .
+[] rdf:type owl:Class ;
+    owl:unionOf ( :ErrorDisplay :NormalDisplay ) .
+[] rdf:type owl:Class ;
+    owl:unionOf [ rdf:rest ( :Money ) ] .
+[] rdf:type owl:Class ;
+    owl:unionOf [ rdf:rest [ rdf:first :Authorization ;
+                    rdf:rest [ rdf:rest () ] ] ] .
+[] rdf:type owl:Class ;
+    owl:unionOf ( :ReadableBankCodeOfCashCard :TypedPasswordOfCustomer ) .
+[] rdf:type owl:Class ;
+    owl:unionOf ( :BankCodeOfBank :PasswordOfCustomer ) .
 [] rdf:first true ;
     rdf:rest () .
