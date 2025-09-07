@@ -10,6 +10,29 @@ from rdflib.plugins.parsers.notation3 import BadSyntax
 from xml.etree import ElementTree as ET
 
 
+# Common OWL predicates that are permitted in generated snippets. Any triple
+# using an ``owl:`` predicate not present in this set will be discarded to avoid
+# introducing malformed vocabulary into the ontology.
+ALLOWED_OWL_PREDICATES = {
+    OWL.onProperty,
+    OWL.someValuesFrom,
+    OWL.allValuesFrom,
+    OWL.hasValue,
+    OWL.cardinality,
+    OWL.minCardinality,
+    OWL.maxCardinality,
+    OWL.equivalentClass,
+    OWL.equivalentProperty,
+    OWL.disjointWith,
+    OWL.intersectionOf,
+    OWL.unionOf,
+    OWL.complementOf,
+    OWL.sameAs,
+    OWL.differentFrom,
+    OWL.inverseOf,
+}
+
+
 class InvalidTurtleError(ValueError):
     """Raised when Turtle parsing fails."""
     pass
@@ -201,6 +224,31 @@ class OntologyBuilder:
 
         return [t for t in triples if all(is_valid(part) for part in t)]
 
+    def _filter_invalid_owl_predicates(self, triples, logger=None):
+        """Remove triples using unsupported predicates from the OWL namespace.
+
+        Generated snippets occasionally invent predicates within the OWL
+        namespace, such as ``owl:datatype``. These are not part of the OWL
+        vocabulary and can cause downstream tools to reject the ontology. This
+        helper discards any triple whose predicate is in the OWL namespace but
+        not explicitly whitelisted in ``ALLOWED_OWL_PREDICATES``.
+        """
+
+        log = logger or logging.getLogger(__name__)
+        cleaned = []
+        for s, p, o in triples:
+            if isinstance(p, URIRef) and str(p).startswith(str(OWL)):
+                if p not in ALLOWED_OWL_PREDICATES:
+                    log.warning(
+                        "Dropping triple with unsupported OWL predicate: %s %s %s",
+                        s,
+                        p,
+                        o,
+                    )
+                    continue
+            cleaned.append((s, p, o))
+        return cleaned
+
     def _drop_empty_restrictions(self, triples, logger=None):
         """Remove anonymous Restriction nodes lacking owl:onProperty.
 
@@ -306,6 +354,8 @@ class OntologyBuilder:
                         o.n3(nm),
                     )
             triples = kept_triples
+        # filter out unsupported owl:* predicates before further processing
+        triples = self._filter_invalid_owl_predicates(triples, logger)
         # remove conflicting rdf:type declarations that confuse OWL editors
         triples = self._remove_conflicting_types(triples)
         # and drop any triples that use non-absolute IRIs
