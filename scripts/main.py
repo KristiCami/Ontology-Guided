@@ -28,25 +28,37 @@ PROMPT_TEMPLATE = (
 )
 
 
-def load_dev_examples() -> tuple[list[dict[str, str]], list[str]]:
+def load_dev_examples(requirements_path: str, split_path: str) -> tuple[list[dict[str, str]], list[str]]:
     """Load few-shot examples from the dev split.
 
-    Reads ``splits/dev.txt`` for sentence IDs and extracts matching records
-    from ``evaluation/atm_requirements.jsonl``. Each example contains a natural
-    language requirement (``user``) and its OWL representation (``assistant``).
+    Parameters
+    ----------
+    requirements_path:
+        Path to a JSONL file with requirements and their OWL annotations.
+    split_path:
+        Path to a text file containing one ``sentence_id`` per line that
+        determines which records from ``requirements_path`` should be used.
+
+    Returns
+    -------
+    examples, dev_ids_list
+        ``examples`` is a list of dictionaries, each containing the natural
+        language requirement (``user``), its OWL representation
+        (``assistant``) and the corresponding ``sentence_id``. ``dev_ids_list``
+        preserves the order of IDs from ``split_path`` so logging can reference
+        them.
     """
 
-    split_path = os.path.join(PROJECT_ROOT, "splits", "dev.txt")
-    data_path = os.path.join(PROJECT_ROOT, "evaluation", "atm_requirements.jsonl")
     with open(split_path, "r", encoding="utf-8") as f:
         dev_ids_list = [line.strip() for line in f if line.strip()]
     dev_ids = set(dev_ids_list)
 
     examples: list[dict[str, str]] = []
-    with open(data_path, "r", encoding="utf-8") as f:
+    with open(requirements_path, "r", encoding="utf-8") as f:
         for line in f:
             record = json.loads(line)
-            if record.get("sentence_id") not in dev_ids:
+            sid = record.get("sentence_id")
+            if sid not in dev_ids:
                 continue
             sentence = record.get("meta", {}).get("description") or record.get("text", "")
             axioms = record.get("axioms", {})
@@ -55,7 +67,13 @@ def load_dev_examples() -> tuple[list[dict[str, str]], list[str]]:
                 part = axioms.get(key)
                 if part:
                     owl_parts.extend(part)
-            examples.append({"user": sentence, "assistant": "\n".join(owl_parts)})
+            examples.append(
+                {
+                    "user": sentence,
+                    "assistant": "\n".join(owl_parts),
+                    "sentence_id": sid,
+                }
+            )
     return examples, dev_ids_list
 
 # Default ontology locations used by optional command-line flags
@@ -427,7 +445,9 @@ def main():
     args = parser.parse_args()
 
     try:
-        examples, dev_sentence_ids = load_dev_examples()
+        requirements_path = os.path.join(PROJECT_ROOT, "evaluation", "atm_requirements.jsonl")
+        split_path = os.path.join(PROJECT_ROOT, "splits", "dev.txt")
+        examples, dev_sentence_ids = load_dev_examples(requirements_path, split_path)
         if args.examples:
             logging.getLogger(__name__).warning(
                 "--examples is ignored; using dev split examples only"
