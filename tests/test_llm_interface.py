@@ -142,7 +142,8 @@ def test_generate_owl_with_terms(monkeypatch, tmp_path):
     captured = {}
 
     def fake_create(*args, **kwargs):
-        captured["prompt"] = kwargs["messages"][1]["content"]
+        captured["system"] = kwargs["messages"][0]["content"]
+        captured["user"] = kwargs["messages"][1]["content"]
         return FakeResponse("""@prefix ex: <http://example.com/> .\nex:A ex:prop ex:B .""")
 
     monkeypatch.setattr(openai.chat.completions, "create", fake_create)
@@ -155,10 +156,11 @@ def test_generate_owl_with_terms(monkeypatch, tmp_path):
         "synonyms": {"ex:quick": "ex:fast"},
     }
     llm.generate_owl(["irrelevant"], "{sentence}", available_terms=terms)
-    assert 'ex:Class' in captured['prompt']
-    assert 'ex:prop' in captured['prompt']
-    assert 'domain ex:A' in captured['prompt']
-    assert 'ex:quick -> ex:fast' in captured['prompt']
+    assert captured["user"] == "irrelevant"
+    assert 'ex:Class' in captured['system']
+    assert 'ex:prop' in captured['system']
+    assert 'ex:prop domain ex:A' in captured['system']
+    assert 'ex:quick -> ex:fast' in captured['system']
 
 
 def test_generate_owl_uses_cache(monkeypatch, tmp_path):
