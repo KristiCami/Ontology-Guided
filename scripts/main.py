@@ -20,6 +20,7 @@ from ontology_guided.llm_interface import LLMInterface
 from ontology_guided.ontology_builder import OntologyBuilder, InvalidTurtleError
 from ontology_guided.validator import SHACLValidator
 from ontology_guided.repair_loop import RepairLoop
+from ontology_guided import exemplar_selector
 from save_prompt_config import save_prompt_config
 
 PROMPT_TEMPLATE = (
@@ -101,6 +102,7 @@ def run_pipeline(
     use_retrieval: bool = False,
     dev_pool: Optional[Union[str, Path, list[dict[str, str]]]] = None,
     retrieve_k: int = 3,
+    retrieval_method: Optional[str] = None,
     prompt_log: Optional[Union[str, Path]] = None,
     repair=False,
     kmax=5,
@@ -240,6 +242,11 @@ def run_pipeline(
         prompt_log=prompt_log,
     )
 
+    if retrieval_method is None and use_retrieval:
+        retrieval_method = getattr(
+            exemplar_selector, "RETRIEVAL_METHOD", "tfidf_cosine"
+        )
+
     # Save prompt configuration once before processing test sentences
     if dev_sentence_ids is not None:
         prompt_messages = llm.build_prompt("", initial_terms, log_examples=False)
@@ -257,6 +264,7 @@ def run_pipeline(
             hyperparams,
             use_retrieval=use_retrieval,
             retrieve_k=retrieve_k,
+            retrieval_method=retrieval_method,
             prompt_log=prompt_log,
         )
 
