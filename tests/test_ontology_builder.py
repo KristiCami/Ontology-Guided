@@ -5,7 +5,7 @@ import pytest
 
 from ontology_guided.ontology_builder import OntologyBuilder, InvalidTurtleError
 from rdflib import Namespace
-from rdflib.namespace import RDF, OWL
+from rdflib.namespace import RDF, RDFS, OWL
 
 
 def test_parse_turtle_with_prefix():
@@ -69,6 +69,26 @@ ex:prop a owl:ObjectProperty ;
         k.split(":")[-1] == "quick" and v.split(":")[-1] == "fast"
         for k, v in terms["synonyms"].items()
     )
+
+
+def test_parse_turtle_corrects_common_typos(caplog):
+    ob = OntologyBuilder('http://example.com/atm#')
+    ttl = (
+        "@prefix ex: <http://example.com/> .\n"
+        "ex:A a owl:Class .\n"
+        "ex:B a owl:Class .\n"
+        "ex:prop a owl:ObjectProperty ;\n"
+        "    rdf:domain ex:A ;\n"
+        "    rdf:range ex:B .\n"
+    )
+    logger = logging.getLogger(__name__)
+    with caplog.at_level(logging.WARNING):
+        ob.parse_turtle(ttl, logger=logger)
+    ex = Namespace("http://example.com/")
+    assert (ex.prop, RDFS.domain, ex.A) in ob.graph
+    assert (ex.prop, RDFS.range, ex.B) in ob.graph
+    assert "rdf:domain -> rdfs:domain" in caplog.text
+    assert "rdf:range -> rdfs:range" in caplog.text
 
 
 def test_custom_lexical_namespace(tmp_path):

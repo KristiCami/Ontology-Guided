@@ -218,6 +218,19 @@ class OntologyBuilder:
                 extra_prefix.append(f"@prefix {p}: <{u}> .\n")
         parse_header = self.header + "".join(extra_prefix)
         data = parse_header + "\n" + cleaned
+
+        # Fix common prefix mistakes before parsing so rdflib succeeds
+        corrections = {
+            "rdf:domain": "rdfs:domain",
+            "rdf:range": "rdfs:range",
+            "rdf:label": "rdfs:label",
+        }
+        log = logger or logging.getLogger(__name__)
+        for wrong, right in corrections.items():
+            data, count = re.subn(rf"\b{wrong}\b", right, data)
+            if count:
+                log.warning("Corrected %s -> %s (%d)", wrong, right, count)
+
         if logger:
             logger.debug("=== Turtle input to rdflib.parse ===")
             logger.debug(data)
