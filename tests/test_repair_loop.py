@@ -1,6 +1,5 @@
 import ontology_guided.repair_loop as repair_loop
 from ontology_guided.repair_loop import RepairLoop
-import json
 import logging
 from ontology_guided.llm_interface import LLMInterface
 from rdflib import Graph, URIRef
@@ -69,8 +68,8 @@ atm:alice atm:knows atm:bob .""",
     repairer = RepairLoop(str(data_path), str(shapes_path), api_key="dummy")
     ttl_path, report_path, violations, stats = repairer.run()
 
-    assert len(FakeValidator.runs) == 2
-    assert FakeValidator.runs[1].endswith("results/repaired_1.ttl")
+    assert len(FakeValidator.runs) == 3
+    assert FakeValidator.runs[-1].endswith("results/repaired_1.ttl")
     assert ttl_path and ttl_path.endswith("results/repaired_1.ttl")
     assert report_path.endswith("results/report_1.txt")
     assert violations == []
@@ -105,7 +104,7 @@ atm:alice atm:knows atm:bob .""",
     ) in final_graph
 
 
-def test_synthesize_repair_prompts_returns_structured_json(monkeypatch):
+def test_synthesize_repair_prompts_returns_prompt(monkeypatch):
     graph_data = """
         @prefix ex: <http://example.com/> .
         ex:a a ex:A ;
@@ -148,8 +147,10 @@ def test_synthesize_repair_prompts_returns_structured_json(monkeypatch):
     )
 
     assert len(prompts) == 1
-    prompt = json.loads(prompts[0])
-    assert prompt["violation"].startswith("Shape=ex:Shape")
+    prompt = prompts[0]
+    assert prompt["prompt"].startswith("SYSTEM:")
+    assert "LOCAL CONTEXT (Turtle):" in prompt["prompt"]
+    assert prompt["prompt"].rstrip().endswith("SUGGEST PATCH (Turtle only):")
     assert prompt["offending_axioms"] == [
         "http://example.com/a http://example.com/p http://example.com/b"
     ]

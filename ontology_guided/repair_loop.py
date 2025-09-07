@@ -1,8 +1,8 @@
 import os
 import logging
 import difflib
-import json
 from typing import List, Tuple, Optional, Union, Dict, Any
+import tempfile
 
 from dotenv import load_dotenv
 from rdflib import Graph, URIRef, Literal
@@ -138,19 +138,20 @@ def synthesize_repair_prompts(
     available_terms: Dict[str, Any],
     inconsistencies: Optional[List[str]] = None,
     max_triples: int = 50,
-) -> List[str]:
-    """Construct structured prompts for the LLM.
+) -> List[Dict[str, Any]]:
+    """Construct textual prompts for the LLM.
 
-    Each prompt is a JSON object with keys:
-    ``violation`` – canonical text,
-    ``offending_axioms`` – list of offending triples or missing triple descriptions,
-    ``context`` – Turtle snippet around the violation,
+    The returned list contains dictionaries with:
+
+    ``prompt`` – the final instruction text for the LLM,
+    ``offending_axioms`` – triples to remove before applying the patch,
     ``terms`` – ontology terms found in the context,
-    ``domain_range_hints`` – optional property domain/range hints,
-    ``synonyms`` – optional synonym mappings,
+    ``domain_range_hints`` and ``synonyms`` – optional hints preserved for
+    downstream use,
     ``reasoner_inconsistencies`` – optional list of inconsistent classes.
     """
-    prompts: List[str] = []
+
+    prompts: List[Dict[str, Any]] = []
     for v in violations:
         canon = canonicalize_violation(v)
         ctx = local_context(
@@ -179,21 +180,31 @@ def synthesize_repair_prompts(
                 missing = f"{focus} {path} {observed if observed else '?'}"
                 offending = [f"Missing triple: {missing}"]
 
-        prompt_obj: Dict[str, Any] = {
-            "violation": canon["text"],
+        lines = [
+            "SYSTEM:",
+            "Fix the ontology by adding/removing triples so that it satisfies the SHACL constraints. Return only valid Turtle.",
+            "LOCAL CONTEXT (Turtle):",
+            ctx.strip(),
+            "VIOLATION (canonicalized):",
+            canon["text"],
+            "SUGGEST PATCH (Turtle only):",
+        ]
+        prompt_text = "\n".join(lines)
+
+        entry: Dict[str, Any] = {
+            "prompt": prompt_text,
             "offending_axioms": offending,
-            "context": ctx,
             "terms": terms,
         }
         hints = available_terms.get("domain_range_hints", {})
         if hints:
-            prompt_obj["domain_range_hints"] = hints
+            entry["domain_range_hints"] = hints
         synonyms = available_terms.get("synonyms", {})
         if synonyms:
-            prompt_obj["synonyms"] = synonyms
+            entry["synonyms"] = synonyms
         if inconsistencies:
-            prompt_obj["reasoner_inconsistencies"] = inconsistencies
-        prompts.append(json.dumps(prompt_obj))
+            entry["reasoner_inconsistencies"] = inconsistencies
+        prompts.append(entry)
     return prompts
 
 
@@ -299,22 +310,25 @@ class RepairLoop:
             # current data from the earlier reasoning run.
             inconsistent = unsat_classes
 
-            prompts = synthesize_repair_prompts(
+            prompt_infos = synthesize_repair_prompts(
                 violations, graph, available_terms, inconsistent, max_triples=max_triples
             )
-            per_iter_entry["prompt_count"] = len(prompts)
+            per_iter_entry["prompt_count"] = len(prompt_infos)
             with open(current_data, "r", encoding="utf-8") as f:
                 original = f.read()
 
             repair_snippets = []
-            for prompt in prompts:
+            for info in prompt_infos:
+                prompt = info["prompt"]
                 snippet = self.llm.generate_owl(
                     [prompt], "{sentence}", available_terms=available_terms
                 )[0]
-                repair_snippets.append(snippet)
 
-                prompt_data = json.loads(prompt)
-                offending_axioms = prompt_data.get("offending_axioms", [])
+                temp_graph = Graph()
+                for triple in graph:
+                    temp_graph.add(triple)
+
+                offending_axioms = info.get("offending_axioms", [])
                 for axiom in offending_axioms:
                     if axiom.startswith("Missing triple"):
                         continue
@@ -329,15 +343,45 @@ class RepairLoop:
                         if o_str.startswith("http://") or o_str.startswith("https://")
                         else Literal(o_str)
                     )
-                    graph.remove((subj, pred, obj))
+                    temp_graph.remove((subj, pred, obj))
 
-                temp_graph = Graph()
                 try:
-                    temp_graph.parse(data=snippet, format="turtle")
-                    for triple in temp_graph:
-                        graph.add(triple)
+                    patch_graph = Graph()
+                    patch_graph.parse(data=snippet, format="turtle")
+                    for triple in patch_graph:
+                        temp_graph.add(triple)
                 except Exception as exc:
                     logger.warning("Failed to parse LLM snippet: %s", exc)
+                    continue
+
+                tmp_serialized = temp_graph.serialize(format="turtle")
+                tmp_data = (
+                    tmp_serialized.decode("utf-8")
+                    if isinstance(tmp_serialized, bytes)
+                    else tmp_serialized
+                )
+                with tempfile.NamedTemporaryFile(
+                    delete=False, suffix=".ttl", mode="w", encoding="utf-8"
+                ) as tmp_file:
+                    tmp_file.write(tmp_data)
+                    tmp_path = tmp_file.name
+
+                temp_validator = SHACLValidator(
+                    tmp_path, self.shapes_path, inference=inference
+                )
+                _, temp_violations, _ = temp_validator.run_validation()
+                os.unlink(tmp_path)
+                temp_texts = {
+                    canonicalize_violation(v)["text"] for v in temp_violations
+                }
+                if temp_texts - violation_texts:
+                    logger.warning(
+                        "Patch introduced new violations; skipping snippet"
+                    )
+                    continue
+
+                repair_snippets.append(snippet)
+                graph = temp_graph
 
             merged_data = graph.serialize(format="turtle")
             merged = merged_data.decode("utf-8") if isinstance(merged_data, bytes) else merged_data
