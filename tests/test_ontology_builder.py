@@ -150,6 +150,27 @@ def test_parse_turtle_applies_synonym():
     assert triples == [(ex_fast, lex_antonym, ex_fast)]
 
 
+def test_drop_empty_restrictions(caplog):
+    ob = OntologyBuilder('http://example.com/atm#')
+    ttl = (
+        "@prefix ex: <http://example.com/> .\n"
+        "ex:A rdfs:subClassOf [ a owl:Restriction ; owl:onProperty ex:prop ; owl:someValuesFrom ex:B ] .\n"
+        "ex:C rdfs:subClassOf [ a owl:Restriction ] .\n"
+    )
+    logger = logging.getLogger(__name__)
+    with caplog.at_level(logging.WARNING):
+        triples = ob.parse_turtle(ttl, logger=logger)
+    ex = Namespace("http://example.com/")
+    assert any(
+        s == ex.A and p == RDFS.subClassOf for s, p, _ in ob.graph.triples((ex.A, RDFS.subClassOf, None))
+    )
+    assert not any(
+        s == ex.C and p == RDFS.subClassOf for s, p, _ in ob.graph.triples((ex.C, RDFS.subClassOf, None))
+    )
+    assert not any(s == ex.C for s, _, _ in triples)
+    assert "owl:onProperty" in caplog.text
+
+
 def test_conflicting_types_are_removed():
     ob = OntologyBuilder('http://example.com/atm#')
     ttl = """@prefix ex: <http://example.com/> .\nex:Foo a owl:Class, owl:DatatypeProperty ."""

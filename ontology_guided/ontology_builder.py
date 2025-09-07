@@ -4,7 +4,7 @@ from typing import Optional
 
 import re
 
-from rdflib import Graph, URIRef
+from rdflib import Graph, URIRef, BNode
 from rdflib.namespace import RDF, RDFS, OWL, XSD, Namespace
 from rdflib.plugins.parsers.notation3 import BadSyntax
 from xml.etree import ElementTree as ET
@@ -201,6 +201,32 @@ class OntologyBuilder:
 
         return [t for t in triples if all(is_valid(part) for part in t)]
 
+    def _drop_empty_restrictions(self, triples, logger=None):
+        """Remove anonymous Restriction nodes lacking owl:onProperty.
+
+        Some generated snippets include blank nodes declared as
+        ``rdf:type owl:Restriction`` but omit the required
+        ``owl:onProperty`` triple. These fragments are incomplete and are
+        discarded entirely to keep the ontology consistent.
+        """
+
+        log = logger or logging.getLogger(__name__)
+        bnodes = set()
+        for s, p, o in triples:
+            if isinstance(s, BNode) and p == RDF.type and o == OWL.Restriction:
+                bnodes.add(s)
+        for s, p, o in triples:
+            if s in bnodes and p == OWL.onProperty:
+                bnodes.remove(s)
+        if not bnodes:
+            return triples
+        for bn in bnodes:
+            log.warning(
+                "Dropping anonymous owl:Restriction without owl:onProperty: %s",
+                bn,
+            )
+        return [t for t in triples if all(part not in bnodes for part in t)]
+
     def parse_turtle(
         self,
         turtle_str: str,
@@ -284,6 +310,8 @@ class OntologyBuilder:
         triples = self._remove_conflicting_types(triples)
         # and drop any triples that use non-absolute IRIs
         triples = self._filter_invalid_iris(triples)
+        # drop anonymous restrictions missing owl:onProperty
+        triples = self._drop_empty_restrictions(triples, logger)
         nm = self.graph.namespace_manager
         syn_map = self.synonym_map
         canonical_triples = []
