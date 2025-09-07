@@ -1,5 +1,6 @@
 import pathlib
 
+import pytest
 import scripts.main as main
 from scripts.main import run_pipeline
 from ontology_guided.llm_interface import LLMInterface
@@ -357,3 +358,35 @@ def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
     assert pathlib.Path(result["inconsistent_classes"]["path"]).exists()
     assert result["inconsistent_classes"]["count"] == 0
     assert result["is_consistent"] is True
+
+
+def test_run_pipeline_requires_dev_sentence_ids(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+    examples = [{"user": "", "assistant": "", "sentence_id": "1"}]
+    with pytest.raises(RuntimeError, match="dev_sentence_ids must be provided"):
+        run_pipeline(
+            [],
+            "",
+            "http://example.com/atm#",
+            examples=examples,
+            spacy_model="en",
+            inference="none",
+        )
+
+
+def test_run_pipeline_rejects_example_allowed_overlap(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+    examples = [{"user": "", "assistant": "", "sentence_id": "1"}]
+    with pytest.raises(RuntimeError, match="Examples and allowed_ids must be disjoint"):
+        run_pipeline(
+            [],
+            "",
+            "http://example.com/atm#",
+            examples=examples,
+            allowed_ids=["1"],
+            dev_sentence_ids=["2"],
+            use_retrieval=True,
+            dev_pool=[{"sentence_id": "2", "user": "", "assistant": ""}],
+            spacy_model="en",
+            inference="none",
+        )

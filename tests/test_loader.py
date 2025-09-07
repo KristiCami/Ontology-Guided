@@ -3,6 +3,7 @@ import logging
 import pytest
 
 from ontology_guided.data_loader import DataLoader
+from scripts.main import load_dev_examples
 
 
 def test_demo_txt_loading_and_preprocessing():
@@ -133,4 +134,20 @@ def test_preprocess_no_keywords_argument():
     text = "Logging is enabled."
     sentences = loader.preprocess_text(text, keywords=None)
     assert sentences == ["Logging is enabled."]
+
+
+def test_load_dev_examples_errors_on_missing_ids(tmp_path):
+    req_path = tmp_path / "reqs.jsonl"
+    record = {
+        "sentence_id": "1",
+        "meta": {"description": "req"},
+        "axioms": {"tbox": ["A"], "abox": [], "shacl": []},
+    }
+    with open(req_path, "w", encoding="utf-8") as f:
+        json.dump(record, f)
+        f.write("\n")
+    split_path = tmp_path / "dev.txt"
+    split_path.write_text("1\n2\n", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="Missing dev IDs: 2"):
+        load_dev_examples(str(req_path), str(split_path))
 
