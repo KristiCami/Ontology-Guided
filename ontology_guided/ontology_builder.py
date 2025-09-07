@@ -157,6 +157,20 @@ class OntologyBuilder:
           datatype property declaration is removed.
         """
         type_map: dict = defaultdict(set)
+        restriction_details: dict = defaultdict(list)
+        named_restrictions: set = set()
+        restriction_preds = {
+            OWL.onProperty,
+            OWL.someValuesFrom,
+            OWL.allValuesFrom,
+            OWL.hasValue,
+            OWL.cardinality,
+            OWL.minCardinality,
+            OWL.maxCardinality,
+            OWL.minQualifiedCardinality,
+            OWL.maxQualifiedCardinality,
+            OWL.qualifiedCardinality,
+        }
         # collect existing type assertions from the graph so that conflicts
         # can be detected across multiple snippets
         for s, o in self.graph.subject_objects(RDF.type):
@@ -164,9 +178,19 @@ class OntologyBuilder:
         for s, p, o in triples:
             if p == RDF.type:
                 type_map[s].add(o)
+                if isinstance(s, URIRef) and o == OWL.Restriction:
+                    named_restrictions.add(s)
+            elif isinstance(s, URIRef) and p in restriction_preds:
+                restriction_details[s].append((s, p, o))
 
         cleaned = []
         for s, p, o in triples:
+            if isinstance(s, URIRef) and s in named_restrictions:
+                # drop explicit restriction type and associated triples
+                if p == RDF.type and o == OWL.Restriction:
+                    continue
+                if p in restriction_preds:
+                    continue
             if p == RDF.type:
                 types = type_map[s]
                 # classes or individuals take precedence over property types
@@ -187,6 +211,16 @@ class OntologyBuilder:
                     continue
             cleaned.append((s, p, o))
 
+        # convert named restrictions to anonymous subclass restrictions
+        for s in named_restrictions:
+            details = restriction_details.get(s, [])
+            if any(p == OWL.onProperty for _, p, _ in details):
+                bn = BNode()
+                cleaned.append((s, RDFS.subClassOf, bn))
+                cleaned.append((bn, RDF.type, OWL.Restriction))
+                for _, p, o in details:
+                    cleaned.append((bn, p, o))
+
         # remove conflicting property type declarations already stored in the graph
         for s, types in type_map.items():
             if (
@@ -202,6 +236,8 @@ class OntologyBuilder:
                     self.graph.remove((s, RDF.type, t))
             elif OWL.ObjectProperty in types and OWL.DatatypeProperty in types:
                 self.graph.remove((s, RDF.type, OWL.DatatypeProperty))
+            if isinstance(s, URIRef) and OWL.Restriction in types:
+                self.graph.remove((s, RDF.type, OWL.Restriction))
 
         return cleaned
 
