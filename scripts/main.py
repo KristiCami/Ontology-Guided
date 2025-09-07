@@ -5,6 +5,7 @@ import sys
 import logging
 import json
 from typing import Iterable, Optional, Union
+from pathlib import Path
 
 # Ensure the project root and scripts directory are on the Python path
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -91,6 +92,11 @@ def run_pipeline(
     model="gpt-4",
     temperature: float = 0.0,
     examples=None,
+    *,
+    use_retrieval: bool = False,
+    dev_pool: Optional[Union[str, Path, list[dict[str, str]]]] = None,
+    retrieve_k: int = 3,
+    prompt_log: Optional[Union[str, Path]] = None,
     repair=False,
     kmax=5,
     reason=False,
@@ -119,7 +125,10 @@ def run_pipeline(
     control reasoning behaviour within the repair loop. ``use_terms`` controls
     whether ontology terms are supplied to the language model. ``validate``
     toggles SHACL validation and the subsequent repair loop. ``strict_terms``
-    discards triples that contain unknown ontology terms.
+    discards triples that contain unknown ontology terms. ``use_retrieval``
+    enables exemplar selection from ``dev_pool``; the ``retrieve_k`` most
+    similar examples are used per sentence and their IDs are written to
+    ``prompt_log``.
     """
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
@@ -169,11 +178,34 @@ def run_pipeline(
     logger = logging.getLogger(__name__)
     avail_terms = builder.get_available_terms() if use_terms else None
 
+    if use_retrieval and dev_pool is not None:
+        if isinstance(dev_pool, (str, Path)):
+            with open(dev_pool, "r", encoding="utf-8") as f:
+                dev_pool_data = json.load(f)
+        else:
+            dev_pool_data = dev_pool
+        if dev_sentence_ids is not None:
+            pool_ids = {
+                ex.get("sentence_id")
+                for ex in dev_pool_data
+                if ex.get("sentence_id") is not None
+            }
+            if set(dev_sentence_ids) != pool_ids:
+                raise RuntimeError(
+                    "Dev pool sentence IDs do not match dev_sentence_ids"
+                )
+        logger.info("Using retrieval with %d dev examples", len(dev_pool_data))
+        dev_pool = dev_pool_data
+
     llm = LLMInterface(
         api_key=api_key,
         model=model,
         temperature=temperature,
         examples=examples,
+        use_retrieval=use_retrieval,
+        dev_pool=dev_pool,
+        retrieve_k=retrieve_k,
+        prompt_log=prompt_log,
     )
 
     # Save prompt configuration once before processing test sentences
@@ -393,6 +425,27 @@ def main():
         default=None,
         help="Path to JSON file with few-shot examples",
     )
+    parser.add_argument(
+        "--use-retrieval",
+        action="store_true",
+        help="Select few-shot examples via retrieval from a dev pool",
+    )
+    parser.add_argument(
+        "--dev-pool",
+        default=None,
+        help="JSON file with dev examples used for retrieval",
+    )
+    parser.add_argument(
+        "--retrieve-k",
+        type=int,
+        default=3,
+        help="Number of exemplars to retrieve for each sentence",
+    )
+    parser.add_argument(
+        "--prompt-log",
+        default=None,
+        help="Where to log IDs of retrieved exemplars",
+    )
     parser.add_argument("--repair", action="store_true", help="Run repair loop if validation fails")
     parser.add_argument("--kmax", type=int, default=5, help="Maximum repair iterations")
     parser.add_argument(
@@ -499,6 +552,10 @@ def main():
             keywords=keywords,
             allowed_ids=allowed_ids,
             dev_sentence_ids=dev_sentence_ids,
+            use_retrieval=args.use_retrieval,
+            dev_pool=args.dev_pool or examples,
+            retrieve_k=args.retrieve_k,
+            prompt_log=args.prompt_log,
         )
     except RuntimeError as exc:
         logging.getLogger(__name__).error("Pipeline aborted: %s", exc)

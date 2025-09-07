@@ -426,6 +426,27 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         default=["splits/test.txt"],
         help="List of files with sentence_id lists, one per dataset",
     )
+    parser.add_argument(
+        "--use-retrieval",
+        action="store_true",
+        help="Select few-shot examples via retrieval from a dev pool",
+    )
+    parser.add_argument(
+        "--dev-pool",
+        default=None,
+        help="JSON file with dev examples used for retrieval",
+    )
+    parser.add_argument(
+        "--retrieve-k",
+        type=int,
+        default=3,
+        help="Number of exemplars to retrieve for each sentence",
+    )
+    parser.add_argument(
+        "--prompt-log",
+        default=None,
+        help="Where to log IDs of retrieved exemplars",
+    )
     args = parser.parse_args()
 
     pairs = [parse_pair(p) for p in args.pairs]
@@ -453,6 +474,16 @@ def main() -> None:  # pragma: no cover - CLI wrapper
     for setting in settings_list:
         setting.setdefault("ontologies", ontology_list)
         setting.setdefault("examples", DEV_EXAMPLES)
+        if args.use_retrieval:
+            setting.setdefault("use_retrieval", True)
+        if args.dev_pool:
+            setting.setdefault("dev_pool", args.dev_pool)
+        elif args.use_retrieval:
+            setting.setdefault("dev_pool", DEV_EXAMPLES)
+        if args.retrieve_k is not None:
+            setting.setdefault("retrieve_k", args.retrieve_k)
+        if args.prompt_log is not None:
+            setting.setdefault("prompt_log", args.prompt_log)
 
     keywords = (
         [k.strip() for k in args.keywords.split(",") if k.strip()]
