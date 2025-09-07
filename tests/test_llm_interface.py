@@ -3,6 +3,7 @@ from ontology_guided.llm_interface import LLMInterface
 import time
 import logging
 import pytest
+import json
 
 def test_generate_owl_with_mock(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
@@ -292,3 +293,49 @@ def test_generate_owl_passes_temperature_and_examples(monkeypatch, tmp_path):
         "content": "@prefix ex: <http://example.com/> .",
     }
     assert captured["messages"][3]["role"] == "user"
+
+
+def test_retrieval_logging(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
+
+    class FakeMessage:
+        def __init__(self, content):
+            self.content = content
+
+    class FakeChoice:
+        def __init__(self, content):
+            self.message = FakeMessage(content)
+
+    class FakeResponse:
+        def __init__(self, content):
+            self.choices = [FakeChoice(content)]
+
+    def fake_create(*args, **kwargs):
+        return FakeResponse("@prefix ex: <http://example.com/> .\nex:A a ex:B .")
+
+    monkeypatch.setattr(openai.chat.completions, "create", fake_create)
+
+    dev_pool = [
+        {"sentence_id": "1", "sentence": "quick brown fox"},
+        {"sentence_id": "2", "sentence": "lazy dog"},
+        {"sentence_id": "3", "sentence": "brown fox jumps"},
+    ]
+
+    log_path = tmp_path / "prompts.log"
+    llm = LLMInterface(
+        api_key="dummy",
+        model="gpt-4",
+        cache_dir=str(tmp_path / "cache"),
+        use_retrieval=True,
+        dev_pool=dev_pool,
+        retrieve_k=2,
+        prompt_log=log_path,
+    )
+
+    llm.generate_owl([
+        {"text": "quick fox", "sentence_id": "T"}
+    ], "{sentence}")
+
+    data = [json.loads(line) for line in log_path.read_text().splitlines()]
+    assert data[0]["sentence_id"] == "T"
+    assert set(data[0]["examples"]) == {"1", "3"}
