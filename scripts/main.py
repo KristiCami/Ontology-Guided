@@ -128,7 +128,8 @@ def run_pipeline(
     discards triples that contain unknown ontology terms. ``use_retrieval``
     enables exemplar selection from ``dev_pool``; the ``retrieve_k`` most
     similar examples are used per sentence and their IDs are written to
-    ``prompt_log``.
+    ``prompt_log``. If ``allowed_ids`` and ``dev_sentence_ids`` are both
+    provided they must be disjoint, otherwise a ``RuntimeError`` is raised.
     """
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
@@ -139,6 +140,10 @@ def run_pipeline(
     failed_snippets = pipeline["failed_snippets"] = []
 
     loader = DataLoader(spacy_model=spacy_model)
+    if allowed_ids is not None and dev_sentence_ids is not None:
+        overlap = set(allowed_ids).intersection(dev_sentence_ids)
+        if overlap:
+            raise RuntimeError("Dev and test IDs must be disjoint")
     texts_iter = loader.load_requirements(inputs, allowed_ids=allowed_ids)
     pipeline["texts"] = []
 
