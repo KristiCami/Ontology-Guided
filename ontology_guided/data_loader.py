@@ -38,15 +38,27 @@ class DataLoader:
         for para in doc.paragraphs:
             yield para.text
 
-    def load_jsonl_file(self, file_path: str) -> Iterator[str]:
-        """Yield the ``text`` field from each JSONL line."""
+    def load_jsonl_file(
+        self, file_path: str, allowed_ids: Optional[Iterable[str]] = None
+    ) -> Iterator[str]:
+        """Yield the ``text`` field from each JSONL line.
+
+        When ``allowed_ids`` is provided, only records whose
+        ``sentence_id`` is contained in that iterable are returned.
+        """
+        id_set = {str(i) for i in allowed_ids} if allowed_ids is not None else None
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     data = json.loads(line)
-                    yield data["text"]
+                    sid = str(data.get("sentence_id"))
+                    if id_set is None or sid in id_set:
+                        yield data["text"]
 
-    def load_requirements(self, input_paths: List[str]) -> Iterable[str]:
+    def load_requirements(
+        self, input_paths: List[str], allowed_ids: Optional[Iterable[str]] = None
+    ) -> Iterable[str]:
+        id_set = {str(i) for i in allowed_ids} if allowed_ids is not None else None
         for path in input_paths:
             if not os.path.exists(path):
                 logging.warning("File %s does not exist and will be skipped", path)
@@ -57,7 +69,7 @@ class DataLoader:
             elif ext == ".docx":
                 yield from self.load_docx_file(path)
             elif ext == ".jsonl":
-                yield from self.load_jsonl_file(path)
+                yield from self.load_jsonl_file(path, allowed_ids=id_set)
             else:
                 raise ValueError(f"Unsupported file extension: {ext}")
 

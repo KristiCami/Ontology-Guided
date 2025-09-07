@@ -102,6 +102,7 @@ def evaluate_once(
     normalize_base: bool = False,
     keywords: Optional[Union[Iterable[str], None]] = None,
     cq_path: Optional[str] = None,
+    allowed_ids: Optional[Iterable[str]] = None,
     **settings: Any,
 ) -> Tuple[Dict[str, float], Dict[str, Any], Any, Optional[float]]:
     """Run the pipeline once and compute evaluation metrics."""
@@ -111,6 +112,7 @@ def evaluate_once(
         base_iri,
         ontologies=ontologies,
         keywords=keywords,
+        allowed_ids=allowed_ids,
         **settings,
     )
     metrics = compute_metrics(
@@ -153,6 +155,7 @@ def run_evaluations(
     normalize_base: bool = False,
     keywords: Optional[Union[Iterable[str], None]] = None,
     cq_paths: Optional[Sequence[Optional[str]]] = None,
+    split_paths: Optional[Sequence[Optional[str]]] = None,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -167,6 +170,10 @@ def run_evaluations(
                 if cq_paths and dataset_idx < len(cq_paths)
                 else None
             )
+            allowed_ids = None
+            if split_paths and dataset_idx < len(split_paths) and split_paths[dataset_idx]:
+                with open(split_paths[dataset_idx], "r", encoding="utf-8") as f:
+                    allowed_ids = [line.strip() for line in f if line.strip()]
             metrics_list: List[Dict[str, float]] = []
             violations_list: List[Dict[str, Any]] = []
             conforms_list: List[Any] = []
@@ -181,6 +188,7 @@ def run_evaluations(
                     normalize_base=normalize_base,
                     keywords=keywords,
                     cq_path=cq_path,
+                    allowed_ids=allowed_ids,
                     **pipeline_opts,
                 )
                 metrics_list.append(metrics)
@@ -308,6 +316,12 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         default=None,
         help="List of files with SPARQL ASK competency questions, one per dataset",
     )
+    parser.add_argument(
+        "--splits",
+        nargs="*",
+        default=None,
+        help="List of files with sentence_id lists, one per dataset",
+    )
     args = parser.parse_args()
 
     pairs = [parse_pair(p) for p in args.pairs]
@@ -348,6 +362,8 @@ def main() -> None:  # pragma: no cover - CLI wrapper
     )
     if args.cqs is not None and len(args.cqs) != len(pairs):
         raise ValueError("--cqs requires the same number of paths as --pairs")
+    if args.splits is not None and len(args.splits) != len(pairs):
+        raise ValueError("--splits requires the same number of paths as --pairs")
 
     run_evaluations(
         pairs,
@@ -358,6 +374,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         normalize_base=args.normalize_base,
         keywords=keywords,
         cq_paths=args.cqs,
+        split_paths=args.splits,
     )
 
 

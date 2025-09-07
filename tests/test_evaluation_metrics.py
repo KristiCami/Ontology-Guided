@@ -33,7 +33,7 @@ def test_compare_metrics(monkeypatch, tmp_path):
 
     monkeypatch.setattr(LLMInterface, "generate_owl", fake_generate_owl)
 
-    def multiline_jsonl_loader(self, file_path):
+    def multiline_jsonl_loader(self, file_path, allowed_ids=None):
         import json
 
         buffer = ""
