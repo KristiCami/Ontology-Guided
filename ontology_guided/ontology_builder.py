@@ -84,6 +84,14 @@ class OntologyBuilder:
                 self.graph.parse(path)
             self._remove_abox_triples()
         self._extract_available_terms()
+        self.initial_available_terms = {
+            "classes": list(self.available_classes),
+            "properties": list(self.available_properties),
+            "domain_range_hints": {
+                k: v.copy() for k, v in self.domain_range_hints.items()
+            },
+            "synonyms": self.synonym_map.copy(),
+        }
         self.triple_provenance: dict[str, dict] = {}
         self._triple_counter = 0
 
@@ -377,6 +385,7 @@ class OntologyBuilder:
         requirement: Optional[str] = None,
         snippet_index: Optional[int] = None,
         strict_terms: bool = False,
+        update_terms: bool = True,
     ):
         lines = [line for line in turtle_str.splitlines() if line.strip()]
         cleaned = "\n".join(lines)
@@ -473,7 +482,8 @@ class OntologyBuilder:
                     o = nm.expand_curie(syn_map[o_norm])
             self.graph.add((s, p, o))
             canonical_triples.append((s, p, o))
-        self._extract_available_terms()
+        if update_terms:
+            self._extract_available_terms()
         return canonical_triples
 
     def add_provenance(self, requirement: str, triples):
