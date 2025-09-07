@@ -30,7 +30,9 @@ KNOWN_PREFIXES = {
 def build_prompt(
     sentence: str,
     vocab: Optional[Dict[str, List[str]]],
-    exemplars: List[Dict[str, str]],
+    hints: Optional[Dict[str, Any]] = None,
+    synonyms: Optional[Dict[str, str]] = None,
+    exemplars: Optional[List[Dict[str, str]]] = None,
 ) -> List[Dict[str, str]]:
     """Construct chat messages for the LLM.
 
@@ -41,6 +43,10 @@ def build_prompt(
     vocab:
         Dictionary with optional ``classes`` and ``properties`` lists to be
         advertised as the allowed vocabulary.
+    hints:
+        Optional mapping of properties to domain/range hints.
+    synonyms:
+        Optional mapping from synonyms to canonical terms.
     exemplars:
         Few-shot examples as dictionaries with ``user`` and ``assistant`` keys.
         The first ``k`` examples (with ``k`` clamped between 3 and 6) are used
@@ -49,18 +55,29 @@ def build_prompt(
 
     classes = vocab.get("classes", []) if vocab else []
     properties = vocab.get("properties", []) if vocab else []
+    hints = hints or {}
+    synonyms = synonyms or {}
 
     system_lines = [
         "You convert NL ATM requirements into OWL ontologies expressed in Turtle.",
         "Return only valid Turtle code with explicit @prefix declarations.",
         "Use only terms from the provided ALLOWED VOCAB.",
     ]
-    if classes or properties:
+    if classes or properties or hints or synonyms:
         system_lines.append("ALLOWED VOCAB:")
         if classes:
             system_lines.append("Classes: " + ", ".join(classes))
         if properties:
             system_lines.append("Properties: " + ", ".join(properties))
+        for prop, info in hints.items():
+            dom = ", ".join(info.get("domain", []))
+            ran = ", ".join(info.get("range", []))
+            if dom:
+                system_lines.append(f"{prop} domain {dom}")
+            if ran:
+                system_lines.append(f"{prop} range {ran}")
+        for syn, real in synonyms.items():
+            system_lines.append(f"{syn} -> {real}")
 
     messages: List[Dict[str, str]] = [
         {"role": "system", "content": "\n".join(system_lines)}
@@ -133,6 +150,8 @@ class LLMInterface:
         self,
         sentence: str,
         vocab: Optional[Dict[str, List[str]]],
+        hints: Optional[Dict[str, Any]] = None,
+        synonyms: Optional[Dict[str, str]] = None,
         *,
         sentence_id: Optional[str] = None,
         raw_sentence: Optional[str] = None,
@@ -157,7 +176,7 @@ class LLMInterface:
             with self.prompt_log.open("a", encoding="utf-8") as f:
                 f.write(json.dumps({"sentence_id": sentence_id, "examples": ids}) + "\n")
 
-        return _BASE_PROMPT_BUILDER(sentence, vocab, exemplars)
+        return _BASE_PROMPT_BUILDER(sentence, vocab, hints, synonyms, exemplars)
 
     def _cache_file(
         self,
@@ -247,23 +266,14 @@ class LLMInterface:
             user_prompt = prompt_template.format(
                 sentence=sent_text, base=base, prefix=prefix
             )
-            if classes:
-                user_prompt += "\n" + ", ".join(classes)
-            if properties:
-                user_prompt += "\n" + ", ".join(properties)
-            for prop, info in hints.items():
-                dom = ", ".join(info.get("domain", []))
-                ran = ", ".join(info.get("range", []))
-                if dom:
-                    user_prompt += f"\n{prop} domain {dom}"
-                if ran:
-                    user_prompt += f"\n{prop} range {ran}"
-            for syn, real in synonyms.items():
-                user_prompt += f"\n{syn} -> {real}"
-
             base_prompt = user_prompt
             messages = self.build_prompt(
-                user_prompt, vocab, sentence_id=sid, raw_sentence=sent_text
+                user_prompt,
+                vocab,
+                hints,
+                synonyms,
+                sentence_id=sid,
+                raw_sentence=sent_text,
             )
             attempts = 0
             current_delay = retry_delay
@@ -328,6 +338,8 @@ class LLMInterface:
                     messages = self.build_prompt(
                         user_prompt,
                         vocab,
+                        hints,
+                        synonyms,
                         sentence_id=sid,
                         raw_sentence=sent_text,
                         log_examples=False,
@@ -374,23 +386,14 @@ class LLMInterface:
             user_prompt = prompt_template.format(
                 sentence=sent_text, base=base, prefix=prefix
             )
-            if classes:
-                user_prompt += "\n" + ", ".join(classes)
-            if properties:
-                user_prompt += "\n" + ", ".join(properties)
-            for prop, info in hints.items():
-                dom = ", ".join(info.get("domain", []))
-                ran = ", ".join(info.get("range", []))
-                if dom:
-                    user_prompt += f"\n{prop} domain {dom}"
-                if ran:
-                    user_prompt += f"\n{prop} range {ran}"
-            for syn, real in synonyms.items():
-                user_prompt += f"\n{syn} -> {real}"
-
             base_prompt = user_prompt
             messages = self.build_prompt(
-                user_prompt, vocab, sentence_id=sid, raw_sentence=sent_text
+                user_prompt,
+                vocab,
+                hints,
+                synonyms,
+                sentence_id=sid,
+                raw_sentence=sent_text,
             )
             attempts = 0
             current_delay = retry_delay
@@ -455,6 +458,8 @@ class LLMInterface:
                     messages = self.build_prompt(
                         user_prompt,
                         vocab,
+                        hints,
+                        synonyms,
                         sentence_id=sid,
                         raw_sentence=sent_text,
                         log_examples=False,
