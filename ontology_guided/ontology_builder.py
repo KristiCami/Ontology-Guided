@@ -311,6 +311,57 @@ class OntologyBuilder:
             )
         return [t for t in triples if all(part not in bnodes for part in t)]
 
+    def _drop_unhandled_axioms(self, triples, logger=None):
+        """Remove blank nodes typed as ``owl:Axiom`` or ``owl:Class`` lacking structure.
+
+        Generated snippets sometimes introduce anonymous nodes declared as
+        ``owl:Axiom`` or ``owl:Class`` without the accompanying properties that
+        give them meaning (e.g. ``owl:annotatedSource`` or ``owl:intersectionOf``).
+        Such fragments are incomplete and are discarded along with any triples
+        that reference them.
+        """
+
+        log = logger or logging.getLogger(__name__)
+        axiom_bnodes: set[BNode] = set()
+        class_bnodes: set[BNode] = set()
+        for s, p, o in triples:
+            if isinstance(s, BNode) and p == RDF.type and o == OWL.Axiom:
+                axiom_bnodes.add(s)
+            if isinstance(s, BNode) and p == RDF.type and o == OWL.Class:
+                class_bnodes.add(s)
+
+        for s, p, o in triples:
+            if s in axiom_bnodes and p in (
+                OWL.annotatedSource,
+                OWL.annotatedProperty,
+                OWL.annotatedTarget,
+            ):
+                axiom_bnodes.discard(s)
+            if s in class_bnodes and p in (
+                OWL.intersectionOf,
+                OWL.unionOf,
+                OWL.complementOf,
+                OWL.oneOf,
+            ):
+                class_bnodes.discard(s)
+
+        to_drop = axiom_bnodes | class_bnodes
+        if not to_drop:
+            return triples
+
+        for bn in axiom_bnodes:
+            log.warning(
+                "Dropping anonymous owl:Axiom without required properties: %s",
+                bn,
+            )
+        for bn in class_bnodes:
+            log.warning(
+                "Dropping anonymous owl:Class without required properties: %s",
+                bn,
+            )
+
+        return [t for t in triples if all(part not in to_drop for part in t)]
+
     def parse_turtle(
         self,
         turtle_str: str,
@@ -398,6 +449,8 @@ class OntologyBuilder:
         triples = self._filter_invalid_iris(triples)
         # drop anonymous restrictions missing owl:onProperty
         triples = self._drop_empty_restrictions(triples, logger)
+        # drop axiom or class bnodes lacking required structure
+        triples = self._drop_unhandled_axioms(triples, logger)
         nm = self.graph.namespace_manager
         syn_map = self.synonym_map
         canonical_triples = []
