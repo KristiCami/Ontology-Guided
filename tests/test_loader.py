@@ -60,6 +60,22 @@ def test_jsonl_loading_and_preprocessing(tmp_path):
     ]
 
 
+def test_jsonl_loading_with_allowed_ids(tmp_path):
+    data = [
+        {"text": "A", "sentence_id": "1"},
+        {"text": "B", "sentence_id": "2"},
+    ]
+    file_path = tmp_path / "reqs.jsonl"
+    with open(file_path, "w", encoding="utf-8") as f:
+        for obj in data:
+            json.dump(obj, f)
+            f.write("\n")
+
+    loader = DataLoader()
+    lines = list(loader.load_requirements([str(file_path)], allowed_ids=["2"]))
+    assert lines == ["B"]
+
+
 def test_load_requirements_warns_and_raises(tmp_path, caplog):
     loader = DataLoader()
 

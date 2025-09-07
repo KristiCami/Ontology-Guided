@@ -50,6 +50,7 @@ def run_pipeline(
     use_async: bool = False,
     strict_terms: bool = False,
     keywords: Optional[Union[Iterable[str], None]] = None,
+    allowed_ids: Optional[Iterable[str]] = None,
 ):
     """Execute the ontology drafting pipeline.
 
@@ -75,7 +76,7 @@ def run_pipeline(
     failed_snippets = pipeline["failed_snippets"] = []
 
     loader = DataLoader(spacy_model=spacy_model)
-    texts_iter = loader.load_requirements(inputs)
+    texts_iter = loader.load_requirements(inputs, allowed_ids=allowed_ids)
     pipeline["texts"] = []
 
     # Store only a small preview of sentences for display purposes
@@ -358,6 +359,11 @@ def main():
         default=None,
         help="Comma-separated keywords for sentence filtering",
     )
+    parser.add_argument(
+        "--split",
+        default=None,
+        help="Path to file with sentence_ids to include",
+    )
     args = parser.parse_args()
 
     try:
@@ -370,6 +376,10 @@ def main():
             if args.keywords
             else None
         )
+        allowed_ids = None
+        if args.split:
+            with open(args.split, "r", encoding="utf-8") as f:
+                allowed_ids = [line.strip() for line in f if line.strip()]
         run_pipeline(
             args.inputs,
             args.shapes,
@@ -391,6 +401,7 @@ def main():
             use_async=args.use_async,
             strict_terms=args.strict_terms,
             keywords=keywords,
+            allowed_ids=allowed_ids,
         )
     except RuntimeError as exc:
         logging.getLogger(__name__).error("Pipeline aborted: %s", exc)
