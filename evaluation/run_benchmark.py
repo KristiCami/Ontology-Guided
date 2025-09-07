@@ -38,6 +38,7 @@ from scripts.main import run_pipeline, load_dev_examples
 from .competency_questions import evaluate_cqs
 from .repair_efficiency import aggregate_repair_efficiency
 from .compare_metrics import filter_by_ids
+from ontology_guided import exemplar_selector
 from ontology_guided.validator import SHACLValidator
 from ontology_guided.reasoner import run_reasoner
 
@@ -123,6 +124,7 @@ def evaluate_once(
         keywords=keywords,
         allowed_ids=test_ids,
         dev_sentence_ids=dev_sentence_ids,
+        retrieval_method=getattr(exemplar_selector, "RETRIEVAL_METHOD", "tfidf_cosine"),
         **settings,
     )
 

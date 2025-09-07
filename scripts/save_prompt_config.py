@@ -11,6 +11,7 @@ def save_prompt_config(
     *,
     use_retrieval: bool = False,
     retrieve_k: int = 0,
+    retrieval_method: Optional[str] = None,
     prompt_log: Optional[Union[str, Path]] = None,
 ) -> None:
     """Persist prompt configuration to ``results/prompt_config.json``.
@@ -27,6 +28,8 @@ def save_prompt_config(
         Whether retrieval-augmented prompting was enabled.
     retrieve_k:
         Number of examples retrieved when ``use_retrieval`` is ``True``.
+    retrieval_method:
+        Name of the retrieval method used to select examples, if any.
     prompt_log:
         Path to the prompt log file produced during generation, if any.
     """
@@ -38,6 +41,7 @@ def save_prompt_config(
         "hyperparameters": hyperparameters,
         "use_retrieval": use_retrieval,
         "retrieve_k": retrieve_k,
+        "retrieval_method": retrieval_method,
         "prompt_log": str(prompt_log) if prompt_log is not None else None,
     }
     with open(os.path.join("results", "prompt_config.json"), "w", encoding="utf-8") as f:

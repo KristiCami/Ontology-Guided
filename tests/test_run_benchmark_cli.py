@@ -32,6 +32,7 @@ def _run_cli(monkeypatch, tmp_path, extra_args):
             "use_retrieval": kwargs.get("use_retrieval"),
             "dev_pool": kwargs.get("dev_pool"),
             "retrieve_k": kwargs.get("retrieve_k"),
+            "retrieval_method": kwargs.get("retrieval_method"),
             "prompt_log": kwargs.get("prompt_log"),
         }
         return {"combined_ttl": "", "violation_stats": {}, "shacl_conforms": True}
@@ -120,6 +121,7 @@ def test_cli_accepts_retrieval(monkeypatch, tmp_path):
     assert result["retrieval"]["use_retrieval"] is True
     assert result["retrieval"]["dev_pool"] == str(pool)
     assert result["retrieval"]["retrieve_k"] == 4
+    assert result["retrieval"]["retrieval_method"] == "tfidf_cosine"
     assert result["retrieval"]["prompt_log"] == str(log)
 
 

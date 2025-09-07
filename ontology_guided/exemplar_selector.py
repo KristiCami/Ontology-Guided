@@ -4,6 +4,8 @@ import math
 from collections import Counter
 from typing import List, Dict, Any
 
+RETRIEVAL_METHOD = "tfidf_cosine"
+
 
 def _tokenize(text: str) -> List[str]:
     """Simple tokenization: lowercase alphanumeric words."""
