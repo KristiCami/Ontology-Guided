@@ -219,7 +219,14 @@ def run_pipeline(
             "temperature": temperature,
             "model": model,
         }
-        save_prompt_config(prompt_text, dev_sentence_ids, hyperparams)
+        save_prompt_config(
+            prompt_text,
+            dev_sentence_ids,
+            hyperparams,
+            use_retrieval=use_retrieval,
+            retrieve_k=retrieve_k,
+            prompt_log=prompt_log,
+        )
 
     snippets_preview = pipeline["owl_snippets"] = []
     BATCH_SIZE = 100
