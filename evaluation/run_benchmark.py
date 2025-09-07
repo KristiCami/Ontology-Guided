@@ -41,7 +41,9 @@ from .compare_metrics import filter_by_ids
 from ontology_guided.validator import SHACLValidator
 from ontology_guided.reasoner import run_reasoner
 
-DEV_EXAMPLES, DEV_SENTENCE_IDS = load_dev_examples()
+DEV_REQUIREMENTS_PATH = os.path.join(PROJECT_ROOT, "evaluation", "atm_requirements.jsonl")
+DEV_SPLIT_PATH = os.path.join(PROJECT_ROOT, "splits", "dev.txt")
+DEV_EXAMPLES, DEV_SENTENCE_IDS = load_dev_examples(DEV_REQUIREMENTS_PATH, DEV_SPLIT_PATH)
 
 
 Pair = Tuple[str, str, str]
