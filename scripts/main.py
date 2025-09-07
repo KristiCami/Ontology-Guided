@@ -6,16 +6,20 @@ import logging
 import json
 from typing import Iterable, Optional, Union
 
-# Ensure the project root is on the Python path when executed directly
+# Ensure the project root and scripts directory are on the Python path
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
+SCRIPTS_DIR = os.path.dirname(__file__)
+if SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, SCRIPTS_DIR)
 
 from ontology_guided.data_loader import DataLoader, clean_text
 from ontology_guided.llm_interface import LLMInterface
 from ontology_guided.ontology_builder import OntologyBuilder, InvalidTurtleError
 from ontology_guided.validator import SHACLValidator
 from ontology_guided.repair_loop import RepairLoop
+from save_prompt_config import save_prompt_config
 
 PROMPT_TEMPLATE = (
     "Convert the following requirement into OWL axioms in Turtle syntax. "
@@ -24,7 +28,7 @@ PROMPT_TEMPLATE = (
 )
 
 
-def load_dev_examples() -> list[dict[str, str]]:
+def load_dev_examples() -> tuple[list[dict[str, str]], list[str]]:
     """Load few-shot examples from the dev split.
 
     Reads ``splits/dev.txt`` for sentence IDs and extracts matching records
@@ -35,7 +39,8 @@ def load_dev_examples() -> list[dict[str, str]]:
     split_path = os.path.join(PROJECT_ROOT, "splits", "dev.txt")
     data_path = os.path.join(PROJECT_ROOT, "evaluation", "atm_requirements.jsonl")
     with open(split_path, "r", encoding="utf-8") as f:
-        dev_ids = {line.strip() for line in f if line.strip()}
+        dev_ids_list = [line.strip() for line in f if line.strip()]
+    dev_ids = set(dev_ids_list)
 
     examples: list[dict[str, str]] = []
     with open(data_path, "r", encoding="utf-8") as f:
@@ -50,8 +55,8 @@ def load_dev_examples() -> list[dict[str, str]]:
                 part = axioms.get(key)
                 if part:
                     owl_parts.extend(part)
-            examples.append({"user": sentence, "assistant": "\n".join(owl_parts)})
-    return examples
+        examples.append({"user": sentence, "assistant": "\n".join(owl_parts)})
+    return examples, dev_ids_list
 
 # Default ontology locations used by optional command-line flags
 ONTOLOGIES_DIR = os.path.join(PROJECT_ROOT, "ontologies")
@@ -81,6 +86,7 @@ def run_pipeline(
     strict_terms: bool = False,
     keywords: Optional[Union[Iterable[str], None]] = None,
     allowed_ids: Optional[Iterable[str]] = None,
+    dev_sentence_ids: Optional[Iterable[str]] = None,
 ):
     """Execute the ontology drafting pipeline.
 
@@ -142,6 +148,19 @@ def run_pipeline(
         temperature=temperature,
         examples=examples,
     )
+
+    # Save prompt configuration once before processing test sentences
+    if dev_sentence_ids is not None:
+        prompt_messages = llm.build_prompt("", avail_terms, log_examples=False)
+        prompt_text = prompt_messages[0]["content"] if prompt_messages else ""
+        hyperparams = {
+            "lambda": None,
+            "m": None,
+            "kmax": kmax,
+            "temperature": temperature,
+            "model": model,
+        }
+        save_prompt_config(prompt_text, dev_sentence_ids, hyperparams)
 
     snippets_preview = pipeline["owl_snippets"] = []
     BATCH_SIZE = 100
@@ -397,7 +416,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        examples = load_dev_examples()
+        examples, dev_sentence_ids = load_dev_examples()
         if args.examples:
             with open(args.examples, "r", encoding="utf-8") as f:
                 examples = json.load(f)
@@ -432,6 +451,7 @@ def main():
             strict_terms=args.strict_terms,
             keywords=keywords,
             allowed_ids=allowed_ids,
+            dev_sentence_ids=dev_sentence_ids,
         )
     except RuntimeError as exc:
         logging.getLogger(__name__).error("Pipeline aborted: %s", exc)
