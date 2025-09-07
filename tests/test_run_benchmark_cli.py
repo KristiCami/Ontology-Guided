@@ -7,7 +7,13 @@ import evaluation.run_benchmark as rb
 
 
 def _run_cli(monkeypatch, tmp_path, extra_args):
-    captured = {"ontologies": [], "cqs": [], "allowed_ids": None, "dev_ids": None}
+    captured = {
+        "ontologies": [],
+        "cqs": [],
+        "allowed_ids": None,
+        "dev_ids": None,
+        "retrieval": {},
+    }
 
     def fake_run_pipeline(
         inputs,
@@ -22,6 +28,12 @@ def _run_cli(monkeypatch, tmp_path, extra_args):
         captured["ontologies"] = list(ontologies or [])
         captured["allowed_ids"] = list(allowed_ids or [])
         captured["dev_ids"] = list(dev_sentence_ids or [])
+        captured["retrieval"] = {
+            "use_retrieval": kwargs.get("use_retrieval"),
+            "dev_pool": kwargs.get("dev_pool"),
+            "retrieve_k": kwargs.get("retrieve_k"),
+            "prompt_log": kwargs.get("prompt_log"),
+        }
         return {"combined_ttl": "", "violation_stats": {}, "shacl_conforms": True}
 
     def fake_evaluate_cqs(ttl, cq_path):
@@ -86,6 +98,29 @@ def test_cli_filters_test_sentences(monkeypatch, tmp_path):
     dev_ids = set(result["dev_ids"])
     assert dev_ids
     assert not dev_ids.intersection(result["allowed_ids"])
+
+
+def test_cli_accepts_retrieval(monkeypatch, tmp_path):
+    pool = tmp_path / "pool.json"
+    pool.write_text("[]")
+    log = tmp_path / "log.json"
+    result = _run_cli(
+        monkeypatch,
+        tmp_path,
+        [
+            "--use-retrieval",
+            "--dev-pool",
+            str(pool),
+            "--retrieve-k",
+            "4",
+            "--prompt-log",
+            str(log),
+        ],
+    )
+    assert result["retrieval"]["use_retrieval"] is True
+    assert result["retrieval"]["dev_pool"] == str(pool)
+    assert result["retrieval"]["retrieve_k"] == 4
+    assert result["retrieval"]["prompt_log"] == str(log)
 
 
 def test_cli_rejects_overlap(monkeypatch, tmp_path):
