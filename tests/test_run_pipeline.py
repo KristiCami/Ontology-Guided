@@ -165,7 +165,16 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
     captured = {}
 
     class FakeRepairLoop:
-        def __init__(self, data_path, shapes_path, api_key, *, kmax=5, base_iri=None):
+        def __init__(
+            self,
+            data_path,
+            shapes_path,
+            api_key,
+            *,
+            kmax=5,
+            base_iri=None,
+            allowed_terms=None,
+        ):
             captured["kmax"] = kmax
             captured["base_iri"] = base_iri
 
@@ -248,7 +257,16 @@ def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
     monkeypatch.setattr(main, "SHACLValidator", FakeValidator)
 
     class FakeRepairLoop:
-        def __init__(self, data_path, shapes_path, api_key, *, kmax=5, base_iri=None):
+        def __init__(
+            self,
+            data_path,
+            shapes_path,
+            api_key,
+            *,
+            kmax=5,
+            base_iri=None,
+            allowed_terms=None,
+        ):
             pass
 
         def run(self, reason=False, inference="rdfs"):

@@ -217,6 +217,7 @@ class RepairLoop:
         *,
         kmax: int = 5,
         base_iri: str = BASE_IRI,
+        allowed_terms: Optional[Dict[str, Any]] = None,
     ):
         self.data_path = data_path
         self.shapes_path = shapes_path
@@ -224,6 +225,7 @@ class RepairLoop:
         self.llm = LLMInterface(api_key=api_key)
         self.base_iri = base_iri
         self.builder = OntologyBuilder(self.base_iri)
+        self.allowed_terms = allowed_terms or {}
 
     def run(
         self, *, reason: bool = False, inference: str = "rdfs", max_triples: int = 50
@@ -247,7 +249,9 @@ class RepairLoop:
         try:
             init_builder = OntologyBuilder(self.base_iri)
             with open(current_data, "r", encoding="utf-8") as data_file:
-                init_builder.parse_turtle(data_file.read(), logger=logger)
+                init_builder.parse_turtle(
+                    data_file.read(), logger=logger, update_terms=False
+                )
             init_owl = os.path.join("results", "initial_reason.owl")
             init_builder.save(init_owl, fmt="xml")
             _, is_consistent, unsat_classes = run_reasoner(init_owl)
@@ -299,19 +303,16 @@ class RepairLoop:
                 canonicalize_violation(v)["text"] for v in violations
             }
 
-            # Extract available ontology terms, domain/range hints, and synonyms
-            # from the current data using an OntologyBuilder instance.
-            temp_builder = OntologyBuilder(self.base_iri)
-            with open(current_data, "r", encoding="utf-8") as data_file:
-                temp_builder.parse_turtle(data_file.read(), logger=logger)
-            available_terms = temp_builder.get_available_terms()
-
             # ``unsat_classes`` already contains the inconsistent classes for the
             # current data from the earlier reasoning run.
             inconsistent = unsat_classes
 
             prompt_infos = synthesize_repair_prompts(
-                violations, graph, available_terms, inconsistent, max_triples=max_triples
+                violations,
+                graph,
+                self.allowed_terms,
+                inconsistent,
+                max_triples=max_triples,
             )
             per_iter_entry["prompt_count"] = len(prompt_infos)
             with open(current_data, "r", encoding="utf-8") as f:
@@ -321,7 +322,7 @@ class RepairLoop:
             for info in prompt_infos:
                 prompt = info["prompt"]
                 snippet = self.llm.generate_owl(
-                    [prompt], "{sentence}", available_terms=available_terms
+                    [prompt], "{sentence}", available_terms=self.allowed_terms
                 )[0]
 
                 temp_graph = Graph()
@@ -400,7 +401,7 @@ class RepairLoop:
             logger.info("Diff size for iteration %d: %d lines", k + 1, len(diff_lines))
 
             self.builder = OntologyBuilder(self.base_iri)
-            self.builder.parse_turtle(merged, logger=logger)
+            self.builder.parse_turtle(merged, logger=logger, update_terms=False)
             ttl_path = os.path.join("results", f"repaired_{k + 1}.ttl")
             owl_path = os.path.join("results", f"repaired_{k + 1}.owl")
             self.builder.save(ttl_path, fmt="turtle")

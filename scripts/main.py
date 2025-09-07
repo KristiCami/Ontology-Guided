@@ -181,7 +181,7 @@ def run_pipeline(
 
     builder = OntologyBuilder(base_iri, ontology_files=ontology_files)
     logger = logging.getLogger(__name__)
-    avail_terms = builder.get_available_terms() if use_terms else None
+    initial_terms = builder.get_available_terms() if use_terms else None
 
     if use_retrieval and dev_pool is not None:
         if isinstance(dev_pool, (str, Path)):
@@ -226,7 +226,7 @@ def run_pipeline(
 
     # Save prompt configuration once before processing test sentences
     if dev_sentence_ids is not None:
-        prompt_messages = llm.build_prompt("", avail_terms, log_examples=False)
+        prompt_messages = llm.build_prompt("", initial_terms, log_examples=False)
         prompt_text = prompt_messages[0]["content"] if prompt_messages else ""
         hyperparams = {
             "lambda": None,
@@ -261,7 +261,7 @@ def run_pipeline(
                     PROMPT_TEMPLATE,
                     base=base_iri,
                     prefix=builder.prefix,
-                    available_terms=avail_terms,
+                    available_terms=initial_terms,
                 )
             else:
                 owl_batch = llm.generate_owl(
@@ -269,7 +269,7 @@ def run_pipeline(
                     PROMPT_TEMPLATE,
                     base=base_iri,
                     prefix=builder.prefix,
-                    available_terms=avail_terms,
+                    available_terms=initial_terms,
                 )
             for sent, snippet in zip(batch, owl_batch):
                 sent_text = sent.get("text") if isinstance(sent, dict) else sent
@@ -283,10 +283,9 @@ def run_pipeline(
                         requirement=sent_text,
                         snippet_index=snippet_counter,
                         strict_terms=strict_terms,
+                        update_terms=False,
                     )
                     builder.add_provenance(sent_text, triples)
-                    if use_terms:
-                        avail_terms = builder.get_available_terms()
                 except InvalidTurtleError:
                     logger.warning(
                         "Skipping invalid OWL snippet for sentence: %s", sent_text
@@ -300,7 +299,7 @@ def run_pipeline(
                 PROMPT_TEMPLATE,
                 base=base_iri,
                 prefix=builder.prefix,
-                available_terms=avail_terms,
+                available_terms=initial_terms,
             )
         else:
             owl_batch = llm.generate_owl(
@@ -308,7 +307,7 @@ def run_pipeline(
                 PROMPT_TEMPLATE,
                 base=base_iri,
                 prefix=builder.prefix,
-                available_terms=avail_terms,
+                available_terms=initial_terms,
             )
         for sent, snippet in zip(batch, owl_batch):
             sent_text = sent.get("text") if isinstance(sent, dict) else sent
@@ -322,10 +321,9 @@ def run_pipeline(
                     requirement=sent_text,
                     snippet_index=snippet_counter,
                     strict_terms=strict_terms,
+                    update_terms=False,
                 )
                 builder.add_provenance(sent_text, triples)
-                if use_terms:
-                    avail_terms = builder.get_available_terms()
             except InvalidTurtleError:
                 logger.warning(
                     "Skipping invalid OWL snippet for sentence: %s", sent_text
@@ -405,7 +403,12 @@ def run_pipeline(
         if not conforms and repair:
             logger.info("Running repair loop...")
             repairer = RepairLoop(
-                pipeline["combined_ttl"], shapes, api_key, kmax=kmax, base_iri=base_iri
+                pipeline["combined_ttl"],
+                shapes,
+                api_key,
+                kmax=kmax,
+                base_iri=base_iri,
+                allowed_terms=initial_terms,
             )
             repaired_ttl, repaired_report, violations, stats = repairer.run(
                 reason=reason, inference=inference
