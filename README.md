@@ -195,11 +195,13 @@ python3 evaluation/run_benchmark.py --pairs "evaluation/atm_requirements.jsonl:e
 
 Οι οντολογίες ανά domain καθορίζονται εύκολα μέσω `--ontologies` για
 μεμονωμένα αρχεία ή `--ontology-dir` για φόρτωση όλων των `.ttl` από έναν
-φάκελο. Παράδειγμα:
+φάκελο. Το χρυσό TBox `evaluation/atm_gold.ttl` περιλαμβάνεται εξ ορισμού, αλλά
+όταν χρησιμοποιείται `--ontology-dir` πρέπει να προστίθεται ρητά. Παράδειγμα:
 
 ```bash
 python3 evaluation/run_benchmark.py \
     --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" \
+    --ontologies evaluation/atm_gold.ttl \
     --ontology-dir ontologies \
     --repeats 1
 ```
@@ -209,7 +211,7 @@ python3 evaluation/run_benchmark.py \
 ```bash
 python -m evaluation.run_benchmark \
     --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" \
-    --settings '[{"name":"table1","use_terms":true,"validate":true,"ontologies":["ontologies/rbo.ttl","ontologies/lexical.ttl"]}]'
+    --settings '[{"name":"table1","use_terms":true,"validate":true,"ontologies":["evaluation/atm_gold.ttl","ontologies/rbo.ttl","ontologies/lexical.ttl"]}]'
 ```
 
 ### Mini Evaluation Example
