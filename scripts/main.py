@@ -55,7 +55,7 @@ def load_dev_examples() -> tuple[list[dict[str, str]], list[str]]:
                 part = axioms.get(key)
                 if part:
                     owl_parts.extend(part)
-        examples.append({"user": sentence, "assistant": "\n".join(owl_parts)})
+            examples.append({"user": sentence, "assistant": "\n".join(owl_parts)})
     return examples, dev_ids_list
 
 # Default ontology locations used by optional command-line flags
@@ -418,8 +418,18 @@ def main():
     try:
         examples, dev_sentence_ids = load_dev_examples()
         if args.examples:
-            with open(args.examples, "r", encoding="utf-8") as f:
-                examples = json.load(f)
+            logging.getLogger(__name__).warning(
+                "--examples is ignored; using dev split examples only"
+            )
+        test_path = os.path.join(PROJECT_ROOT, "splits", "test.txt")
+        with open(test_path, "r", encoding="utf-8") as f:
+            test_sentence_ids = [line.strip() for line in f if line.strip()]
+        overlap_examples = set(dev_sentence_ids) & set(test_sentence_ids)
+        if overlap_examples:
+            raise RuntimeError(
+                "Few-shot examples contain test IDs: "
+                + ", ".join(sorted(overlap_examples))
+            )
         keywords = (
             [k.strip() for k in args.keywords.split(",") if k.strip()]
             if args.keywords
@@ -429,6 +439,12 @@ def main():
         if args.split:
             with open(args.split, "r", encoding="utf-8") as f:
                 allowed_ids = [line.strip() for line in f if line.strip()]
+            overlap_inputs = set(allowed_ids) & set(dev_sentence_ids)
+            if overlap_inputs:
+                raise RuntimeError(
+                    "Input sentence IDs are in dev split: "
+                    + ", ".join(sorted(overlap_inputs))
+                )
         run_pipeline(
             args.inputs,
             args.shapes,
