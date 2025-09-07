@@ -36,6 +36,9 @@ if PROJECT_ROOT not in sys.path:
 from scripts.main import run_pipeline
 from .competency_questions import evaluate_cqs
 from .repair_efficiency import aggregate_repair_efficiency
+from .compare_metrics import filter_by_ids
+from ontology_guided.validator import SHACLValidator
+from ontology_guided.reasoner import run_reasoner
 
 
 Pair = Tuple[str, str, str]
@@ -102,7 +105,7 @@ def evaluate_once(
     normalize_base: bool = False,
     keywords: Optional[Union[Iterable[str], None]] = None,
     cq_path: Optional[str] = None,
-    allowed_ids: Optional[Iterable[str]] = None,
+    test_ids: Optional[Iterable[str]] = None,
     **settings: Any,
 ) -> Tuple[Dict[str, float], Dict[str, Any], Any, Optional[float]]:
     """Run the pipeline once and compute evaluation metrics."""
@@ -112,17 +115,107 @@ def evaluate_once(
         base_iri,
         ontologies=ontologies,
         keywords=keywords,
-        allowed_ids=allowed_ids,
         **settings,
     )
-    metrics = compute_metrics(
-        result["combined_ttl"], gold, normalize_base=normalize_base
-    )
-    violation_stats = result.get("violation_stats", {}) or {}
-    shacl_conforms = result.get("shacl_conforms")
+
+    pred_graph = Graph()
+    if result.get("combined_ttl") and os.path.exists(result["combined_ttl"]):
+        pred_graph.parse(result["combined_ttl"], format="turtle")
+    gold_graph = Graph()
+    if gold and os.path.exists(gold):
+        gold_graph.parse(gold, format="turtle")
+
+    text_to_id: Dict[str, str] = {}
+    if os.path.exists(requirements):
+        with open(requirements, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    data = json.loads(line)
+                    text_to_id[data["text"]] = str(data.get("sentence_id"))
+
+    prov_pred: Dict[Tuple[str, str, str], str] = {}
+    for meta in result.get("provenance", {}).values():
+        triple = tuple(meta.get("triple", ()))
+        sid = text_to_id.get(meta.get("requirement", ""))
+        if sid:
+            prov_pred[triple] = sid
+
+    prov_gold: Dict[Tuple[str, str, str], str] = {}
+    if os.path.exists(requirements):
+        with open(requirements, "r", encoding="utf-8") as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                rec = json.loads(line)
+                sid = str(rec.get("sentence_id"))
+                axioms = rec.get("axioms", {})
+                ttl_parts: List[str] = []
+                for key in ("tbox", "abox"):
+                    part = axioms.get(key)
+                    if part:
+                        ttl_parts.extend(part)
+                if ttl_parts:
+                    g = Graph()
+                    g.parse(data="\n".join(ttl_parts), format="turtle")
+                    for triple in g:
+                        prov_gold[tuple(str(t) for t in triple)] = sid
+
+    if test_ids is None:
+        test_ids = []
+    pred_graph = filter_by_ids(pred_graph, test_ids, prov_pred)
+    gold_graph = filter_by_ids(gold_graph, test_ids, prov_gold)
+
+    pred_path = "results/combined_test.ttl"
+    gold_filtered_path = "results/gold_test.ttl"
+    pred_graph.serialize(pred_path, format="turtle")
+    gold_graph.serialize(gold_filtered_path, format="turtle")
+
+    metrics = compute_metrics(pred_path, gold_filtered_path, normalize_base=normalize_base)
+
+    shacl_conforms = None
+    summary: Dict[str, Any] = {"total": 0, "bySeverity": {}}
+    is_consistent = None
+    unsat_classes: List[str] = []
+    if settings.get("reason", False):
+        pred_graph.serialize("results/combined_test.owl", format="xml")
+        try:
+            _, is_consistent, unsat_classes = run_reasoner("results/combined_test.owl")
+        except Exception:
+            is_consistent = None
+            unsat_classes = []
+    if settings.get("validate", False):
+        validator = SHACLValidator(
+            pred_path, shapes, inference=settings.get("inference", "rdfs")
+        )
+        shacl_conforms, _, summary = validator.run_validation()
+
+    violation_stats = {
+        "pre_count": summary.get("total", 0),
+        "post_count": summary.get("total", 0),
+        "iterations": 0,
+        "first_conforms_iteration": 0 if shacl_conforms else None,
+        "per_iteration": [
+            {
+                "iteration": 0,
+                "total": summary.get("total", 0),
+                "bySeverity": summary.get("bySeverity", {}),
+                "is_consistent": is_consistent,
+                "unsat_count": len(unsat_classes),
+                "prompt_count": 0,
+                "prompt_success_rate": 0.0,
+            }
+        ],
+        "reduction": 0.0,
+        "unsat_initial": len(unsat_classes),
+        "unsat_final": len(unsat_classes),
+        "consistency_transitions": [],
+        "prompt_count": 0,
+        "prompt_success_rate": 0.0,
+    }
+
     cq_rate = None
     if cq_path:
-        cq_res = evaluate_cqs(result["combined_ttl"], cq_path)
+        cq_res = evaluate_cqs(pred_path, cq_path)
         cq_rate = cq_res["pass_rate"]
     return metrics, violation_stats, shacl_conforms, cq_rate
 
@@ -170,10 +263,10 @@ def run_evaluations(
                 if cq_paths and dataset_idx < len(cq_paths)
                 else None
             )
-            allowed_ids = None
+            test_ids = None
             if split_paths and dataset_idx < len(split_paths) and split_paths[dataset_idx]:
                 with open(split_paths[dataset_idx], "r", encoding="utf-8") as f:
-                    allowed_ids = [line.strip() for line in f if line.strip()]
+                    test_ids = [line.strip() for line in f if line.strip()]
             metrics_list: List[Dict[str, float]] = []
             violations_list: List[Dict[str, Any]] = []
             conforms_list: List[Any] = []
@@ -188,7 +281,7 @@ def run_evaluations(
                     normalize_base=normalize_base,
                     keywords=keywords,
                     cq_path=cq_path,
-                    allowed_ids=allowed_ids,
+                    test_ids=test_ids,
                     **pipeline_opts,
                 )
                 metrics_list.append(metrics)
@@ -319,7 +412,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
     parser.add_argument(
         "--splits",
         nargs="*",
-        default=None,
+        default=["splits/test.txt"],
         help="List of files with sentence_id lists, one per dataset",
     )
     args = parser.parse_args()

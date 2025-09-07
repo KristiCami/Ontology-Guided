@@ -10,7 +10,7 @@ import argparse
 import json
 from pathlib import Path
 from rdflib import Graph
-from typing import Iterable, Optional, Union
+from typing import Iterable, Optional, Union, Mapping, Tuple
 
 import os, sys
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -19,6 +19,41 @@ if PROJECT_ROOT not in sys.path:
 
 from scripts.main import run_pipeline
 from evaluation.axiom_metrics import evaluate_axioms
+
+
+def filter_by_ids(
+    graph: Graph,
+    ids: Iterable[str],
+    provenance: Mapping[Tuple[str, str, str], str],
+) -> Graph:
+    """Return a subgraph keeping only triples with provenance in ``ids``.
+
+    Parameters
+    ----------
+    graph: Graph
+        RDF graph containing axioms to be filtered.
+    ids: Iterable[str]
+        Allowed ``sentence_id`` values.
+    provenance: Mapping[Tuple[str, str, str], str]
+        Mapping from triples to their originating ``sentence_id``.
+
+    Returns
+    -------
+    Graph
+        A new graph containing only triples whose provenance ``sentence_id``
+        is present in ``ids``.
+    """
+
+    id_set = {str(i) for i in ids}
+    filtered = Graph()
+    for triple in graph:
+        key = tuple(str(term) for term in triple)
+        sid = provenance.get(key)
+        if sid in id_set:
+            filtered.add(triple)
+    for prefix, namespace in graph.namespaces():
+        filtered.bind(prefix, namespace)
+    return filtered
 
 
 def compare_metrics(
