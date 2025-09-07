@@ -40,8 +40,8 @@ class DataLoader:
 
     def load_jsonl_file(
         self, file_path: str, allowed_ids: Optional[Iterable[str]] = None
-    ) -> Iterator[str]:
-        """Yield the ``text`` field from each JSONL line.
+    ) -> Iterator[dict[str, str]]:
+        """Yield ``{"text": ..., "sentence_id": ...}`` for each JSONL record.
 
         When ``allowed_ids`` is provided, only records whose
         ``sentence_id`` is contained in that iterable are returned.
@@ -53,11 +53,11 @@ class DataLoader:
                     data = json.loads(line)
                     sid = str(data.get("sentence_id"))
                     if id_set is None or sid in id_set:
-                        yield data["text"]
+                        yield {"text": data.get("text", ""), "sentence_id": sid}
 
     def load_requirements(
         self, input_paths: List[str], allowed_ids: Optional[Iterable[str]] = None
-    ) -> Iterable[str]:
+    ) -> Iterable[Union[str, dict[str, str]]]:
         id_set = {str(i) for i in allowed_ids} if allowed_ids is not None else None
         for path in input_paths:
             if not os.path.exists(path):

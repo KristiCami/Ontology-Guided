@@ -38,6 +38,7 @@ def test_compare_metrics(monkeypatch, tmp_path):
 
         buffer = ""
         depth = 0
+        id_set = {str(i) for i in allowed_ids} if allowed_ids is not None else None
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
                 stripped = line.strip()
@@ -46,7 +47,10 @@ def test_compare_metrics(monkeypatch, tmp_path):
                 buffer += line
                 depth += line.count("{") - line.count("}")
                 if depth == 0:
-                    yield json.loads(buffer)["text"]
+                    rec = json.loads(buffer)
+                    sid = str(rec.get("sentence_id"))
+                    if id_set is None or sid in id_set:
+                        yield {"text": rec.get("text", ""), "sentence_id": sid}
                     buffer = ""
 
     monkeypatch.setattr(DataLoader, "load_jsonl_file", multiline_jsonl_loader)

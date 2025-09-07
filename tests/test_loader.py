@@ -38,8 +38,8 @@ def test_docx_loading_and_preprocessing(tmp_path):
 
 def test_jsonl_loading_and_preprocessing(tmp_path):
     data = [
-        {"text": "* The system shall reboot."},
-        {"text": "1. Users must change password."},
+        {"text": "* The system shall reboot.", "sentence_id": "1"},
+        {"text": "1. Users must change password.", "sentence_id": "2"},
     ]
     file_path = tmp_path / "reqs.jsonl"
     with open(file_path, "w", encoding="utf-8") as f:
@@ -49,11 +49,11 @@ def test_jsonl_loading_and_preprocessing(tmp_path):
 
     loader = DataLoader()
     lines = list(loader.load_requirements([str(file_path)]))
-    assert lines == [obj["text"] for obj in data]
+    assert lines == data
 
     sentences = []
     for line in lines:
-        sentences.extend(loader.preprocess_text(line))
+        sentences.extend(loader.preprocess_text(line["text"]))
     assert sentences == [
         "The system shall reboot.",
         "Users must change password.",
@@ -73,7 +73,7 @@ def test_jsonl_loading_with_allowed_ids(tmp_path):
 
     loader = DataLoader()
     lines = list(loader.load_requirements([str(file_path)], allowed_ids=["2"]))
-    assert lines == ["B"]
+    assert lines == [data[1]]
 
 
 def test_load_requirements_warns_and_raises(tmp_path, caplog):

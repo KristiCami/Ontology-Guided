@@ -120,12 +120,21 @@ def run_pipeline(
     PREVIEW_LIMIT = 20
 
     def sentence_iterator():
-        for text in texts_iter:
-            pipeline["texts"].append(text)
-            for sent_text in loader.preprocess_text(text, keywords=keywords):
+        for item in texts_iter:
+            if isinstance(item, dict):
+                raw_text = item.get("text", "")
+                sid = item.get("sentence_id")
+            else:
+                raw_text = item
+                sid = None
+            pipeline["texts"].append(raw_text)
+            for sent_text in loader.preprocess_text(raw_text, keywords=keywords):
                 if len(sentences_preview) < PREVIEW_LIMIT:
                     sentences_preview.append(sent_text)
-                yield sent_text
+                if sid is not None:
+                    yield {"text": sent_text, "sentence_id": sid}
+                else:
+                    yield sent_text
     sentences_iter = sentence_iterator()
 
     ontology_files = list(ontologies or [])
@@ -166,7 +175,7 @@ def run_pipeline(
     BATCH_SIZE = 100
 
     os.makedirs("results", exist_ok=True)
-    batch: list[str] = []
+    batch: list[Union[str, dict[str, str]]] = []
     any_sentence = False
     snippet_counter = 0
     for sentence in sentences_iter:
@@ -190,6 +199,7 @@ def run_pipeline(
                     available_terms=avail_terms,
                 )
             for sent, snippet in zip(batch, owl_batch):
+                sent_text = sent.get("text") if isinstance(sent, dict) else sent
                 if len(snippets_preview) < PREVIEW_LIMIT:
                     snippets_preview.append(snippet)
                 snippet_counter += 1
@@ -197,18 +207,18 @@ def run_pipeline(
                     triples = builder.parse_turtle(
                         snippet,
                         logger=logger,
-                        requirement=sent,
+                        requirement=sent_text,
                         snippet_index=snippet_counter,
                         strict_terms=strict_terms,
                     )
-                    builder.add_provenance(sent, triples)
+                    builder.add_provenance(sent_text, triples)
                     if use_terms:
                         avail_terms = builder.get_available_terms()
                 except InvalidTurtleError:
                     logger.warning(
-                        "Skipping invalid OWL snippet for sentence: %s", sent
+                        "Skipping invalid OWL snippet for sentence: %s", sent_text
                     )
-                    failed_snippets.append({"sentence": sent, "snippet": snippet})
+                    failed_snippets.append({"sentence": sent_text, "snippet": snippet})
             batch = []
     if batch:
         if use_async:
@@ -228,6 +238,7 @@ def run_pipeline(
                 available_terms=avail_terms,
             )
         for sent, snippet in zip(batch, owl_batch):
+            sent_text = sent.get("text") if isinstance(sent, dict) else sent
             if len(snippets_preview) < PREVIEW_LIMIT:
                 snippets_preview.append(snippet)
             snippet_counter += 1
@@ -235,18 +246,18 @@ def run_pipeline(
                 triples = builder.parse_turtle(
                     snippet,
                     logger=logger,
-                    requirement=sent,
+                    requirement=sent_text,
                     snippet_index=snippet_counter,
                     strict_terms=strict_terms,
                 )
-                builder.add_provenance(sent, triples)
+                builder.add_provenance(sent_text, triples)
                 if use_terms:
                     avail_terms = builder.get_available_terms()
             except InvalidTurtleError:
                 logger.warning(
-                    "Skipping invalid OWL snippet for sentence: %s", sent
+                    "Skipping invalid OWL snippet for sentence: %s", sent_text
                 )
-                failed_snippets.append({"sentence": sent, "snippet": snippet})
+                failed_snippets.append({"sentence": sent_text, "snippet": snippet})
         any_sentence = True
     if not any_sentence:
         raise RuntimeError("No requirements found in inputs")
