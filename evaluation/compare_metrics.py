@@ -17,7 +17,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from scripts.main import run_pipeline
+from scripts.main import run_pipeline, load_dev_examples
 from evaluation.axiom_metrics import evaluate_axioms
 
 
@@ -66,6 +66,9 @@ def compare_metrics(
     output_path: str = "results/axiom_metrics.json",
     match_mode: str = "syntactic",
     equiv_as_subclass: bool = False,
+    test_ids: Optional[Iterable[str]] = None,
+    examples: Optional[list[dict[str, str]]] = None,
+    dev_sentence_ids: Optional[Iterable[str]] = None,
 ) -> dict:
     """Run the pipeline on requirements and compare against a gold TTL file.
 
@@ -96,6 +99,9 @@ def compare_metrics(
         spacy_model="en",
         inference="none",
         keywords=keywords,
+        allowed_ids=test_ids,
+        examples=examples,
+        dev_sentence_ids=dev_sentence_ids,
     )
     predicted_ttl = result["combined_ttl"]
 
@@ -104,6 +110,45 @@ def compare_metrics(
 
     gold_graph = Graph()
     gold_graph.parse(gold_path, format="turtle")
+
+    text_to_id: dict[str, str] = {}
+    if os.path.exists(requirements_path):
+        with open(requirements_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    data = json.loads(line)
+                    text_to_id[data.get("text", "")] = str(data.get("sentence_id"))
+
+    prov_pred: dict[Tuple[str, str, str], str] = {}
+    for meta in result.get("provenance", {}).values():
+        triple = tuple(meta.get("triple", ()))
+        sid = text_to_id.get(meta.get("requirement", ""))
+        if sid:
+            prov_pred[tuple(str(t) for t in triple)] = sid
+
+    prov_gold: dict[Tuple[str, str, str], str] = {}
+    if os.path.exists(requirements_path):
+        with open(requirements_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                rec = json.loads(line)
+                sid = str(rec.get("sentence_id"))
+                axioms = rec.get("axioms", {})
+                ttl_parts: list[str] = []
+                for key in ("tbox", "abox"):
+                    part = axioms.get(key)
+                    if part:
+                        ttl_parts.extend(part)
+                if ttl_parts:
+                    g = Graph()
+                    g.parse(data="\n".join(ttl_parts), format="turtle")
+                    for triple in g:
+                        prov_gold[tuple(str(t) for t in triple)] = sid
+
+    if test_ids is not None:
+        pred_graph = filter_by_ids(pred_graph, test_ids, prov_pred)
+        gold_graph = filter_by_ids(gold_graph, test_ids, prov_gold)
 
     pred_triples = set(pred_graph)
     gold_triples = set(gold_graph)
@@ -175,6 +220,16 @@ def main():
         default="results/axiom_metrics.json",
         help="Path to save computed metrics",
     )
+    parser.add_argument(
+        "--split",
+        default=None,
+        help="Path to file with sentence_ids to evaluate",
+    )
+    parser.add_argument(
+        "--dev",
+        default=None,
+        help="Path to file with sentence_ids for dev examples",
+    )
     args = parser.parse_args()
 
     keywords = (
@@ -182,6 +237,22 @@ def main():
         if args.keywords
         else None
     )
+    test_ids = None
+    if args.split:
+        with open(args.split, "r", encoding="utf-8") as f:
+            test_ids = [line.strip() for line in f if line.strip()]
+
+    examples = None
+    dev_ids = None
+    if args.dev:
+        examples, dev_ids = load_dev_examples(args.requirements, args.dev)
+        if test_ids is not None:
+            overlap = set(test_ids) & set(dev_ids)
+            if overlap:
+                raise RuntimeError(
+                    "Dev and test splits overlap: " + ", ".join(sorted(overlap))
+                )
+
     metrics = compare_metrics(
         args.requirements,
         args.gold,
@@ -192,6 +263,9 @@ def main():
         output_path=args.out,
         match_mode=args.match_mode,
         equiv_as_subclass=args.equiv_as_subclass,
+        test_ids=test_ids,
+        examples=examples,
+        dev_sentence_ids=dev_ids,
     )
 
     for axiom, vals in metrics.get("per_type", {}).items():
