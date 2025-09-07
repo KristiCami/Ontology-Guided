@@ -3,6 +3,7 @@ import logging
 import difflib
 from typing import List, Tuple, Optional, Union, Dict, Any
 import tempfile
+import copy
 
 from dotenv import load_dotenv
 from rdflib import Graph, URIRef, Literal
@@ -307,6 +308,7 @@ class RepairLoop:
             # current data from the earlier reasoning run.
             inconsistent = unsat_classes
 
+            terms_snapshot = copy.deepcopy(self.allowed_terms)
             prompt_infos = synthesize_repair_prompts(
                 violations,
                 graph,
@@ -314,6 +316,11 @@ class RepairLoop:
                 inconsistent,
                 max_triples=max_triples,
             )
+            if self.allowed_terms != terms_snapshot:
+                logger.warning(
+                    "Allowed terms modified during prompt synthesis; reverting"
+                )
+                self.allowed_terms = terms_snapshot
             per_iter_entry["prompt_count"] = len(prompt_infos)
             with open(current_data, "r", encoding="utf-8") as f:
                 original = f.read()
@@ -321,9 +328,15 @@ class RepairLoop:
             repair_snippets = []
             for info in prompt_infos:
                 prompt = info["prompt"]
+                llm_terms_snapshot = copy.deepcopy(self.allowed_terms)
                 snippet = self.llm.generate_owl(
                     [prompt], "{sentence}", available_terms=self.allowed_terms
                 )[0]
+                if self.allowed_terms != llm_terms_snapshot:
+                    logger.warning(
+                        "Allowed terms modified by LLM call; reverting"
+                    )
+                    self.allowed_terms = llm_terms_snapshot
 
                 temp_graph = Graph()
                 for triple in graph:
