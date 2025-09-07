@@ -197,6 +197,17 @@ def run_pipeline(
         logger.info("Using retrieval with %d dev examples", len(dev_pool_data))
         dev_pool = dev_pool_data
 
+    if not use_retrieval and dev_sentence_ids is not None:
+        example_ids = {
+            ex.get("sentence_id")
+            for ex in (examples or [])
+            if ex.get("sentence_id") is not None
+        }
+        if set(dev_sentence_ids) != example_ids:
+            raise RuntimeError(
+                "Example sentence IDs do not match dev_sentence_ids"
+            )
+
     llm = LLMInterface(
         api_key=api_key,
         model=model,
