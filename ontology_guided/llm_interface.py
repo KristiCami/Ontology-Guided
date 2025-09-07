@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 import logging
 from rdflib import Graph
+import random
 
 
 # Common namespace prefixes that may appear in LLM output. If a prefix is used
@@ -24,6 +25,62 @@ KNOWN_PREFIXES = {
     "foaf": "http://xmlns.com/foaf/0.1/",
     "lex": "http://example.com/lexical#",
 }
+
+
+def build_prompt(
+    sentence: str,
+    vocab: Optional[Dict[str, List[str]]],
+    exemplars: List[Dict[str, str]],
+) -> List[Dict[str, str]]:
+    """Construct chat messages for the LLM.
+
+    Parameters
+    ----------
+    sentence:
+        Requirement to convert into OWL/Turtle.
+    vocab:
+        Dictionary with optional ``classes`` and ``properties`` lists to be
+        advertised as the allowed vocabulary.
+    exemplars:
+        Few-shot examples as dictionaries with ``user`` and ``assistant`` keys.
+    """
+
+    classes = vocab.get("classes", []) if vocab else []
+    properties = vocab.get("properties", []) if vocab else []
+
+    system_lines = [
+        "You convert NL ATM requirements into OWL ontologies expressed in Turtle.",
+        "Return only valid Turtle code with explicit @prefix declarations.",
+        "Use only terms from the provided ALLOWED VOCAB.",
+    ]
+    if classes or properties:
+        system_lines.append("ALLOWED VOCAB:")
+        if classes:
+            system_lines.append("Classes: " + ", ".join(classes))
+        if properties:
+            system_lines.append("Properties: " + ", ".join(properties))
+
+    messages: List[Dict[str, str]] = [
+        {"role": "system", "content": "\n".join(system_lines)}
+    ]
+
+    if exemplars:
+        k = min(6, len(exemplars))
+        if k >= 3:
+            sample = random.sample(exemplars, k)
+        else:
+            sample = exemplars
+        for ex in sample:
+            user_msg = ex.get("user") or ex.get("sentence")
+            assistant_msg = ex.get("assistant") or ex.get("owl")
+            if user_msg and assistant_msg:
+                messages.append({"role": "user", "content": user_msg})
+                messages.append(
+                    {"role": "assistant", "content": assistant_msg}
+                )
+
+    messages.append({"role": "user", "content": sentence})
+    return messages
 
 class LLMInterface:
     def __init__(
@@ -114,64 +171,31 @@ class LLMInterface:
         max_retry_delay: float = 60.0,
     ) -> List[str]:
         """Synchronous helper that calls the LLM and returns Turtle code."""
-        results = []
-        classes = []
-        properties = []
-        hints = {}
-        synonyms = {}
+        results: List[str] = []
+        classes: List[str] = []
+        properties: List[str] = []
+        hints: Dict[str, Any] = {}
+        synonyms: Dict[str, Any] = {}
         if available_terms:
             classes = available_terms.get("classes", [])
             properties = available_terms.get("properties", [])
             hints = available_terms.get("domain_range_hints", {})
             synonyms = available_terms.get("synonyms", {})
+        vocab = {"classes": classes, "properties": properties}
         for sent in sentences:
             cached = self._load_cache(sent, available_terms, base, prefix)
             if cached is not None:
                 results.append(cached)
                 continue
-            prompt = (
-                "Return ONLY valid Turtle code, without any explanatory text or markdown fences.\n"
-                "Include explicit @prefix declarations for any prefixes you use "
-                "(e.g., @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .). "
-                "If a prefix is not declared, use full IRIs enclosed in <> instead of shorthand.\n"
-            )
-            if classes or properties or hints or synonyms:
-                prompt += "Use existing ontology terms when appropriate.\n"
-                if classes:
-                    prompt += "Classes: " + ", ".join(classes) + "\n"
-                if properties:
-                    prompt += "Properties: " + ", ".join(properties) + "\n"
-                if hints:
-                    prompt += "Property domains/ranges:\n"
-                    for p, dr in hints.items():
-                        dom = ", ".join(dr.get("domain", []))
-                        rng = ", ".join(dr.get("range", []))
-                        prompt += f"  - {p}: domain {dom or '-'}; range {rng or '-'}\n"
-                if synonyms:
-                    prompt += "Synonyms:\n"
-                    for s, c in synonyms.items():
-                        prompt += f"  - {s} -> {c}\n"
-            prompt += prompt_template.format(
+            user_prompt = prompt_template.format(
                 sentence=sent, base=base, prefix=prefix
             )
-            base_prompt = prompt
+            base_prompt = user_prompt
+            messages = build_prompt(user_prompt, vocab, self.examples)
             attempts = 0
             current_delay = retry_delay
             while True:
                 try:
-                    messages = [
-                        {
-                            "role": "system",
-                            "content": "You are a Turtle/OWL code generator.",
-                        }
-                    ]
-                    for ex in self.examples:
-                        user_msg = ex.get("user")
-                        assistant_msg = ex.get("assistant")
-                        if user_msg is not None and assistant_msg is not None:
-                            messages.append({"role": "user", "content": user_msg})
-                            messages.append({"role": "assistant", "content": assistant_msg})
-                    messages.append({"role": "user", "content": prompt})
                     resp = openai.chat.completions.create(
                         model=self.model,
                         temperature=self.temperature,
@@ -195,9 +219,6 @@ class LLMInterface:
                 match = re.search(r"```turtle\s*(.*?)```", raw, re.S)
                 turtle_code = match.group(1).strip() if match else raw.strip()
 
-                # Detect prefixes used in the Turtle that are not declared. For any
-                # known prefix we add a corresponding @prefix declaration so that
-                # rdflib can parse the graph without errors.
                 used_prefixes = set(
                     re.findall(r"(?<!<)\b([A-Za-z][\w-]*):(?!//)", turtle_code)
                 )
@@ -227,15 +248,16 @@ class LLMInterface:
                         )
                         turtle_code = ""
                         break
-                    prompt = (
+                    user_prompt = (
                         "Previous output was invalid Turtle; return only correct Turtle.\n"
                         + base_prompt
                     )
+                    messages = build_prompt(user_prompt, vocab, self.examples)
                     time.sleep(current_delay)
                     current_delay = min(current_delay * 2, max_retry_delay)
 
-            results.append(turtle_code)
             self._save_cache(sent, available_terms, base, prefix, turtle_code)
+            results.append(turtle_code)
         return results
 
     async def _generate_owl_async(
@@ -252,8 +274,8 @@ class LLMInterface:
     ) -> List[str]:
         """Asynchronously call the LLM and return only the Turtle code."""
 
-        classes = []
-        properties = []
+        classes: List[str] = []
+        properties: List[str] = []
         hints: Dict[str, Any] = {}
         synonyms: Dict[str, Any] = {}
         if available_terms:
@@ -261,55 +283,22 @@ class LLMInterface:
             properties = available_terms.get("properties", [])
             hints = available_terms.get("domain_range_hints", {})
             synonyms = available_terms.get("synonyms", {})
+        vocab = {"classes": classes, "properties": properties}
 
         async def process(sent: str) -> str:
             cached = self._load_cache(sent, available_terms, base, prefix)
             if cached is not None:
                 return cached
 
-            prompt = (
-                "Return ONLY valid Turtle code, without any explanatory text or markdown fences.\n"
-                "Include explicit @prefix declarations for any prefixes you use "
-                "(e.g., @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .). "
-                "If a prefix is not declared, use full IRIs enclosed in <> instead of shorthand.\n"
-            )
-            if classes or properties or hints or synonyms:
-                prompt += "Use existing ontology terms when appropriate.\n"
-                if classes:
-                    prompt += "Classes: " + ", ".join(classes) + "\n"
-                if properties:
-                    prompt += "Properties: " + ", ".join(properties) + "\n"
-                if hints:
-                    prompt += "Property domains/ranges:\n"
-                    for p, dr in hints.items():
-                        dom = ", ".join(dr.get("domain", []))
-                        rng = ", ".join(dr.get("range", []))
-                        prompt += f"  - {p}: domain {dom or '-'}; range {rng or '-'}\n"
-                if synonyms:
-                    prompt += "Synonyms:\n"
-                    for s, c in synonyms.items():
-                        prompt += f"  - {s} -> {c}\n"
-            prompt += prompt_template.format(
+            user_prompt = prompt_template.format(
                 sentence=sent, base=base, prefix=prefix
             )
-            base_prompt = prompt
+            base_prompt = user_prompt
+            messages = build_prompt(user_prompt, vocab, self.examples)
             attempts = 0
             current_delay = retry_delay
             while True:
                 try:
-                    messages = [
-                        {
-                            "role": "system",
-                            "content": "You are a Turtle/OWL code generator.",
-                        }
-                    ]
-                    for ex in self.examples:
-                        user_msg = ex.get("user")
-                        assistant_msg = ex.get("assistant")
-                        if user_msg is not None and assistant_msg is not None:
-                            messages.append({"role": "user", "content": user_msg})
-                            messages.append({"role": "assistant", "content": assistant_msg})
-                    messages.append({"role": "user", "content": prompt})
                     resp = await openai.chat.completions.create(
                         model=self.model,
                         temperature=self.temperature,
@@ -362,10 +351,11 @@ class LLMInterface:
                         )
                         turtle_code = ""
                         break
-                    prompt = (
+                    user_prompt = (
                         "Previous output was invalid Turtle; return only correct Turtle.\n"
                         + base_prompt
                     )
+                    messages = build_prompt(user_prompt, vocab, self.examples)
                     await asyncio.sleep(current_delay)
                     current_delay = min(current_delay * 2, max_retry_delay)
 

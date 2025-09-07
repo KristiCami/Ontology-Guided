@@ -23,6 +23,36 @@ PROMPT_TEMPLATE = (
     "Requirement: {sentence}\n\nOWL:"
 )
 
+
+def load_dev_examples() -> list[dict[str, str]]:
+    """Load few-shot examples from the dev split.
+
+    Reads ``splits/dev.txt`` for sentence IDs and extracts matching records
+    from ``evaluation/atm_requirements.jsonl``. Each example contains a natural
+    language requirement (``user``) and its OWL representation (``assistant``).
+    """
+
+    split_path = os.path.join(PROJECT_ROOT, "splits", "dev.txt")
+    data_path = os.path.join(PROJECT_ROOT, "evaluation", "atm_requirements.jsonl")
+    with open(split_path, "r", encoding="utf-8") as f:
+        dev_ids = {line.strip() for line in f if line.strip()}
+
+    examples: list[dict[str, str]] = []
+    with open(data_path, "r", encoding="utf-8") as f:
+        for line in f:
+            record = json.loads(line)
+            if record.get("sentence_id") not in dev_ids:
+                continue
+            sentence = record.get("meta", {}).get("description") or record.get("text", "")
+            axioms = record.get("axioms", {})
+            owl_parts: list[str] = []
+            for key in ("tbox", "abox", "shacl"):
+                part = axioms.get(key)
+                if part:
+                    owl_parts.extend(part)
+            examples.append({"user": sentence, "assistant": "\n".join(owl_parts)})
+    return examples
+
 # Default ontology locations used by optional command-line flags
 ONTOLOGIES_DIR = os.path.join(PROJECT_ROOT, "ontologies")
 RBO_ONTOLOGY_PATH = os.path.join(ONTOLOGIES_DIR, "rbo.ttl")
@@ -367,7 +397,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        examples = None
+        examples = load_dev_examples()
         if args.examples:
             with open(args.examples, "r", encoding="utf-8") as f:
                 examples = json.load(f)
