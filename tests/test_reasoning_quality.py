@@ -1,4 +1,3 @@
-import json
 import pytest
 import owlready2
 from ontology_guided.reasoner import run_reasoner, ReasonerError
@@ -77,7 +76,11 @@ def test_reasoning_quality(monkeypatch, tmp_path):
         repair_loop,
         "synthesize_repair_prompts",
         lambda violations, graph, available_terms, inconsistent, max_triples=50: [
-            json.dumps({"offending_axioms": [offending], "violation": "v"})
+            {
+                "prompt": "SYSTEM:\nLOCAL CONTEXT (Turtle):\n\nVIOLATION (canonicalized): v\nSUGGEST PATCH (Turtle only):",
+                "offending_axioms": [offending],
+                "terms": [],
+            }
         ],
     )
     monkeypatch.setattr(
