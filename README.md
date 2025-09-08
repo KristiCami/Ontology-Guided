@@ -308,6 +308,16 @@ python3 evaluation/compare_metrics.py evaluation/mini_requirements.jsonl evaluat
 ```
 Αναμένονται μετρικές F1 περίπου 0.14 → 0.27 → 0.53 για τα αρχεία `mini_pred_iter0.ttl`, `mini_pred_iter1.ttl` και `mini_pred_iter2.ttl`.
 
+### Extraction Metric Examples
+
+Δύο scripts επιδεικνύουν πώς υπολογίζονται οι μετρικές P/R/F1 για συγκεκριμένους τύπους αξιωμάτων:
+
+```bash
+python3 evaluation/examples/extraction_subclass.py       # Example 1A – SubClassOf (P/R/F1 = 0.60)
+python3 evaluation/examples/extraction_domain_range.py  # Example 1B – Domain & Range (P/R/F1 = 0.50)
+```
+
+
 ### Competency Questions
 
 Οι ερωτήσεις ικανότητας (Competency Questions) μετρούν κατά πόσο η παραγόμενη
