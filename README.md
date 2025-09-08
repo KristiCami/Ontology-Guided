@@ -148,6 +148,14 @@ The diagram below zooms into the repair cycle from detecting a real violation to
 
    Τα αρχεία που ανεβάζονται διαγράφονται αυτόματα μετά την ολοκλήρωση κάθε αιτήματος.
 
+8. **Παράδειγμα reasoner**
+   ```bash
+   python3 evaluation/reasoning_example.py
+   ```
+   Εκτελεί ένα μικρό παράδειγμα λογικού συμπερασμού· αρχικά εμφανίζει
+   `unsats=1` λόγω ενός εσφαλμένου αξιώματος και μετά την αφαίρεσή του
+   `unsats=0`.
+
 ---
 
 ## 📦 Προ-ενσωματωμένες Οντολογίες

@@ -1,0 +1,7 @@
+@prefix ex: <http://example.com/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:VIPCustomer rdfs:subClassOf ex:Customer .
+ex:NonCustomer rdfs:subClassOf [ owl:complementOf ex:Customer ] .
+ex:VIPCustomer rdfs:subClassOf ex:NonCustomer .
