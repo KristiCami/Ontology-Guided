@@ -57,6 +57,23 @@ The diagram below zooms into the repair cycle from detecting a real violation to
 4. **Competency Questions** – ποσοστό επιτυχίας σε SPARQL `ASK` queries που εκφράζουν απαιτήσεις του domain.
 5. **Repair Efficiency** – πόσες επαναλήψεις χρειάζονται κατά μέσο όρο για να επιτευχθεί συμμόρφωση.
 
+### Repair efficiency example
+
+Ο φάκελος `evaluation/repair_samples/` περιέχει μικρά JSON αρχεία με
+ενδεικτικά στατιστικά βρόχου επιδιόρθωσης. Εκτελέστε:
+
+```bash
+python3 evaluation/repair_efficiency_example.py
+```
+
+Η έξοδος εμφανίζει την κατανομή των επαναλήψεων μέχρι την πρώτη
+συμμόρφωση και τον μέσο αριθμό επαναλήψεων. Παράδειγμα:
+
+```
+Distribution: {'1': 1, '2': 1, '3': 0, '>3': 1}
+Mean iterations: 3.00
+```
+
 ## 🚀 Γρήγορη Εκκίνηση
 
 1. **Εγκατάσταση βιβλιοθηκών**
