@@ -383,6 +383,12 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         help="JSON list with setting dictionaries",
     )
     parser.add_argument(
+        "--settings-file",
+        type=str,
+        default=None,
+        help="Path to JSON file with setting dictionaries",
+    )
+    parser.add_argument(
         "--repeats", type=int, default=1, help="Number of runs per configuration"
     )
     parser.add_argument(
@@ -453,7 +459,9 @@ def main() -> None:  # pragma: no cover - CLI wrapper
 
     pairs = [parse_pair(p) for p in args.pairs]
 
-    if args.settings:
+    if args.settings_file:
+        settings_list = json.load(open(args.settings_file))
+    elif args.settings:
         settings_list = json.loads(args.settings)
     else:
         settings_list = [
