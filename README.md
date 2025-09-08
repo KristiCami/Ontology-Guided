@@ -300,6 +300,20 @@ python -m evaluation.run_benchmark \
     --settings '[{"name":"table1","use_terms":true,"validate":true,"ontologies":["gold/atm_gold.ttl","ontologies/rbo.ttl","ontologies/lexical.ttl"]}]'
 ```
 
+Εναλλακτικά, οι ρυθμίσεις μπορούν να αποθηκευτούν σε αρχείο JSON και να φορτωθούν με την επιλογή `--settings-file`:
+
+```bash
+python -m evaluation.run_benchmark \
+    --pairs "data/requirements.jsonl:gold/atm_gold.ttl" \
+    --settings-file custom_settings.json
+```
+
+όπου το `custom_settings.json` μπορεί να περιέχει, για παράδειγμα:
+
+```json
+[{"name": "table1", "use_terms": true, "validate": true}]
+```
+
 ### Mini Evaluation Example
 
 Για ένα μίνι παράδειγμα, χρησιμοποιήστε τα αρχεία στον φάκελο `evaluation` που ξεκινούν με `mini_`.
