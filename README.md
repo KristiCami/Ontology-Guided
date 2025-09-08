@@ -15,30 +15,6 @@ Demo Url: https://kristitsami.pythonanywhere.com/
 > Αναπτύχθηκε στο πλαίσιο μεταπτυχιακής διπλωματικής εργασίας στην Τεχνητή Νοημοσύνη.
 
 ---
-
-## 📂 Δομή Αρχείων
-
-```
-Ontology-Guided/
-├── ontology_guided/         # Python package με τον βασικό κώδικα
-│   ├── __init__.py
-│   ├── data_loader.py       # Φόρτωση και προεπεξεργασία κειμένων
-│   ├── llm_interface.py     # Επικοινωνία με το LLM (π.χ. GPT-4)
-│   ├── ontology_builder.py  # Ενοποίηση Turtle σε αρχείο OWL/TTL (υποστηρίζει `lexical_namespace` για συνώνυμα)
-│   ├── repair_loop.py       # Επαναληπτική επιδιόρθωση με LLM
-│   └── validator.py         # SHACL έλεγχος ορθότητας
-├── scripts/                 # Εκτελέσιμα βοηθητικά scripts
-│   ├── main.py              # Ενοποιημένο pipeline
-│   ├── generate_examples.py # Δημιουργία παραδειγμάτων
-│   └── web_app.py           # Απλή web διεπαφή
-├── tests/                   # Μονάδες ελέγχου
-├── demo.txt                 # Δείγμα απαιτήσεων
-├── shapes.ttl               # Κανόνες SHACL
-├── requirements.txt         # Εξαρτήσεις Python
-└── README.md
-```
-
----
 ## 🔄 OG‑NSD Pipeline
 
 ![OG‑NSD Pipeline](docs/pipeline.svg)
