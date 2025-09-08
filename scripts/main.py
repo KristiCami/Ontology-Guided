@@ -96,6 +96,8 @@ def run_pipeline(
     ontologies=None,
     ontology_dir=None,
     model="gpt-4",
+    backend: str = "openai",
+    model_path: Optional[str] = None,
     temperature: float = 0.0,
     examples=None,
     *,
@@ -123,7 +125,10 @@ def run_pipeline(
 
     Parameters mirror the command line flags used in ``main``. The function now
     returns a dictionary describing the intermediate artefacts so callers such
-    as the web interface can display each stage to the user. When ``load_rbo``
+    as the web interface can display each stage to the user. The ``backend``
+    argument selects the LLM provider (``openai`` or ``llama``) and
+    ``model_path`` can override the model name for local backends. When
+    ``load_rbo``
     or ``load_lexical`` are ``True``, the predefined ontology files at
     ``RBO_ONTOLOGY_PATH`` and ``LEXICAL_ONTOLOGY_PATH`` are included
     automatically.  ``ontology_dir`` allows specifying a directory from which
@@ -139,8 +144,8 @@ def run_pipeline(
     provided they must be disjoint, otherwise a ``RuntimeError`` is raised.
     """
     load_dotenv()
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
+    api_key = os.getenv("OPENAI_API_KEY") if backend == "openai" else ""
+    if backend == "openai" and not api_key:
         raise RuntimeError("Set OPENAI_API_KEY in .env")
 
     pipeline = {}
@@ -234,6 +239,8 @@ def run_pipeline(
     llm = LLMInterface(
         api_key=api_key,
         model=model,
+        backend=backend,
+        model_path=model_path,
         temperature=temperature,
         examples=examples,
         use_retrieval=use_retrieval,
@@ -434,6 +441,7 @@ def run_pipeline(
                 base_iri=base_iri,
                 allowed_terms=initial_terms,
             )
+            repairer.llm = llm
             repaired_ttl, repaired_report, violations, stats = repairer.run(
                 reason=reason, inference=inference
             )
@@ -463,7 +471,18 @@ def main():
     )
     parser.add_argument("--rbo", action="store_true", help="Include the RBO ontology")
     parser.add_argument("--lexical", action="store_true", help="Include the lexical ontology")
-    parser.add_argument("--model", default="gpt-4", help="OpenAI model")
+    parser.add_argument("--model", default="gpt-4", help="Model name")
+    parser.add_argument(
+        "--backend",
+        default="openai",
+        choices=["openai", "llama"],
+        help="LLM backend to use",
+    )
+    parser.add_argument(
+        "--model-path",
+        default=None,
+        help="Local model path or identifier for llama backend",
+    )
     parser.add_argument(
         "--temperature",
         type=float,
@@ -618,6 +637,8 @@ def main():
             ontologies=args.ontologies,
             ontology_dir=args.ontology_dir,
             model=args.model,
+            backend=args.backend,
+            model_path=args.model_path,
             temperature=args.temperature,
             examples=examples,
             repair=args.repair,
