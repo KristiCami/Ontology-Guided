@@ -188,6 +188,36 @@ Mean iterations: 3.00
    `unsats=1` λόγω ενός εσφαλμένου αξιώματος και μετά την αφαίρεσή του
    `unsats=0`.
 
+## Using LLaMA locally
+
+1. **Λήψη βαρών**  
+   Αποδεχθείτε τους όρους χρήσης του μοντέλου και κατεβάστε τα αρχεία LLaMA
+   (π.χ. `Llama-2-7b`) σε έναν τοπικό φάκελο.
+2. **Μετατροπή σε μορφή Hugging Face**  
+   Χρησιμοποιήστε το script των `transformers` για να μετατρέψετε τα αρχικά
+   βάρη στο φορμάτης Hugging Face:
+   ```bash
+   python -m transformers.models.llama.convert_llama_weights_to_hf \
+       --input_dir /path/to/raw_weights --model_size 7B \
+       --output_dir /path/to/weights
+   ```
+3. **Εκτέλεση με τοπικά βάρη**  
+   Τρέξτε το pipeline δίνοντας backend και μονοπάτι του μοντέλου:
+   ```bash
+   python3 scripts/main.py --backend llama --model-path /path/to/weights
+   ```
+
+### Απαιτήσεις hardware
+
+- Το μοντέλο 7B χρειάζεται περίπου 8 GB VRAM (ή ~32 GB RAM για εκτέλεση σε
+  CPU). Μεγαλύτερα μοντέλα απαιτούν αναλογικά περισσότερη μνήμη.
+
+### Quantization
+
+- Για περιορισμένους πόρους, προτείνεται quantization 8‑bit ή 4‑bit
+  μέσω `bitsandbytes` ή χρήση `llama.cpp` για μετατροπή σε `ggml` βάρη και
+  εκτέλεση σε CPU.
+
 ---
 
 ## 📦 Προ-ενσωματωμένες Οντολογίες
