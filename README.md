@@ -82,10 +82,25 @@ Mean iterations: 3.00
    python3 -m spacy download en_core_web_sm
    ```
 
-2. **Ρύθμιση κλειδιού API**
+2. **Λήψη βαρών LLaMA**
+   Οι βιβλιοθήκες `transformers`, `accelerate`, `safetensors` και `sentencepiece`
+   εγκαθίστανται στο προηγούμενο βήμα.
+   - *Hugging Face*: αποδεχθείτε τους όρους χρήσης του μοντέλου και εκτελέστε:
+     ```bash
+     huggingface-cli login
+     git lfs install
+     huggingface-cli download meta-llama/Llama-2-7b-hf --local-dir models/llama-2-7b
+     ```
+   - *llama.cpp* (εναλλακτικά):
+     ```bash
+     pip install llama-cpp-python
+     python3 -m llama_cpp.download --model llama-2-7b
+     ```
+
+3. **Ρύθμιση κλειδιού API**
    Δημιουργήστε αρχείο `.env` με την μεταβλητή `OPENAI_API_KEY` για να μπορεί το LLM να κληθεί.
 
-3. **Εκτέλεση ενοποιημένου pipeline**
+4. **Εκτέλεση ενοποιημένου pipeline**
    ```bash
    python3 scripts/main.py --inputs demo.txt --shapes shapes.ttl --reason --repair
    ```
@@ -134,7 +149,7 @@ Mean iterations: 3.00
    Η προαιρετική σημαία `--reason` τρέχει τον ενσωματωμένο reasoner της OWLready2 πριν τον έλεγχο SHACL.
    Για να λειτουργήσει, απαιτείται εγκατεστημένο Java (π.χ. OpenJDK).
 
-4. **Αυτόματη δημιουργία παραδειγμάτων**
+5. **Αυτόματη δημιουργία παραδειγμάτων**
    ```bash
    python3 scripts/generate_examples.py
    ```
