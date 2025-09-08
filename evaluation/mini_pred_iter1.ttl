@@ -1,8 +1,22 @@
 @prefix ex: <http://example.com/mini#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:performedBy rdfs:domain ex:Transaction ;
+  rdfs:range ex:Customer .
+
+ex:Withdrawal rdfs:subClassOf ex:Transaction .
 
 ex:w1 a ex:Withdrawal ;
-  ex:performedBy ex:atm1 ;
+  ex:performedBy ex:c1 ;
   ex:hasAmount "100"^^xsd:decimal .
+
+ex:w2 a ex:Withdrawal ;
+  ex:hasAmount "50"^^xsd:decimal .
+
+ex:w3 a ex:Withdrawal ;
+  ex:performedBy ex:atm1 .
+
+ex:c1 a ex:Customer .
 
 ex:atm1 a ex:ATM .
