@@ -462,7 +462,13 @@ def main() -> None:  # pragma: no cover - CLI wrapper
     if args.settings_file:
         settings_list = json.load(open(args.settings_file))
     elif args.settings:
-        settings_list = json.loads(args.settings)
+        try:
+            settings_list = json.loads(args.settings)
+        except json.JSONDecodeError as exc:
+            raise argparse.ArgumentTypeError(
+                "Invalid JSON for --settings. JSON must be valid; "
+                "for complex configurations, use --settings-file."
+            ) from exc
     else:
         settings_list = [
             {"name": "table1", "use_terms": True, "validate": True},

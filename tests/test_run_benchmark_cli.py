@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 
+import argparse
 import pytest
 
 import evaluation.run_benchmark as rb
@@ -144,3 +145,23 @@ def test_cli_rejects_overlap(monkeypatch, tmp_path):
     monkeypatch.setattr(sys, "argv", argv)
     with pytest.raises(ValueError):
         rb.main()
+
+
+def test_cli_rejects_invalid_json(monkeypatch, tmp_path):
+    argv = [
+        "run_benchmark.py",
+        "--pairs",
+        "req:gold:shapes",
+        "--settings",
+        "{",
+        "--repeats",
+        "1",
+        "--output-dir",
+        str(tmp_path),
+    ]
+    monkeypatch.setattr(sys, "argv", argv)
+    with pytest.raises(argparse.ArgumentTypeError) as exc_info:
+        rb.main()
+    msg = str(exc_info.value)
+    assert "JSON must be valid" in msg
+    assert "--settings-file" in msg
