@@ -1,0 +1,24 @@
+@prefix ex: <http://example.com/mini#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Individuals
+ex:c1 a ex:Customer .
+ex:e1 a ex:Employee .
+ex:e2 a ex:Employee .
+
+# Withdrawals fully repaired
+ex:w1 a ex:Withdrawal ;
+  ex:performedBy ex:c1 ;
+  ex:hasAmount "50"^^xsd:decimal .
+
+ex:w2 a ex:Withdrawal ;
+  ex:performedBy ex:c1 ;
+  ex:hasAmount "10"^^xsd:decimal .
+
+ex:w3 a ex:Withdrawal ;
+  ex:performedBy ex:c1 ;
+  ex:hasAmount "30"^^xsd:decimal .
+
+ex:w4 a ex:Withdrawal ;
+  ex:performedBy ex:c1 ;
+  ex:hasAmount "40"^^xsd:decimal .
