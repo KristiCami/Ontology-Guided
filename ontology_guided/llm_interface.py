@@ -111,23 +111,41 @@ class LLMInterface:
         self,
         api_key: str,
         model: str = "gpt-4",
+        *,
+        backend: str = "openai",
+        model_path: Optional[str] = None,
+        device: Optional[str] = None,
         cache_dir: Optional[str] = None,
         temperature: float = 0.0,
+        max_new_tokens: int = 512,
         examples: Optional[Union[List[Dict[str, str]], str, Path]] = None,
-        *,
         use_retrieval: bool = False,
         dev_pool: Optional[Union[List[Dict[str, str]], str, Path]] = None,
         retrieve_k: int = 3,
         prompt_log: Optional[Union[str, Path]] = None,
     ):
-        openai.api_key = api_key
-        self.model = model
+        self.backend = backend
+        self.temperature = temperature
+        self.max_new_tokens = max_new_tokens
+        if backend == "openai":
+            openai.api_key = api_key
+            self.model = model
+        elif backend == "llama":
+            from transformers import AutoTokenizer, AutoModelForCausalLM
+            import torch
+
+            model_name = model_path or model
+            self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+            self.model = AutoModelForCausalLM.from_pretrained(model_name)
+            self.model.to(self.device)
+        else:
+            raise ValueError(f"Unsupported backend: {backend}")
         self.cache_dir = Path(
             cache_dir or Path(__file__).resolve().parent.parent / "cache"
         )
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.logger = logging.getLogger(__name__)
-        self.temperature = temperature
         if isinstance(examples, (str, Path)):
             with open(examples, "r", encoding="utf-8") as f:
                 examples = json.load(f)
@@ -232,6 +250,23 @@ class LLMInterface:
         with path.open("w") as f:
             json.dump({"result": result}, f)
 
+    def _call_llama(self, messages: List[Dict[str, str]]) -> str:
+        import torch
+
+        prompt = "\n".join(
+            f"{m['role']}: {m['content']}" for m in messages
+        ) + "\nassistant:"
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
+        with torch.no_grad():
+            output = self.model.generate(
+                **inputs,
+                max_new_tokens=self.max_new_tokens,
+                do_sample=self.temperature > 0,
+                temperature=self.temperature,
+            )
+        generated = output[0][inputs["input_ids"].shape[-1]:]
+        return self.tokenizer.decode(generated, skip_special_tokens=True)
+
     def generate_owl_sync(
         self,
         sentences: List[Union[str, Dict[str, Any]]],
@@ -279,12 +314,16 @@ class LLMInterface:
             current_delay = retry_delay
             while True:
                 try:
-                    resp = openai.chat.completions.create(
-                        model=self.model,
-                        temperature=self.temperature,
-                        messages=messages,
-                    )
-                except (openai.OpenAIError, httpx.HTTPError) as e:
+                    if self.backend == "openai":
+                        resp = openai.chat.completions.create(
+                            model=self.model,
+                            temperature=self.temperature,
+                            messages=messages,
+                        )
+                        raw = resp.choices[0].message.content
+                    else:
+                        raw = self._call_llama(messages)
+                except Exception as e:
                     attempts += 1
                     self.logger.warning("LLM call failed: %s", e)
                     if attempts > max_retries:
@@ -298,7 +337,6 @@ class LLMInterface:
                     current_delay = min(current_delay * 2, max_retry_delay)
                     continue
 
-                raw = resp.choices[0].message.content
                 match = re.search(r"```turtle\s*(.*?)```", raw, re.S)
                 turtle_code = match.group(1).strip() if match else raw.strip()
 
@@ -399,12 +437,16 @@ class LLMInterface:
             current_delay = retry_delay
             while True:
                 try:
-                    resp = await openai.chat.completions.create(
-                        model=self.model,
-                        temperature=self.temperature,
-                        messages=messages,
-                    )
-                except (openai.OpenAIError, httpx.HTTPError) as e:
+                    if self.backend == "openai":
+                        resp = await openai.chat.completions.create(
+                            model=self.model,
+                            temperature=self.temperature,
+                            messages=messages,
+                        )
+                        raw = resp.choices[0].message.content
+                    else:
+                        raw = await asyncio.to_thread(self._call_llama, messages)
+                except Exception as e:
                     attempts += 1
                     self.logger.warning("LLM call failed: %s", e)
                     if attempts > max_retries:
@@ -418,7 +460,6 @@ class LLMInterface:
                     current_delay = min(current_delay * 2, max_retry_delay)
                     continue
 
-                raw = resp.choices[0].message.content
                 match = re.search(r"```turtle\s*(.*?)```", raw, re.S)
                 turtle_code = match.group(1).strip() if match else raw.strip()
 
