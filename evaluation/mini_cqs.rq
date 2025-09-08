@@ -18,3 +18,20 @@ ASK WHERE {
     }
   }
 }
+
+PREFIX ex: <http://example.com/mini#>
+ASK WHERE {
+  FILTER NOT EXISTS {
+    ?d a ex:Deposit ;
+       ex:dispensesCashTo ?c .
+  }
+}
+
+PREFIX ex: <http://example.com/mini#>
+ASK WHERE {
+  FILTER NOT EXISTS {
+    ?atm a ex:ATM .
+    FILTER NOT EXISTS { ?atm ex:hasCard ?card . }
+    FILTER NOT EXISTS { ?atm ex:displays ex:InitialDisplay . }
+  }
+}

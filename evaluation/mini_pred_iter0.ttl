@@ -1,6 +1,7 @@
 @prefix ex: <http://example.com/mini#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 ex:performedBy rdfs:domain ex:Transaction ;
   rdfs:range ex:Person .
@@ -15,4 +16,23 @@ ex:w3 a ex:Withdrawal ;
 
 ex:p1 a ex:Person .
 
-ex:atm1 a ex:ATM .
+ex:atm1 a ex:ATM ;
+  ex:displays ex:InitialDisplay .
+
+ex:dispensesCashTo a owl:ObjectProperty ;
+  rdfs:domain ex:Transaction ;
+  rdfs:range ex:Customer .
+
+ex:hasCard a owl:ObjectProperty ;
+  rdfs:domain ex:ATM ;
+  rdfs:range ex:Card .
+
+ex:displays a owl:ObjectProperty ;
+  rdfs:domain ex:ATM ;
+  rdfs:range ex:Display .
+
+ex:ATM a owl:Class .
+ex:Card a owl:Class .
+ex:Display a owl:Class .
+ex:Deposit rdfs:subClassOf ex:Transaction .
+ex:InitialDisplay a ex:Display .

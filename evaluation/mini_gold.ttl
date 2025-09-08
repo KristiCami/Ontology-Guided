@@ -16,8 +16,28 @@ ex:hasAmount a owl:DatatypeProperty ;
   rdfs:domain ex:Transaction ;
   rdfs:range xsd:decimal .
 
+ex:dispensesCashTo a owl:ObjectProperty ;
+  rdfs:domain ex:Transaction ;
+  rdfs:range ex:Customer .
+
+ex:hasCard a owl:ObjectProperty ;
+  rdfs:domain ex:ATM ;
+  rdfs:range ex:Card .
+
+ex:displays a owl:ObjectProperty ;
+  rdfs:domain ex:ATM ;
+  rdfs:range ex:Display .
+
+ex:ATM a owl:Class .
+ex:Card a owl:Class .
+ex:Display a owl:Class .
+ex:Deposit rdfs:subClassOf ex:Transaction .
+ex:InitialDisplay a ex:Display .
+
 # Example individuals
 ex:c1 a ex:Customer .
 ex:w1 a ex:Withdrawal ;
   ex:performedBy ex:c1 ;
   ex:hasAmount "100"^^xsd:decimal .
+ex:atm1 a ex:ATM ;
+  ex:displays ex:InitialDisplay .
