@@ -106,3 +106,15 @@ print(metrics)
 ```
 
 Η τυποποιημένη παρουσίαση των εντολών επιτρέπει την άμεση επανάληψη των μετρήσεων από οποιοδήποτε μέλος της ομάδας ή εξωτερικό αξιολογητή.
+
+### 7.4 Αυτόματο παράδειγμα με αποθήκευση απαντήσεων
+
+```bash
+python scripts/run_atm_examples.py \
+    --terms atm:Withdrawal atm:Transaction atm:Customer \
+    --depth 1 \
+    --output-dir results/examples/withdrawal_demo \
+    --tag gold_vs_oper
+```
+
+Το script δημιουργεί τα snippets, εκτελεί SHACL/CQs και γράφει αναλυτικά reports (JSON & Markdown) στον επιλεγμένο φάκελο ώστε οι απαντήσεις να τεκμηριώνονται μόνιμα.【F:scripts/run_atm_examples.py†L76-L174】
