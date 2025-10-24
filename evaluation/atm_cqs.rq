@@ -1,15 +1,30 @@
 PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-# Every Withdrawal has a non-negative amount
+# Every withdrawal records a non-negative requested amount
 ASK {
   FILTER NOT EXISTS {
     ?w a atm:Withdrawal ;
-       atm:amount ?amt .
+       atm:requestedAmount ?amt .
     FILTER (?amt < 0)
   }
 }
 
-# ATMs accept cash cards
+# Every withdrawal is linked to a customer and an account
 ASK {
-  atm:ATM atm:accepts ?card .
+  FILTER NOT EXISTS {
+    ?w a atm:Withdrawal .
+    FILTER NOT EXISTS { ?w atm:performedBy ?c . ?c a atm:Customer . }
+  }
+  FILTER NOT EXISTS {
+    ?w a atm:Withdrawal .
+    FILTER NOT EXISTS { ?w atm:onAccount ?a . ?a a atm:Account . }
+  }
+}
+
+# Banks issue cash cards that are typed as cash cards
+ASK {
+  ?b a atm:Bank ;
+     atm:issuesCard ?cc .
+  ?cc a atm:CashCard .
 }

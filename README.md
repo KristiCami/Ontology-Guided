@@ -254,6 +254,7 @@ python3 scripts/main.py \
 ```
 data/requirements.jsonl   # όλες οι απαιτήσεις με πεδία sentence_id
 gold/atm_gold.ttl         # χρυσή οντολογία (ή άλλα αρχεία στο gold/)
+gold/shapes_atm.ttl       # SHACL περιορισμοί για έλεγχο δομής
 splits/dev.txt            # sentence_id για παραδείγματα few-shot
 splits/test.txt           # sentence_id που αξιολογούνται
 ```
@@ -262,6 +263,10 @@ splits/test.txt           # sentence_id που αξιολογούνται
 χρησιμοποιούνται στο χρυσό αρχείο και στα αρχεία split.  Οι προτάσεις του
 `dev.txt` αξιοποιούνται ως παραδείγματα στο prompt και δεν πρέπει να
 εμφανίζονται στο `test.txt`.
+
+Για πληρέστερα σενάρια υπάρχει η λειτουργική οντολογία
+`ontologies/atm_operational.ttl`, η οποία περιλαμβάνει όλα τα states,
+μηνύματα και περιορισμούς που δεν χρησιμοποιούνται στην αξιολόγηση.
 
 ### Dev παραδείγματα και Retrieval
 
@@ -290,13 +295,13 @@ python3 scripts/main.py --inputs data/requirements.jsonl --shapes shapes.ttl \
 ```bash
 # Υπολογισμός μετρικών με dev παραδείγματα και test split
 python3 evaluation/compare_metrics.py data/requirements.jsonl gold/atm_gold.ttl \
-    --shapes shapes.ttl --split splits/test.txt --dev splits/dev.txt
+    --shapes gold/shapes_atm.ttl --split splits/test.txt --dev splits/dev.txt
 ```
 
 ```bash
 # Benchmark με retrieval και test split
 python3 evaluation/run_benchmark.py --pairs "data/requirements.jsonl:gold/atm_gold.ttl" \
-    --splits splits/test.txt --use-retrieval --dev-pool data/dev_examples.json \
+    --splits splits/test.txt --shapes gold/shapes_atm.ttl --use-retrieval --dev-pool data/dev_examples.json \
     --prompt-log results/prompts.log
 ```
 
@@ -325,7 +330,7 @@ python3 evaluation/run_benchmark.py --pairs "data/requirements.jsonl:gold/atm_go
 
 Οι οντολογίες ανά domain καθορίζονται εύκολα μέσω `--ontologies` για
 μεμονωμένα αρχεία ή `--ontology-dir` για φόρτωση όλων των `.ttl` από έναν
-φάκελο. Το χρυσό TBox `evaluation/atm_gold.ttl` περιλαμβάνεται εξ ορισμού, αλλά
+φάκελο. Το χρυσό TBox `gold/atm_gold.ttl` περιλαμβάνεται εξ ορισμού, αλλά
 όταν χρησιμοποιείται `--ontology-dir` πρέπει να προστίθεται ρητά. Παράδειγμα:
 
 ```bash
