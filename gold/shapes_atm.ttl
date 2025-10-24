@@ -1,0 +1,78 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+atm:WithdrawalShape a sh:NodeShape ;
+  sh:targetClass atm:Withdrawal ;
+  sh:property [
+    sh:path atm:performedBy ;
+    sh:class atm:Customer ;
+    sh:minCount 1
+  ] ;
+  sh:property [
+    sh:path atm:onAccount ;
+    sh:class atm:Account ;
+    sh:minCount 1
+  ] ;
+  sh:property [
+    sh:path atm:requestedAmount ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0
+  ] ;
+  sh:property [
+    sh:path atm:dispensedAmount ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0
+  ] .
+
+atm:CashCardShape a sh:NodeShape ;
+  sh:targetClass atm:CashCard ;
+  sh:property [
+    sh:path atm:serialNumber ;
+    sh:datatype xsd:string ;
+    sh:minCount 1
+  ] ;
+  sh:property [
+    sh:path atm:bankCode ;
+    sh:datatype xsd:string ;
+    sh:minCount 1
+  ] ;
+  sh:property [
+    sh:path [ sh:inversePath atm:ownsCard ] ;
+    sh:minCount 1 ;
+    sh:class atm:Customer
+  ] .
+
+atm:PerTransactionLimitShape a sh:NodeShape ;
+  sh:targetClass atm:Withdrawal ;
+  sh:property [
+    sh:path atm:requestedAmount ;
+    sh:datatype xsd:decimal ;
+    sh:maxInclusive 1000
+  ] .
+
+atm:AuthorizationShape a sh:NodeShape ;
+  sh:targetClass atm:Transaction ;
+  sh:property [
+    sh:path atm:authorizedBy ;
+    sh:class atm:Authorization ;
+    sh:minCount 1
+  ] ;
+  sh:property [
+    sh:path atm:transactionTimestamp ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1
+  ] .
+
+atm:ATMInstallationShape a sh:NodeShape ;
+  sh:targetClass atm:ATM ;
+  sh:property [
+    sh:path atm:operatedBy ;
+    sh:class atm:Bank ;
+    sh:minCount 1
+  ] ;
+  sh:property [
+    sh:path atm:installedAt ;
+    sh:class atm:BankBranch ;
+    sh:minCount 1
+  ] .

@@ -27,7 +27,7 @@ def test_compare_metrics(monkeypatch, tmp_path):
             "<http://lod.csd.auth.gr/atm/atm.ttl> "
             "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> "
             "<http://www.w3.org/2002/07/owl#Ontology> .\n"
-            "<http://lod.csd.auth.gr/atm/atm.ttl#accepts> "
+            "<http://lod.csd.auth.gr/atm/atm.ttl#operatedBy> "
             "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> "
             "<http://www.w3.org/2002/07/owl#ObjectProperty> ."
         )
@@ -59,13 +59,13 @@ def test_compare_metrics(monkeypatch, tmp_path):
 
     root = pathlib.Path(__file__).resolve().parent.parent
     requirements = root / "evaluation" / "atm_requirements.jsonl"
-    gold = root / "evaluation" / "atm_gold.ttl"
-    shapes = root / "shapes.ttl"
+    gold = root / "gold" / "atm_gold.ttl"
+    shapes = root / "gold" / "shapes_atm.ttl"
 
     metrics = compare_metrics(str(requirements), str(gold), str(shapes))
 
-    # overall precision/recall should reflect triple level metrics
-    assert metrics["precision"] == pytest.approx(1.0)
+    # overall precision is diluted by categories without matches but remains > 0
+    assert metrics["precision"] == pytest.approx(0.5)
 
     gold_graph = Graph()
     gold_graph.parse(str(gold), format="turtle")

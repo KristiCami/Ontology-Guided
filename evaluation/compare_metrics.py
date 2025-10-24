@@ -3,7 +3,7 @@
 Example
 -------
 python -m evaluation.compare_metrics \
-    evaluation/atm_requirements.jsonl evaluation/atm_gold.ttl
+    evaluation/atm_requirements.jsonl gold/atm_gold.ttl
 """
 
 import argparse

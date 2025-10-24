@@ -9,7 +9,7 @@ shot examples from the dev split are loaded automatically.
 Example
 -------
 python -m evaluation.run_benchmark \
-    --pairs "evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl" \
+    --pairs "evaluation/atm_requirements.jsonl:gold/atm_gold.ttl" \
     --cqs evaluation/atm_cqs.rq \
     --base-iri http://lod.csd.auth.gr/atm/atm.ttl# \
     --repeats 1
@@ -373,7 +373,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
     parser.add_argument(
         "--pairs",
         nargs="+",
-        default=["evaluation/atm_requirements.jsonl:evaluation/atm_gold.ttl"],
+        default=["evaluation/atm_requirements.jsonl:gold/atm_gold.ttl"],
         help="List of requirements:gold[:shapes] triples",
     )
     parser.add_argument(
@@ -483,7 +483,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         ontology_list.extend(str(p) for p in sorted(dir_path.glob("*.ttl")))
     if not ontology_list:
         ontology_list = [
-            "evaluation/atm_gold.ttl",
+            "gold/atm_gold.ttl",
             "ontologies/lexical.ttl",
             "ontologies/lexical_atm.ttl",
         ]
