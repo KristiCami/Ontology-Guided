@@ -1,30 +1,163 @@
+# Core ATM classes are available in the ontology
 PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+ASK {
+  FILTER NOT EXISTS {
+    VALUES ?cls {
+      atm:ATM atm:Bank atm:Customer atm:Account atm:CashCard
+      atm:Transaction atm:Withdrawal atm:Deposit atm:Authorization
+    }
+    FILTER NOT EXISTS { ?cls a owl:Class . }
+  }
+}
+
+# Withdrawals specialise the transaction concept (directly or indirectly)
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  atm:Withdrawal rdfs:subClassOf+ atm:Transaction .
+}
+
+# Deposits are also treated as transactions
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  atm:Deposit rdfs:subClassOf+ atm:Transaction .
+}
+
+# ATMs connect either to transactions (gold) or to cash cards (operational)
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  BIND(EXISTS {
+    atm:handlesTransaction rdfs:domain atm:ATM ;
+                           rdfs:range atm:Transaction .
+  } AS ?handlesTransactions)
+  BIND(EXISTS {
+    atm:accepts rdfs:domain atm:ATM ;
+                rdfs:range atm:CashCard .
+  } AS ?acceptsCards)
+  FILTER (?handlesTransactions || ?acceptsCards)
+}
+
+# ATMs are associated with banks either via operations or ownership
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  BIND(EXISTS {
+    atm:operatedBy rdfs:domain atm:ATM ;
+                   rdfs:range atm:Bank .
+  } AS ?operatedBy)
+  BIND(EXISTS {
+    atm:belongsToBank rdfs:domain atm:ATM ;
+                      rdfs:range [ owl:onProperty atm:belongsToBank ;
+                                   owl:allValuesFrom atm:Bank
+                                 ] .
+  } AS ?belongsTo)
+  FILTER (?operatedBy || ?belongsTo)
+}
+
+# Banks maintain customer relationships
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  BIND(EXISTS {
+    atm:maintainsAccount rdfs:domain atm:Bank ;
+                        rdfs:range atm:Account .
+  } AS ?maintainsAccount)
+  BIND(EXISTS {
+    atm:hasCustomer rdfs:domain atm:Bank .
+  } AS ?hasCustomers)
+  FILTER (?maintainsAccount || ?hasCustomers)
+}
+
+# Customers are linked to cash cards in both ontologies
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  BIND(EXISTS {
+    atm:ownsCard rdfs:domain atm:Customer ;
+                 rdfs:range atm:CashCard .
+  } AS ?ownsCard)
+  BIND(EXISTS {
+    atm:hasCashCard rdfs:domain atm:Customer ;
+                    rdfs:range atm:CashCard .
+  } AS ?hasCashCard)
+  FILTER (?ownsCard || ?hasCashCard)
+}
+
+# Customers or their accounts are linked together
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  BIND(EXISTS {
+    atm:hasAccount rdfs:domain atm:Customer ;
+                  rdfs:range atm:Account .
+  } AS ?customerAccounts)
+  BIND(EXISTS {
+    atm:isHold rdfs:domain atm:Account .
+  } AS ?accountHeldBy)
+  FILTER (?customerAccounts || ?accountHeldBy)
+}
+
+# Cash card bank codes are captured with an appropriate datatype
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
-# Every withdrawal records a non-negative requested amount
 ASK {
-  FILTER NOT EXISTS {
-    ?w a atm:Withdrawal ;
-       atm:requestedAmount ?amt .
-    FILTER (?amt < 0)
-  }
+  BIND(EXISTS { atm:bankCode rdfs:range xsd:string . } AS ?stringRange)
+  BIND(EXISTS { atm:bankCode rdfs:range xsd:integer . } AS ?integerRange)
+  BIND(EXISTS { atm:bankCode rdfs:domain atm:CashCard . } AS ?cashCardDomain)
+  BIND(EXISTS {
+    atm:bankCode rdfs:domain ?domain .
+    ?domain owl:unionOf ?union .
+  } AS ?unionDomain)
+  FILTER ((?stringRange || ?integerRange) && (?cashCardDomain || ?unionDomain))
 }
 
-# Every withdrawal is linked to a customer and an account
+# Transaction timestamps are captured as temporal datatypes
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 ASK {
-  FILTER NOT EXISTS {
-    ?w a atm:Withdrawal .
-    FILTER NOT EXISTS { ?w atm:performedBy ?c . ?c a atm:Customer . }
-  }
-  FILTER NOT EXISTS {
-    ?w a atm:Withdrawal .
-    FILTER NOT EXISTS { ?w atm:onAccount ?a . ?a a atm:Account . }
-  }
+  atm:transactionTimestamp rdfs:domain atm:Transaction .
+  BIND(EXISTS { atm:transactionTimestamp rdfs:range xsd:dateTime . } AS ?dateTimeRange)
+  BIND(EXISTS { atm:transactionTimestamp rdfs:range xsd:dateTimeStamp . } AS ?dateTimeStampRange)
+  FILTER (?dateTimeRange || ?dateTimeStampRange)
 }
 
-# Banks issue cash cards that are typed as cash cards
+# Transaction amounts are numeric in both versions
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 ASK {
-  ?b a atm:Bank ;
-     atm:issuesCard ?cc .
-  ?cc a atm:CashCard .
+  BIND(EXISTS {
+    atm:requestedAmount rdfs:domain atm:Transaction ;
+                      rdfs:range xsd:decimal .
+  } AS ?requestedAmount)
+  BIND(EXISTS {
+    atm:transactionAmount rdfs:range xsd:integer .
+  } AS ?transactionAmount)
+  FILTER (?requestedAmount || ?transactionAmount)
+}
+
+# Withdrawal-specific information is present
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+ASK {
+  BIND(EXISTS {
+    atm:dispensedAmount rdfs:domain atm:Withdrawal ;
+                        rdfs:range xsd:decimal .
+  } AS ?dispensedAmount)
+  BIND(EXISTS {
+    atm:transactionAmount rdfs:domain ?domain .
+    ?domain owl:unionOf/rdf:rest*/rdf:first ?member .
+    FILTER (?member = atm:ATMTransaction || ?member = atm:Transaction)
+  } AS ?transactionAmountDomain)
+  FILTER (?dispensedAmount || ?transactionAmountDomain)
 }
