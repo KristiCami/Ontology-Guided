@@ -161,3 +161,126 @@ ASK {
   } AS ?transactionAmountDomain)
   FILTER (?dispensedAmount || ?transactionAmountDomain)
 }
+
+# ATMs explicitly dispense cash
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  atm:dispenses rdfs:domain atm:ATM ;
+                rdfs:range atm:Money .
+}
+
+# ATM user interfaces capture both normal and error displays
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  atm:displays rdfs:domain atm:ATM ;
+               rdfs:range ?displayUnion .
+  ?displayUnion owl:unionOf ?list .
+  FILTER EXISTS { ?list rdf:rest*/rdf:first atm:NormalDisplay }
+  FILTER EXISTS { ?list rdf:rest*/rdf:first atm:ErrorDisplay }
+}
+
+# Resilience features include backup or main power supplies
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  BIND(EXISTS {
+    atm:hasBackUpPowerSupply rdfs:domain atm:ATM ;
+                             rdfs:range atm:PowerSupply .
+  } AS ?backup)
+  BIND(EXISTS {
+    atm:hasMainPowerSupply rdfs:domain atm:ATM ;
+                           rdfs:range atm:PowerSupply .
+  } AS ?main)
+  FILTER (?backup || ?main)
+}
+
+# Operational timings are captured for security-critical checks
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  BIND(EXISTS {
+    atm:hasCardVerificationTime rdfs:domain atm:ATM ;
+                                 rdfs:range atm:Time .
+  } AS ?cardVerification)
+  BIND(EXISTS {
+    atm:hasPinVerificationTime rdfs:domain atm:ATM ;
+                                rdfs:range atm:Time .
+  } AS ?pinVerification)
+  FILTER (?cardVerification && ?pinVerification)
+}
+
+# Bidirectional communication with the bank back-end is represented
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  BIND(EXISTS {
+    atm:fromBankComputer rdfs:range atm:BankComputer .
+  } AS ?fromBankComputer)
+  BIND(EXISTS {
+    atm:toBankComputer rdfs:range atm:BankComputer .
+  } AS ?toBankComputer)
+  BIND(EXISTS {
+    atm:toATM rdfs:range atm:ATM .
+  } AS ?toAtm)
+  FILTER (?fromBankComputer && ?toBankComputer && ?toAtm)
+}
+
+# ATM and bank systems update transactional metrics
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  atm:updates rdfs:range ?rangeNode .
+  ?rangeNode owl:unionOf ?union .
+  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:ATMtotalFundOfATM }
+  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:AccountBalanceOFAccount }
+}
+
+# Requirements modelling captures subject, verb, condition and else branches
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  BIND(EXISTS {
+    atm:subject rdfs:domain atm:BasicRequirement ;
+                rdfs:range atm:Subject .
+  } AS ?subject)
+  BIND(EXISTS {
+    atm:verb rdfs:domain atm:BasicRequirement ;
+             rdfs:range atm:Verb .
+  } AS ?verb)
+  BIND(EXISTS {
+    atm:condition rdfs:domain atm:ComplexRequirement ;
+                  rdfs:range atm:BasicRequirement .
+  } AS ?condition)
+  BIND(EXISTS {
+    atm:else rdfs:domain atm:ComplexRequirement ;
+             rdfs:range atm:BasicRequirement .
+  } AS ?else)
+  FILTER (?subject && ?verb && ?condition && ?else)
+}
+
+# Customers interacting with ATMs use both passwords and transaction amounts
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  atm:types rdfs:domain atm:Customer ;
+            rdfs:range ?rangeNode .
+  ?rangeNode owl:unionOf ?union .
+  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:PasswordOfCustomer }
+  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:TransactionAmountOfTransaction }
+}
+
+# ATM keypads are defined with explicit key components
+PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ASK {
+  atm:consistOfKeys rdfs:domain atm:Keypad ;
+                    rdfs:range atm:Keys .
+}
