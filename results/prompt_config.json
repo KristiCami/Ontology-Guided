@@ -1,5 +1,5 @@
 {
-  "prompt": "You convert NL ATM requirements into OWL ontologies expressed in Turtle.\nReturn only valid Turtle code with explicit @prefix declarations.\nUse only terms from the provided ALLOWED VOCAB.\nALLOWED VOCAB:\nClasses: :ATM, :ATMComponent, :Account, :Authorization, :BalanceInquiry, :Bank, :BankBranch, :BankNetwork, :CashCard, :Customer, :Deposit, :Message, :Transaction, :Withdrawal\nProperties: :authorizedBy, :bankCode, :communicatesMessage, :componentName, :connectsToNetwork, :dispensedAmount, :hasAccount, :hasComponent, :installedAt, :issuesCard, :locationDescription, :onAccount, :operatedBy, :ownsCard, :performedBy, :requestedAmount, :serialNumber, :transactionTimestamp",
+  "prompt": "You convert NL ATM requirements into OWL ontologies expressed in Turtle.\nReturn only valid Turtle code with explicit @prefix declarations.\nUse only terms from the provided ALLOWED VOCAB.\nALLOWED VOCAB:\nClasses: :ATM, :Account, :Authorization, :BalanceInquiry, :Bank, :CashCard, :Customer, :Deposit, :Message, :Transaction, :Withdrawal\nProperties: :authorizedBy, :bankCode, :communicates, :dispensedAmount, :handlesTransaction, :hasAccount, :issuesCard, :maintainsAccount, :messageCode, :onAccount, :operatedBy, :ownsCard, :performedBy, :requestedAmount, :serialNumber, :transactionTimestamp, :usesCard",
   "dev_sentence_ids": [
     "1",
     "2",
