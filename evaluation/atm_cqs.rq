@@ -1,4 +1,6 @@
 PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 # Every withdrawal records a non-negative requested amount
@@ -22,9 +24,65 @@ ASK {
   }
 }
 
-# Banks issue cash cards that are typed as cash cards
+# Withdrawals are modeled as transactions
 ASK {
-  ?b a atm:Bank ;
-     atm:issuesCard ?cc .
-  ?cc a atm:CashCard .
+  atm:Withdrawal rdfs:subClassOf atm:Transaction .
+}
+
+# Deposits and balance inquiries are transactions as well
+ASK {
+  atm:Deposit rdfs:subClassOf atm:Transaction .
+  atm:BalanceInquiry rdfs:subClassOf atm:Transaction .
+}
+
+# ATMs are operated by banks and handle transactions
+ASK {
+  atm:operatedBy rdfs:domain atm:ATM ;
+                 rdfs:range atm:Bank .
+  atm:handlesTransaction rdfs:domain atm:ATM ;
+                        rdfs:range atm:Transaction .
+}
+
+# Customers have accounts and own cards according to the model
+ASK {
+  atm:hasAccount rdfs:domain atm:Customer ;
+                 rdfs:range atm:Account .
+  atm:ownsCard rdfs:domain atm:Customer ;
+               rdfs:range atm:CashCard .
+}
+
+# Transactions capture the key participants and authorization step
+ASK {
+  atm:performedBy rdfs:domain atm:Transaction ;
+                  rdfs:range atm:Customer .
+  atm:onAccount rdfs:domain atm:Transaction ;
+                rdfs:range atm:Account .
+  atm:usesCard rdfs:domain atm:Transaction ;
+               rdfs:range atm:CashCard .
+  atm:authorizedBy rdfs:domain atm:Transaction ;
+                   rdfs:range atm:Authorization .
+}
+
+# Banks issue cash cards and maintain accounts
+ASK {
+  atm:issuesCard rdfs:domain atm:Bank ;
+                 rdfs:range atm:CashCard .
+  atm:maintainsAccount rdfs:domain atm:Bank ;
+                        rdfs:range atm:Account .
+}
+
+# Key data properties are typed with appropriate ranges
+ASK {
+  atm:requestedAmount rdfs:domain atm:Transaction ;
+                      rdfs:range xsd:decimal .
+  atm:dispensedAmount rdfs:domain atm:Withdrawal ;
+                      rdfs:range xsd:decimal .
+  atm:transactionTimestamp rdfs:domain atm:Transaction ;
+                           rdfs:range xsd:dateTime .
+  atm:serialNumber rdfs:domain atm:CashCard ;
+                   rdfs:range xsd:string .
+  atm:bankCode rdfs:domain atm:CashCard ;
+               rdfs:range xsd:string .
+  atm:messageCode rdfs:domain atm:Message ;
+                  rdfs:range xsd:string .
 }

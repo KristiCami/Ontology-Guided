@@ -5,8 +5,6 @@
 
 atm:ATM a owl:Class .
 atm:Bank a owl:Class .
-atm:BankBranch a owl:Class .
-atm:BankNetwork a owl:Class .
 atm:Customer a owl:Class .
 atm:Account a owl:Class .
 atm:CashCard a owl:Class .
@@ -19,23 +17,22 @@ atm:BalanceInquiry a owl:Class ;
   rdfs:subClassOf atm:Transaction .
 atm:Authorization a owl:Class .
 atm:Message a owl:Class .
-atm:ATMComponent a owl:Class .
 
 atm:operatedBy a owl:ObjectProperty ;
   rdfs:domain atm:ATM ;
   rdfs:range atm:Bank .
 
-atm:installedAt a owl:ObjectProperty ;
+atm:handlesTransaction a owl:ObjectProperty ;
   rdfs:domain atm:ATM ;
-  rdfs:range atm:BankBranch .
+  rdfs:range atm:Transaction .
 
-atm:connectsToNetwork a owl:ObjectProperty ;
-  rdfs:domain atm:ATM ;
-  rdfs:range atm:BankNetwork .
+atm:issuesCard a owl:ObjectProperty ;
+  rdfs:domain atm:Bank ;
+  rdfs:range atm:CashCard .
 
-atm:hasComponent a owl:ObjectProperty ;
-  rdfs:domain atm:ATM ;
-  rdfs:range atm:ATMComponent .
+atm:maintainsAccount a owl:ObjectProperty ;
+  rdfs:domain atm:Bank ;
+  rdfs:range atm:Account .
 
 atm:hasAccount a owl:ObjectProperty ;
   rdfs:domain atm:Customer ;
@@ -43,10 +40,6 @@ atm:hasAccount a owl:ObjectProperty ;
 
 atm:ownsCard a owl:ObjectProperty ;
   rdfs:domain atm:Customer ;
-  rdfs:range atm:CashCard .
-
-atm:issuesCard a owl:ObjectProperty ;
-  rdfs:domain atm:Bank ;
   rdfs:range atm:CashCard .
 
 atm:performedBy a owl:ObjectProperty ;
@@ -57,11 +50,15 @@ atm:onAccount a owl:ObjectProperty ;
   rdfs:domain atm:Transaction ;
   rdfs:range atm:Account .
 
+atm:usesCard a owl:ObjectProperty ;
+  rdfs:domain atm:Transaction ;
+  rdfs:range atm:CashCard .
+
 atm:authorizedBy a owl:ObjectProperty ;
   rdfs:domain atm:Transaction ;
   rdfs:range atm:Authorization .
 
-atm:communicatesMessage a owl:ObjectProperty ;
+atm:communicates a owl:ObjectProperty ;
   rdfs:domain atm:ATM ;
   rdfs:range atm:Message .
 
@@ -73,6 +70,10 @@ atm:dispensedAmount a owl:DatatypeProperty ;
   rdfs:domain atm:Withdrawal ;
   rdfs:range xsd:decimal .
 
+atm:transactionTimestamp a owl:DatatypeProperty ;
+  rdfs:domain atm:Transaction ;
+  rdfs:range xsd:dateTime .
+
 atm:serialNumber a owl:DatatypeProperty ;
   rdfs:domain atm:CashCard ;
   rdfs:range xsd:string .
@@ -81,14 +82,6 @@ atm:bankCode a owl:DatatypeProperty ;
   rdfs:domain atm:CashCard ;
   rdfs:range xsd:string .
 
-atm:transactionTimestamp a owl:DatatypeProperty ;
-  rdfs:domain atm:Transaction ;
-  rdfs:range xsd:dateTime .
-
-atm:locationDescription a owl:DatatypeProperty ;
-  rdfs:domain atm:BankBranch ;
-  rdfs:range xsd:string .
-
-atm:componentName a owl:DatatypeProperty ;
-  rdfs:domain atm:ATMComponent ;
+atm:messageCode a owl:DatatypeProperty ;
+  rdfs:domain atm:Message ;
   rdfs:range xsd:string .

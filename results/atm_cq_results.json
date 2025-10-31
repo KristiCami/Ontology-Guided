@@ -1,0 +1,12 @@
+{
+  "gold": {
+    "passed": 9,
+    "total": 10,
+    "pass_rate": 0.9
+  },
+  "operational": {
+    "passed": 0,
+    "total": 10,
+    "pass_rate": 0.0
+  }
+}
