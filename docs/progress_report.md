@@ -1,7 +1,7 @@
 # Πρόοδος Πειραμάτων Νευρο-Συμβολικού Συστήματος
 
 ## Εκτελεστική Περίληψη
-- Ολοκληρώθηκε η offline αξιολόγηση του ATM domain για τα βασικά σενάρια E1–E4 με χρήση του cache backend· τα αποτελέσματα έχουν εξαχθεί από τα CSV/JSON αρχεία που παράγονται από το `evaluation/run_benchmark.py`.
+- Ολοκληρώθηκε η offline αξιολόγηση του ATM domain για τα βασικά σενάρια E1–E4 με χρήση του cache backend τα αποτελέσματα έχουν εξαχθεί από τα CSV/JSON αρχεία που παράγονται από το `evaluation/run_benchmark.py`.
 - Τεκμηριώθηκε πλήρως η προέλευση των μετρικών (αρχεία εισόδου, scripts, ενδιάμεσα artefacts) ώστε να διευκολύνεται η αναπαραγωγή και ο έλεγχος.
 - Οι σταυρο-τομεακές εκτελέσεις (E5–E6) και οι σαρώσεις απαλοιφών A1–A14 παραμένουν σε εξέλιξη· τα απαιτούμενα βήματα και οι εκκρεμότητες καταγράφονται αναλυτικά.
 
@@ -68,20 +68,20 @@ python -m evaluation.run_benchmark \
 ## Πίνακας Β – Ablations & Sensitivity (Κατάσταση)
 | ID | Παράμετρος | Τρέχουσα Κατάσταση | Σημειώσεις/Ενέργειες |
 |----|------------|--------------------|----------------------|
-| A1 | -wSHACL | ⏳ Εκκρεμεί | Απαιτεί rerun με `lambda` weights ομοιόμορφα (τροποποίηση `run_benchmark.py` settings). |
-| A2 | -PatchCalc | ⏳ Εκκρεμεί | Δημιουργία config με `repair_backend="raw_turtle"` και log validation. |
-| A3 | -Admissibility | ⏳ Εκκρεμεί | Ενσωμάτωση flag παράκαμψης στο `scripts/main.py` πριν το commit των patches. |
-| A4 | -OntoAwarePrompt | ⏳ Εκκρεμεί | Απενεργοποίηση `use_terms` + αφαίρεση grounding από `ontology_guided/prompts`. |
-| A5 | Reasoner order | ⏳ Εκκρεμεί | Αντιστροφή σειράς `validator.run_validation()` / `run_reasoner()` στο loop. |
-| A6 | LLM swap | ⏳ Εκκρεμεί | Προσθήκη backend configs για Claude/LLaMA σε `evaluation/presentation_main.json`. |
-| A7 | K_max budget | ⏳ Εκκρεμεί | Sweep `kmax` μέσω command line (`--settings`). |
-| A8 | Top-m hints | ⏳ Εκκρεμεί | Παραμετροποίηση `exemplar_selector.RETRIEVAL_METHOD` & `top_m` στο pipeline. |
-| A9 | Weights λ | ⏳ Εκκρεμεί | Grid search και εξαγωγή καμπυλών Pareto (σύνδεση με `repair_efficiency.py`). |
-| A10 | Noisy reqs | ⏳ Εκκρεμεί | Παραγωγή παραλλαγών με noise (βλ. `scripts/noise_injection.py` αν διαθέσιμο, αλλιώς νέο script). |
-| A11 | Long docs | ⏳ Εκκρεμεί | Δημιουργία buckets μεγαλύτερου μήκους και μέτρηση χρόνου/μνήμης. |
-| A12 | Shapes coverage | ⏳ Εκκρεμεί | Τροποποίηση `shapes.ttl` (+/-20%) με διατήρηση versioning. |
-| A13 | Aligners | ⏳ Εκκρεμεί | Benchmark διαφορετικών matchers στο `ontology_guided/exemplar_selector`. |
-| A14 | CQ design | ⏳ Εκκρεμεί | Διακύμανση πυκνότητας/αυστηρότητας στο `evaluation/atm_cqs.rq`. |
+| A1 | -wSHACL |  Εκκρεμεί | Απαιτεί rerun με `lambda` weights ομοιόμορφα (τροποποίηση `run_benchmark.py` settings). |
+| A2 | -PatchCalc |  Εκκρεμεί | Δημιουργία config με `repair_backend="raw_turtle"` και log validation. |
+| A3 | -Admissibility |  Εκκρεμεί | Ενσωμάτωση flag παράκαμψης στο `scripts/main.py` πριν το commit των patches. |
+| A4 | -OntoAwarePrompt |  Εκκρεμεί | Απενεργοποίηση `use_terms` + αφαίρεση grounding από `ontology_guided/prompts`. |
+| A5 | Reasoner order |  Εκκρεμεί | Αντιστροφή σειράς `validator.run_validation()` / `run_reasoner()` στο loop. |
+| A6 | LLM swap |  Εκκρεμεί | Προσθήκη backend configs για Claude/LLaMA σε `evaluation/presentation_main.json`. |
+| A7 | K_max budget |  Εκκρεμεί | Sweep `kmax` μέσω command line (`--settings`). |
+| A8 | Top-m hints |  Εκκρεμεί | Παραμετροποίηση `exemplar_selector.RETRIEVAL_METHOD` & `top_m` στο pipeline. |
+| A9 | Weights λ |  Εκκρεμεί | Grid search και εξαγωγή καμπυλών Pareto (σύνδεση με `repair_efficiency.py`). |
+| A10 | Noisy reqs |  Εκκρεμεί | Παραγωγή παραλλαγών με noise (βλ. `scripts/noise_injection.py` αν διαθέσιμο, αλλιώς νέο script). |
+| A11 | Long docs |  Εκκρεμεί | Δημιουργία buckets μεγαλύτερου μήκους και μέτρηση χρόνου/μνήμης. |
+| A12 | Shapes coverage |  Εκκρεμεί | Τροποποίηση `shapes.ttl` (+/-20%) με διατήρηση versioning. |
+| A13 | Aligners |  Εκκρεμεί | Benchmark διαφορετικών matchers στο `ontology_guided/exemplar_selector`. |
+| A14 | CQ design |  Εκκρεμεί | Διακύμανση πυκνότητας/αυστηρότητας στο `evaluation/atm_cqs.rq`. |
 
 ## Εκκρεμότητες & Επόμενα Βήματα
 1. **Σταυρο-τομεακά Runs (E5)**: Δημιουργία cache για Healthcare (`evaluation/healthcare_requirements.txt`, `evaluation/healthcare_shapes.ttl`) και Automotive· επαλήθευση commands στο `run_benchmark.py` με κατάλληλα `--pairs`.
