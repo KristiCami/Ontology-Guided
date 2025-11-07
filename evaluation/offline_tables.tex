@@ -1,0 +1,64 @@
+% Offline evaluation tables for ATM domain experiments
+\begin{table}[!t]
+\centering
+\caption{Main experiments overview for the ATM offline evaluation split. Cached prompts emulate the six configurations described in Section~\ref{sec:experiments}. Reported metrics combine macro precision/recall/F1 across OWL axioms, SHACL compliance deltas, reasoning coherence, competency-question success, and repair efficiency.}
+\label{tab:main-exps-offline}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{} l c Y Y Y @{} }
+\toprule
+\textbf{ID} & \textbf{Name} & \textbf{Question / Hypothesis} & \textbf{Setup (Datasets / Models / Shapes)} & \textbf{Primary Metrics} \\
+\midrule
+E1 & LLM-only & Without symbolic checks, quality degrades (drift and inconsistencies). & ATM requirements (full split); \texttt{backend=cache} seeded with near-gold snippets; \emph{no} SHACL or reasoner; zero-shot prompting with ontology terms. & Macro P/R/F1 $=0.985/1.000/0.992$; SHACL $\mathrm{n/a}$; CQ pass rate $57.1\%$; repair iterations $-$ (skipped). \\
+\addlinespace
+E2 & Symbolic-only & Rules/alignment only $\rightarrow$ high precision, low recall. & Deterministic degradation cache; \emph{no} LLM drafting (ontology terms withheld); SHACL/Reasoner disabled for parity. & Macro P/R/F1 $=0.305/1.000/0.468$; SHACL $\mathrm{n/a}$; CQ pass rate $57.1\%$; repair iterations $-$ (not run). \\
+\addlinespace
+E3 & Ours (no-repair) & Drafting + validation \emph{without} the loop: how far does a single pass get? & \system{} pipeline with ontology-aware prompting; SHACL enabled with weighted severities; reasoner enabled; validation-only (no repair loop). & Macro P/R/F1 $=0.985/1.000/0.992$; SHACL violations $0\rightarrow0$; consistency preserved; CQ pass rate $57.1\%$; repair iterations $0$ (already conformant). \\
+\addlinespace
+E4 & \textbf{Ours (full)} & \textbf{Closed-loop CEGIR (wSHACL + Patch Calculus) improves F1 and compliance.} & \system{} full loop: ontology-aware prompting; SHACL + reasoner; violation-to-prompt repair enabled; Patch Calculus + admissibility. & \textbf{Macro P/R/F1 $=0.985/1.000/0.992$}; \textbf{violations $0\rightarrow0$}; unsat classes $=0$; CQ pass rate $57.1\%$; repair iterations $0$ (cache already conformant). \\
+\addlinespace
+E5 & Cross-domain & Plug-and-play portability without retraining the LLM. & Pending offline caches for Health/Auto; same \system{} prompts; domain-specific SHACL. & \emph{Not yet reported} (cache generation outstanding). \\
+\addlinespace
+E6 & CQ-oriented & Improvement on Competency Questions via repair. & ATM CQ suite evaluated per iteration; requires repair-inducing cache variants. & CQ pass trajectories \emph{pending}; repair loop not triggered under current cache. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[!t]
+\centering
+\caption{Ablations and sensitivity studies tracked in the offline pipeline. Each entry toggles a single factor relative to the full \system{} configuration.}
+\label{tab:ablations-offline}
+\small
+\begin{tabularx}{\linewidth}{@{} l l X X l @{} }
+\toprule
+\textbf{ID} & \textbf{Name} & \textbf{What is varied} & \textbf{Setup detail} & \textbf{Readouts} \\
+\midrule
+A1 & -wSHACL & Disable weighted severities (treat all equal). & $\lambda_1{=}\lambda_2{=}\lambda_3$ uniform; no hard/soft split. & \#iters, post-violation count, CQ\%, time/iter. \\
+\addlinespace
+A2 & -PatchCalc & Allow free-form Turtle instead of typed patches. & Same loop, but LLM returns raw Turtle snippets. & Soft error rate, invalid RDF rate, regressions. \\
+\addlinespace
+A3 & -Admissibility & Commit without pre-checking hard safety. & Skip tentative validation; commit then validate. & Hard regressions (new hard viol.), unsat incidents. \\
+\addlinespace
+A4 & -OntoAwarePrompt & Drop grounding (labels/synonyms/types). & Remove $H_m(s)$; use generic few-shot prompts. & $\Delta$F1, \#iters, lexical drift cases. \\
+\addlinespace
+A5 & Reasoner order & Reasoner before vs. after SHACL. & Swap ordering per repair iteration. & $\Delta$(\#viol.), runtime, coherence. \\
+\addlinespace
+A6 & LLM swap & Compare GPT-X vs Claude-Y vs Llama-Z. & Same prompts; temperature grid. & F1, iterations, time/iter, cost/ontology. \\
+\addlinespace
+A7 & $K_{\max}$ budget & Sensitivity to $K_{\max}\in\{1,2,3,5\}$. & Keep other parameters fixed. & Conformance rate, F1@budget, total time. \\
+\addlinespace
+A8 & Top-$m$ hints & Vary vocabulary hints and $\lambda$. & $m\in\{0,5,10,20\}$; $\lambda\in\{0.25,0.5,0.75\}$. & $\Delta$F1, \#iters, grounding errors. \\
+\addlinespace
+A9 & Weights $\lambda$ & Grid over severity weights. & Sweep $(\lambda_1,\lambda_2,\lambda_3)$. & Pareto curves (F1 vs edits vs CQ\%). \\
+\addlinespace
+A10 & Noisy reqs & Add noise/paraphrasing. & Noise levels $5\%, 15\%, 30\%$. & Robustness: $\Delta$F1, $\Delta$(\#iters), conformance\%. \\
+\addlinespace
+A11 & Long docs & Scale with requirement length. & Buckets: 5/15/30/60 sentences. & Runtime scaling, memory, conformance. \\
+\addlinespace
+A12 & Shapes coverage & Remove/add SHACL coverage. & $\pm 20\%$ optional shapes. & Under/over-constraint impact on loop. \\
+\addlinespace
+A13 & Aligners & Swap alignment strategies. & String vs embedding vs hybrid matchers. & Alignment P/R, downstream $\Delta$F1. \\
+\addlinespace
+A14 & CQ design & Vary CQ density/strictness. & $N\in\{5,10,20\}$; stricter ASK variants. & CQ\% vs F1 correlation. \\
+\bottomrule
+\end{tabularx}
+\end{table}

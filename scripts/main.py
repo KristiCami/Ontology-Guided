@@ -89,6 +89,15 @@ RBO_ONTOLOGY_PATH = os.path.join(ONTOLOGIES_DIR, "rbo.ttl")
 LEXICAL_ONTOLOGY_PATH = os.path.join(ONTOLOGIES_DIR, "lexical.ttl")
 
 
+def _infer_prefix_from_base(base_iri: str) -> str:
+    trimmed = base_iri.rstrip("#/")
+    candidate = trimmed.rsplit("/", 1)[-1] if "/" in trimmed else trimmed
+    if candidate.endswith(".ttl"):
+        candidate = candidate[: -len(".ttl")]
+    candidate = candidate.replace("-", "_").replace(".", "_")
+    return candidate or "ns"
+
+
 def run_pipeline(
     inputs,
     shapes,
@@ -100,6 +109,7 @@ def run_pipeline(
     model_path: Optional[str] = None,
     temperature: float = 0.0,
     examples=None,
+    prefix: Optional[str] = None,
     *,
     use_retrieval: bool = False,
     dev_pool: Optional[Union[str, Path, list[dict[str, str]]]] = None,
@@ -202,7 +212,10 @@ def run_pipeline(
     if load_lexical:
         ontology_files.append(LEXICAL_ONTOLOGY_PATH)
 
-    builder = OntologyBuilder(base_iri, ontology_files=ontology_files)
+    if prefix is None:
+        prefix = _infer_prefix_from_base(base_iri)
+
+    builder = OntologyBuilder(base_iri, prefix=prefix, ontology_files=ontology_files)
     logger = logging.getLogger(__name__)
     initial_terms = builder.get_available_terms() if use_terms else None
 
@@ -463,6 +476,11 @@ def main():
     parser.add_argument("--inputs", nargs="+", default=["demo.txt"], help="Requirement files (.txt/.docx)")
     parser.add_argument("--shapes", default="shapes.ttl", help="SHACL shapes file")
     parser.add_argument("--base-iri", default="http://example.com/atm#", help="Base IRI for ontology")
+    parser.add_argument(
+        "--prefix",
+        default=None,
+        help="Prefix to use for the generated ontology (defaults to deriving from base IRI)",
+    )
     parser.add_argument("--ontologies", nargs="*", default=[], help="Additional ontology files to load")
     parser.add_argument(
         "--ontology-dir",
@@ -475,7 +493,7 @@ def main():
     parser.add_argument(
         "--backend",
         default="openai",
-        choices=["openai", "llama"],
+        choices=["openai", "llama", "cache"],
         help="LLM backend to use",
     )
     parser.add_argument(
@@ -641,6 +659,7 @@ def main():
             model_path=args.model_path,
             temperature=args.temperature,
             examples=examples,
+            prefix=args.prefix,
             repair=args.repair,
             kmax=args.kmax,
             reason=args.reason,
