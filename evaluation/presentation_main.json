@@ -1,0 +1,36 @@
+[
+  {
+    "name": "E1_llm_only",
+    "use_terms": true,
+    "validate": false,
+    "repair": false,
+    "reason": false,
+    "backend": "cache"
+  },
+  {
+    "name": "E2_symbolic_only",
+    "use_terms": false,
+    "validate": false,
+    "repair": false,
+    "reason": false,
+    "backend": "cache",
+    "strict_terms": true
+  },
+  {
+    "name": "E3_no_repair",
+    "use_terms": true,
+    "validate": true,
+    "repair": false,
+    "reason": true,
+    "backend": "cache"
+  },
+  {
+    "name": "E4_full_loop",
+    "use_terms": true,
+    "validate": true,
+    "repair": true,
+    "reason": true,
+    "backend": "cache",
+    "kmax": 5
+  }
+]
