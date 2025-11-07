@@ -139,6 +139,8 @@ class LLMInterface:
             self.tokenizer = AutoTokenizer.from_pretrained(model_name)
             self.model = AutoModelForCausalLM.from_pretrained(model_name)
             self.model.to(self.device)
+        elif backend == "cache":
+            self.model = model
         else:
             raise ValueError(f"Unsupported backend: {backend}")
         self.cache_dir = Path(
@@ -298,6 +300,10 @@ class LLMInterface:
             if cached is not None:
                 results.append(cached)
                 continue
+            if self.backend == "cache":
+                raise RuntimeError(
+                    f"Cache miss for sentence '{sent_text}'; run with a networked backend to populate the cache."
+                )
             user_prompt = prompt_template.format(
                 sentence=sent_text, base=base, prefix=prefix
             )
@@ -420,6 +426,10 @@ class LLMInterface:
             cached = self._load_cache(sent_text, available_terms, base, prefix)
             if cached is not None:
                 return cached
+            if self.backend == "cache":
+                raise RuntimeError(
+                    f"Cache miss for sentence '{sent_text}'; run with a networked backend to populate the cache."
+                )
 
             user_prompt = prompt_template.format(
                 sentence=sent_text, base=base, prefix=prefix

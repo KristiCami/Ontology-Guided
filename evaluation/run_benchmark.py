@@ -171,9 +171,14 @@ def evaluate_once(
                         prov_gold[tuple(str(t) for t in triple)] = sid
 
     if test_ids is None:
-        test_ids = []
-    pred_graph = filter_by_ids(pred_graph, test_ids, prov_pred)
-    gold_graph = filter_by_ids(gold_graph, test_ids, prov_gold)
+        filtered_pred = pred_graph
+        filtered_gold = gold_graph
+    else:
+        filtered_pred = filter_by_ids(pred_graph, test_ids, prov_pred)
+        filtered_gold = filter_by_ids(gold_graph, test_ids, prov_gold)
+
+    pred_graph = filtered_pred
+    gold_graph = filtered_gold
 
     pred_path = "results/combined_test.ttl"
     gold_filtered_path = "results/gold_test.ttl"
@@ -260,6 +265,7 @@ def run_evaluations(
     cq_paths: Optional[Sequence[Optional[str]]] = None,
     split_paths: Optional[Sequence[Optional[str]]] = None,
     dev_sentence_ids: Optional[Iterable[str]] = None,
+    skip_filter: bool = False,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -275,15 +281,16 @@ def run_evaluations(
                 else None
             )
             test_ids = None
-            if split_paths and dataset_idx < len(split_paths) and split_paths[dataset_idx]:
-                with open(split_paths[dataset_idx], "r", encoding="utf-8") as f:
-                    test_ids = [line.strip() for line in f if line.strip()]
-                if dev_sentence_ids is not None:
-                    overlap = set(test_ids) & set(dev_sentence_ids)
-                    if overlap:
-                        raise ValueError(
-                            f"Test IDs overlap with dev IDs: {sorted(overlap)}"
-                        )
+            if not skip_filter:
+                if split_paths and dataset_idx < len(split_paths) and split_paths[dataset_idx]:
+                    with open(split_paths[dataset_idx], "r", encoding="utf-8") as f:
+                        test_ids = [line.strip() for line in f if line.strip()]
+                    if dev_sentence_ids is not None:
+                        overlap = set(test_ids) & set(dev_sentence_ids)
+                        if overlap:
+                            raise ValueError(
+                                f"Test IDs overlap with dev IDs: {sorted(overlap)}"
+                            )
             metrics_list: List[Dict[str, float]] = []
             violations_list: List[Dict[str, Any]] = []
             conforms_list: List[Any] = []
@@ -418,6 +425,12 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         help="Normalize base IRIs before comparing graphs",
     )
     parser.add_argument(
+        "--backend",
+        default="cache",
+        choices=["cache", "openai", "llama"],
+        help="LLM backend to use when running the pipeline",
+    )
+    parser.add_argument(
         "--keywords",
         default=None,
         help="Comma-separated keywords for sentence filtering",
@@ -433,6 +446,11 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         nargs="*",
         default=["splits/test.txt"],
         help="List of files with sentence_id lists, one per dataset",
+    )
+    parser.add_argument(
+        "--skip-filter",
+        action="store_true",
+        help="Do not filter triples by sentence IDs (use full graphs)",
     )
     parser.add_argument(
         "--use-retrieval",
@@ -490,6 +508,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
     for setting in settings_list:
         setting.setdefault("ontologies", ontology_list)
         setting.setdefault("examples", DEV_EXAMPLES)
+        setting.setdefault("backend", args.backend)
         if args.use_retrieval:
             setting.setdefault("use_retrieval", True)
         if args.dev_pool:
@@ -522,6 +541,7 @@ def main() -> None:  # pragma: no cover - CLI wrapper
         cq_paths=args.cqs,
         split_paths=args.splits,
         dev_sentence_ids=DEV_SENTENCE_IDS,
+        skip_filter=args.skip_filter,
     )
 
 
