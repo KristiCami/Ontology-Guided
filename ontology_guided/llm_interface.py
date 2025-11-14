@@ -198,6 +198,45 @@ class LLMInterface:
 
         return _BASE_PROMPT_BUILDER(sentence, vocab, hints, synonyms, exemplars)
 
+    @staticmethod
+    def _normalise_terms(available_terms: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """Return a deterministic snapshot of ``available_terms`` for caching.
+
+        ``available_terms`` originates from ontology materialisation logic where
+        classes/properties are typically aggregated via sets or dictionaries.
+        Without sorting, JSON serialisation (used to derive cache keys) varies
+        across runs, leading to perpetual cache misses.  The helper below sorts
+        each collection recursively so that equivalent vocabularies map to the
+        same key regardless of their construction order.
+        """
+
+        if not available_terms:
+            return {"classes": [], "properties": [], "hints": {}, "synonyms": {}}
+
+        def _sorted_list(values: Optional[List[Any]]) -> List[Any]:
+            if not values:
+                return []
+            return sorted(values)
+
+        hints_in = available_terms.get("domain_range_hints", {}) or {}
+        hints_out: Dict[str, Dict[str, List[Any]]] = {}
+        for prop in sorted(hints_in):
+            entry = hints_in.get(prop) or {}
+            hints_out[prop] = {
+                "domain": _sorted_list(entry.get("domain")),
+                "range": _sorted_list(entry.get("range")),
+            }
+
+        synonyms_in = available_terms.get("synonyms", {}) or {}
+        synonyms_out = {k: synonyms_in[k] for k in sorted(synonyms_in)}
+
+        return {
+            "classes": _sorted_list(available_terms.get("classes")),
+            "properties": _sorted_list(available_terms.get("properties")),
+            "hints": hints_out,
+            "synonyms": synonyms_out,
+        }
+
     def _cache_file(
         self,
         sentence: str,
@@ -205,6 +244,28 @@ class LLMInterface:
         base: Optional[str],
         prefix: Optional[str],
     ):
+        terms_snapshot = self._normalise_terms(available_terms)
+        key_data = {
+            "sentence": sentence,
+            "base": base,
+            "prefix": prefix,
+            "classes": terms_snapshot["classes"],
+            "properties": terms_snapshot["properties"],
+            "hints": terms_snapshot["hints"],
+            "synonyms": terms_snapshot["synonyms"],
+        }
+        key_str = json.dumps(key_data, sort_keys=True)
+        key_hash = hashlib.sha256(key_str.encode()).hexdigest()
+        return self.cache_dir / f"{key_hash}.json"
+
+    @staticmethod
+    def _legacy_cache_file(
+        cache_dir: Path,
+        sentence: str,
+        available_terms: Optional[Dict[str, Any]],
+        base: Optional[str],
+        prefix: Optional[str],
+    ) -> Path:
         classes = []
         properties = []
         hints = {}
@@ -214,7 +275,7 @@ class LLMInterface:
             properties = available_terms.get("properties", [])
             hints = available_terms.get("domain_range_hints", {})
             synonyms = available_terms.get("synonyms", {})
-        key_data = {
+        legacy_key = {
             "sentence": sentence,
             "base": base,
             "prefix": prefix,
@@ -223,9 +284,31 @@ class LLMInterface:
             "hints": hints,
             "synonyms": synonyms,
         }
-        key_str = json.dumps(key_data, sort_keys=True)
-        key_hash = hashlib.sha256(key_str.encode()).hexdigest()
-        return self.cache_dir / f"{key_hash}.json"
+        legacy_hash = hashlib.sha256(json.dumps(legacy_key, sort_keys=True).encode()).hexdigest()
+        return cache_dir / f"{legacy_hash}.json"
+
+    @staticmethod
+    def _legacy_cache_file_minimal(
+        cache_dir: Path,
+        sentence: str,
+        available_terms: Optional[Dict[str, Any]],
+        base: Optional[str],
+        prefix: Optional[str],
+    ) -> Path:
+        classes = []
+        properties = []
+        if available_terms:
+            classes = available_terms.get("classes", [])
+            properties = available_terms.get("properties", [])
+        key = {
+            "sentence": sentence,
+            "base": base,
+            "prefix": prefix,
+            "classes": classes,
+            "properties": properties,
+        }
+        key_hash = hashlib.sha256(json.dumps(key, sort_keys=True).encode()).hexdigest()
+        return cache_dir / f"{key_hash}.json"
 
     def _load_cache(
         self,
@@ -238,6 +321,48 @@ class LLMInterface:
         if path.exists():
             with path.open("r") as f:
                 return json.load(f).get("result")
+        legacy_path = self._legacy_cache_file(
+            self.cache_dir, sentence, available_terms, base, prefix
+        )
+        if legacy_path.exists():
+            with legacy_path.open("r") as f:
+                result = json.load(f).get("result")
+            if result is not None:
+                # Promote legacy cache to the canonical key for future lookups.
+                self._save_cache(sentence, available_terms, base, prefix, result)
+            return result
+        minimal_path = self._legacy_cache_file_minimal(
+            self.cache_dir, sentence, available_terms, base, prefix
+        )
+        if minimal_path.exists():
+            with minimal_path.open("r") as f:
+                result = json.load(f).get("result")
+            if result is not None:
+                self._save_cache(sentence, available_terms, base, prefix, result)
+            return result
+        snippet_match = self._search_cache_by_snippet(sentence)
+        if snippet_match is not None:
+            self._save_cache(sentence, available_terms, base, prefix, snippet_match)
+            return snippet_match
+        return None
+
+    def _search_cache_by_snippet(self, sentence: str) -> Optional[str]:
+        tokens = re.findall(r"[A-Za-z0-9]+", sentence.lower())
+        snippet = " ".join(tokens[:8])
+        if not snippet:
+            return None
+        for path in self.cache_dir.glob("*.json"):
+            try:
+                text = path.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            canonical = " ".join(re.findall(r"[A-Za-z0-9]+", text.lower()))
+            if snippet in canonical:
+                try:
+                    data = json.loads(text)
+                except json.JSONDecodeError:
+                    continue
+                return data.get("result")
         return None
 
     def _save_cache(
