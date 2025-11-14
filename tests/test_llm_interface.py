@@ -193,6 +193,85 @@ def test_generate_owl_uses_cache(monkeypatch, tmp_path):
     assert calls["count"] == 1
 
 
+def test_cache_key_stable_with_permuted_terms(tmp_path):
+    llm = LLMInterface(api_key="", backend="cache", cache_dir=str(tmp_path))
+    sentence = "Test"
+    terms_original = {
+        "classes": ["ex:B", "ex:A"],
+        "properties": ["ex:prop2", "ex:prop1"],
+        "domain_range_hints": {
+            "ex:prop2": {"domain": ["ex:B", "ex:A"], "range": ["ex:C"]},
+            "ex:prop1": {"domain": ["ex:D"], "range": ["ex:E", "ex:F"]},
+        },
+        "synonyms": {"foo": "bar", "baz": "qux"},
+    }
+    llm._save_cache(sentence, terms_original, "http://example.com/#", "ex", "ttl")
+
+    # Same content, different ordering to mimic non-deterministic term loaders
+    terms_permuted = {
+        "classes": ["ex:A", "ex:B"],
+        "properties": ["ex:prop1", "ex:prop2"],
+        "domain_range_hints": {
+            "ex:prop1": {"range": ["ex:F", "ex:E"], "domain": ["ex:D"]},
+            "ex:prop2": {"range": ["ex:C"], "domain": ["ex:A", "ex:B"]},
+        },
+        "synonyms": {"baz": "qux", "foo": "bar"},
+    }
+    cached = llm._load_cache(sentence, terms_permuted, "http://example.com/#", "ex")
+    assert cached == "ttl"
+
+
+def test_cache_loads_legacy_entries(tmp_path):
+    llm = LLMInterface(api_key="", backend="cache", cache_dir=str(tmp_path))
+    sentence = "Legacy"
+    terms = {
+        "classes": ["ex:A"],
+        "properties": ["ex:p"],
+        "domain_range_hints": {},
+        "synonyms": {},
+    }
+    base = "http://example.com/#"
+    legacy_path = LLMInterface._legacy_cache_file(
+        tmp_path, sentence, terms, base, "ex"
+    )
+    legacy_path.write_text(json.dumps({"result": "old"}))
+    value = llm._load_cache(sentence, terms, base, "ex")
+    assert value == "old"
+    canonical = llm._cache_file(sentence, terms, base, "ex")
+    assert canonical.exists()
+
+    # Minimal legacy caches (sentence+vocab) are also promoted.
+    minimal_terms = {
+        "classes": ["ex:B", "ex:A"],
+        "properties": ["ex:p2", "ex:p1"],
+        "domain_range_hints": {"ex:p1": {"domain": ["ex:A"]}},
+        "synonyms": {"foo": "bar"},
+    }
+    minimal_path = LLMInterface._legacy_cache_file_minimal(
+        tmp_path, sentence, minimal_terms, base, "ex"
+    )
+    minimal_path.write_text(json.dumps({"result": "minimal"}))
+    promoted = llm._load_cache(sentence, minimal_terms, base, "ex")
+    assert promoted == "minimal"
+    assert llm._cache_file(sentence, minimal_terms, base, "ex").exists()
+
+
+def test_cache_snippet_search(tmp_path):
+    llm = LLMInterface(api_key="", backend="cache", cache_dir=str(tmp_path))
+    sentence = "The ATM shall greet the customer"
+    snippet_file = tmp_path / "snippet.json"
+    snippet_file.write_text(
+        json.dumps(
+            {
+                "result": "@prefix ex: <http://example.com/> .\n# The ATM shall greet the customer",
+            }
+        )
+    )
+    terms = {"classes": ["ex:ATM"], "properties": [], "domain_range_hints": {}, "synonyms": {}}
+    cached = llm._load_cache(sentence, terms, "http://example.com/#", "ex")
+    assert cached.startswith("@prefix ex:")
+
+
 def test_generate_owl_retry_on_invalid_turtle(monkeypatch, tmp_path):
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
 

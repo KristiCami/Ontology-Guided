@@ -133,11 +133,11 @@ def evaluate_once(
     if result.get("combined_ttl") and os.path.exists(result["combined_ttl"]):
         pred_graph.parse(result["combined_ttl"], format="turtle")
     gold_graph = Graph()
-    if gold and os.path.exists(gold):
+    if gold and os.path.isfile(gold):
         gold_graph.parse(gold, format="turtle")
 
     text_to_id: Dict[str, str] = {}
-    if os.path.exists(requirements):
+    if os.path.isfile(requirements):
         with open(requirements, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
@@ -152,7 +152,7 @@ def evaluate_once(
             prov_pred[triple] = sid
 
     prov_gold: Dict[Tuple[str, str, str], str] = {}
-    if os.path.exists(requirements):
+    if os.path.isfile(requirements):
         with open(requirements, "r", encoding="utf-8") as f:
             for line in f:
                 if not line.strip():
