@@ -34,6 +34,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
+from ontology_guided.project_paths import DEFAULT_SHAPES_PATH
 from scripts.main import run_pipeline, load_dev_examples
 from .competency_questions import evaluate_cqs
 from .repair_efficiency import aggregate_repair_efficiency
@@ -55,7 +56,7 @@ def parse_pair(text: str) -> Pair:
     parts = text.split(":")
     if len(parts) == 2:
         req, gold = parts
-        shapes = "shapes.ttl"
+        shapes = str(DEFAULT_SHAPES_PATH)
     elif len(parts) == 3:
         req, gold, shapes = parts
     else:  # pragma: no cover - argument validation

@@ -17,6 +17,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
+from ontology_guided.project_paths import DEFAULT_SHAPES_PATH
 from scripts.main import run_pipeline, load_dev_examples
 from evaluation.axiom_metrics import evaluate_axioms
 
@@ -56,10 +57,13 @@ def filter_by_ids(
     return filtered
 
 
+DEFAULT_SHAPES = str(DEFAULT_SHAPES_PATH)
+
+
 def compare_metrics(
     requirements_path: str,
     gold_path: str,
-    shapes_path: str = "shapes.ttl",
+    shapes_path: str = DEFAULT_SHAPES,
     base_iri: str = "http://lod.csd.auth.gr/atm/atm.ttl#",
     keywords: Optional[Union[Iterable[str], None]] = None,
     micro: bool = False,
@@ -188,7 +192,11 @@ def main():
     parser = argparse.ArgumentParser(description="Compare generated OWL with gold standard")
     parser.add_argument("requirements", help="Path to requirements JSONL file")
     parser.add_argument("gold", help="Path to gold standard TTL file")
-    parser.add_argument("--shapes", default="shapes.ttl", help="Path to SHACL shapes file")
+    parser.add_argument(
+        "--shapes",
+        default=DEFAULT_SHAPES,
+        help=f"Path to SHACL shapes file (default: {DEFAULT_SHAPES_PATH})",
+    )
     parser.add_argument(
         "--base-iri",
         default="http://lod.csd.auth.gr/atm/atm.ttl#",

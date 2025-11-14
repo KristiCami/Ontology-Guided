@@ -24,7 +24,7 @@ def test_run_pipeline_custom_settings(monkeypatch, tmp_path):
 
     root = pathlib.Path(__file__).resolve().parent.parent
     inputs = [str(root / "demo.txt")]
-    shapes = str(root / "shapes.ttl")
+    shapes = str(root / "gold" / "shapes_atm.ttl")
 
     result = run_pipeline(
         inputs,
@@ -59,7 +59,7 @@ def test_run_pipeline_collects_failed_snippets(monkeypatch, tmp_path):
 
     root = pathlib.Path(__file__).resolve().parent.parent
     inputs = [str(root / "demo.txt")]
-    shapes = str(root / "shapes.ttl")
+    shapes = str(root / "gold" / "shapes_atm.ttl")
 
     result = run_pipeline(
         inputs,
@@ -102,7 +102,7 @@ def test_run_pipeline_ontology_dir(monkeypatch, tmp_path):
     captured = {}
 
     class FakeBuilder:
-        def __init__(self, base_iri, ontology_files=None):
+        def __init__(self, base_iri, prefix=None, ontology_files=None):
             captured["files"] = list(ontology_files or [])
             self.triple_provenance = {}
             self.prefix = "atm"
@@ -123,7 +123,7 @@ def test_run_pipeline_ontology_dir(monkeypatch, tmp_path):
 
     root = pathlib.Path(__file__).resolve().parent.parent
     inputs = [str(root / "demo.txt")]
-    shapes = str(root / "shapes.ttl")
+    shapes = str(root / "gold" / "shapes_atm.ttl")
 
     run_pipeline(
         inputs,
@@ -202,7 +202,7 @@ def test_run_pipeline_passes_repair_options(monkeypatch, tmp_path):
 
     root = pathlib.Path(__file__).resolve().parent.parent
     inputs = [str(root / "demo.txt")]
-    shapes = str(root / "shapes.ttl")
+    shapes = str(root / "gold" / "shapes_atm.ttl")
 
     result = run_pipeline(
         inputs,
@@ -291,7 +291,7 @@ def test_run_pipeline_skips_repaired_ttl_when_none(monkeypatch, tmp_path):
 
     root = pathlib.Path(__file__).resolve().parent.parent
     inputs = [str(root / "demo.txt")]
-    shapes = str(root / "shapes.ttl")
+    shapes = str(root / "gold" / "shapes_atm.ttl")
 
     result = run_pipeline(
         inputs,
@@ -341,7 +341,7 @@ def test_run_pipeline_runs_reasoner(monkeypatch, tmp_path):
 
     root = pathlib.Path(__file__).resolve().parent.parent
     inputs = [str(root / "demo.txt")]
-    shapes = str(root / "shapes.ttl")
+    shapes = str(root / "gold" / "shapes_atm.ttl")
 
     result = run_pipeline(
         inputs,

@@ -102,7 +102,7 @@ Mean iterations: 3.00
 
 4. **Εκτέλεση ενοποιημένου pipeline**
    ```bash
-   python3 scripts/main.py --inputs demo.txt --shapes shapes.ttl --reason --repair
+   python3 scripts/main.py --inputs demo.txt --shapes gold/shapes_atm.ttl --reason --repair
    ```
    Το script διαβάζει τις απαιτήσεις, παράγει τα OWL triples, τρέχει τον
    reasoner και τον έλεγχο SHACL, και αν χρειαστεί εκτελεί αυτόματο βρόχο διόρθωσης.
@@ -143,7 +143,7 @@ Mean iterations: 3.00
 
    Παράδειγμα με προσαρμοσμένες επιλογές:
    ```bash
-   python3 scripts/main.py --inputs demo.txt --shapes shapes.ttl --ontology-dir ontologies --rbo --lexical --base-iri http://example.com/atm#
+   python3 scripts/main.py --inputs demo.txt --shapes gold/shapes_atm.ttl --ontology-dir ontologies --rbo --lexical --base-iri http://example.com/atm#
    ```
 
    Η προαιρετική σημαία `--reason` τρέχει τον ενσωματωμένο reasoner της OWLready2 πριν τον έλεγχο SHACL.
@@ -157,7 +157,7 @@ Mean iterations: 3.00
 5. **Χειροκίνητη εκτέλεση επιμέρους βημάτων** (προαιρετικά)
    ```bash
    python3 ontology_guided/ontology_builder.py    # συγχώνευση σε combined.ttl/owl
-   python3 ontology_guided/validator.py --data results/combined.ttl --shapes shapes.ttl
+   python3 ontology_guided/validator.py --data results/combined.ttl --shapes gold/shapes_atm.ttl
    python3 ontology_guided/repair_loop.py         # εφόσον υπάρχουν παραβιάσεις
    ```
 6. **Εκτέλεση tests**
@@ -287,7 +287,7 @@ few-shot prompts.  Με την επιλογή `--use-retrieval` ο επιλογ�
 
 ```bash
 # Εκτέλεση pipeline μόνο σε test IDs με παγωμένο retrieval
-python3 scripts/main.py --inputs data/requirements.jsonl --shapes shapes.ttl \
+python3 scripts/main.py --inputs data/requirements.jsonl --shapes gold/shapes_atm.ttl \
     --split splits/test.txt --use-retrieval --dev-pool data/dev_examples.json \
     --retrieve-k 4 --prompt-log results/prompts.log
 ```

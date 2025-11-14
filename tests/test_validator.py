@@ -8,6 +8,52 @@ def _write_temp(tmp_path, name, content):
     return str(p)
 
 
+SHAPES_TURTLE = """@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix atm: <http://example.com/atm#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+atm:TransactionShape a sh:NodeShape ;
+  sh:targetClass atm:Transaction ;
+  sh:property [
+    sh:path atm:actor ;
+    sh:minCount 1 ;
+    sh:message "Transaction must have an actor"
+  ] ;
+  sh:property [
+    sh:path atm:target ;
+    sh:minCount 1 ;
+    sh:message "Transaction must have a target account"
+  ] ;
+  sh:property [
+    sh:path atm:amount ;
+    sh:datatype xsd:decimal ;
+    sh:minCount 1 ;
+    sh:message "Transaction must declare an amount"
+  ] .
+
+atm:ActionShape a sh:NodeShape ;
+  sh:targetClass atm:Action ;
+  sh:property [
+    sh:path atm:object ;
+    sh:minCount 1 ;
+    sh:message "Action must have an object"
+  ] .
+
+atm:ATMLogShape a sh:NodeShape ;
+  sh:targetClass atm:ATM ;
+  sh:property [
+    sh:path atm:logs ;
+    sh:class atm:Transaction ;
+    sh:minCount 1 ;
+    sh:message "ATM must log at least one Transaction"
+  ] .
+"""
+
+
+def _default_shapes(tmp_path):
+    return _write_temp(tmp_path, "shapes.ttl", SHAPES_TURTLE)
+
+
 def test_validation_conforming(tmp_path):
     data = """@prefix atm: <http://example.com/atm#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -33,8 +79,8 @@ atm:insert1 a atm:CardInsertion ;
     atm:after atm:tx1 .
 """
     data_path = _write_temp(tmp_path, "valid.ttl", data)
-    shapes_path = Path(__file__).resolve().parent.parent / "shapes.ttl"
-    validator = SHACLValidator(data_path, str(shapes_path))
+    shapes_path = _default_shapes(tmp_path)
+    validator = SHACLValidator(data_path, shapes_path)
     conforms, results, summary = validator.run_validation()
     assert conforms
     assert results == []
@@ -58,8 +104,8 @@ atm:atm1 a atm:ATM ;
     atm:logs atm:act1 .
 """
     data_path = _write_temp(tmp_path, "invalid.ttl", data)
-    shapes_path = Path(__file__).resolve().parent.parent / "shapes.ttl"
-    validator = SHACLValidator(data_path, str(shapes_path))
+    shapes_path = _default_shapes(tmp_path)
+    validator = SHACLValidator(data_path, shapes_path)
     conforms, results, summary = validator.run_validation()
     assert not conforms
     assert isinstance(results, list)
@@ -106,8 +152,8 @@ atm:act1 a atm:Action ;
     atm:actor atm:alice .
 """
     data_path = _write_temp(tmp_path, "multi_invalid.ttl", data)
-    shapes_path = Path(__file__).resolve().parent.parent / "shapes.ttl"
-    validator = SHACLValidator(data_path, str(shapes_path))
+    shapes_path = _default_shapes(tmp_path)
+    validator = SHACLValidator(data_path, shapes_path)
     conforms, results, summary = validator.run_validation()
     assert not conforms
     assert summary["total"] == 3

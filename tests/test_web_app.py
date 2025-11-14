@@ -1,6 +1,7 @@
 import io
 import os
 from scripts import web_app
+from ontology_guided.project_paths import DEFAULT_BASE_IRI, DEFAULT_SHAPES_PATH
 
 
 def _fake_result(path):
@@ -54,8 +55,8 @@ def test_web_app_flags_default(monkeypatch, tmp_path):
     assert resp.status_code == 200
     assert called["repair"] is False
     assert called["reason"] is False
-    assert called["shapes"] == "shapes.ttl"
-    assert called["base_ns"] == "http://example.com/atm#"
+    assert called["shapes"] == str(DEFAULT_SHAPES_PATH)
+    assert called["base_ns"] == DEFAULT_BASE_IRI
 
 
 def test_web_app_custom_shapes_and_base(monkeypatch, tmp_path):
