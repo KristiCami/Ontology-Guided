@@ -5,16 +5,65 @@
 
 atm:ATM a owl:Class .
 atm:Bank a owl:Class .
+atm:BankComputer a owl:Class .
 atm:Customer a owl:Class .
 atm:Account a owl:Class .
 atm:CashCard a owl:Class .
 atm:Transaction a owl:Class .
 atm:Withdrawal a owl:Class ;
-  rdfs:subClassOf atm:Transaction .
+  rdfs:subClassOf atm:Transaction ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:performedBy ;
+      owl:someValuesFrom atm:Customer
+    ] ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:onAccount ;
+      owl:someValuesFrom atm:Account
+    ] ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:usesCard ;
+      owl:someValuesFrom atm:CashCard
+    ] ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:requestedAmount ;
+      owl:someValuesFrom xsd:decimal
+    ] ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:dispensedAmount ;
+      owl:someValuesFrom xsd:decimal
+    ] .
 atm:Deposit a owl:Class ;
-  rdfs:subClassOf atm:Transaction .
+  rdfs:subClassOf atm:Transaction ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:performedBy ;
+      owl:someValuesFrom atm:Customer
+    ] ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:onAccount ;
+      owl:someValuesFrom atm:Account
+    ] ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:usesCard ;
+      owl:someValuesFrom atm:CashCard
+    ] ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:requestedAmount ;
+      owl:someValuesFrom xsd:decimal
+    ] .
 atm:BalanceInquiry a owl:Class ;
-  rdfs:subClassOf atm:Transaction .
+  rdfs:subClassOf atm:Transaction ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:performedBy ;
+      owl:someValuesFrom atm:Customer
+    ] ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:onAccount ;
+      owl:someValuesFrom atm:Account
+    ] ,
+    [ a owl:Restriction ;
+      owl:onProperty atm:usesCard ;
+      owl:someValuesFrom atm:CashCard
+    ] .
 atm:Authorization a owl:Class .
 atm:Message a owl:Class .
 
@@ -58,9 +107,13 @@ atm:authorizedBy a owl:ObjectProperty ;
   rdfs:domain atm:Transaction ;
   rdfs:range atm:Authorization .
 
-atm:communicates a owl:ObjectProperty ;
+atm:sendsMessageTo a owl:ObjectProperty ;
   rdfs:domain atm:ATM ;
-  rdfs:range atm:Message .
+  rdfs:range atm:BankComputer .
+
+atm:receivesMessageFrom a owl:ObjectProperty ;
+  rdfs:domain atm:ATM ;
+  rdfs:range atm:BankComputer .
 
 atm:requestedAmount a owl:DatatypeProperty ;
   rdfs:domain atm:Transaction ;
@@ -70,18 +123,20 @@ atm:dispensedAmount a owl:DatatypeProperty ;
   rdfs:domain atm:Withdrawal ;
   rdfs:range xsd:decimal .
 
-atm:transactionTimestamp a owl:DatatypeProperty ;
+atm:transactionTimestamp a owl:DatatypeProperty , owl:FunctionalProperty ;
   rdfs:domain atm:Transaction ;
   rdfs:range xsd:dateTime .
 
-atm:serialNumber a owl:DatatypeProperty ;
+atm:serialNumber a owl:DatatypeProperty , owl:FunctionalProperty ;
   rdfs:domain atm:CashCard ;
   rdfs:range xsd:string .
 
-atm:bankCode a owl:DatatypeProperty ;
+atm:bankCode a owl:DatatypeProperty , owl:FunctionalProperty ;
   rdfs:domain atm:CashCard ;
   rdfs:range xsd:string .
 
 atm:messageCode a owl:DatatypeProperty ;
   rdfs:domain atm:Message ;
   rdfs:range xsd:string .
+
+atm:CashCard owl:hasKey ( atm:bankCode atm:serialNumber ) .
