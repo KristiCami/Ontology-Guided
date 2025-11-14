@@ -1,6 +1,7 @@
 import argparse
 import os
 from dotenv import load_dotenv
+import os
 import sys
 import logging
 import json
@@ -8,12 +9,18 @@ from typing import Iterable, Optional, Union
 from pathlib import Path
 
 # Ensure the project root and scripts directory are on the Python path
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
-SCRIPTS_DIR = os.path.dirname(__file__)
-if SCRIPTS_DIR not in sys.path:
-    sys.path.insert(0, SCRIPTS_DIR)
+_ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(_ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(_ROOT_DIR))
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from ontology_guided.project_paths import (
+    PROJECT_ROOT,
+    DEFAULT_BASE_IRI,
+    DEFAULT_SHAPES_PATH,
+)
 
 from ontology_guided.data_loader import DataLoader, clean_text
 from ontology_guided.llm_interface import LLMInterface
@@ -84,9 +91,9 @@ def load_dev_examples(requirements_path: str, split_path: str) -> tuple[list[dic
     return examples, dev_ids_list
 
 # Default ontology locations used by optional command-line flags
-ONTOLOGIES_DIR = os.path.join(PROJECT_ROOT, "ontologies")
-RBO_ONTOLOGY_PATH = os.path.join(ONTOLOGIES_DIR, "rbo.ttl")
-LEXICAL_ONTOLOGY_PATH = os.path.join(ONTOLOGIES_DIR, "lexical.ttl")
+ONTOLOGIES_DIR = str(PROJECT_ROOT / "ontologies")
+RBO_ONTOLOGY_PATH = str(PROJECT_ROOT / "ontologies" / "rbo.ttl")
+LEXICAL_ONTOLOGY_PATH = str(PROJECT_ROOT / "ontologies" / "lexical.ttl")
 
 
 def _infer_prefix_from_base(base_iri: str) -> str:
@@ -474,8 +481,20 @@ def run_pipeline(
 def main():
     parser = argparse.ArgumentParser(description="Run the OWL generation pipeline")
     parser.add_argument("--inputs", nargs="+", default=["demo.txt"], help="Requirement files (.txt/.docx)")
-    parser.add_argument("--shapes", default="shapes.ttl", help="SHACL shapes file")
-    parser.add_argument("--base-iri", default="http://example.com/atm#", help="Base IRI for ontology")
+    try:
+        shapes_help = f"SHACL shapes file (default: {DEFAULT_SHAPES_PATH.relative_to(PROJECT_ROOT)})"
+    except ValueError:
+        shapes_help = f"SHACL shapes file (default: {DEFAULT_SHAPES_PATH})"
+    parser.add_argument(
+        "--shapes",
+        default=str(DEFAULT_SHAPES_PATH),
+        help=shapes_help,
+    )
+    parser.add_argument(
+        "--base-iri",
+        default=DEFAULT_BASE_IRI,
+        help="Base IRI for ontology",
+    )
     parser.add_argument(
         "--prefix",
         default=None,

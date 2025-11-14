@@ -10,6 +10,7 @@ for path in (current_dir, project_root):
     if path not in sys.path:
         sys.path.insert(0, path)
 
+from ontology_guided.project_paths import DEFAULT_BASE_IRI, DEFAULT_SHAPES_PATH
 from main import run_pipeline
 
 app = Flask(__name__)
@@ -102,7 +103,7 @@ def index():
                 ontology_files.append(o_path)
 
         shapes_uploaded = False
-        shapes_path = "shapes.ttl"
+        shapes_path = str(DEFAULT_SHAPES_PATH)
         shapes_file = request.files.get("shapes")
         if shapes_file and shapes_file.filename:
             shapes_uploaded = True
@@ -110,7 +111,7 @@ def index():
             shapes_path = os.path.join("uploads", sname)
             shapes_file.save(shapes_path)
 
-        base_iri = request.form.get("base_iri", "http://example.com/atm#").strip()
+        base_iri = request.form.get("base_iri", DEFAULT_BASE_IRI).strip()
 
         if not inputs:
             return "No input provided", 400

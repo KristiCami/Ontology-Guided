@@ -12,9 +12,10 @@ from .validator import SHACLValidator
 from .llm_interface import LLMInterface
 from .ontology_builder import OntologyBuilder
 from .reasoner import run_reasoner, ReasonerError
+from .project_paths import DEFAULT_SHAPES_PATH
 
 BASE_IRI = "http://example.com/atm#"
-SHAPES_FILE = "shapes.ttl"
+SHAPES_FILE = str(DEFAULT_SHAPES_PATH)
 DATA_FILE = "results/combined.ttl"
 
 

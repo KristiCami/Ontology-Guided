@@ -162,7 +162,7 @@ def test_compare_metrics_with_split_and_dev(monkeypatch, tmp_path):
         encoding="utf-8",
     )
 
-    shapes = pathlib.Path(__file__).resolve().parent.parent / "shapes.ttl"
+    shapes = pathlib.Path(__file__).resolve().parent.parent / "gold" / "shapes_atm.ttl"
 
     dev_split = tmp_path / "dev.txt"
     dev_split.write_text("2\n", encoding="utf-8")

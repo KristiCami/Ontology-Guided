@@ -9,7 +9,7 @@
 | Συνιστώσα | Αρχείο / Πηγή | Περιγραφή | Χρήση |
 |-----------|----------------|-----------|-------|
 | Απαιτήσεις (ATM) | `evaluation/atm_requirements.jsonl` | JSONL με τα sentence-level requirements και τις αντιστοιχίες χρυσών αξιωμάτων. | Είσοδος στο pipeline (E1–E4). |
-| SHACL Shapes | `shapes.ttl` | Καλύπτει constraint κανόνες ATM domain. | Ενεργοποιείται όταν `validate=true` (E3–E4). |
+| SHACL Shapes | `gold/shapes_atm.ttl` | Καλύπτει constraint κανόνες ATM domain. | Ενεργοποιείται όταν `validate=true` (E3–E4). |
 | Gold Ontology | `gold/atm_gold.ttl` | Στόχος αξιολόγησης F1/precision/recall. | Σύγκριση με τα παραγόμενα triples. |
 | CQ Suite | `evaluation/atm_cqs.rq` | SPARQL ASK queries (21 ερωτήσεις). | Μέτρηση CQ pass rate. |
 | Dev/Test Splits | `splits/dev.txt`, `evaluation/table1.csv` export | Ορίζει sentence IDs που χρησιμοποιούνται στο filtering των απαιτήσεων. | Διασφαλίζει μη διαρροή μεταξύ dev/test. |
@@ -79,7 +79,7 @@ python -m evaluation.run_benchmark \
 | A9 | Weights λ |  Εκκρεμεί | Grid search και εξαγωγή καμπυλών Pareto (σύνδεση με `repair_efficiency.py`). |
 | A10 | Noisy reqs |  Εκκρεμεί | Παραγωγή παραλλαγών με noise (βλ. `scripts/noise_injection.py` αν διαθέσιμο, αλλιώς νέο script). |
 | A11 | Long docs |  Εκκρεμεί | Δημιουργία buckets μεγαλύτερου μήκους και μέτρηση χρόνου/μνήμης. |
-| A12 | Shapes coverage |  Εκκρεμεί | Τροποποίηση `shapes.ttl` (+/-20%) με διατήρηση versioning. |
+| A12 | Shapes coverage |  Εκκρεμεί | Τροποποίηση `gold/shapes_atm.ttl` (+/-20%) με διατήρηση versioning. |
 | A13 | Aligners |  Εκκρεμεί | Benchmark διαφορετικών matchers στο `ontology_guided/exemplar_selector`. |
 | A14 | CQ design |  Εκκρεμεί | Διακύμανση πυκνότητας/αυστηρότητας στο `evaluation/atm_cqs.rq`. |
 
