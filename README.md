@@ -8,6 +8,75 @@ School of Informatics, Aristotle University of Thessaloniki  \\
 
 ---
 
+## 0. System Overview & Quickstart
+The repository contains an end-to-end implementation of the OG–NSD pipeline described in the thesis narrative below.  The code turns unstructured requirement statements into OWL axioms, validates them with SHACL shapes, optionally runs DL reasoning, and emits machine-readable reports summarizing issues and competency-question (CQ) coverage.
+
+### Repository layout
+```
+README.md                 ← This document (methodology + hands-on instructions)
+og_nsd/                   ← Python package with reusable pipeline modules
+  config.py               ← Dataclass for configuring runs
+  llm.py                  ← OpenAI adapter + heuristic fallback LLM
+  ontology.py             ← Graph assembly helpers built on rdflib
+  pipeline.py             ← High-level orchestration logic
+  queries.py              ← CQ loader/runner for SPARQL ASK suites
+  reasoning.py            ← Optional owlready2 + Pellet reasoning hooks
+  reporting.py            ← JSON report builder
+  requirements.py         ← JSON/JSONL requirement ingestion helpers
+  shacl.py                ← SHACL validation wrapper (pySHACL)
+scripts/run_pipeline.py   ← CLI entry point wrapping `OntologyDraftingPipeline`
+requirements.txt          ← Minimal Python dependencies (rdflib, pyshacl, owlready2)
+gold/                     ← Domain assets (ATM gold ontology + SHACL shapes)
+atm_requirements.jsonl    ← Benchmark requirements used in the paper
+atm_cqs.rq                ← CQ suite for coverage evaluation
+```
+
+### Installation
+1. **Create a virtual environment** (Python ≥ 3.10 recommended):
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
+2. **(Optional) Enable OpenAI-backed prompting.** Install `openai` and export `OPENAI_API_KEY`:
+   ```bash
+   pip install openai
+   export OPENAI_API_KEY=sk-...
+   ```
+   The default mode (`--llm-mode heuristic`) is offline-safe and derives axioms with lightweight pattern rules for reproducibility.
+
+### Running the pipeline (ATM example)
+```bash
+python scripts/run_pipeline.py \
+  --requirements atm_requirements.jsonl \
+  --shapes gold/shapes_atm.ttl \
+  --base gold/atm_gold.ttl \
+  --cqs atm_cqs.rq \
+  --output build/atm_generated.ttl \
+  --report build/atm_report.json \
+  --max-reqs 50
+```
+Key outputs:
+- `build/atm_generated.ttl`: merged ontology (bootstrap + generated axioms).
+- `build/atm_report.json`: SHACL summary, CQ pass/fail list, LLM notes, and reasoning diagnostics if enabled (`--reasoning`).
+
+### Customising runs
+| Need | How |
+| ---- | --- |
+| Switch to OpenAI generation | Pass `--llm-mode openai` (requires API key). |
+| Limit runtime | Adjust `--max-reqs` to sample the requirement corpus. |
+| Enable DL reasoning | Append `--reasoning` (Pellet must be installed on the host; otherwise the code falls back gracefully). |
+| Use another domain | Point `--shapes`, `--base`, and `--cqs` to the new ontology assets. |
+| Save intermediate Turtle | Edit `PipelineConfig` (see `og_nsd/config.py`) or extend `scripts/run_pipeline.py`. |
+
+### Development tips
+- The pipeline is modular: swap in a domain-specific LLM by subclassing `LLMClient` or plug in another validator by editing `og_nsd/shacl.py`.
+- `RequirementLoader` supports both pure JSON (list/dict) and JSONL files.  It also exposes `chunk_requirements` for few-shot prompt batching.
+- Competency questions are plain SPARQL ASK queries separated by blank lines/comments, making it easy to author new CQ suites per domain.
+
+---
+
 ## Abstract
 Natural language requirements are often ambiguous and inconsistent, hindering automated validation and reuse. We present a neuro–symbolic pipeline that transforms free-form requirements into validated OWL ontologies via a closed-loop architecture that integrates Large Language Models (LLMs), SHACL constraints, and logical reasoning. Our contributions include (i) ontology-aware LLM prompting, (ii) SHACL-guided iterative repair, (iii) hybrid reasoning and validation, and (iv) plug-and-play domain adaptability. Evaluation on an ATM case study demonstrates improved precision, recall, and constraint compliance compared to neural-only and symbolic-only baselines.
 
@@ -74,121 +143,6 @@ Our pipeline can be understood as an instance of Counterexample-Guided Inductive
 Given preloaded ontologies $O$ and their vocabularies $A$, we ground the LLM with (i) preferred labels and synonyms, (ii) domain relations, and (iii) naming/typing conventions (e.g., class vs. object property) to reduce semantic drift. We use few-shot exemplars in Turtle with comments mapping NL phrases to OWL axioms; Listing 1 shows a minimal example.
 
 ```turtle
-@prefix ex: <http://example.org/atm#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
-# NL: "An ATM dispenses cash to an authenticated customer."
-ex:ATM a owl:Class .
-ex:Customer a owl:Class .
-ex:dispensesCashTo a owl:ObjectProperty ;
-  rdfs:domain ex:ATM ;
-  rdfs:range ex:Customer .
-ex:authenticated a owl:DatatypeProperty ;
-  rdfs:domain ex:Customer ;
-  rdfs:range xsd:boolean .
-```
-
-**Prompt grounding rule.** For each sentence $s \in R$, we append top-$m$ vocabulary items $H_m(s) \subseteq A$ scored by a hybrid function $\lambda \, \text{BM25}(s, a) + (1-\lambda) \, \text{sim}_{\text{emb}}(s, a)$ with type filters (class/property/datatype). Hyperparameters $\lambda$ and $m$ are tuned on a development split.
-
-### F. Patch Calculus: Typed Ontology Edits
-To constrain and structure the LLM’s outputs, we introduce a typed patch calculus. Instead of arbitrary text edits, the LLM is guided to produce patches drawn from a finite grammar of ontology edit operations:
-
-```
-Patch P ::= ADDCLASS(C)
-          | ADDOBJPROP(P,D,R)
-          | ADDDTPROP(D,Dm,T)
-          | ADDAXIOM(α)
-          | DELAXIOM(α)
-          | ADDRESTRICTION(C,ρ)
-          | ALIGN(θ)
-
-ρ ::= ∀p.C | ∃p.C | ≥ k p.C | ≤ k p.C
-θ ::= C ≡ C′ | C ⊑ C′ | p ≡ p′ | p ⊑ p′
-```
-
-Each patch is subject to invariants that preserve soundness:
-- **Idempotence:** Re-applying the same `ADDAXIOM` yields no change.
-- **Monotonic safety:** A patch is admissible only if it introduces no new hard violations.
-- **Compositionality:** Patches on disjoint symbols commute, ensuring deterministic outcomes.
-
-### G. Closed Neuro–Symbolic Repair Loop
-**Violation-to-Prompt Synthesis (core contribution).** Given a violation $v \in \text{viol}(G, S)$, we build a repair prompt $r = \Gamma(v, G, A)$ from three parts: (i) canonicalized explanation $e = \text{canon}(v)$ (target, path, constraint, observed value/type); (ii) local context $C = \text{nbr}(G, v, h)$, the $h$-hop induced subgraph around the violating node(s), serialized in Turtle; and (iii) term hints $H \subseteq A$ selected by lexical matchers and type-compatibility filters. The prompt requests OWL patches that resolve $v$ while preserving prior axioms.
-
-At each iteration, we first run the reasoner to materialize entailments and detect incoherencies, then validate the resulting graph with SHACL. This ordering ensures that structural constraints are checked against an ontology already closed under inference.
-
-**Why this is novel.** Our repair loop differs from prior self-refinement methods in three key ways:
-- Validator feedback (from SHACL and reasoners) is canonicalized into structured prompts rather than passed as free text.
-- Repair prompts include local graph context, grounding the LLM in relevant triples.
-- Termination is defined as $\Phi(G) = 0$, i.e., full logical and structural conformance, not only surface-level edits.
-
-**Termination and cost.** The loop halts when $\Phi(G) = 0$ or after $K_{\max}$ iterations. Per-iteration cost is $\mathcal{O}(T_{\text{val}} + T_{\text{reas}} + |R| T_{\text{llm}})$ for SHACL validation, reasoning, and $|R|$ generations, respectively. Empirically we find both $|R|$ and $K_{\max}$ small (see Table II).
-
-#### Algorithm 1: OG–NSD-CEGIR
-```
-Require: Requirements R, ontologies O, SHACL shapes S,
-         base IRI ι, LLM L, max iterations Kmax
-Ensure: Validated ontology G* and SHACL report
-1: T ← LOADANDSEGMENT(R)
-2: A ← EXTRACTAVAILABLETERMS(O)
-3: G ← ∅
-4: for each sentence s ∈ T do
-5:     p ← PROMPT(L, s, A)
-6:     τ ← L.GENERATEOWL(p)
-7:     G ← MERGE(G, PARSETURTLE(τ))
-8: end for
-9: if reasoning enabled then G ← RUNREASONER(G)
-10: end if
-11: (conf, rep, Φ) ← SHACLVALIDATEWEIGHTED(G, S)
-12: k ← 0
-13: while ¬conf and k < Kmax do
-14:     V ← EXTRACTCOUNTEREXAMPLES(rep)
-15:     R ← SYNTHESIZEREPAIRPROMPTS(V, G, A)
-16:     for each r ∈ R do
-17:         τ′ ← L.GENERATEPATCH(r)
-18:         G ← MERGEIFADMISSIBLE(G, PARSETURTLE(τ′))
-19:     end for
-20:     if reasoning enabled then G ← RUNREASONER(G)
-21:     end if
-22:     (conf, rep, Φ) ← SHACLVALIDATEWEIGHTED(G, S)
-23:     k ← k + 1
-24: end while
-25: return G, rep
-```
-
-#### Algorithm 2: Counterexample → Patch Prompt Synthesis
-```
-Require: Counterexamples V, graph G, terms A
-Ensure: Repair prompt set R
-1: R ← ∅
-2: for each v ∈ V do
-3:     ctx ← EXTRACTLOCALCONTEXT(G, v)
-4:     e ← CANONICALIZECOUNTEREXAMPLE(v)
-5:     hints ← SELECTTERMS(A, ctx)
-6:     r ← FORMATPATCHPROMPT(e, ctx, hints)
-7:     R ← R ∪ {r}
-8: end for
-9: return R
-```
-
-**Admissible patches.** A patch set $S$ is admissible for $G$ iff applying it and re-validating yields no hard violations: $\text{VERIFY}(\text{APPLY}(G, S))$ returns $V_{\text{hard}} = \varnothing$. Only admissible patches are committed in our loop.
-
----
-
-## H. Theoretical Properties
-We provide guarantees that distinguish OG–NSD from purely heuristic pipelines.
-
-- **Theorem 1 (Hard-safety):** If `APPLY` commits only admissible patches that preserve all hard constraints, then for all rounds $t$, the ontology $G_t$ remains consistent and satisfies all hard SHACL shapes.
-- **Theorem 2 (Termination):** If the patch grammar is finite and each committed patch strictly reduces the violation potential (i.e., decreases the weighted objective in Eq. 1), then the repair loop halts in at most $\mathcal{O}(|\mathcal{P}|)$ iterations.
-- **Theorem 3 (Approximate minimality):** If `SELECTPATCHES` uses greedy set cover on the violation→patch relation, then the resulting repair set is within a $(1 + \ln m)$ factor of the optimal number of patches, where $m$ is the number of violations.
-
-## I. SHACL Shapes and Reasoning
-We combine OWL reasoning for logical consistency with SHACL for shape-based constraint checking. Reasoners detect unsatisfiable classes and incoherent hierarchies, while SHACL captures structural and data-type constraints. Listing 2 illustrates a minimal ATM constraint.
-
-```turtle
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix ex: <http://example.org/atm#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 ex:WithdrawalShape a sh:NodeShape ;
@@ -273,19 +227,20 @@ Coverage of SHACL shapes, dependency on available domain ontologies, token limit
 We presented OG–NSD, a neuro–symbolic pipeline for drafting OWL ontologies from NL requirements with alignment, hybrid validation, and iterative repair. Experiments across domains indicate improved precision/recall and near-perfect SHACL compliance.
 
 ## References
-1. M. A. Hearst, “Automatic acquisition of hyponyms from large text corpora,” in COLING, 1992.  
-2. P. Cimiano and J. Völker, “Text2Onto: A framework for ontology learning and data-driven change discovery,” in NLDB, 2005.  
-3. R. Navigli and P. Velardi, “From glossaries to ontologies: OntoLearn reloaded,” *Computational Linguistics*, vol. 39, no. 3, pp. 665–707, 2010.  
-4. M. Banko and O. Etzioni, “The tradeoffs between open and traditional relation extraction,” in ACL, 2007.  
-5. J. Euzenat and P. Shvaiko, *Ontology Matching*, 2nd ed. Springer, 2013.  
-6. P. Hitzler, M. Krötzsch, B. Parsia, P. F. Patel-Schneider, and S. Rudolph, “OWL 2 web ontology language primer,” W3C Recommendation, 2012.  
-7. E. Sirin, B. Parsia, B. C. Grau, A. Kalyanpur, and Y. Katz, “Pellet: A practical OWL-DL reasoner,” *Journal on Web Semantics*, 2007.  
-8. R. Shearer, B. Motik, and I. Horrocks, “HermiT: A highly-efficient OWL reasoner,” in OWLED, 2008.  
-9. Y. Kazakov, M. Krötzsch, and F. Simančík, “The ELK reasoner: Completeness and performance,” *Journal of Automated Reasoning*, vol. 53, no. 1, pp. 1–61, 2014.  
-10. H. Knublauch and D. Kontokostas, “Shapes Constraint Language (SHACL),” W3C Recommendation, 2017.  
-11. T. R. Besold, A. S. d’Avila Garcez, S. Bader et al., “Neural-symbolic learning and reasoning: A survey and interpretation,” *Frontiers in Artificial Intelligence and Applications*, 2017.  
-12. A. S. d’Avila Garcez, L. C. Lamb, and D. M. Gabbay, *Neural-Symbolic Cognitive Reasoning*. Springer, 2009.  
-13. T. Rocktäschel and S. Riedel, “End-to-end differentiable proving,” in NeurIPS, 2017.  
-14. R. Evans and E. Grefenstette, “Learning explanatory rules from noisy data,” in *Journal of Machine Learning Research*, 2018.  
-15. A. Madaan et al., “Self-refine: Iterative refinement with feedback from LLMs,” in NeurIPS, 2023.  
+1. M. A. Hearst, “Automatic acquisition of hyponyms from large text corpora,” in COLING, 1992.
+2. P. Cimiano and J. Völker, “Text2Onto: A framework for ontology learning and data-driven change discovery,” in NLDB, 2005.
+3. R. Navigli and P. Velardi, “From glossaries to ontologies: OntoLearn reloaded,” *Computational Linguistics*, vol. 39, no. 3, pp. 665–707, 2010.
+4. M. Banko and O. Etzioni, “The tradeoffs between open and traditional relation extraction,” in ACL, 2007.
+5. J. Euzenat and P. Shvaiko, *Ontology Matching*, 2nd ed. Springer, 2013.
+6. P. Hitzler, M. Krötzsch, B. Parsia, P. F. Patel-Schneider, and S. Rudolph, “OWL 2 web ontology language primer,” W3C Recommendation, 2012.
+7. E. Sirin, B. Parsia, B. C. Grau, A. Kalyanpur, and Y. Katz, “Pellet: A practical OWL-DL reasoner,” *Journal on Web Semantics*, 2007.
+8. R. Shearer, B. Motik, and I. Horrocks, “HermiT: A highly-efficient OWL reasoner,” in OWLED, 2008.
+9. Y. Kazakov, M. Krötzsch, and F. Simančík, “The ELK reasoner: Completeness and performance,” *Journal of Automated Reasoning*, vol. 53, no. 1, pp. 1–61, 2014.
+10. H. Knublauch and D. Kontokostas, “Shapes Constraint Language (SHACL),” W3C Recommendation, 2017.
+11. T. R. Besold, A. S. d’Avila Garcez, S. Bader et al., “Neural-symbolic learning and reasoning: A survey and interpretation,” *Frontiers in Artificial Intelligence and Applications*, 2017.
+12. A. S. d’Avila Garcez, L. C. Lamb, and D. M. Gabbay, *Neural-Symbolic Cognitive Reasoning*. Springer, 2009.
+13. T. Rocktäschel and S. Riedel, “End-to-end differentiable proving,” in NeurIPS, 2017.
+14. R. Evans and E. Grefenstette, “Learning explanatory rules from noisy data,” in *Journal of Machine Learning Research*, 2018.
+
+15. A. Madaan et al., “Self-refine: Iterative refinement with feedback from LLMs,” in NeurIPS, 2023.
 16. N. Shinn et al., “Reflexion: Language agents with verbal reinforcement learning,” in NeurIPS, 2023.
