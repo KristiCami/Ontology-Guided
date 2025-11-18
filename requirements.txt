@@ -1,3 +1,0 @@
-rdflib>=6.3
-pyshacl>=0.22
-owlrl>=6.0.2
