@@ -1,0 +1,10 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix atm: <http://example.org/atm#> .
+
+atm:TransactionShape a sh:NodeShape ;
+    sh:targetClass atm:Transaction ;
+    sh:property [
+        sh:path atm:performedBy ;
+        sh:minCount 1 ;
+        sh:message "Every transaction must be linked to the user who performs it." ;
+    ] .

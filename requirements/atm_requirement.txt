@@ -1,0 +1,1 @@
+The ATM must log all user transactions after card insertion. Each transaction needs to be associated with the user performing it.
