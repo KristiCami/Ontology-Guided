@@ -1,0 +1,125 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+atm:WithdrawalShape a sh:NodeShape ;
+  sh:targetClass atm:Withdrawal ;
+  sh:property [
+    sh:path atm:performedBy ;
+    sh:class atm:Customer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:severity sh:Violation ;
+    sh:message "Withdrawal must be performed by exactly one Customer."
+  ] ;
+  sh:property [
+    sh:path atm:onAccount ;
+    sh:class atm:Account ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:severity sh:Violation ;
+    sh:message "Withdrawal must refer to exactly one Account."
+  ] ;
+  sh:property [
+    sh:path atm:usesCard ;
+    sh:class atm:CashCard ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:severity sh:Violation ;
+    sh:message "Withdrawal must use exactly one CashCard."
+  ] ;
+  sh:property [
+    sh:path atm:requestedAmount ;
+    sh:datatype xsd:decimal ;
+    sh:minCount 1 ;
+    sh:minInclusive "0"^^xsd:decimal ;
+    sh:severity sh:Violation ;
+    sh:message "requestedAmount must exist and be a non-negative decimal."
+  ] ;
+  sh:property [
+    sh:path atm:dispensedAmount ;
+    sh:datatype xsd:decimal ;
+    sh:minCount 1 ;
+    sh:minInclusive "0"^^xsd:decimal ;
+    sh:severity sh:Violation ;
+    sh:message "dispensedAmount must exist and be a non-negative decimal."
+  ] .
+
+atm:PerTransactionLimitShape a sh:NodeShape ;
+  sh:targetClass atm:Withdrawal ;
+  sh:property [
+    sh:path atm:requestedAmount ;
+    sh:datatype xsd:decimal ;
+    sh:maxInclusive "1000"^^xsd:decimal ;
+    sh:severity sh:Warning ;
+    sh:message "Requested amount exceeds policy limit (soft)."
+  ] .
+
+atm:AuthorizationShape a sh:NodeShape ;
+  sh:targetClass atm:Transaction ;
+  sh:property [
+    sh:path atm:authorizedBy ;
+    sh:class atm:Authorization ;
+    sh:minCount 1 ;
+    sh:severity sh:Violation ;
+    sh:message "Every transaction must be linked to an Authorization."
+  ] ;
+  sh:property [
+    sh:path atm:transactionTimestamp ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:severity sh:Violation ;
+    sh:message "Every transaction must have a timestamp (xsd:dateTime)."
+  ] .
+
+atm:CashCardShape a sh:NodeShape ;
+  sh:targetClass atm:CashCard ;
+  sh:property [
+    sh:path atm:serialNumber ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:severity sh:Violation ;
+    sh:message "CashCard must have exactly one serialNumber."
+  ] ;
+  sh:property [
+    sh:path atm:bankCode ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:severity sh:Violation ;
+    sh:message "CashCard must have exactly one bankCode."
+  ] ;
+  sh:property [
+    sh:path [ sh:inversePath atm:ownsCard ] ;
+    sh:class atm:Customer ;
+    sh:minCount 1 ;
+    sh:severity sh:Violation ;
+    sh:message "Each CashCard must be owned by at least one Customer."
+  ] .
+
+atm:CashCardKeyShape a sh:NodeShape ;
+  sh:targetClass atm:CashCard ;
+  sh:sparql [
+    a sh:SPARQLConstraint ;
+    sh:message "bankCode+serialNumber must be globally unique across CashCards." ;
+    sh:severity sh:Violation ;
+    sh:select """
+      SELECT ?this
+      WHERE {
+        ?this atm:bankCode ?bc ; atm:serialNumber ?sn .
+        ?other a atm:CashCard ; atm:bankCode ?bc ; atm:serialNumber ?sn .
+        FILTER(?other != ?this)
+      }
+    """
+  ] .
+
+atm:ATMShape a sh:NodeShape ;
+  sh:targetClass atm:ATM ;
+  sh:property [
+    sh:path atm:operatedBy ;
+    sh:class atm:Bank ;
+    sh:minCount 1 ;
+    sh:severity sh:Violation ;
+    sh:message "ATM must be associated with a Bank via operatedBy."
+  ] .
