@@ -13,6 +13,67 @@ Natural language requirements are often ambiguous and inconsistent, hindering au
 
 **Index Terms** — Ontology learning, requirements engineering, OWL, SHACL, large language models, neuro–symbolic AI, automated reasoning.
 
+## Πρακτικός Οδηγός Χρήσης (Hands-on Guide)
+Η παρακάτω ενότητα εξηγεί πώς να εγκαταστήσετε, να τρέξετε και να επεκτείνετε το OG–NSD ως πλήρες λειτουργικό σύστημα παραγωγής OWL. Οι οδηγίες είναι αναλυτικές και προσανατολισμένες στην πράξη ώστε να μπορεί να αναπαραχθεί βήμα-βήμα η διαδικασία.
+
+### 1. Προαπαιτούμενα
+1. **Python 3.10+** (συνιστάται 3.11).
+2. **pip/venv** για απομόνωση εξαρτήσεων.
+3. (Προαιρετικό) **OpenAI API key** αν θέλετε να αντικαταστήσετε το offline Template LLM με GPT-4/4o.
+
+### 2. Εγκατάσταση
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Στα Windows: .venv\Scripts\activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 3. Εκτέλεση Pipeline
+Το αποθετήριο περιέχει ήδη ανωτέρω αρχεία (ATM requirements + SHACL σχήματα). Για να παράξετε ένα ενοποιημένο ontology και αναφορά ελέγχου:
+```bash
+python scripts/run_pipeline.py atm_requirements.jsonl \
+  --shapes gold/shapes_atm.ttl \
+  --output artifacts/run1 \
+  --namespace "http://example.com/atm#" \
+  --iterations 3 \
+  --model template
+```
+
+- Ο φάκελος `artifacts/run1/` θα περιέχει:
+  - `generated_ontology.ttl`: ενοποιημένο OWL/Turtle με όλες τις απαιτήσεις.
+  - `validation_report.json`: αναλυτικές αναφορές SHACL ανά απαίτηση.
+- Η σημαία `--model template` ενεργοποιεί τον offline LLM (πλήρως αναπαραγώγιμος). Για GPT-4, δώστε `--model gpt-4o` και ορίστε `OPENAI_API_KEY` στο περιβάλλον.
+
+### 4. Ρύθμιση LLM και Feedback Loop
+- Το σύστημα εφαρμόζει κλειστό βρόχο: LLM → OWL → SHACL → repair prompt → LLM.
+- `--iterations N` καθορίζει τον μέγιστο αριθμό προσπαθειών ανά απαίτηση. Σε κάθε iteration:
+  1. Χτίζεται prompt (βλ. `og_nsd/prompts.py`).
+  2. Το LLM (template ή OpenAI) παράγει Turtle.
+  3. Το `pyshacl` τρέχει πάνω στα `gold/shapes_atm.ttl`.
+  4. Τα σφάλματα ενσωματώνονται σε νέο prompt και επαναλαμβάνεται η διαδικασία.
+
+### 5. Τροποποίηση Σχημάτων & Ontologies
+- Αντικαταστήστε το `--shapes` με νέο SHACL αρχείο (π.χ. domain-specific).
+- Για επιπλέον οντολογίες/ευθυγράμμιση, επεκτείνετε τα αρχεία στο `gold/` και προσαρμόστε τις λίστες στο `og_nsd/config.py`.
+- Οι ερωτήσεις ικανότητας (competency questions) μπορούν να τοποθετηθούν στο `atm_cqs.rq` και να συνδυαστούν σε μελλοντικές εκτελέσεις.
+
+### 6. Διάγνωση & Αντιμετώπιση Προβλημάτων
+- **Σφάλμα OpenAI**: Βεβαιωθείτε ότι το `OPENAI_API_KEY` είναι ορισμένο και εγκατεστημένο το `openai` package.
+- **Αστοχία SHACL**: Ελέγξτε το `validation_report.json` για το κείμενο `sh:resultMessage`. Το ίδιο κείμενο χρησιμοποιείται στο repair prompt.
+- **Άδεια έξοδος**: Διαγράψτε παλιά artifacts και ξανατρέξτε την εντολή.
+
+### 7. Δομή Κώδικα
+- `og_nsd/pipeline.py`: κύρια ορχήστρα (drafting, validation, repair).
+- `og_nsd/llm.py`: Template LLM (offline) + OpenAI wrapper.
+- `og_nsd/validators.py`: αναγνώσεις SHACL με `pyshacl`.
+- `scripts/run_pipeline.py`: CLI για γρήγορη εκτέλεση.
+- `requirements.txt`: όλες οι βιβλιοθήκες (rdflib, pyshacl, owlready2, spacy, openai).
+
+Με τα παραπάνω βήματα το σύστημα είναι πλήρως λειτουργικό, αναπαραγώγιμο και έτοιμο για περαιτέρω επεκτάσεις ή αξιολόγηση.
+
+---
+
 ## I. Introduction
 ### Problem
 Requirements in natural language (NL) are informal and underspecified, creating obstacles for automation in validation, traceability, and reuse. Ontologies can provide a shared, machine-interpretable conceptualization but are costly to author manually.
