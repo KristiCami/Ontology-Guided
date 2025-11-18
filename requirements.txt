@@ -1,5 +1,0 @@
-rdflib==7.0.0
-pyshacl==0.20.0
-owlready2==0.45
-spacy==3.7.2
-openai>=1.6.1
