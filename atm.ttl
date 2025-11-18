@@ -1,0 +1,2853 @@
+@prefix : <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xsp: <http://www.owl-ontologies.com/2005/08/07/xsp.owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
+@prefix protege: <http://protege.stanford.edu/plugins/owl/protege#> .
+@base <http://lod.csd.auth.gr/atm/atm.ttl#> .
+
+<http://lod.csd.auth.gr/atm/atm.ttl> rdf:type owl:Ontology .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://www.w3.org/2000/01/rdf-schema#range
+rdfs:range rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Datatypes
+#################################################################
+
+###  java:edu.stanford.smi.protege.model.DefaultCls
+<java:edu.stanford.smi.protege.model.DefaultCls> rdf:type rdfs:Datatype .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#accepts
+:accepts rdf:type owl:ObjectProperty ;
+         rdfs:domain :ATM ;
+         rdfs:range :CashCard ;
+         owl:propertyDisjointWith :not_accepts .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#belongsToBank
+:belongsToBank rdf:type owl:ObjectProperty ;
+               owl:inverseOf :isBelongedBy ;
+               rdfs:domain :ATM ;
+               rdfs:range [ rdf:type owl:Restriction ;
+                            owl:onProperty :belongsToBank ;
+                            owl:allValuesFrom :Bank
+                          ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#belongsToCashCard
+:belongsToCashCard rdf:type owl:ObjectProperty ;
+                   rdfs:subPropertyOf owl:topObjectProperty ;
+                   rdfs:domain :CashCard ;
+                   rdfs:range [ rdf:type owl:Restriction ;
+                                owl:onProperty :belongsToCashCard ;
+                                owl:allValuesFrom :Customer
+                              ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#complies_with
+:complies_with rdf:type owl:ObjectProperty ;
+               rdfs:domain :Function ;
+               rdfs:range :InformationStandard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#condition
+:condition rdf:type owl:ObjectProperty ;
+           rdfs:domain :ComplexRequirement ;
+           rdfs:range :BasicRequirement .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#consistOfBankComputer
+:consistOfBankComputer rdf:type owl:ObjectProperty ;
+                       rdfs:domain :Bank ;
+                       rdfs:range [ rdf:type owl:Restriction ;
+                                    owl:onProperty :consistOfBankComputer ;
+                                    owl:someValuesFrom :BankComputer
+                                  ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#consistOfKeys
+:consistOfKeys rdf:type owl:ObjectProperty ;
+               owl:inverseOf :ispartOfKeypad ;
+               rdfs:domain :Keypad ;
+               rdfs:range :Keys .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#dispenses
+:dispenses rdf:type owl:ObjectProperty ;
+           rdfs:domain :ATM ;
+           rdfs:range :Money .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#displays
+:displays rdf:type owl:ObjectProperty ;
+          rdfs:domain :ATM ;
+          rdfs:range [ rdf:type owl:Class ;
+                       owl:unionOf ( :ErrorDisplay
+                                     :NormalDisplay
+                                   )
+                     ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#else
+:else rdf:type owl:ObjectProperty ;
+      rdfs:domain :ComplexRequirement ;
+      rdfs:range :BasicRequirement .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#enters
+:enters rdf:type owl:ObjectProperty ;
+        rdfs:domain :Customer ;
+        rdfs:range [ rdf:type owl:Class ;
+                     owl:unionOf ( :CashCard
+                                   :TransactionAmountOfTransaction
+                                 )
+                   ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#forTime
+:forTime rdf:type owl:ObjectProperty ;
+         rdfs:domain :Display ;
+         rdfs:range :DisplayTime .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#fromATM
+:fromATM rdf:type owl:ObjectProperty ;
+         rdfs:domain [ rdf:type owl:Class ;
+                       owl:unionOf ( :TransactionAmountOfTransactionFromATM
+                                     :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM
+                                   )
+                     ] ;
+         rdfs:range :ATM .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#fromBankComputer
+:fromBankComputer rdf:type owl:ObjectProperty ;
+                  rdfs:domain [ rdf:type owl:Class ;
+                                owl:unionOf ( :InteractionFromBankComputer
+                                              :ResponseFromBankComputer
+                                              :StatusInteractionFromBankComputer
+                                            )
+                              ] ;
+                  rdfs:range :BankComputer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasAccountBalanceDisplayTime
+:hasAccountBalanceDisplayTime rdf:type owl:ObjectProperty ;
+                              rdfs:domain :ATM ;
+                              rdfs:range :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasAccountBalanceTransferTime
+:hasAccountBalanceTransferTime rdf:type owl:ObjectProperty ;
+                               rdfs:domain :ATM ;
+                               rdfs:range :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasBackUpPowerSupply
+:hasBackUpPowerSupply rdf:type owl:ObjectProperty ;
+                      rdfs:domain :ATM ;
+                      rdfs:range :PowerSupply .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasButtonResponseTime
+:hasButtonResponseTime rdf:type owl:ObjectProperty ;
+                       rdfs:domain :ATM ;
+                       rdfs:range :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasCardVerificationTime
+:hasCardVerificationTime rdf:type owl:ObjectProperty ;
+                         rdfs:domain :ATM ;
+                         rdfs:range :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasCashCard
+:hasCashCard rdf:type owl:ObjectProperty ;
+             rdfs:domain :Customer ;
+             rdfs:range :CashCard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasCashWithdrawalTransactionTime
+:hasCashWithdrawalTransactionTime rdf:type owl:ObjectProperty ;
+                                  rdfs:domain :ATM ;
+                                  rdfs:range :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasCost
+:hasCost rdf:type owl:ObjectProperty ;
+         rdfs:domain :InternetAccess .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasCreditCardAdvanceTime
+:hasCreditCardAdvanceTime rdf:type owl:ObjectProperty ;
+                          rdfs:domain :ATM ;
+                          rdfs:range :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasCustomer
+:hasCustomer rdf:type owl:ObjectProperty ,
+                      owl:IrreflexiveProperty ;
+             rdfs:domain :Bank ;
+             rdfs:range [ rdf:type owl:Restriction ;
+                          owl:onProperty :hasCustomer ;
+                          owl:someValuesFrom :Customer
+                        ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasDepositTransactionTime
+:hasDepositTransactionTime rdf:type owl:ObjectProperty ;
+                           rdfs:domain :ATM ;
+                           rdfs:range :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasDisplayTime
+:hasDisplayTime rdf:type owl:ObjectProperty ;
+                rdfs:domain :ErrorDisplay ;
+                rdfs:range :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasFunctionalKey
+:hasFunctionalKey rdf:type owl:ObjectProperty ;
+                  rdfs:domain :Keypad ;
+                  rdfs:range [ rdf:type owl:Restriction ;
+                               owl:onProperty :hasFunctionalKey ;
+                               owl:qualifiedCardinality "8"^^xsd:nonNegativeInteger ;
+                               owl:onClass :Keys
+                             ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasInitialDisplay
+:hasInitialDisplay rdf:type owl:ObjectProperty ;
+                   rdfs:domain :ATMTransaction ;
+                   rdfs:range :Display .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasInput
+:hasInput rdf:type owl:ObjectProperty ;
+          rdfs:domain :PowerSupply ;
+          rdfs:range :PowerSource .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasMainPowerSupply
+:hasMainPowerSupply rdf:type owl:ObjectProperty ;
+                    rdfs:domain :ATM ;
+                    rdfs:range :PowerSupply .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasPinVerificationTime
+:hasPinVerificationTime rdf:type owl:ObjectProperty ;
+                        rdfs:domain :ATM ;
+                        rdfs:range :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasProduct
+:hasProduct rdf:type owl:ObjectProperty ;
+            rdfs:domain :Customer ;
+            rdfs:range [ rdf:type owl:Restriction ;
+                         owl:onProperty :hasProduct ;
+                         owl:someValuesFrom :Product
+                       ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasReceipt
+:hasReceipt rdf:type owl:ObjectProperty ;
+            rdfs:domain :Printer ;
+            rdfs:range :Receipt .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasReceiptPrintingTime
+:hasReceiptPrintingTime rdf:type owl:ObjectProperty ;
+                        rdfs:domain :ATM ;
+                        rdfs:range :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasTouchScreenTime
+:hasTouchScreenTime rdf:type owl:ObjectProperty ;
+                    rdfs:domain :ATM ;
+                    rdfs:range :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasUnit
+:hasUnit rdf:type owl:ObjectProperty ;
+         rdfs:domain :PhysicalQuantity ;
+         rdfs:range :Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasVolatge
+:hasVolatge rdf:type owl:ObjectProperty ;
+            rdfs:domain :PowerSupply .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#haskey
+:haskey rdf:type owl:ObjectProperty ;
+        rdfs:domain :Keypad ;
+        rdfs:range "Cls(@A30_a11812dd_067e_426f_ac5e_bc9bd91e7a95)"^^<java:edu.stanford.smi.protege.model.DefaultCls> ,
+                   "Cls(@A31_a11812dd_067e_426f_ac5e_bc9bd91e7a95)"^^<java:edu.stanford.smi.protege.model.DefaultCls> .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#holds
+:holds rdf:type owl:ObjectProperty ;
+       owl:inverseOf :isHold ;
+       rdfs:domain :Customer ;
+       rdfs:range :Account .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#initializes
+:initializes rdf:type owl:ObjectProperty ;
+             rdfs:domain :Maintainer ;
+             rdfs:range :AccountMaxWithdrawalPerDayAndAccountOfAccount .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#involves
+:involves rdf:type owl:ObjectProperty ;
+          rdfs:domain :CashCard ;
+          rdfs:range [ rdf:type owl:Restriction ;
+                       owl:onProperty :involves ;
+                       owl:someValuesFrom :Account
+                     ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#isBelongedBy
+:isBelongedBy rdf:type owl:ObjectProperty ;
+              rdfs:domain :Bank ;
+              rdfs:range [ rdf:type owl:Restriction ;
+                           owl:onProperty :isBelongedBy ;
+                           owl:someValuesFrom :ATM
+                         ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#isHold
+:isHold rdf:type owl:ObjectProperty ;
+        rdfs:domain :Account ;
+        rdfs:range [ rdf:type owl:Restriction ;
+                     owl:onProperty :isHold ;
+                     owl:someValuesFrom :Customer
+                   ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#isLessThan
+:isLessThan rdf:type owl:ObjectProperty ;
+            rdfs:domain :Money ;
+            rdfs:range :AccountMaxWithdrawalPerDayAndAccountOfAccount .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#isLinkedTo
+:isLinkedTo rdf:type owl:ObjectProperty ;
+            rdfs:domain :ATMTransaction ;
+            rdfs:range :Account .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#isLinkedToATM
+:isLinkedToATM rdf:type owl:ObjectProperty ;
+               rdfs:domain :ATMTransaction ;
+               rdfs:range :ATM .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#isLinkedToCard
+:isLinkedToCard rdf:type owl:ObjectProperty ;
+                rdfs:domain :ATMTransaction ;
+                rdfs:range :Card .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#isMaintained
+:isMaintained rdf:type owl:ObjectProperty ;
+              owl:inverseOf :maintains ;
+              rdfs:domain :ATM ;
+              rdfs:range [ rdf:type owl:Restriction ;
+                           owl:onProperty :isMaintained ;
+                           owl:someValuesFrom :Maintainer
+                         ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#isPartOf
+:isPartOf rdf:type owl:ObjectProperty ;
+          rdfs:domain :Printer ;
+          rdfs:range :ATM .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#isPartOfATM
+:isPartOfATM rdf:type owl:ObjectProperty ;
+             rdfs:domain :Screen ;
+             rdfs:range :ATM .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#isPerformedByCustomer
+:isPerformedByCustomer rdf:type owl:ObjectProperty ;
+                       rdfs:domain :ATMTransaction ;
+                       rdfs:range :Customer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#is_checking
+:is_checking rdf:type owl:ObjectProperty ;
+             rdfs:domain [ rdf:type owl:Class ;
+                           owl:unionOf ( :ATM
+                                         :BankComputer
+                                       )
+                         ] ;
+             rdfs:range [ rdf:type owl:Class ;
+                          owl:unionOf ( :CardSerialNumberOfCashCard
+                                        :CashCard
+                                        :PasswordOfCustomer
+                                        :TypedPasswordOfCustomer
+                                      )
+                        ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#is_greater_than
+:is_greater_than rdf:type owl:ObjectProperty ;
+                 rdfs:domain [ rdf:type owl:Class ;
+                               owl:unionOf ( :AccountCountFailPinOfAccount
+                                             :TransactionAmountOfTransaction
+                                           )
+                             ] ;
+                 rdfs:range [ rdf:type owl:Class ;
+                              owl:unionOf ( :BankMaxWithdrawalPerTransactionOfBank
+                                            :Count
+                                          )
+                            ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#is_in
+:is_in rdf:type owl:ObjectProperty ;
+       rdfs:domain [ rdf:type owl:Class ;
+                     owl:unionOf ( :CashCard
+                                   :Money
+                                 )
+                   ] ;
+       rdfs:range :ATM ;
+       owl:propertyDisjointWith :is_in_not .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#is_in_not
+:is_in_not rdf:type owl:ObjectProperty ;
+           rdfs:domain [ rdf:type owl:Class ;
+                         owl:unionOf ( :CashCard
+                                       :Money
+                                     )
+                       ] ;
+           rdfs:range :ATM .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#is_in_state
+:is_in_state rdf:type owl:ObjectProperty ;
+             owl:inverseOf :is_not_state ;
+             rdfs:domain [ rdf:type owl:Class ;
+                           owl:unionOf ( :ATM
+                                         :Authorization
+                                         :CashCard
+                                       )
+                         ] ;
+             rdfs:range :Status .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#is_less_than_or_equals_to
+:is_less_than_or_equals_to rdf:type owl:ObjectProperty ;
+                           rdfs:domain [ rdf:type owl:Class ;
+                                         owl:unionOf ( :Money
+                                                       :TransactionAmountOfTransaction
+                                                     )
+                                       ] ;
+                           rdfs:range [ rdf:type owl:Class ;
+                                        owl:unionOf ( :AccountMaxWithdrawalPerDayAndAccountOfAccount
+                                                      :BankMaxWithdrawalPerTransactionOfBank
+                                                    )
+                                      ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#is_not_state
+:is_not_state rdf:type owl:ObjectProperty ;
+              rdfs:domain [ rdf:type owl:Class ;
+                            owl:unionOf ( :ATM
+                                          :CashCard
+                                          :Process
+                                        )
+                          ] ;
+              rdfs:range :Status .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ispartOfKeypad
+:ispartOfKeypad rdf:type owl:ObjectProperty ;
+                rdfs:domain :Keys ;
+                rdfs:range :Keypad .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#isperformedByATMTransaction
+:isperformedByATMTransaction rdf:type owl:ObjectProperty ;
+                             rdfs:domain :Customer ;
+                             rdfs:range :ATMTransaction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#keeps
+:keeps rdf:type owl:ObjectProperty ;
+       rdfs:domain :ATM ;
+       rdfs:range :CashCard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#lockingSystemPartOf
+:lockingSystemPartOf rdf:type owl:ObjectProperty ;
+                     rdfs:domain :LockingSystem ;
+                     rdfs:range :CashVault .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#maintains
+:maintains rdf:type owl:ObjectProperty ;
+           rdfs:domain :Maintainer ;
+           rdfs:range :ATM .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#not_accepts
+:not_accepts rdf:type owl:ObjectProperty ;
+             rdfs:domain :ATM ;
+             rdfs:range :CashCard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#not_equals
+:not_equals rdf:type owl:ObjectProperty ;
+            rdfs:domain [ rdf:type owl:Class ;
+                          owl:unionOf ( :ReadableBankCodeOfCashCard
+                                        :TypedPasswordOfCustomer
+                                      )
+                        ] ;
+            rdfs:range [ rdf:type owl:Class ;
+                         owl:unionOf ( :BankCodeOfBank
+                                       :PasswordOfCustomer
+                                     )
+                       ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#object
+:object rdf:type owl:ObjectProperty ;
+        rdfs:domain :BasicRequirement ;
+        rdfs:range :Object .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ofATM
+:ofATM rdf:type owl:ObjectProperty ;
+       rdfs:domain :ATMtotalFundOfATM ;
+       rdfs:range :ATM .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ofAccount
+:ofAccount rdf:type owl:ObjectProperty ;
+           rdfs:domain [ rdf:type owl:Class ;
+                         owl:unionOf ( :AccountBalanceOFAccount
+                                       :AccountCountFailPinOfAccount
+                                       :AccountMaxWithdrawalPerDayAndAccountOfAccount
+                                     )
+                       ] ;
+           rdfs:range :Account .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ofBank
+:ofBank rdf:type owl:ObjectProperty ;
+        rdfs:domain [ rdf:type owl:Class ;
+                      owl:unionOf ( :BankCodeOfBank
+                                    :BankMaxWithdrawalPerTransactionOfBank
+                                  )
+                    ] ;
+        rdfs:range :Bank .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ofCashCard
+:ofCashCard rdf:type owl:ObjectProperty ;
+            rdfs:domain [ rdf:type owl:Class ;
+                          owl:unionOf ( :CardSerialNumberOfCashCard
+                                        :ReadableBankCodeOfCashCard
+                                        :TransactionAmountOfTransactionCardSerialNumberOfCashCard
+                                        :TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer
+                                        :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM
+                                        :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer
+                                      )
+                        ] ;
+            rdfs:range :CashCard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ofCustomer
+:ofCustomer rdf:type owl:ObjectProperty ;
+            rdfs:domain [ rdf:type owl:Class ;
+                          owl:unionOf ( :PasswordOfCustomer
+                                        :TypedPasswordOfCustomer
+                                        :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM
+                                        :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer
+                                        :TypedPasswordOfCustomerToBankComputer
+                                      )
+                        ] ;
+            rdfs:range :Customer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ofEntity
+:ofEntity rdf:type owl:ObjectProperty ;
+          rdfs:domain :BasicRequirement ;
+          rdfs:range :OfEntity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ofInteraction
+:ofInteraction rdf:type owl:ObjectProperty ;
+               rdfs:domain [ rdf:type owl:Class ;
+                             owl:unionOf ( :InteractionFromBankComputer
+                                           :InteractionToATM
+                                           :StatusInteractionFromBankComputer
+                                           :StatusInteractionToATM
+                                         )
+                           ] ;
+               rdfs:range :Interaction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ofResponse
+:ofResponse rdf:type owl:ObjectProperty ;
+            rdfs:domain :ResponseFromBankComputer ;
+            rdfs:range :Response .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ofStatus
+:ofStatus rdf:type owl:ObjectProperty ;
+          rdfs:domain [ rdf:type owl:Class ;
+                        owl:unionOf ( :StatusInteractionFromBankComputer
+                                      :StatusInteractionToATM
+                                    )
+                      ] ;
+          rdfs:range :Status .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ofTransaction
+:ofTransaction rdf:type owl:ObjectProperty ;
+               rdfs:domain [ rdf:type owl:Class ;
+                             owl:unionOf ( :TransactionAmountOfTransaction
+                                           :TransactionAmountOfTransactionCardSerialNumberOfCashCard
+                                           :TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer
+                                           :TransactionAmountOfTransactionFromATM
+                                           :TransactionAmountOfTransactionToBankComputer
+                                         )
+                           ] ;
+               rdfs:range :ATMTransaction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#prints
+:prints rdf:type owl:ObjectProperty ;
+        rdfs:domain :ATM ;
+        rdfs:range :Receipt .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#reads
+:reads rdf:type owl:ObjectProperty ;
+       rdfs:domain :ATM ;
+       rdfs:range [ rdf:type owl:Class ;
+                    owl:unionOf ( :BankCodeOfBank
+                                  :CardSerialNumberOfCashCard
+                                )
+                  ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#receives
+:receives rdf:type owl:ObjectProperty ;
+          rdfs:domain [ rdf:type owl:Class ;
+                        owl:unionOf ( :ATM
+                                      :BankComputer
+                                    )
+                      ] ;
+          rdfs:range [ rdf:type owl:Class ;
+                       owl:unionOf ( :InteractionFromBankComputer
+                                     :StatusInteractionFromBankComputer
+                                     :TransactionAmountOfTransactionFromATM
+                                     :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM
+                                   )
+                     ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#records
+:records rdf:type owl:ObjectProperty ;
+         rdfs:domain [ rdf:type owl:Class ;
+                       owl:unionOf ( :ATM
+                                     :BankComputer
+                                   )
+                     ] ;
+         rdfs:range [ rdf:type owl:Class ;
+                      owl:unionOf ( :CardSerialNumberOfCashCard
+                                    :TransactionAmountOfTransactionCardSerialNumberOfCashCard
+                                  )
+                    ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#returns
+:returns rdf:type owl:ObjectProperty ;
+         rdfs:domain :ATM ;
+         rdfs:range :CashCard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#sends
+:sends rdf:type owl:ObjectProperty ;
+       rdfs:domain [ rdf:type owl:Class ;
+                     owl:unionOf ( :ATM
+                                   :BankComputer
+                                 )
+                   ] ;
+       rdfs:range [ rdf:type owl:Class ;
+                    owl:unionOf ( :InteractionToATM
+                                  :StatusInteractionToATM
+                                  :TransactionAmountOfTransactionCardSerialNumberOfCashCard
+                                  :TransactionAmountOfTransactionToBankComputer
+                                  :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer
+                                  :TypedPasswordOfCustomerToBankComputer
+                                )
+                  ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#shouldBeLogged
+:shouldBeLogged rdf:type owl:ObjectProperty ;
+                rdfs:domain :CashCard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#subject
+:subject rdf:type owl:ObjectProperty ;
+         rdfs:domain :BasicRequirement ;
+         rdfs:range :Subject .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#toATM
+:toATM rdf:type owl:ObjectProperty ;
+       rdfs:domain [ rdf:type owl:Class ;
+                     owl:unionOf ( :InteractionToATM
+                                   :StatusInteractionToATM
+                                 )
+                   ] ;
+       rdfs:range :ATM .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#toBankComputer
+:toBankComputer rdf:type owl:ObjectProperty ;
+                rdfs:domain [ rdf:type owl:Class ;
+                              owl:unionOf ( :TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer
+                                            :TransactionAmountOfTransactionToBankComputer
+                                            :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer
+                                            :TypedPasswordOfCustomerToBankComputer
+                                          )
+                            ] ;
+                rdfs:range :BankComputer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#toEntity
+:toEntity rdf:type owl:ObjectProperty ;
+          rdfs:domain :BasicRequirement ;
+          rdfs:range :ToEntity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#types
+:types rdf:type owl:ObjectProperty ;
+       rdfs:domain :Customer ;
+       rdfs:range [ rdf:type owl:Class ;
+                    owl:unionOf ( :PasswordOfCustomer
+                                  :TransactionAmountOfTransaction
+                                )
+                  ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#updates
+:updates rdf:type owl:ObjectProperty ;
+         rdfs:domain [ rdf:type owl:Class ;
+                       owl:unionOf ( :ATM
+                                     :BankComputer
+                                   )
+                     ] ;
+         rdfs:range [ rdf:type owl:Class ;
+                      owl:unionOf ( :ATMtotalFundOfATM
+                                    :AccountBalanceOFAccount
+                                    :AccountCountFailPinOfAccount
+                                    :AccountMaxWithdrawalPerDayAndAccountOfAccount
+                                  )
+                    ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#verb
+:verb rdf:type owl:ObjectProperty ;
+      rdfs:domain :BasicRequirement ;
+      rdfs:range :Verb .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#waits
+:waits rdf:type owl:ObjectProperty ;
+       rdfs:domain :ATM ;
+       rdfs:range :ResponseFromBankComputer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#works
+:works rdf:type owl:ObjectProperty ;
+       rdfs:domain :Maintainer ;
+       rdfs:range "Cls(@A147_a11812dd_067e_426f_ac5e_bc9bd91e7a95)"^^<java:edu.stanford.smi.protege.model.DefaultCls> .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#aTMAccountBalanceDisplayTime
+:aTMAccountBalanceDisplayTime rdf:type owl:DatatypeProperty ;
+                              rdfs:domain :ATM ;
+                              rdfs:range xsd:double .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#aTMAddress
+:aTMAddress rdf:type owl:DatatypeProperty ;
+            rdfs:domain :ATM ;
+            rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#aTMBankName
+:aTMBankName rdf:type owl:DatatypeProperty ;
+             rdfs:domain :ATM ;
+             rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#aTMBranch
+:aTMBranch rdf:type owl:DatatypeProperty ;
+           rdfs:domain :ATM ;
+           rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#aTMCardVerificationTime
+:aTMCardVerificationTime rdf:type owl:DatatypeProperty ;
+                         rdfs:domain :ATM ;
+                         rdfs:range xsd:double .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#aTMCashCardId
+:aTMCashCardId rdf:type owl:DatatypeProperty ;
+               rdfs:domain :ATM ;
+               rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#aTMId
+:aTMId rdf:type owl:DatatypeProperty ;
+       rdfs:domain :ATM ;
+       rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#aTMName
+:aTMName rdf:type owl:DatatypeProperty ;
+         rdfs:domain :ATM ;
+         rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#aTMPinVerificationTime
+:aTMPinVerificationTime rdf:type owl:DatatypeProperty ;
+                        rdfs:domain :ATM ;
+                        rdfs:range xsd:double .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#aTMtotalFund
+:aTMtotalFund rdf:type owl:DatatypeProperty ;
+              rdfs:domain [ rdf:type owl:Class ;
+                            owl:unionOf ( :ATM
+                                          :ATMtotalFundOfATM
+                                        )
+                          ] ;
+              rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#accountBalance
+:accountBalance rdf:type owl:DatatypeProperty ;
+                rdfs:domain [ rdf:type owl:Class ;
+                              owl:unionOf ( :Account
+                                            :AccountBalanceOFAccount
+                                          )
+                            ] ;
+                rdfs:range xsd:double .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#accountCountFailPin
+:accountCountFailPin rdf:type owl:DatatypeProperty ;
+                     rdfs:domain :AccountCountFailPinOfAccount ;
+                     rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#accountMaxWithdrawalPerDayAndAccount
+:accountMaxWithdrawalPerDayAndAccount rdf:type owl:DatatypeProperty ;
+                                      rdfs:domain [ rdf:type owl:Class ;
+                                                    owl:unionOf ( :Account
+                                                                  :AccountMaxWithdrawalPerDayAndAccountOfAccount
+                                                                  :Maintainer
+                                                                  :Money
+                                                                )
+                                                  ] ;
+                                      rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#accountNumber
+:accountNumber rdf:type owl:DatatypeProperty ;
+               rdfs:domain :Account ;
+               rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#accountType
+:accountType rdf:type owl:DatatypeProperty ;
+             rdfs:domain :Account ;
+             rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#address
+:address rdf:type owl:DatatypeProperty ;
+         rdfs:domain :PersonOrPhysicalEntity ;
+         rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#bankAddress
+:bankAddress rdf:type owl:DatatypeProperty ;
+             rdfs:domain :Bank ;
+             rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#bankCode
+:bankCode rdf:type owl:DatatypeProperty ;
+          rdfs:domain [ rdf:type owl:Class ;
+                        owl:unionOf ( :ATM
+                                      :BankCodeOfBank
+                                    )
+                      ] ;
+          rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#bankMaxWithdrawalPerTransaction
+:bankMaxWithdrawalPerTransaction rdf:type owl:DatatypeProperty ;
+                                 rdfs:domain [ rdf:type owl:Class ;
+                                               owl:unionOf ( :BankMaxWithdrawalPerTransactionOfBank
+                                                             :Money
+                                                           )
+                                             ] ;
+                                 rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#bankMinCashPerTransaction
+:bankMinCashPerTransaction rdf:type owl:DatatypeProperty ;
+                           rdfs:domain :Bank ;
+                           rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#bankName
+:bankName rdf:type owl:DatatypeProperty ;
+          rdfs:domain :Bank ;
+          rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#bankTotalFundStartOfDay
+:bankTotalFundStartOfDay rdf:type owl:DatatypeProperty ;
+                         rdfs:domain :Bank ;
+                         rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#cardBankName
+:cardBankName rdf:type owl:DatatypeProperty ;
+              rdfs:domain :Card ;
+              rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#cardCvv
+:cardCvv rdf:type owl:DatatypeProperty ;
+         rdfs:domain :Card ;
+         rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#cardExpiryDate
+:cardExpiryDate rdf:type owl:DatatypeProperty ;
+                rdfs:domain :Card ;
+                rdfs:range xsd:dateTime .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#cardId
+:cardId rdf:type owl:DatatypeProperty ;
+        rdfs:domain :Card ;
+        rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#cardSerialNumber
+:cardSerialNumber rdf:type owl:DatatypeProperty ;
+                  rdfs:domain [ rdf:type owl:Class ;
+                                owl:unionOf ( :CardSerialNumberOfCashCard
+                                              :CashCard
+                                              :TransactionAmountOfTransactionCardSerialNumberOfCashCard
+                                              :TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer
+                                              :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM
+                                              :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer
+                                            )
+                              ] ;
+                  rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#cardType
+:cardType rdf:type owl:DatatypeProperty ;
+          rdfs:domain :Card ;
+          rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#city
+:city rdf:type owl:DatatypeProperty ;
+      rdfs:domain :PersonOrPhysicalEntity ;
+      rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#computerID
+:computerID rdf:type owl:DatatypeProperty ;
+            rdfs:domain :BankComputer ;
+            rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#computerType
+:computerType rdf:type owl:DatatypeProperty ;
+              rdfs:domain :BankComputer ;
+              rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#customerID
+:customerID rdf:type owl:DatatypeProperty ;
+            rdfs:domain :Customer ;
+            rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#dateOfBirth
+:dateOfBirth rdf:type owl:DatatypeProperty ;
+             rdfs:domain :PersonOrPhysicalEntity ;
+             rdfs:range xsd:dateTime .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#display
+:display rdf:type owl:DatatypeProperty ;
+         rdfs:domain :Display ;
+         rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#dotMatrixPrinterColumn
+:dotMatrixPrinterColumn rdf:type owl:DatatypeProperty ;
+                        rdfs:domain :DotMatrixPrinter ;
+                        rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#email
+:email rdf:type owl:DatatypeProperty ;
+       rdfs:domain :PersonOrPhysicalEntity ;
+       rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#employeeId
+:employeeId rdf:type owl:DatatypeProperty ;
+            rdfs:domain :Employee ;
+            rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#firstName
+:firstName rdf:type owl:DatatypeProperty ;
+           rdfs:domain :PersonOrPhysicalEntity ;
+           rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#gender
+:gender rdf:type owl:DatatypeProperty ;
+        rdfs:domain :PersonOrPhysicalEntity ;
+        rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#hasValue
+:hasValue rdf:type owl:DatatypeProperty ;
+          rdfs:domain :PhysicalQuantity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#interactionTimeStamp
+:interactionTimeStamp rdf:type owl:DatatypeProperty ;
+                      rdfs:domain :Interaction ;
+                      rdfs:range xsd:dateTimeStamp .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#internet_AccessFormCost
+:internet_AccessFormCost rdf:type owl:DatatypeProperty ;
+                         rdfs:domain :InternetAccess .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#lastName
+:lastName rdf:type owl:DatatypeProperty ;
+          rdfs:domain :PersonOrPhysicalEntity ;
+          rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#maintainerId
+:maintainerId rdf:type owl:DatatypeProperty ;
+              rdfs:domain :Maintainer ;
+              rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#middleName
+:middleName rdf:type owl:DatatypeProperty ;
+            rdfs:domain :PersonOrPhysicalEntity ;
+            rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#mobileNumber
+:mobileNumber rdf:type owl:DatatypeProperty ;
+              rdfs:domain :PersonOrPhysicalEntity ;
+              rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#password
+:password rdf:type owl:DatatypeProperty ;
+          rdfs:domain [ rdf:type owl:Class ;
+                        owl:unionOf ( :Customer
+                                      :PasswordOfCustomer
+                                    )
+                      ] ;
+          rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#phoneNumber
+:phoneNumber rdf:type owl:DatatypeProperty ;
+             rdfs:domain :PersonOrPhysicalEntity ;
+             rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#powerSourceType
+:powerSourceType rdf:type owl:DatatypeProperty ;
+                 rdfs:domain :PowerSource ;
+                 rdfs:range [ rdf:type rdfs:Datatype ;
+                              owl:oneOf [ rdf:type rdf:List ;
+                                          rdf:first "ac" ;
+                                          rdf:rest [ rdf:type rdf:List ;
+                                                     rdf:first "dc" ;
+                                                     rdf:rest rdf:nil
+                                                   ]
+                                        ]
+                            ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#powerSourceVoltage
+:powerSourceVoltage rdf:type owl:DatatypeProperty ;
+                    rdfs:domain :PowerSource ;
+                    rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#powerSupplySwitch
+:powerSupplySwitch rdf:type owl:DatatypeProperty ;
+                   rdfs:domain :PowerSupply ;
+                   rdfs:range [ rdf:type rdfs:Datatype ;
+                                owl:oneOf [ rdf:type rdf:List ;
+                                            rdf:first " manual " ;
+                                            rdf:rest rdf:nil
+                                          ]
+                              ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#productID
+:productID rdf:type owl:DatatypeProperty ;
+           rdfs:domain :Product ;
+           rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#productName
+:productName rdf:type owl:DatatypeProperty ;
+             rdfs:domain :Product ;
+             rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#productType
+:productType rdf:type owl:DatatypeProperty ;
+             rdfs:domain :Product ;
+             rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#productionDate
+:productionDate rdf:type owl:DatatypeProperty ;
+                rdfs:domain :Product ;
+                rdfs:range xsd:dateTime .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#readableBankCode
+:readableBankCode rdf:type owl:DatatypeProperty ;
+                  rdfs:domain :ReadableBankCodeOfCashCard ;
+                  rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#recordValue
+:recordValue rdf:type owl:DatatypeProperty ;
+             rdfs:domain :CardSerialNumberOfCashCard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#salary
+:salary rdf:type owl:DatatypeProperty ;
+        rdfs:domain :Employee ;
+        rdfs:range xsd:float .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#timeConstraint
+:timeConstraint rdf:type owl:DatatypeProperty ;
+                rdfs:domain [ rdf:type owl:Class ;
+                              owl:unionOf ( :DisplayTime
+                                            :InteractionTime
+                                          )
+                            ] ;
+                rdfs:range [ rdf:type rdfs:Datatype ;
+                             owl:oneOf [ rdf:type rdf:List ;
+                                         rdf:first " is_less_than" ;
+                                         rdf:rest [ rdf:type rdf:List ;
+                                                    rdf:first "atleast" ;
+                                                    rdf:rest [ rdf:type rdf:List ;
+                                                               rdf:first "atmost" ;
+                                                               rdf:rest [ rdf:type rdf:List ;
+                                                                          rdf:first "is_greater_than" ;
+                                                                          rdf:rest rdf:nil
+                                                                        ]
+                                                             ]
+                                                  ]
+                                       ]
+                           ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#tranacactionId
+:tranacactionId rdf:type owl:DatatypeProperty ;
+                rdfs:domain :Transaction ;
+                rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#transactionAmount
+:transactionAmount rdf:type owl:DatatypeProperty ;
+                   rdfs:domain [ rdf:type owl:Class ;
+                                 owl:unionOf ( :ATMTransaction
+                                               :TransactionAmountOfTransaction
+                                               :TransactionAmountOfTransactionCardSerialNumberOfCashCard
+                                               :TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer
+                                               :TransactionAmountOfTransactionFromATM
+                                               :TransactionAmountOfTransactionToBankComputer
+                                             )
+                               ] ;
+                   rdfs:range xsd:integer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#transactionTimestamp
+:transactionTimestamp rdf:type owl:DatatypeProperty ;
+                      rdfs:domain :Transaction ;
+                      rdfs:range xsd:dateTimeStamp .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#transactionType
+:transactionType rdf:type owl:DatatypeProperty ;
+                 rdfs:domain :Transaction ;
+                 rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#transcactionDate
+:transcactionDate rdf:type owl:DatatypeProperty ;
+                  rdfs:domain :Transaction ;
+                  rdfs:range xsd:dateTime .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#transcactionStatus
+:transcactionStatus rdf:type owl:DatatypeProperty ;
+                    rdfs:domain :Transaction ;
+                    rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#typedpassword
+:typedpassword rdf:type owl:DatatypeProperty ;
+               rdfs:domain [ rdf:type owl:Class ;
+                             owl:unionOf ( :Customer
+                                           :TypedPasswordOfCustomer
+                                           :TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM
+                                           :TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer
+                                         )
+                           ] ;
+               rdfs:range xsd:string .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#workload
+:workload rdf:type owl:DatatypeProperty ;
+          rdfs:domain :Computer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#zipCode
+:zipCode rdf:type owl:DatatypeProperty ;
+         rdfs:domain :PersonOrPhysicalEntity ;
+         rdfs:range xsd:integer .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ATM
+:ATM rdf:type owl:Class ;
+     rdfs:subClassOf :Service .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ATMStatus
+:ATMStatus rdf:type owl:Class ;
+           rdfs:subClassOf :Status .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ATMTransaction
+:ATMTransaction rdf:type owl:Class ;
+                rdfs:subClassOf :Transaction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ATMtotalFundOfATM
+:ATMtotalFundOfATM rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AccessMethodProtocol
+:AccessMethodProtocol rdf:type owl:Class ;
+                      rdfs:subClassOf :Protocol .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Account
+:Account rdf:type owl:Class ;
+         rdfs:subClassOf :Product .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AccountBalanceOFAccount
+:AccountBalanceOFAccount rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AccountCountFailPinOfAccount
+:AccountCountFailPinOfAccount rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AccountMaxWithdrawalPerDayAndAccountOfAccount
+:AccountMaxWithdrawalPerDayAndAccountOfAccount rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Angle_unit
+:Angle_unit rdf:type owl:Class ;
+            rdfs:subClassOf :Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Angstorm
+:Angstorm rdf:type owl:Class ;
+          rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ApplicationSoftware
+:ApplicationSoftware rdf:type owl:Class ;
+                     rdfs:subClassOf :Software .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Audio
+:Audio rdf:type owl:Class ;
+       rdfs:subClassOf :Codec .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Authorization
+:Authorization rdf:type owl:Class ;
+               rdfs:subClassOf :Process .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Bank
+:Bank rdf:type owl:Class ;
+      rdfs:subClassOf :Company .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#BankCodeOfBank
+:BankCodeOfBank rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#BankComputer
+:BankComputer rdf:type owl:Class ;
+              rdfs:subClassOf :Computer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#BankMaxWithdrawalPerTransactionOfBank
+:BankMaxWithdrawalPerTransactionOfBank rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#BasicRequirement
+:BasicRequirement rdf:type owl:Class ;
+                  rdfs:subClassOf :Requirement .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Bit
+:Bit rdf:type owl:Class ;
+     rdfs:subClassOf :Information_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#BoilerPlateParts
+:BoilerPlateParts rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#BusinessWorkflowSoftware
+:BusinessWorkflowSoftware rdf:type owl:Class ;
+                          rdfs:subClassOf :EnterpriseInfrastructureSoftware .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Byte
+:Byte rdf:type owl:Class ;
+      rdfs:subClassOf :Information_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CDMA
+:CDMA rdf:type owl:Class ;
+      rdfs:subClassOf :AccessMethodProtocol .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CSMA
+:CSMA rdf:type owl:Class ;
+      rdfs:subClassOf :AccessMethodProtocol .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CabinetCover
+:CabinetCover rdf:type owl:Class ;
+              rdfs:subClassOf :HardwareComponent .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Cable
+:Cable rdf:type owl:Class ;
+       rdfs:subClassOf :MaritimeLength .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Candela_per_square_meter
+:Candela_per_square_meter rdf:type owl:Class ;
+                          rdfs:subClassOf :Luminance_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Card
+:Card rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CardReader
+:CardReader rdf:type owl:Class ;
+            rdfs:subClassOf :DataInput .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CardSerialNumberOfCashCard
+:CardSerialNumberOfCashCard rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CashCard
+:CashCard rdf:type owl:Class ;
+          rdfs:subClassOf :Card .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CashCardStatus
+:CashCardStatus rdf:type owl:Class ;
+                rdfs:subClassOf :Status .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CashVault
+:CashVault rdf:type owl:Class ;
+           rdfs:subClassOf :HardwareComponent .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CentiMorgan
+:CentiMorgan rdf:type owl:Class ;
+             rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CentiRay
+:CentiRay rdf:type owl:Class ;
+          rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Centimeter
+:Centimeter rdf:type owl:Class ;
+            rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Chain
+:Chain rdf:type owl:Class ;
+       rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Chroma_sampling_unit
+:Chroma_sampling_unit rdf:type owl:Class ;
+                      rdfs:subClassOf :Image_resolution .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Codec
+:Codec rdf:type owl:Class ;
+       rdfs:subClassOf :InformationStandard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Company
+:Company rdf:type owl:Class ;
+         rdfs:subClassOf :Customer ,
+                         :LegalEntity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ComplexRequirement
+:ComplexRequirement rdf:type owl:Class ;
+                    rdfs:subClassOf :Requirement .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Computer
+:Computer rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ComputerProgrammingTools
+:ComputerProgrammingTools rdf:type owl:Class ;
+                          rdfs:subClassOf :Software .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Conditional
+:Conditional rdf:type owl:Class ;
+             rdfs:subClassOf :BoilerPlateParts .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Cost
+:Cost rdf:type owl:Class ;
+      rdfs:subClassOf :PhysicalQuantity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Count
+:Count rdf:type owl:Class ;
+       rdfs:subClassOf :PhysicalQuantity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CurrentAccount
+:CurrentAccount rdf:type owl:Class ;
+                rdfs:subClassOf :Account .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Customer
+:Customer rdf:type owl:Class ;
+          rdfs:subClassOf :PersonOrPhysicalEntity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#DataInput
+:DataInput rdf:type owl:Class ;
+           rdfs:subClassOf :HardwareComponent .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#DataTransferProtocol
+:DataTransferProtocol rdf:type owl:Class ;
+                      rdfs:subClassOf :Protocol .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#DatabaseManagementSystem
+:DatabaseManagementSystem rdf:type owl:Class ;
+                          rdfs:subClassOf :EnterpriseInfrastructureSoftware .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Decibel
+:Decibel rdf:type owl:Class ;
+         rdfs:subClassOf :Ratio .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Degree
+:Degree rdf:type owl:Class ;
+        rdfs:subClassOf :Plane_angle_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Deposit
+:Deposit rdf:type owl:Class ;
+         rdfs:subClassOf :ATMTransaction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#DialUp
+:DialUp rdf:type owl:Class ;
+        rdfs:subClassOf :InternetAccess .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#DigitalAssetManagement
+:DigitalAssetManagement rdf:type owl:Class ;
+                        rdfs:subClassOf :EnterpriseInfrastructureSoftware .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Diomensionless_unit
+:Diomensionless_unit rdf:type owl:Class ;
+                     rdfs:subClassOf :Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Display
+:Display rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#DisplayTime
+:DisplayTime rdf:type owl:Class ;
+             rdfs:subClassOf :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#DotMatrixPrinter
+:DotMatrixPrinter rdf:type owl:Class ;
+                  rdfs:subClassOf :Printer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Dots_per_inch
+:Dots_per_inch rdf:type owl:Class ;
+               rdfs:subClassOf :Spatial_resolution_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Dynamic_range_unit
+:Dynamic_range_unit rdf:type owl:Class ;
+                    rdfs:subClassOf :Image_resolution .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ElectricPotentialDifferenceUnit
+:ElectricPotentialDifferenceUnit rdf:type owl:Class ;
+                                 rdfs:subClassOf :Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Else
+:Else rdf:type owl:Class ;
+      rdfs:subClassOf :BoilerPlateParts .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Employee
+:Employee rdf:type owl:Class ;
+          rdfs:subClassOf :PersonOrPhysicalEntity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#EncryptionStandard
+:EncryptionStandard rdf:type owl:Class ;
+                    rdfs:subClassOf :InformationStandard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#EnterpriseInfrastructureSoftware
+:EnterpriseInfrastructureSoftware rdf:type owl:Class ;
+                                  rdfs:subClassOf :ApplicationSoftware .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Entity
+:Entity rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ErrorDisplay
+:ErrorDisplay rdf:type owl:Class ;
+              rdfs:subClassOf :Display .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#FTP
+:FTP rdf:type owl:Class ;
+     rdfs:subClassOf :DataTransferProtocol .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Fathom
+:Fathom rdf:type owl:Class ;
+        rdfs:subClassOf :MaritimeLength .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#FiberGlass
+:FiberGlass rdf:type owl:Class ;
+            rdfs:subClassOf :Material .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Foot
+:Foot rdf:type owl:Class ;
+      rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Fraction
+:Fraction rdf:type owl:Class ;
+          rdfs:subClassOf :Ratio .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Function
+:Function rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#FunctionalKey
+:FunctionalKey rdf:type owl:Class ;
+               rdfs:subClassOf :Keys .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Furlong
+:Furlong rdf:type owl:Class ;
+         rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Gigabyte
+:Gigabyte rdf:type owl:Class ;
+          rdfs:subClassOf :Information_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#HardwareComponent
+:HardwareComponent rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Height
+:Height rdf:type owl:Class ;
+        rdfs:subClassOf :Length .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#IFBBThenBBElseBB
+:IFBBThenBBElseBB rdf:type owl:Class ;
+                  rdfs:subClassOf :ComplexRequirement .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#IfBBThenBB
+:IfBBThenBB rdf:type owl:Class ;
+            rdfs:subClassOf :ComplexRequirement .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Image_resolution
+:Image_resolution rdf:type owl:Class ;
+                  rdfs:subClassOf :Information_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Inch
+:Inch rdf:type owl:Class ;
+      rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#InformationStandard
+:InformationStandard rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Information_unit
+:Information_unit rdf:type owl:Class ;
+                  rdfs:subClassOf :Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Interaction
+:Interaction rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#InteractionFromBankComputer
+:InteractionFromBankComputer rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#InteractionTime
+:InteractionTime rdf:type owl:Class ;
+                 rdfs:subClassOf :Time .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#InteractionToATM
+:InteractionToATM rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#InternetAccess
+:InternetAccess rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Keypad
+:Keypad rdf:type owl:Class ;
+        rdfs:subClassOf :DataInput .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Keys
+:Keys rdf:type owl:Class ;
+      rdfs:subClassOf :DataInput .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Kibibyte
+:Kibibyte rdf:type owl:Class ;
+          rdfs:subClassOf :Information_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Kilobyte
+:Kilobyte rdf:type owl:Class ;
+          rdfs:subClassOf :Information_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#League
+:League rdf:type owl:Class ;
+        rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#LegalEntity
+:LegalEntity rdf:type owl:Class ;
+             rdfs:subClassOf :Entity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Length
+:Length rdf:type owl:Class ;
+        rdfs:subClassOf :PhysicalQuantity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Length_Unit
+:Length_Unit rdf:type owl:Class ;
+             rdfs:subClassOf :Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Light_Unit
+:Light_Unit rdf:type owl:Class ;
+            rdfs:subClassOf :Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#LockingSystem
+:LockingSystem rdf:type owl:Class ;
+               rdfs:subClassOf :HardwareComponent .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Luminance_Unit
+:Luminance_Unit rdf:type owl:Class ;
+                rdfs:subClassOf :Light_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#MagneticCardReader
+:MagneticCardReader rdf:type owl:Class ;
+                    rdfs:subClassOf :CardReader .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Maintainer
+:Maintainer rdf:type owl:Class ;
+            rdfs:subClassOf :Employee ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty :maintains ;
+                              owl:someValuesFrom :ATM
+                            ] .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#MaritimeLength
+:MaritimeLength rdf:type owl:Class ;
+                rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Material
+:Material rdf:type owl:Class ;
+          rdfs:subClassOf :Resource .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Mebibyte
+:Mebibyte rdf:type owl:Class ;
+          rdfs:subClassOf :Information_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Megabyte
+:Megabyte rdf:type owl:Class ;
+          rdfs:subClassOf :Information_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Memory
+:Memory rdf:type owl:Class ;
+        rdfs:subClassOf :HardwareComponent .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Micrometer
+:Micrometer rdf:type owl:Class ;
+            rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Micron_pixel
+:Micron_pixel rdf:type owl:Class ;
+              rdfs:subClassOf :Spatial_resolution_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Mile
+:Mile rdf:type owl:Class ;
+      rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#MilliMeter
+:MilliMeter rdf:type owl:Class ;
+            rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Mole_fraction
+:Mole_fraction rdf:type owl:Class ;
+               rdfs:subClassOf :Fraction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Money
+:Money rdf:type owl:Class ;
+       rdfs:subClassOf :Cost .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#MoneyUnit
+:MoneyUnit rdf:type owl:Class ;
+           rdfs:subClassOf :Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#NanoMeter
+:NanoMeter rdf:type owl:Class ;
+           rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#NauticalMile
+:NauticalMile rdf:type owl:Class ;
+              rdfs:subClassOf :MaritimeLength .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Negative
+:Negative rdf:type owl:Class ;
+          rdfs:subClassOf :Response .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#NetworkSuites
+:NetworkSuites rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#NonVotalite
+:NonVotalite rdf:type owl:Class ;
+             rdfs:subClassOf :Memory .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#NormalDisplay
+:NormalDisplay rdf:type owl:Class ;
+               rdfs:subClassOf :Display .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#OSI
+:OSI rdf:type owl:Class ;
+     rdfs:subClassOf :NetworkSuites .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Object
+:Object rdf:type owl:Class ;
+        rdfs:subClassOf :BoilerPlateParts .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#OfEntity
+:OfEntity rdf:type owl:Class ;
+          rdfs:subClassOf :BoilerPlateParts .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#PasswordOfCustomer
+:PasswordOfCustomer rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Percent
+:Percent rdf:type owl:Class ;
+         rdfs:subClassOf :Ratio .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#PersonOrPhysicalEntity
+:PersonOrPhysicalEntity rdf:type owl:Class ;
+                        rdfs:subClassOf :Entity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#PhysicalQuantity
+:PhysicalQuantity rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#PicoMeter
+:PicoMeter rdf:type owl:Class ;
+           rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Pixels_per_inch
+:Pixels_per_inch rdf:type owl:Class ;
+                 rdfs:subClassOf :Spatial_resolution_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Pixels_per_millimeter
+:Pixels_per_millimeter rdf:type owl:Class ;
+                       rdfs:subClassOf :Spatial_resolution_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Plane_angle_unit
+:Plane_angle_unit rdf:type owl:Class ;
+                  rdfs:subClassOf :Angle_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Positive
+:Positive rdf:type owl:Class ;
+          rdfs:subClassOf :Response .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#PowerSource
+:PowerSource rdf:type owl:Class ;
+             rdfs:subClassOf :Resource .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#PowerSupply
+:PowerSupply rdf:type owl:Class ;
+             rdfs:subClassOf :HardwareComponent .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Power_unit
+:Power_unit rdf:type owl:Class ;
+            rdfs:subClassOf :Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Printer
+:Printer rdf:type owl:Class ;
+         rdfs:subClassOf :HardwareComponent .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Process
+:Process rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ProcessStatus
+:ProcessStatus rdf:type owl:Class ;
+               rdfs:subClassOf :Status .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ProcessSuccessfulStatus
+:ProcessSuccessfulStatus rdf:type owl:Class ;
+                         rdfs:subClassOf :ProcessStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ProcessUnwantedStatus
+:ProcessUnwantedStatus rdf:type owl:Class ;
+                       rdfs:subClassOf :ProcessStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Product
+:Product rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Protocol
+:Protocol rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#QualitativeCost
+:QualitativeCost rdf:type owl:Class ;
+                 rdfs:subClassOf :Cost .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Radian
+:Radian rdf:type owl:Class ;
+        rdfs:subClassOf :Plane_angle_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Ratio
+:Ratio rdf:type owl:Class ;
+       rdfs:subClassOf :Diomensionless_unit ,
+                       :Percent .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ReadableBankCodeOfCashCard
+:ReadableBankCodeOfCashCard rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Receipt
+:Receipt rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Request
+:Request rdf:type owl:Class ;
+         rdfs:subClassOf :Interaction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Requirement
+:Requirement rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Resource
+:Resource rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Response
+:Response rdf:type owl:Class ;
+          rdfs:subClassOf :Interaction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ResponseFromBankComputer
+:ResponseFromBankComputer rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#SavingAccount
+:SavingAccount rdf:type owl:Class ;
+               rdfs:subClassOf :Account .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Screen
+:Screen rdf:type owl:Class ;
+        rdfs:subClassOf :HardwareComponent .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#SecurityCamera
+:SecurityCamera rdf:type owl:Class ;
+                rdfs:subClassOf :HardwareComponent .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#SecurityStandard
+:SecurityStandard rdf:type owl:Class ;
+                  rdfs:subClassOf :InformationStandard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Server
+:Server rdf:type owl:Class ;
+        rdfs:subClassOf :Computer .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ServerWorkLoad
+:ServerWorkLoad rdf:type owl:Class ;
+                rdfs:subClassOf :WorkLoad .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Service
+:Service rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#SmartCardReader
+:SmartCardReader rdf:type owl:Class ;
+                 rdfs:subClassOf :CardReader .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Software
+:Software rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Solid_angle_unit
+:Solid_angle_unit rdf:type owl:Class ;
+                  rdfs:subClassOf :Angle_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Spatial_resolution_unit
+:Spatial_resolution_unit rdf:type owl:Class ;
+                         rdfs:subClassOf :Image_resolution .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Speaker
+:Speaker rdf:type owl:Class ;
+         rdfs:subClassOf :HardwareComponent .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Status
+:Status rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#StatusInteractionFromBankComputer
+:StatusInteractionFromBankComputer rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#StatusInteractionToATM
+:StatusInteractionToATM rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#StatusPowerSupplyStatus
+:StatusPowerSupplyStatus rdf:type owl:Class ;
+                         rdfs:subClassOf :Status .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Steredian
+:Steredian rdf:type owl:Class ;
+           rdfs:subClassOf :Solid_angle_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Subject
+:Subject rdf:type owl:Class ;
+         rdfs:subClassOf :BoilerPlateParts .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#SubjectVerbObject
+:SubjectVerbObject rdf:type owl:Class ;
+                   rdfs:subClassOf :BasicRequirement .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#SubjectVerbObjectOfEntity
+:SubjectVerbObjectOfEntity rdf:type owl:Class ;
+                           rdfs:subClassOf :BasicRequirement .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#SuccessfulSates
+:SuccessfulSates rdf:type owl:Class ;
+                 rdfs:subClassOf :CashCardStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#SystemSoftware
+:SystemSoftware rdf:type owl:Class ;
+                rdfs:subClassOf :Software .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TFTP
+:TFTP rdf:type owl:Class ;
+      rdfs:subClassOf :FTP .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Terabyte
+:Terabyte rdf:type owl:Class ;
+          rdfs:subClassOf :Information_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Text
+:Text rdf:type owl:Class ;
+      rdfs:subClassOf :Codec .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Thickness
+:Thickness rdf:type owl:Class ;
+           rdfs:subClassOf :Length .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Thou
+:Thou rdf:type owl:Class ;
+      rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Time
+:Time rdf:type owl:Class ;
+      rdfs:subClassOf :PhysicalQuantity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TimeUnit
+:TimeUnit rdf:type owl:Class ;
+          rdfs:subClassOf :Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ToEntity
+:ToEntity rdf:type owl:Class ;
+          rdfs:subClassOf :BoilerPlateParts .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Transaction
+:Transaction rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TransactionAmountOfTransaction
+:TransactionAmountOfTransaction rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TransactionAmountOfTransactionCardSerialNumberOfCashCard
+:TransactionAmountOfTransactionCardSerialNumberOfCashCard rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer
+:TransactionAmountOfTransactionCardSerialNumberOfCashCardToBankComputer rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TransactionAmountOfTransactionFromATM
+:TransactionAmountOfTransactionFromATM rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TransactionAmountOfTransactionToBankComputer
+:TransactionAmountOfTransactionToBankComputer rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TransactionByBank
+:TransactionByBank rdf:type owl:Class ;
+                   rdfs:subClassOf :Transaction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TransactionDialog
+:TransactionDialog rdf:type owl:Class ;
+                   rdfs:subClassOf :Process .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Transfer
+:Transfer rdf:type owl:Class ;
+          rdfs:subClassOf :ATMTransaction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Transmission
+:Transmission rdf:type owl:Class ;
+              rdfs:subClassOf :Function .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TypedPasswordOfCustomer
+:TypedPasswordOfCustomer rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM
+:TypedPasswordOfCustomerCardSerialNumberOfCashCardFromATM rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer
+:TypedPasswordOfCustomerCardSerialNumberOfCashCardToBanKComputer rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TypedPasswordOfCustomerToBankComputer
+:TypedPasswordOfCustomerToBankComputer rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#UnWantedStates
+:UnWantedStates rdf:type owl:Class ;
+                rdfs:subClassOf :CashCardStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Unit
+:Unit rdf:type owl:Class .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#UnwantedATMStatus
+:UnwantedATMStatus rdf:type owl:Class ;
+                   rdfs:subClassOf :ATMStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#UnwantedPowerSupplyStatus
+:UnwantedPowerSupplyStatus rdf:type owl:Class ;
+                           rdfs:subClassOf :StatusPowerSupplyStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Validation
+:Validation rdf:type owl:Class ;
+            rdfs:subClassOf :Process .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Verb
+:Verb rdf:type owl:Class ;
+      rdfs:subClassOf :BoilerPlateParts .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Verification
+:Verification rdf:type owl:Class ;
+              rdfs:subClassOf :Function .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Video
+:Video rdf:type owl:Class ;
+       rdfs:subClassOf :Codec .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Volalite
+:Volalite rdf:type owl:Class ;
+          rdfs:subClassOf :Memory .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#WantedATMStatus
+:WantedATMStatus rdf:type owl:Class ;
+                 rdfs:subClassOf :ATMStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Watt
+:Watt rdf:type owl:Class ;
+      rdfs:subClassOf :Power_unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#WebTransaction
+:WebTransaction rdf:type owl:Class ;
+                rdfs:subClassOf :Transaction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Width
+:Width rdf:type owl:Class ;
+       rdfs:subClassOf :Length .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Withdrawal
+:Withdrawal rdf:type owl:Class ;
+            rdfs:subClassOf :ATMTransaction .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#WorkLoad
+:WorkLoad rdf:type owl:Class ;
+          rdfs:subClassOf :PhysicalQuantity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Yard
+:Yard rdf:type owl:Class ;
+      rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#meter
+:meter rdf:type owl:Class ;
+       rdfs:subClassOf :Length_Unit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TCP/IP
+<http://lod.csd.auth.gr/atm/atm.ttl#TCP/IP> rdf:type owl:Class ;
+                                            rdfs:subClassOf :NetworkSuites .
+
+
+###  http://www.w3.org/2001/XMLSchema#dateTimeStamp
+xsd:dateTimeStamp rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ATM
+:ATM rdf:type owl:NamedIndividual ,
+              :Object ,
+              :Subject ,
+              :ToEntity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ATMCardService
+:ATMCardService rdf:type owl:NamedIndividual ,
+                         :Verification .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ATM_returns_Cashcard
+:ATM_returns_Cashcard rdf:type owl:NamedIndividual ,
+                               :SubjectVerbObject ;
+                      :object :CashCard ;
+                      :subject :ATM ;
+                      :verb :returns .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AbNormalShutDown
+:AbNormalShutDown rdf:type owl:NamedIndividual ,
+                           :UnwantedATMStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AcceptAuthorization
+:AcceptAuthorization rdf:type owl:NamedIndividual ,
+                              :Object ,
+                              :Positive .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AmountIsGreaterM
+:AmountIsGreaterM rdf:type owl:NamedIndividual ,
+                           :Negative .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AmountIsLessN
+:AmountIsLessN rdf:type owl:NamedIndividual ,
+                        :Negative .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AmountIsNotAccept_m
+:AmountIsNotAccept_m rdf:type owl:NamedIndividual ,
+                              :ErrorDisplay .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AmountIsNotAccept_n
+:AmountIsNotAccept_n rdf:type owl:NamedIndividual ,
+                              :ErrorDisplay .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AmountIsUpdated
+:AmountIsUpdated rdf:type owl:NamedIndividual ,
+                          :Positive .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#AuthorizationRequest
+:AuthorizationRequest rdf:type owl:NamedIndividual ,
+                               :Request .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#BMSVersion2.0
+:BMSVersion2.0 rdf:type owl:NamedIndividual ,
+                        :BusinessWorkflowSoftware .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#BankComputer
+:BankComputer rdf:type owl:NamedIndividual ,
+                       :Subject .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#BankComputer_records_cardSerialnumber_of_CashCard
+:BankComputer_records_cardSerialnumber_of_CashCard rdf:type owl:NamedIndividual ,
+                                                            :SubjectVerbObjectOfEntity ;
+                                                   :object :cardSerialNumber ;
+                                                   :ofEntity :CashCard ;
+                                                   :subject :BankComputer ;
+                                                   :verb :records .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CardisKept
+:CardisKept rdf:type owl:NamedIndividual ,
+                     :UnWantedStates .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#CashCard
+:CashCard rdf:type owl:NamedIndividual ,
+                   :Object ,
+                   :OfEntity ,
+                   :Subject .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Century
+:Century rdf:type owl:NamedIndividual ,
+                  :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ChoiseOfTranscaction
+:ChoiseOfTranscaction rdf:type owl:NamedIndividual ,
+                               :NormalDisplay .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Combination
+:Combination rdf:type owl:NamedIndividual ,
+                      :LockingSystem .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Customer
+:Customer rdf:type owl:NamedIndividual ,
+                   :OfEntity .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Day
+:Day rdf:type owl:NamedIndividual ,
+              :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#DisplayBalanceReceiptOrScreen
+:DisplayBalanceReceiptOrScreen rdf:type owl:NamedIndividual ,
+                                        :NormalDisplay .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Dollars
+:Dollars rdf:type owl:NamedIndividual ,
+                  :MoneyUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Else_CashCard_is_in_state_StatusValidPassword
+:Else_CashCard_is_in_state_StatusValidPassword rdf:type owl:NamedIndividual ,
+                                                        :Else ;
+                                               :object :AcceptAuthorization ,
+                                                       :StatusValidCashCard ,
+                                                       :StatusValidPassword ;
+                                               :subject :BankComputer ,
+                                                        :CashCard ;
+                                               :toEntity :ATM ;
+                                               :verb :is_in_state ,
+                                                     :sends .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ErrorMessageforAtLeast30Sec
+:ErrorMessageforAtLeast30Sec rdf:type owl:NamedIndividual ,
+                                      :ErrorDisplay .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Euro
+:Euro rdf:type owl:NamedIndividual ,
+               :MoneyUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ExpireState
+:ExpireState rdf:type owl:NamedIndividual ,
+                      :UnWantedStates .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#FinishedState
+:FinishedState rdf:type owl:NamedIndividual ,
+                        :ProcessSuccessfulStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#HalfLife
+:HalfLife rdf:type owl:NamedIndividual ,
+                   :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Heavy
+:Heavy rdf:type owl:NamedIndividual ,
+                :Server .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Hour
+:Hour rdf:type owl:NamedIndividual ,
+               :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#If__typedpassword_of_Customer_not_equals_password_of__Customer_then_CashCard_is_in_state_StatusBadPassword_Else_CashCard_is_in_state_StatusValidPassword
+:If__typedpassword_of_Customer_not_equals_password_of__Customer_then_CashCard_is_in_state_StatusBadPassword_Else_CashCard_is_in_state_StatusValidPassword rdf:type owl:NamedIndividual ,
+                                                                                                                                                                   :IFBBThenBBElseBB ;
+                                                                                                                                                          :condition :If_typedpassword_of_Customer_not_equals_password_of_Customer ;
+                                                                                                                                                          :else :Else_CashCard_is_in_state_StatusValidPassword ;
+                                                                                                                                                          :object :StatusInValidCashCard ,
+                                                                                                                                                                  :rejectionAuthorization ,
+                                                                                                                                                                  :statusBadPassword ;
+                                                                                                                                                          :subject :BankComputer ,
+                                                                                                                                                                   :CashCard ;
+                                                                                                                                                          :toEntity :ATM ;
+                                                                                                                                                          :verb :is_in_state ,
+                                                                                                                                                                :sends .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#If_typedpassword_of_Customer_not_equals_password_of_Customer
+:If_typedpassword_of_Customer_not_equals_password_of_Customer rdf:type owl:NamedIndividual ,
+                                                                       :Conditional ;
+                                                              :object :password ;
+                                                              :ofEntity :Customer ;
+                                                              :subject :typedPassword ;
+                                                              :verb :not_equals .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#InValidCashcard
+:InValidCashcard rdf:type owl:NamedIndividual ,
+                          :ErrorDisplay .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#InitialDisplay
+:InitialDisplay rdf:type owl:NamedIndividual ,
+                         :NormalDisplay ,
+                         :Object .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#InitialWithdrawalSequence
+:InitialWithdrawalSequence rdf:type owl:NamedIndividual ,
+                                    :Display .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#MicroSecond
+:MicroSecond rdf:type owl:NamedIndividual ,
+                      :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#MilliSecond
+:MilliSecond rdf:type owl:NamedIndividual ,
+                      :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Minute
+:Minute rdf:type owl:NamedIndividual ,
+                 :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Month
+:Month rdf:type owl:NamedIndividual ,
+                :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#NanoSecond
+:NanoSecond rdf:type owl:NamedIndividual ,
+                     :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#No_Money
+:No_Money rdf:type owl:NamedIndividual ,
+                   :UnwantedATMStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Normal
+:Normal rdf:type owl:NamedIndividual ,
+                 :Server .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#NotFinishedState
+:NotFinishedState rdf:type owl:NamedIndividual ,
+                           :ProcessUnwantedStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#OracleVersion7.0
+:OracleVersion7.0 rdf:type owl:NamedIndividual ,
+                           :DatabaseManagementSystem .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#PicoSecond
+:PicoSecond rdf:type owl:NamedIndividual ,
+                     :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Pin
+:Pin rdf:type owl:NamedIndividual ,
+              :Verification .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#PinTransmission
+:PinTransmission rdf:type owl:NamedIndividual ,
+                          :Transmission .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#PowerFailures
+:PowerFailures rdf:type owl:NamedIndividual ,
+                        :UnwantedPowerSupplyStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Restart
+:Restart rdf:type owl:NamedIndividual ,
+                  :WantedATMStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Second
+:Second rdf:type owl:NamedIndividual ,
+                 :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ShutDown
+:ShutDown rdf:type owl:NamedIndividual ,
+                   :WantedATMStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#StartState
+:StartState rdf:type owl:NamedIndividual ,
+                     :ProcessSuccessfulStatus .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#StatusInValidCashCard
+:StatusInValidCashCard rdf:type owl:NamedIndividual ,
+                                :Object ,
+                                :UnWantedStates .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#StatusValidAccount
+:StatusValidAccount rdf:type owl:NamedIndividual ,
+                             :SuccessfulSates .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#StatusValidBankCode
+:StatusValidBankCode rdf:type owl:NamedIndividual ,
+                              :SuccessfulSates .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#StatusValidCashCard
+:StatusValidCashCard rdf:type owl:NamedIndividual ,
+                              :Object ,
+                              :SuccessfulSates .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#StatusValidPassword
+:StatusValidPassword rdf:type owl:NamedIndividual ,
+                              :Object ,
+                              :SuccessfulSates .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#StatusValidSerialNumber
+:StatusValidSerialNumber rdf:type owl:NamedIndividual ,
+                                  :SuccessfulSates .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TransactionNotSucceeded
+:TransactionNotSucceeded rdf:type owl:NamedIndividual ,
+                                  :Negative .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TransactionSucceeded
+:TransactionSucceeded rdf:type owl:NamedIndividual ,
+                               :Positive .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TranscactionAmount
+:TranscactionAmount rdf:type owl:NamedIndividual ,
+                             :Request .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#TripleDes
+:TripleDes rdf:type owl:NamedIndividual ,
+                    :EncryptionStandard .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#ValidCashCard
+:ValidCashCard rdf:type owl:NamedIndividual ,
+                        :Positive .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Volt
+:Volt rdf:type owl:NamedIndividual ,
+               :ElectricPotentialDifferenceUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Week
+:Week rdf:type owl:NamedIndividual ,
+               :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#WrongAccount
+:WrongAccount rdf:type owl:NamedIndividual ,
+                       :ErrorDisplay .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#WrongBankCode
+:WrongBankCode rdf:type owl:NamedIndividual ,
+                        :ErrorDisplay .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#WrongPassword
+:WrongPassword rdf:type owl:NamedIndividual ,
+                        :ErrorDisplay .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Yamaha
+:Yamaha rdf:type owl:NamedIndividual ,
+                 :Audio .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#Year
+:Year rdf:type owl:NamedIndividual ,
+               :TimeUnit .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#badAccount
+:badAccount rdf:type owl:NamedIndividual ,
+                     :Negative .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#badBankcode
+:badBankcode rdf:type owl:NamedIndividual ,
+                      :Negative .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#badPassword
+:badPassword rdf:type owl:NamedIndividual ,
+                      :Negative .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#cardSerialNumber
+:cardSerialNumber rdf:type owl:NamedIndividual ,
+                           :Object .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#displays
+:displays rdf:type owl:NamedIndividual ,
+                   :Verb .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#has_no_money
+:has_no_money rdf:type owl:NamedIndividual ,
+                       :ErrorDisplay .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#if_CashCard_is_in_not_ATM
+:if_CashCard_is_in_not_ATM rdf:type owl:NamedIndividual ,
+                                    :Conditional ;
+                           :object :ATM ;
+                           :subject :CashCard ;
+                           :verb :is_in_not .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#if_CashCard_is_in_not_ATM_then_ATM_displays_Initial_Display
+:if_CashCard_is_in_not_ATM_then_ATM_displays_Initial_Display rdf:type owl:NamedIndividual ,
+                                                                      :IfBBThenBB ;
+                                                             :condition :if_CashCard_is_in_not_ATM ;
+                                                             :object :InitialDisplay ;
+                                                             :subject :ATM ;
+                                                             :verb :displays .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#invalidCashard
+:invalidCashard rdf:type owl:NamedIndividual ,
+                         :Negative .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#is_in_not
+:is_in_not rdf:type owl:NamedIndividual ,
+                    :Verb .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#is_in_state
+:is_in_state rdf:type owl:NamedIndividual ,
+                      :Verb .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#not_equals
+:not_equals rdf:type owl:NamedIndividual ,
+                     :Verb .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#password
+:password rdf:type owl:NamedIndividual ,
+                   :Object .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#records
+:records rdf:type owl:NamedIndividual ,
+                  :Verb ;
+         :object :cardSerialNumber ;
+         :ofEntity :CashCard ;
+         :subject :BankComputer ;
+         :verb :records .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#rejectionAuthorization
+:rejectionAuthorization rdf:type owl:NamedIndividual ,
+                                 :Negative ,
+                                 :Object .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#returns
+:returns rdf:type owl:NamedIndividual ,
+                  :Verb .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#sends
+:sends rdf:type owl:NamedIndividual ,
+                :Verb .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#statusBadAccount
+:statusBadAccount rdf:type owl:NamedIndividual ,
+                           :UnWantedStates .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#statusBadBankCode
+:statusBadBankCode rdf:type owl:NamedIndividual ,
+                            :UnWantedStates .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#statusBadPassword
+:statusBadPassword rdf:type owl:NamedIndividual ,
+                            :Object ,
+                            :UnWantedStates .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#three
+:three rdf:type owl:NamedIndividual ,
+                :Count .
+
+
+###  http://lod.csd.auth.gr/atm/atm.ttl#typedPassword
+:typedPassword rdf:type owl:NamedIndividual ,
+                        :Subject .
+
+
+###  Generated by the OWL API (version 4.5.26.2023-07-17T20:34:13Z) https://github.com/owlcs/owlapi
