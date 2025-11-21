@@ -28,29 +28,29 @@ atm_cqs.rq                ← CQ suite for coverage evaluation
 ```
 
 ### Installation
-1. **Create a virtual environment** (Python ≥ 3.10 recommended):
-   ```bash
+1. **Create a virtual environment** (Python ≥ 3.10 recommended) in PowerShell:
+   ```powershell
    python -m venv .venv
-   source .venv/bin/activate
-   pip install --upgrade pip
+   .\.venv\Scripts\Activate.ps1
+   python -m pip install --upgrade pip
    pip install -r requirements.txt
    ```
-2. **(Optional) Enable OpenAI-backed prompting.** Install `openai` and export `OPENAI_API_KEY`:
-   ```bash
-   pip install openai
-   export OPENAI_API_KEY=sk-...
+2. **(Optional) Enable OpenAI-backed prompting.** Install `openai` and set `OPENAI_API_KEY`:
+   ```powershell
+   python -m pip install openai
+   $env:OPENAI_API_KEY="sk-..."
    ```
    The default mode (`--llm-mode heuristic`) is offline-safe and derives axioms with lightweight pattern rules for reproducibility.
 
 ### Running the pipeline (ATM example)
-```bash
-python scripts/run_pipeline.py \
-  --requirements atm_requirements.jsonl \
-  --shapes gold/shapes_atm.ttl \
-  --base gold/atm_gold.ttl \
-  --cqs atm_cqs.rq \
-  --output build/atm_generated.ttl \
-  --report build/atm_report.json \
+```powershell
+python scripts/run_pipeline.py `
+  --requirements atm_requirements.jsonl `
+  --shapes gold/shapes_atm.ttl `
+  --base gold/atm_gold.ttl `
+  --cqs atm_cqs.rq `
+  --output build/atm_generated.ttl `
+  --report build/atm_report.json `
   --max-reqs 50
 ```
 Key outputs:
