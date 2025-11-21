@@ -2,10 +2,6 @@
 
 **A Neuro–Symbolic Pipeline for OWL Generation, Validation, and Feedback Repair**
 
-Your Name  \\
-School of Informatics, Aristotle University of Thessaloniki  \\
-[your.email@example.com](mailto:your.email@example.com)
-
 ---
 
 ## 0. System Overview & Quickstart
