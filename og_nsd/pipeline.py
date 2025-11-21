@@ -41,16 +41,57 @@ class OntologyDraftingPipeline:
             self.assembler.add_turtle(state, llm_response.turtle)
         if llm_response is None:
             raise RuntimeError("LLM returned no axioms")
-        shacl_report = self.validator.validate(state.graph)
-        cq_results = self.cq_runner.run(state.graph) if self.cq_runner else None
-        reasoner_report = self.reasoner.run(state.graph)
+
+        iteration_reports = []
+        patch_notes: list[str] = []
+        for iteration in range(self.config.max_iterations + 1):
+            reasoner_report = self.reasoner.run(state.graph)
+            shacl_report = self.validator.validate(state.graph)
+            cq_results = self.cq_runner.run(state.graph) if self.cq_runner else None
+            iteration_reports.append(
+                {
+                    "iteration": iteration,
+                    "conforms": shacl_report.conforms,
+                    "shacl": shacl_report,
+                    "reasoner": reasoner_report,
+                    "cq_results": cq_results,
+                }
+            )
+
+            if shacl_report.conforms or iteration == self.config.max_iterations:
+                break
+
+            prompts = self._synthesize_repair_prompts(shacl_report)
+            context_ttl = state.graph.serialize(format="turtle")
+            patch_response = self.llm.generate_patch(prompts, context_ttl)
+            patch_notes.append(patch_response.reasoning_notes)
+            if patch_response.turtle.strip():
+                self.assembler.add_turtle(state, patch_response.turtle)
+
         report = build_report(
             llm_response=llm_response,
-            shacl_report=shacl_report,
-            cq_results=cq_results,
-            reasoner_report=reasoner_report,
+            shacl_report=iteration_reports[-1]["shacl"],
+            cq_results=iteration_reports[-1]["cq_results"],
+            reasoner_report=iteration_reports[-1]["reasoner"],
+            iterations=iteration_reports,
+            patch_notes=patch_notes,
         )
         self.assembler.serialize(state, self.config.output_path)
         if self.config.report_path:
             save_report(report, self.config.report_path)
         return report
+
+    def _synthesize_repair_prompts(self, shacl_report) -> list[str]:
+        prompts: list[str] = []
+        for result in shacl_report.results:
+            parts = []
+            if result.message:
+                parts.append(result.message)
+            if result.path:
+                parts.append(f"path={result.path}")
+            if result.focus_node:
+                parts.append(f"focus={result.focus_node}")
+            prompts.append(" | ".join(parts))
+        if not prompts and shacl_report.text_report:
+            prompts.append(shacl_report.text_report.splitlines()[0])
+        return prompts
