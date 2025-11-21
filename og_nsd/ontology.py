@@ -88,8 +88,6 @@ def _ensure_standard_prefixes(turtle: str) -> str:
 
 _CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 _QUOTED_PREFIX_RE = re.compile(r"'([A-Za-z][\w-]*:)")
-_LOGIC_LINE_PREFIXES = ("IF", "THEN", "ELSE", "WHEN", "UNLESS")
-_LOGIC_TOKEN_RE = re.compile(r"\b(?:IF|THEN|ELSE|WHEN|UNLESS|NOT)\b", re.IGNORECASE)
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -104,35 +102,8 @@ def _sanitize_turtle(turtle: str) -> str:
         line = _QUOTED_PREFIX_RE.sub(r"\1", line)
 
         stripped = line.lstrip()
-        if stripped.upper().startswith(_LOGIC_LINE_PREFIXES):
-            _terminate_incomplete_statement(sanitized_lines)
-            sanitized_lines.append(_comment_line(line))
-            continue
-
-        if _LOGIC_TOKEN_RE.search(stripped):
-            _terminate_incomplete_statement(sanitized_lines)
-            sanitized_lines.append(_comment_line(line))
+        if stripped.upper().startswith("NOT "):
+            sanitized_lines.append(f"# {line}" if not line.lstrip().startswith("#") else line)
             continue
         sanitized_lines.append(line)
     return "\n".join(sanitized_lines)
-
-
-def _comment_line(line: str) -> str:
-    """Safely prepend a comment marker unless already present."""
-
-    stripped = line.lstrip()
-    return line if stripped.startswith("#") else f"# {line}"
-
-
-def _terminate_incomplete_statement(lines: list[str]) -> None:
-    """Close a preceding Turtle statement before commenting out a logic line."""
-
-    if not lines:
-        return
-
-    last_line = lines[-1]
-    stripped = last_line.strip()
-    if stripped.startswith("#") or not stripped.endswith(";"):
-        return
-
-    lines[-1] = _comment_line(last_line)
