@@ -46,13 +46,46 @@ class RequirementLoader:
                 parsed = [parsed]
             return iter(parsed)
         except json.JSONDecodeError:
-            # Treat file as JSON Lines.
+            # Treat file as JSON Lines or multi-line JSON objects separated by
+            # blank lines. Lines that only contain commas are ignored to allow
+            # slightly malformed pretty-printed JSONL files.
             def _iter() -> Iterator[dict]:
+                buffer: list[str] = []
+
+                def flush_buffer() -> dict | None:
+                    if not buffer:
+                        return None
+                    parsed = json.loads("\n".join(buffer))
+                    buffer.clear()
+                    return parsed
+
                 for line in text.splitlines():
-                    line = line.strip()
-                    if not line or line.startswith("//"):
+                    stripped = line.strip()
+                    if not stripped or stripped.startswith("//") or stripped == ",":
                         continue
-                    yield json.loads(line)
+
+                    buffer.append(line)
+                    try:
+                        # Attempt to parse whenever we add a line; successful
+                        # parses are yielded immediately so the next object can
+                        # start accumulating.
+                        parsed = flush_buffer()
+                    except json.JSONDecodeError:
+                        # Keep accumulating lines until a complete JSON object
+                        # can be parsed.
+                        continue
+                    if parsed is not None:
+                        yield parsed
+
+                # Catch any trailing buffered object.
+                try:
+                    parsed = flush_buffer()
+                except json.JSONDecodeError as exc:  # pragma: no cover - defensive
+                    raise json.JSONDecodeError(
+                        f"Failed to parse requirements from {self.path}", text, exc.pos
+                    ) from exc
+                if parsed is not None:
+                    yield parsed
 
             return _iter()
 
