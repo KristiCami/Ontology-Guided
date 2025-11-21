@@ -40,7 +40,13 @@ class ShaclValidator:
             data_graph,
             shacl_graph=self.shapes_graph,
             inference="both",
-            serialize_report_graph=True,
+            serialize_report_graph=False,
         )
-        report_graph_ttl = report_graph.serialize(format="turtle") if report_graph else None
+        report_graph_ttl: Optional[str] = None
+        if isinstance(report_graph, bytes):
+            report_graph_ttl = report_graph.decode("utf-8")
+        elif isinstance(report_graph, str):
+            report_graph_ttl = report_graph
+        elif report_graph:
+            report_graph_ttl = report_graph.serialize(format="turtle")
         return ShaclReport(bool(conforms), str(text_report), report_graph_ttl)
