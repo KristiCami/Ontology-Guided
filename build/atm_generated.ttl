@@ -1,0 +1,239 @@
+@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+atm:ATM_dispenses_Account a owl:Axiom ;
+    atm:sourceRequirement "REQ-024" .
+
+atm:ATM_dispenses_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-011" .
+
+atm:ATM_logs_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-006" .
+
+atm:ATM_relatesTo_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-002",
+        "REQ-003" .
+
+atm:ATM_relatesTo_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-001",
+        "REQ-027" .
+
+atm:ATM_relatesTo_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-016" .
+
+atm:BalanceInquiry a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:performedBy ;
+            owl:someValuesFrom atm:Customer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:onAccount ;
+            owl:someValuesFrom atm:Account ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:usesCard ;
+            owl:someValuesFrom atm:CashCard ],
+        atm:Transaction .
+
+atm:Bank_dispenses_Account a owl:Axiom ;
+    atm:sourceRequirement "REQ-029" .
+
+atm:Bank_logs_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-007" .
+
+atm:Bank_logs_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-009" .
+
+atm:Bank_relatesTo_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-005",
+        "REQ-008",
+        "REQ-017",
+        "REQ-021",
+        "REQ-028" .
+
+atm:Bank_relatesTo_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-018",
+        "REQ-020",
+        "REQ-026" .
+
+atm:Bank_relatesTo_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-013",
+        "REQ-022",
+        "REQ-023",
+        "REQ-025",
+        "REQ-030" .
+
+atm:Bank_verifies_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-019" .
+
+atm:Customer_dispenses_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-014" .
+
+atm:Customer_logs_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-015" .
+
+atm:Customer_logs_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-012" .
+
+atm:Customer_relatesTo_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-004",
+        "REQ-010" .
+
+atm:Deposit a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:performedBy ;
+            owl:someValuesFrom atm:Customer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:onAccount ;
+            owl:someValuesFrom atm:Account ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:usesCard ;
+            owl:someValuesFrom atm:CashCard ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:requestedAmount ;
+            owl:someValuesFrom xsd:decimal ],
+        atm:Transaction .
+
+atm:authorizedBy a owl:ObjectProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range atm:Authorization .
+
+atm:dispenses a owl:ObjectProperty ;
+    rdfs:domain atm:ATM,
+        atm:Bank,
+        atm:Customer ;
+    rdfs:range atm:Account,
+        atm:RequirementTarget,
+        atm:Transaction .
+
+atm:handlesTransaction a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:Transaction .
+
+atm:hasAccount a owl:ObjectProperty ;
+    rdfs:domain atm:Customer ;
+    rdfs:range atm:Account .
+
+atm:issuesCard a owl:ObjectProperty ;
+    rdfs:domain atm:Bank ;
+    rdfs:range atm:CashCard .
+
+atm:logs a owl:ObjectProperty ;
+    rdfs:domain atm:ATM,
+        atm:Bank,
+        atm:Customer ;
+    rdfs:range atm:CashCard,
+        atm:RequirementTarget,
+        atm:Transaction .
+
+atm:maintainsAccount a owl:ObjectProperty ;
+    rdfs:domain atm:Bank ;
+    rdfs:range atm:Account .
+
+atm:messageCode a owl:DatatypeProperty ;
+    rdfs:domain atm:Message ;
+    rdfs:range xsd:string .
+
+atm:operatedBy a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:Bank .
+
+atm:ownsCard a owl:ObjectProperty ;
+    rdfs:domain atm:Customer ;
+    rdfs:range atm:CashCard .
+
+atm:receivesMessageFrom a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:BankComputer .
+
+atm:relatesTo a owl:ObjectProperty ;
+    rdfs:domain atm:ATM,
+        atm:Bank,
+        atm:Customer ;
+    rdfs:range atm:CashCard,
+        atm:RequirementTarget,
+        atm:Transaction .
+
+atm:sendsMessageTo a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:BankComputer .
+
+atm:transactionTimestamp a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range xsd:dateTime .
+
+atm:verifies a owl:ObjectProperty ;
+    rdfs:domain atm:Bank ;
+    rdfs:range atm:CashCard .
+
+atm:Authorization a owl:Class .
+
+atm:Message a owl:Class .
+
+atm:Withdrawal a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:performedBy ;
+            owl:someValuesFrom atm:Customer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:onAccount ;
+            owl:someValuesFrom atm:Account ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:usesCard ;
+            owl:someValuesFrom atm:CashCard ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:requestedAmount ;
+            owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:dispensedAmount ;
+            owl:someValuesFrom xsd:decimal ],
+        atm:Transaction .
+
+atm:bankCode a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:domain atm:CashCard ;
+    rdfs:range xsd:string .
+
+atm:dispensedAmount a owl:DatatypeProperty ;
+    rdfs:domain atm:Withdrawal ;
+    rdfs:range xsd:decimal .
+
+atm:serialNumber a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:domain atm:CashCard ;
+    rdfs:range xsd:string .
+
+atm:BankComputer a owl:Class .
+
+atm:requestedAmount a owl:DatatypeProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range xsd:decimal .
+
+atm:RequirementTarget a owl:Class .
+
+atm:onAccount a owl:ObjectProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range atm:Account .
+
+atm:performedBy a owl:ObjectProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range atm:Customer .
+
+atm:usesCard a owl:ObjectProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range atm:CashCard .
+
+atm:ATM a owl:Class .
+
+atm:Account a owl:Class .
+
+atm:Bank a owl:Class .
+
+atm:Customer a owl:Class .
+
+atm:CashCard a owl:Class ;
+    owl:hasKey ( atm:bankCode atm:serialNumber ) .
+
+atm:Transaction a owl:Class .
+
