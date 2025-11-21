@@ -4,7 +4,7 @@ import unittest
 
 from rdflib import Graph
 
-from og_nsd.ontology import _ensure_standard_prefixes
+from og_nsd.ontology import _ensure_standard_prefixes, _sanitize_turtle
 
 
 class EnsureStandardPrefixesTests(unittest.TestCase):
@@ -29,6 +29,22 @@ class EnsureStandardPrefixesTests(unittest.TestCase):
         # Should not duplicate known prefixes
         self.assertEqual(1, enriched.count("@prefix owl:"))
         Graph().parse(data=enriched, format="turtle")
+
+
+class SanitizeTurtleTests(unittest.TestCase):
+    def test_comments_lines_starting_with_not(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n"
+            "\n"
+            "atm:ATM a owl:Class .\n"
+            "NOT atm:CashCard atm:in atm:ATM .\n"
+            "atm:CashCard a owl:Class ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertIn("# NOT atm:CashCard", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
 
 if __name__ == "__main__":

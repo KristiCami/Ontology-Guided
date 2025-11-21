@@ -32,6 +32,16 @@ class OntologyAssembler:
         try:
             state.graph.parse(data=cleaned, format="turtle")
         except Exception as exc:  # pragma: no cover - requires rdflib parse error
+            sanitized = _sanitize_turtle(cleaned)
+            if sanitized != cleaned:
+                try:
+                    state.graph.parse(data=sanitized, format="turtle")
+                except Exception as exc2:  # pragma: no cover - requires rdflib parse error
+                    raise ValueError(
+                        f"Failed to parse Turtle from LLM response after sanitization: {exc2}"
+                    ) from exc2
+                state.turtle_snippets.append(sanitized)
+                return
             raise ValueError(f"Failed to parse Turtle from LLM response: {exc}") from exc
         state.turtle_snippets.append(cleaned)
 
@@ -74,3 +84,16 @@ def _ensure_standard_prefixes(turtle: str) -> str:
     if not missing:
         return turtle
     return "\n".join(missing + [turtle])
+
+
+def _sanitize_turtle(turtle: str) -> str:
+    """Apply lightweight heuristics to tolerate common LLM output glitches."""
+
+    sanitized_lines = []
+    for line in turtle.splitlines():
+        stripped = line.lstrip()
+        if stripped.upper().startswith("NOT "):
+            sanitized_lines.append(f"# {line}" if not line.lstrip().startswith("#") else line)
+            continue
+        sanitized_lines.append(line)
+    return "\n".join(sanitized_lines)
