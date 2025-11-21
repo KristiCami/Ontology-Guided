@@ -1,8 +1,8 @@
 {
-  "llm_notes": "Mapped 'If the transaction is not successful, an error message should be displayed and the card should be ejected.' \u2192 atm:ATM relatesTo atm:Transaction\nMapped 'If the ATM requests verification of the card (serial number and password), the bank computer checks if the bank code is valid. A bank code is valid if the cash card was issued by the bank. Then, a valid or invalid bank code is returned.' \u2192 atm:Bank relatesTo atm:CashCard\nMapped 'If the bank code is invalid, the bank computer shall send the message 'bad bank code' to the ATM.' \u2192 atm:Bank relatesTo atm:RequirementTarget\nMapped 'If the ATM sends a request to verify the password, the bank computer shall check if the password is valid for a valid cash card. Then the result is either a valid or invalid password.' \u2192 atm:Bank verifies atm:CashCard\nMapped 'If the password is invalid, the bank computer shall send a message to the ATM indicating a bad password.' \u2192 atm:Bank relatesTo atm:RequirementTarget",
+  "llm_notes": "Generated via OpenAI chat.completions",
   "shacl": {
     "conforms": true,
-    "text_report": "pyshacl not installed; skipping validation"
+    "text_report": "Validation Report\nConforms: True\n"
   },
   "competency_questions": [
     {
