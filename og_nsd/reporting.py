@@ -18,16 +18,12 @@ def build_report(
     cq_results: Optional[List[CompetencyQuestionResult]] = None,
     reasoner_report: Optional[ReasonerReport] = None,
 ) -> Dict[str, Any]:
-    shacl_section: Dict[str, Any] = {
-        "conforms": shacl_report.conforms,
-        "text_report": shacl_report.text_report,
-    }
-    if shacl_report.report_graph_ttl is not None:
-        shacl_section["report_graph_ttl"] = shacl_report.report_graph_ttl
-
     report: Dict[str, Any] = {
         "llm_notes": llm_response.reasoning_notes,
-        "shacl": shacl_section,
+        "shacl": {
+            "conforms": shacl_report.conforms,
+            "text_report": shacl_report.text_report,
+        },
     }
     if cq_results is not None:
         report["competency_questions"] = [asdict(result) for result in cq_results]
