@@ -26,6 +26,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--llm-mode", choices=["heuristic", "openai"], default="heuristic")
     parser.add_argument("--max-reqs", type=int, default=20, help="Maximum number of requirements to process")
     parser.add_argument("--reasoning", action="store_true", help="Enable owlready2 reasoning (requires Pellet)")
+    parser.add_argument("--iterations", type=int, default=2, help="Maximum repair iterations")
+    parser.add_argument("--temperature", type=float, default=0.2, help="LLM sampling temperature")
     return parser.parse_args()
 
 
@@ -41,6 +43,8 @@ def main() -> None:
         llm_mode=args.llm_mode,
         max_requirements=args.max_reqs,
         reasoning_enabled=args.reasoning,
+        max_iterations=args.iterations,
+        llm_temperature=args.temperature,
     )
     pipeline = OntologyDraftingPipeline(config)
     report = pipeline.run()

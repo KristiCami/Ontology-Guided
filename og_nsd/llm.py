@@ -38,6 +38,21 @@ class LLMClient(abc.ABC):
     def generate_axioms(self, requirements: Sequence[Requirement]) -> LLMResponse:
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def generate_patch(self, prompts: Sequence[str], context_ttl: str) -> LLMResponse:
+        """Produce ontology edits that attempt to resolve validation feedback.
+
+        Parameters
+        ----------
+        prompts:
+            A sequence of human-readable violation summaries produced by the
+            SHACL validator and/or DL reasoner.
+        context_ttl:
+            A Turtle serialization of the current ontology graph so the model
+            can ground its edits.
+        """
+        raise NotImplementedError
+
 
 class HeuristicLLM(LLMClient):
     """Rule-based fallback model for offline experimentation."""
@@ -65,6 +80,35 @@ class HeuristicLLM(LLMClient):
                 f"atm:{subject}_{prop}_{obj} a owl:Axiom ; atm:sourceRequirement \"{req.identifier}\" ."
             )
             notes.append(f"Mapped '{req.text}' → atm:{subject} {prop} atm:{obj}")
+        turtle = "\n".join(triples)
+        return LLMResponse(turtle=turtle, reasoning_notes="\n".join(notes))
+
+    def generate_patch(self, prompts: Sequence[str], context_ttl: str) -> LLMResponse:
+        """Emit a simple, deterministic patch guided by violation summaries.
+
+        The heuristic repair step is intentionally conservative: it adds
+        annotations that make the problematic nodes/classes explicit and
+        declares any referenced properties as OWL object properties. This keeps
+        the graph syntactically valid while providing a concrete edit so the
+        closed-loop controller can progress even without remote LLM access.
+        """
+
+        triples: List[str] = [
+            f"@prefix atm: <{self.base_ns}> .",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .",
+        ]
+        notes: List[str] = []
+        for idx, prompt in enumerate(prompts, start=1):
+            focus = slugify(prompt.split()[0])
+            triples.append(f"atm:{focus} a owl:Class .")
+            triples.append(
+                f"atm:{focus}_repair_{idx} a owl:Axiom ; rdfs:comment \"{prompt}\" ."
+            )
+            notes.append(f"Added repair note for: {prompt}")
+
+        if len(triples) == 3:
+            notes.append("No violations provided; emitted empty patch.")
         turtle = "\n".join(triples)
         return LLMResponse(turtle=turtle, reasoning_notes="\n".join(notes))
 
@@ -124,6 +168,24 @@ class OpenAILLM(LLMClient):
         content = response.choices[0].message.content.strip() if response.choices else ""
         return LLMResponse(turtle=content, reasoning_notes="Generated via OpenAI chat.completions")
 
+    def generate_patch(self, prompts: Sequence[str], context_ttl: str) -> LLMResponse:
+        repair_prompt = self._build_repair_prompt(prompts, context_ttl)
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": repair_prompt},
+        ]
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY is not set")
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
+        )
+        content = response.choices[0].message.content.strip() if response.choices else ""
+        return LLMResponse(turtle=content, reasoning_notes="Patch generated via OpenAI chat.completions")
+
     def _build_prompt(self, requirements: Sequence[Requirement]) -> str:
         body = []
         for req in requirements:
@@ -138,4 +200,16 @@ class OpenAILLM(LLMClient):
         return (
             "You are an ontology engineer who drafts OWL 2 DL axioms using Turtle syntax. "
             "Emit only syntactically valid Turtle with atm: prefix."
+        )
+
+    def _build_repair_prompt(self, prompts: Sequence[str], context_ttl: str) -> str:
+        prompt_block = "\n".join(f"- {p}" for p in prompts) or "- No violations provided"
+        return (
+            "You are repairing an OWL ontology. Given the SHACL/Reasoner issues below, "
+            "emit a compact Turtle patch that resolves them without deleting existing classes.\n\n"
+            "Issues:\n"
+            f"{prompt_block}\n\n"
+            "Context (truncated Turtle):\n"
+            f"{context_ttl[:4000]}\n"
+            "Respond only with Turtle additions that address the issues."
         )
