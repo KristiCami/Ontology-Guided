@@ -28,7 +28,7 @@ class OntologyAssembler:
         return OntologyState(graph=graph, turtle_snippets=snippets)
 
     def add_turtle(self, state: OntologyState, turtle: str) -> None:
-        cleaned = _strip_code_fence(turtle)
+        cleaned = _ensure_standard_prefixes(_strip_code_fence(turtle))
         try:
             state.graph.parse(data=cleaned, format="turtle")
         except Exception as exc:  # pragma: no cover - requires rdflib parse error
@@ -49,3 +49,28 @@ def _strip_code_fence(turtle: str) -> str:
     if match:
         return match.group(1).strip()
     return turtle.strip()
+
+
+_STANDARD_PREFIXES = {
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+}
+
+
+def _ensure_standard_prefixes(turtle: str) -> str:
+    """Prepend common prefixes if they are referenced but not declared."""
+
+    declared = {
+        match.group(1).lower()
+        for match in re.finditer(r"@prefix\s+([A-Za-z][\w-]*):", turtle)
+    }
+    missing = [
+        f"@prefix {prefix}: <{uri}> ."
+        for prefix, uri in _STANDARD_PREFIXES.items()
+        if prefix not in declared
+    ]
+    if not missing:
+        return turtle
+    return "\n".join(missing + [turtle])
