@@ -46,7 +46,11 @@ class HeuristicLLM(LLMClient):
         self.base_ns = base_namespace.rstrip("#/") + "#"
 
     def generate_axioms(self, requirements: Sequence[Requirement]) -> LLMResponse:
-        triples: List[str] = [f"@prefix atm: <{self.base_ns}> .", "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ."]
+        triples: List[str] = [
+            f"@prefix atm: <{self.base_ns}> .",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .",
+        ]
         notes: List[str] = []
         for req in requirements:
             subject = self._extract_subject(req)
