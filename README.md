@@ -14,6 +14,7 @@ og_nsd/                   ← Python package with reusable pipeline modules
   config.py               ← Dataclass for configuring runs
   llm.py                  ← OpenAI adapter + heuristic fallback LLM
   ontology.py             ← Graph assembly helpers built on rdflib
+  evaluation.py           ← Metric calculators for the paper tables
   pipeline.py             ← High-level orchestration logic
   queries.py              ← CQ loader/runner for SPARQL ASK suites
   reasoning.py            ← Optional owlready2 + Pellet reasoning hooks
@@ -21,6 +22,7 @@ og_nsd/                   ← Python package with reusable pipeline modules
   requirements.py         ← JSON/JSONL requirement ingestion helpers
   shacl.py                ← SHACL validation wrapper (pySHACL)
 scripts/run_pipeline.py   ← CLI entry point wrapping `OntologyDraftingPipeline`
+scripts/summarize_results.py ← Helper to print Markdown rows for the paper tables
 requirements.txt          ← Minimal Python dependencies (rdflib, pyshacl, owlready2)
 gold/                     ← Domain assets (ATM gold ontology + SHACL shapes)
 atm_requirements.jsonl    ← Benchmark requirements used in the paper
@@ -57,6 +59,35 @@ python scripts/run_pipeline.py `
 Key outputs:
 - `build/atm_generated.ttl`: merged ontology (bootstrap + generated axioms + any repair patches).
 - `build/atm_report.json`: SHACL summary, structured violation list, CQ pass/fail list, iteration-by-iteration diagnostics, LLM notes, and reasoning diagnostics if enabled (`--reasoning`).
+
+### Populating the paper tables
+This README contains two experiment tables (Extraction quality, SHACL compliance). Use the helper script to generate Markdown rows you can paste after running your own experiments.
+
+1. **Run the pipeline with the desired settings** (set `--iterations 0` to capture the “no repair” baseline):
+   ```powershell
+   python scripts/run_pipeline.py `
+     --requirements atm_requirements.jsonl `
+     --shapes gold/shapes_atm.ttl `
+     --base gold/atm_gold.ttl `
+     --cqs atm_cqs.rq `
+     --output build/atm_full.ttl `
+     --report build/atm_full_report.json `
+     --iterations 2
+   ```
+2. **Emit table rows** using the saved ontology, gold ontology, and JSON report:
+   ```powershell
+   python scripts/summarize_results.py `
+     --generated build/atm_full.ttl `
+     --gold gold/atm_gold.ttl `
+     --report build/atm_full_report.json `
+     --label "Ours (full)"
+   ```
+   The script prints:
+   - A Markdown row for **Table I (Extraction quality)** using micro-averaged P/R/F1.
+   - A Markdown row for **Table II (SHACL compliance)** with violation counts and conformance.
+   - Per-type precision/recall/F1 and macro averages to aid analysis.
+
+Repeat the two steps for every setting you want to report (e.g., `--iterations 0` for “Ours (no repair)”, `--llm-mode heuristic` vs. `openai`). Paste the emitted rows into the tables below.
 
 ### Customising runs
 | Need | How |
