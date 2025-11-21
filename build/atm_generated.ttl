@@ -4,9 +4,6 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-atm:ATM_dispenses_Account a owl:Axiom ;
-    atm:sourceRequirement "REQ-024" .
-
 atm:ATM_dispenses_RequirementTarget a owl:Axiom ;
     atm:sourceRequirement "REQ-011" .
 
@@ -18,8 +15,7 @@ atm:ATM_relatesTo_CashCard a owl:Axiom ;
         "REQ-003" .
 
 atm:ATM_relatesTo_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "REQ-001",
-        "REQ-027" .
+    atm:sourceRequirement "REQ-001" .
 
 atm:ATM_relatesTo_Transaction a owl:Axiom ;
     atm:sourceRequirement "REQ-016" .
@@ -36,9 +32,6 @@ atm:BalanceInquiry a owl:Class ;
             owl:someValuesFrom atm:CashCard ],
         atm:Transaction .
 
-atm:Bank_dispenses_Account a owl:Axiom ;
-    atm:sourceRequirement "REQ-029" .
-
 atm:Bank_logs_RequirementTarget a owl:Axiom ;
     atm:sourceRequirement "REQ-007" .
 
@@ -48,21 +41,14 @@ atm:Bank_logs_Transaction a owl:Axiom ;
 atm:Bank_relatesTo_CashCard a owl:Axiom ;
     atm:sourceRequirement "REQ-005",
         "REQ-008",
-        "REQ-017",
-        "REQ-021",
-        "REQ-028" .
+        "REQ-017" .
 
 atm:Bank_relatesTo_RequirementTarget a owl:Axiom ;
     atm:sourceRequirement "REQ-018",
-        "REQ-020",
-        "REQ-026" .
+        "REQ-020" .
 
 atm:Bank_relatesTo_Transaction a owl:Axiom ;
-    atm:sourceRequirement "REQ-013",
-        "REQ-022",
-        "REQ-023",
-        "REQ-025",
-        "REQ-030" .
+    atm:sourceRequirement "REQ-013" .
 
 atm:Bank_verifies_CashCard a owl:Axiom ;
     atm:sourceRequirement "REQ-019" .
@@ -101,10 +87,8 @@ atm:authorizedBy a owl:ObjectProperty ;
 
 atm:dispenses a owl:ObjectProperty ;
     rdfs:domain atm:ATM,
-        atm:Bank,
         atm:Customer ;
-    rdfs:range atm:Account,
-        atm:RequirementTarget,
+    rdfs:range atm:RequirementTarget,
         atm:Transaction .
 
 atm:handlesTransaction a owl:ObjectProperty ;
@@ -224,11 +208,11 @@ atm:usesCard a owl:ObjectProperty ;
     rdfs:domain atm:Transaction ;
     rdfs:range atm:CashCard .
 
-atm:ATM a owl:Class .
-
 atm:Account a owl:Class .
 
 atm:Bank a owl:Class .
+
+atm:ATM a owl:Class .
 
 atm:Customer a owl:Class .
 
