@@ -21,6 +21,7 @@ og_nsd/                   ← Python package with reusable pipeline modules
   requirements.py         ← JSON/JSONL requirement ingestion helpers
   shacl.py                ← SHACL validation wrapper (pySHACL)
 scripts/run_pipeline.py   ← CLI entry point wrapping `OntologyDraftingPipeline`
+scripts/evaluate_results.py ← Post-hoc metric helper that prints Markdown rows for the tables below
 requirements.txt          ← Minimal Python dependencies (rdflib, pyshacl, owlready2)
 gold/                     ← Domain assets (ATM gold ontology + SHACL shapes)
 atm_requirements.jsonl    ← Benchmark requirements used in the paper
@@ -57,6 +58,24 @@ python scripts/run_pipeline.py `
 Key outputs:
 - `build/atm_generated.ttl`: merged ontology (bootstrap + generated axioms + any repair patches).
 - `build/atm_report.json`: SHACL summary, structured violation list, CQ pass/fail list, iteration-by-iteration diagnostics, LLM notes, and reasoning diagnostics if enabled (`--reasoning`).
+
+### Generating the table rows (metrics + SHACL compliance)
+After you produce `build/atm_generated.ttl` and `build/atm_report.json`, run the helper below to print Markdown rows you can paste directly into the two empty tables in Section IV (metrics) and Table II (SHACL compliance):
+
+```bash
+python scripts/evaluate_results.py \ \
+  --generated build/atm_generated.ttl \ \
+  --gold gold/atm_gold.ttl \ \
+  --report build/atm_report.json \ \
+  --label "Ours (full)"
+```
+
+What you will get:
+- An overall row in the form `| Ours (full) | P | R | F1 |` that you can paste into the **Extraction quality** table.
+- A per-axiom breakdown table (optional, for appendix or debugging).
+- A SHACL/repair-loop row for Table II with `Viol. pre`, `Viol. post`, `Iterations`, and `Conforms` fields filled from your run.
+
+You can rerun the script with different labels (e.g., `LLM-only`, `Symbolic-only`) for ablation studies and append the resulting rows to the tables.
 
 ### Customising runs
 | Need | How |
@@ -177,6 +196,8 @@ We evaluate along five complementary dimensions:
    $$P = \frac{|A_g \cap A_p|}{|A_p|}, \quad R = \frac{|A_g \cap A_p|}{|A_g|}, \quad F_1 = \frac{2PR}{P + R}.$$
    We report macro-F1 (average over types) and micro-F1 (global). Matching can be syntactic (IRI equality) or semantic (entailment under a reasoner).
 
+   Use `scripts/evaluate_results.py` to populate the rows below; the script prints the Markdown row for the method label you pass via `--label`.
+
    | Method | Precision | Recall | F1 |
    | --- | --- | --- | --- |
    | LLM-only | – | – | – |
@@ -193,6 +214,13 @@ We evaluate along five complementary dimensions:
 5. **Repair efficiency.** Measures cost of achieving conformance. Define each case as one document; we compute: (i) iterations until conformance, (ii) mean iterations, (iii) distribution (% fixed in 1,2,3,>3 iterations).
 
 Together, these metrics capture precision/recall trade-offs, constraint satisfaction, logical soundness, domain competence, and efficiency of the repair loop.
+
+### Table II: SHACL compliance and repair efficiency
+Run `scripts/evaluate_results.py` with `--report` to produce the Markdown row for this table (see the command in the quickstart). Paste the printed row under the header below.
+
+| Setting | Viol. pre | Viol. post | Iterations | Conforms |
+| --- | --- | --- | --- | --- |
+| – | – | – | – | – |
 
 ### Protocol
 Split requirements into train/dev/test documents (if applicable for prompt tuning), fix seeds, and average over $N$ runs. Use McNemar/Bhattacharyya or bootstrap to assess significance. In our reference experiments we run three seeds per setting to stabilize variance across LLM samples.
