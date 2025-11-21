@@ -46,6 +46,32 @@ class SanitizeTurtleTests(unittest.TestCase):
         self.assertIn("# NOT atm:CashCard", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
+    def test_strips_control_characters(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n"
+            "\n"
+            "atm:ATM a owl:Class .\n"
+            "atm:ATM atm:requires [ atm:has atm:CardNumber ; atm:from \x08atm:CashCard ] ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertNotIn("\x08", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
+    def test_removes_quoted_prefixes(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n"
+            "\n"
+            "atm:ATM a owl:Class .\n"
+            "atm:ATM atm:requires [ atm:has atm:CardNumber ; atm:from 'atm:CashCard ] ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertIn("atm:from atm:CashCard", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
 
 if __name__ == "__main__":
     unittest.main()

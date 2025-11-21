@@ -86,11 +86,21 @@ def _ensure_standard_prefixes(turtle: str) -> str:
     return "\n".join(missing + [turtle])
 
 
+_CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+_QUOTED_PREFIX_RE = re.compile(r"'([A-Za-z][\w-]*:)")
+
+
 def _sanitize_turtle(turtle: str) -> str:
     """Apply lightweight heuristics to tolerate common LLM output glitches."""
 
     sanitized_lines = []
-    for line in turtle.splitlines():
+    for raw_line in turtle.splitlines():
+        # Remove non-printable control characters that often sneak into LLM output
+        line = _CONTROL_CHAR_RE.sub("", raw_line)
+
+        # Remove accidental single quotes directly before prefixed names (e.g., 'atm:Class)
+        line = _QUOTED_PREFIX_RE.sub(r"\1", line)
+
         stripped = line.lstrip()
         if stripped.upper().startswith("NOT "):
             sanitized_lines.append(f"# {line}" if not line.lstrip().startswith("#") else line)
