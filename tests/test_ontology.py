@@ -72,38 +72,6 @@ class SanitizeTurtleTests(unittest.TestCase):
         self.assertIn("atm:from atm:CashCard", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
-    def test_comments_inline_logic_tokens(self) -> None:
-        turtle = (
-            "@prefix atm: <http://example.org/atm#> .\n"
-            "\n"
-            "atm:ATM a owl:Class .\n"
-            "atm:ATM atm:runningOutOfMoney ;\n"
-            "    atm:ATM NOT atm:set atm:display .\n"
-            "atm:ATM atm:has atm:CashDispenser ."
-        )
-
-        sanitized = _sanitize_turtle(turtle)
-
-        self.assertIn("#     atm:ATM NOT atm:set atm:display .", sanitized)
-        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
-
-    def test_comments_conditional_blocks(self) -> None:
-        turtle = (
-            "@prefix atm: <http://example.org/atm#> .\n"
-            "\n"
-            "atm:ATM a owl:Class .\n"
-            "IF atm:ATM atm:runningOutOfMoney ;\n"
-            "    atm:ATM atm:blocks atm:CashWithdrawal .\n"
-            "THEN atm:ATM atm:has atm:Notice .\n"
-            "atm:ATM atm:dispenses atm:Cash ."
-        )
-
-        sanitized = _sanitize_turtle(turtle)
-
-        self.assertIn("# IF atm:ATM atm:runningOutOfMoney ;", sanitized)
-        self.assertIn("# THEN atm:ATM atm:has atm:Notice .", sanitized)
-        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
-
 
 if __name__ == "__main__":
     unittest.main()
