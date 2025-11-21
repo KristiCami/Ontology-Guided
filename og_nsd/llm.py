@@ -10,9 +10,9 @@ from typing import Dict, Iterable, List, Sequence
 from .requirements import Requirement
 
 try:
-    import openai
+    from openai import OpenAI
 except Exception:  # pragma: no cover - optional dependency
-    openai = None  # type: ignore
+    OpenAI = None  # type: ignore
 
 
 def slugify(label: str) -> str:
@@ -101,7 +101,7 @@ class OpenAILLM(LLMClient):
     """Adapter for the OpenAI Chat Completions API."""
 
     def __init__(self, model: str = "gpt-4o-mini", temperature: float = 0.1, system_prompt: str | None = None) -> None:
-        if openai is None:
+        if OpenAI is None:
             raise RuntimeError("openai package is not installed")
         self.model = model
         self.temperature = temperature
@@ -115,10 +115,14 @@ class OpenAILLM(LLMClient):
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
             raise RuntimeError("OPENAI_API_KEY is not set")
-        openai.api_key = api_key
-        response = openai.ChatCompletion.create(model=self.model, messages=messages, temperature=self.temperature)
-        content = response["choices"][0]["message"]["content"].strip()
-        return LLMResponse(turtle=content, reasoning_notes="Generated via OpenAI ChatCompletion")
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
+        )
+        content = response.choices[0].message.content.strip() if response.choices else ""
+        return LLMResponse(turtle=content, reasoning_notes="Generated via OpenAI chat.completions")
 
     def _build_prompt(self, requirements: Sequence[Requirement]) -> str:
         body = []
