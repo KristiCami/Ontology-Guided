@@ -9,8 +9,10 @@ from rdflib import Graph
 
 try:
     from pyshacl import validate
-except ImportError:  # pragma: no cover
+    _PYSHACL_IMPORT_ERROR: Optional[Exception] = None
+except ImportError as exc:  # pragma: no cover
     validate = None  # type: ignore
+    _PYSHACL_IMPORT_ERROR = exc
 
 
 @dataclass
@@ -29,7 +31,11 @@ class ShaclValidator:
 
     def validate(self, data_graph: Graph) -> ShaclReport:
         if validate is None:
-            return ShaclReport(True, "pyshacl not installed; skipping validation", None)
+            reason = (
+                "pyshacl import failed"
+                f" ({_PYSHACL_IMPORT_ERROR}); install dependencies via 'pip install -r requirements.txt'"
+            )
+            return ShaclReport(False, reason, None)
         conforms, report_graph, text_report = validate(
             data_graph,
             shacl_graph=self.shapes_graph,
