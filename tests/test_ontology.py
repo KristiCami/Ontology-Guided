@@ -72,6 +72,28 @@ class SanitizeTurtleTests(unittest.TestCase):
         self.assertIn("atm:from atm:CashCard", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
+    def test_unwraps_byte_string_reprs(self) -> None:
+        turtle = (
+            "b'@prefix atm: <http://example.org/atm#> .\\n"
+            "\\natm:ATM a owl:Class .\\n'"
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertNotIn("b'@prefix", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
+    def test_quotes_bare_decimals(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n\n"
+            "atm:Transaction atm:requestedAmount 100.00^^xsd:decimal ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertIn('"100.00"^^xsd:decimal', sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
 
 if __name__ == "__main__":
     unittest.main()

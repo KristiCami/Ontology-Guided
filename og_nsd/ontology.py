@@ -169,10 +169,17 @@ def _ensure_standard_prefixes(turtle: str) -> str:
 
 _CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 _QUOTED_PREFIX_RE = re.compile(r"'([A-Za-z][\w-]*:)")
+_BYTE_LITERAL_RE = re.compile(r"^b['\"](.*)['\"]$", re.DOTALL)
+_BARE_DECIMAL_RE = re.compile(r"(?<!\")([+-]?\d+(?:\.\d+)?)(\s*\^\^xsd:decimal)")
 
 
 def _sanitize_turtle(turtle: str) -> str:
     """Apply lightweight heuristics to tolerate common LLM output glitches."""
+
+    # Unwrap accidental Python byte-string reprs (e.g., "b'@prefix ...'")
+    match = _BYTE_LITERAL_RE.match(turtle.strip())
+    if match:
+        turtle = match.group(1).replace("\\n", "\n")
 
     sanitized_lines = []
     for raw_line in turtle.splitlines():
@@ -181,6 +188,10 @@ def _sanitize_turtle(turtle: str) -> str:
 
         # Remove accidental single quotes directly before prefixed names (e.g., 'atm:Class)
         line = _QUOTED_PREFIX_RE.sub(r"\1", line)
+
+        # Ensure decimals are quoted so rdflib can parse them as literals
+        if "^^xsd:decimal" in line and "\"" not in line:
+            line = _BARE_DECIMAL_RE.sub(r'"\1"\2', line)
 
         stripped = line.lstrip()
         if stripped.upper().startswith("NOT "):
