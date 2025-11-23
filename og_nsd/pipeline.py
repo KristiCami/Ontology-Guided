@@ -11,7 +11,6 @@ from .queries import CompetencyQuestionRunner
 from .reasoning import OwlreadyReasoner
 from .reporting import build_report, save_report
 from .requirements import RequirementLoader, chunk_requirements
-from .schema import OntologyContext, extract_ontology_context
 from .shacl import ShaclValidator
 
 
@@ -26,7 +25,6 @@ class OntologyDraftingPipeline:
         if config.competency_questions_path:
             self.cq_runner = CompetencyQuestionRunner(config.competency_questions_path)
         self.llm = self._select_llm(config)
-        self.ontology_context: Optional[OntologyContext] = self._maybe_load_context()
 
     def _select_llm(self, config: PipelineConfig) -> LLMClient:
         if config.llm_mode == "openai":
@@ -39,7 +37,7 @@ class OntologyDraftingPipeline:
         state = self.assembler.bootstrap()
         llm_response: Optional[LLMResponse] = None
         for batch in chunk_requirements(requirements, size=5):
-            llm_response = self.llm.generate_axioms(batch, ontology_context=self.ontology_context)
+            llm_response = self.llm.generate_axioms(batch)
             self.assembler.add_turtle(state, llm_response.turtle)
         if llm_response is None:
             raise RuntimeError("LLM returned no axioms")
@@ -97,15 +95,3 @@ class OntologyDraftingPipeline:
         if not prompts and shacl_report.text_report:
             prompts.append(shacl_report.text_report.splitlines()[0])
         return prompts
-
-    def _maybe_load_context(self) -> Optional[OntologyContext]:
-        if not self.config.use_ontology_context:
-            return None
-
-        context_source = self.config.ontology_context_path or self.config.base_ontology_path
-        if context_source is None:
-            raise ValueError(
-                "use_ontology_context is enabled but no ontology_context_path or base_ontology_path was provided"
-            )
-
-        return extract_ontology_context(context_source, base_namespace=self.config.base_namespace)
