@@ -18,10 +18,13 @@ class OntologyDraftingPipeline:
     def __init__(self, config: PipelineConfig) -> None:
         self.config = config
         self.config.ensure_output_dirs()
-        self.assembler = OntologyAssembler(config.base_ontology_path)
+        self.schema_context = self._load_schema_context(config)
+        default_prefixes = self.schema_context.prefixes if self.schema_context else None
+        self.assembler = OntologyAssembler(
+            config.base_ontology_path, default_prefixes=default_prefixes
+        )
         self.validator = ShaclValidator(config.shapes_path) if config.shapes_path else None
         self.reasoner = OwlreadyReasoner(enabled=config.reasoning_enabled)
-        self.schema_context = self._load_schema_context(config)
         self.cq_runner: Optional[CompetencyQuestionRunner] = None
         if config.competency_questions_path:
             self.cq_runner = CompetencyQuestionRunner(config.competency_questions_path)

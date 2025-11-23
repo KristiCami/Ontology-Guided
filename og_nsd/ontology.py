@@ -27,8 +27,13 @@ class SchemaContext:
 
 
 class OntologyAssembler:
-    def __init__(self, base_ontology_path: Optional[Path] = None) -> None:
+    def __init__(
+        self,
+        base_ontology_path: Optional[Path] = None,
+        default_prefixes: Optional[Dict[str, str]] = None,
+    ) -> None:
         self.base_path = base_ontology_path
+        self.default_prefixes = default_prefixes or {}
 
     def bootstrap(self) -> OntologyState:
         graph = Graph()
@@ -39,7 +44,9 @@ class OntologyAssembler:
         return OntologyState(graph=graph, turtle_snippets=snippets)
 
     def add_turtle(self, state: OntologyState, turtle: str) -> None:
-        cleaned = _ensure_standard_prefixes(_strip_code_fence(turtle))
+        cleaned = _ensure_standard_prefixes(
+            _strip_code_fence(turtle), additional_prefixes=self.default_prefixes
+        )
         try:
             state.graph.parse(data=cleaned, format="turtle")
         except Exception as exc:  # pragma: no cover - requires rdflib parse error
@@ -150,16 +157,23 @@ _STANDARD_PREFIXES = {
 }
 
 
-def _ensure_standard_prefixes(turtle: str) -> str:
+def _ensure_standard_prefixes(
+    turtle: str, *, additional_prefixes: Optional[Dict[str, str]] = None
+) -> str:
     """Prepend common prefixes if they are referenced but not declared."""
 
     declared = {
         match.group(1).lower()
         for match in re.finditer(r"@prefix\s+([A-Za-z][\w-]*):", turtle)
     }
+
+    prefix_map: Dict[str, str] = dict(_STANDARD_PREFIXES)
+    if additional_prefixes:
+        prefix_map.update(additional_prefixes)
+
     missing = [
         f"@prefix {prefix}: <{uri}> ."
-        for prefix, uri in _STANDARD_PREFIXES.items()
+        for prefix, uri in prefix_map.items()
         if prefix not in declared
     ]
     if not missing:
