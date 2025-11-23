@@ -6,7 +6,7 @@ from typing import Optional
 
 from .config import PipelineConfig
 from .llm import HeuristicLLM, LLMClient, LLMResponse, OpenAILLM
-from .ontology import OntologyAssembler
+from .ontology import OntologyAssembler, load_schema_context
 from .queries import CompetencyQuestionRunner
 from .reasoning import OwlreadyReasoner
 from .reporting import build_report, save_report
@@ -21,6 +21,7 @@ class OntologyDraftingPipeline:
         self.assembler = OntologyAssembler(config.base_ontology_path)
         self.validator = ShaclValidator(config.shapes_path) if config.shapes_path else None
         self.reasoner = OwlreadyReasoner(enabled=config.reasoning_enabled)
+        self.schema_context = self._load_schema_context(config)
         self.cq_runner: Optional[CompetencyQuestionRunner] = None
         if config.competency_questions_path:
             self.cq_runner = CompetencyQuestionRunner(config.competency_questions_path)
@@ -37,7 +38,7 @@ class OntologyDraftingPipeline:
         state = self.assembler.bootstrap()
         llm_response: Optional[LLMResponse] = None
         for batch in chunk_requirements(requirements, size=5):
-            llm_response = self.llm.generate_axioms(batch)
+            llm_response = self.llm.generate_axioms(batch, schema_context=self.schema_context)
             self.assembler.add_turtle(state, llm_response.turtle)
         if llm_response is None:
             raise RuntimeError("LLM returned no axioms")
@@ -108,3 +109,15 @@ class OntologyDraftingPipeline:
         if not prompts and shacl_report.text_report:
             prompts.append(shacl_report.text_report.splitlines()[0])
         return prompts
+
+    def _load_schema_context(self, config: PipelineConfig):
+        if not config.use_ontology_context:
+            return None
+
+        grounding_path = config.grounding_ontology_path or config.base_ontology_path
+        if grounding_path is None:
+            raise ValueError(
+                "Ontology-aware prompting requested but no grounding ontology was provided. "
+                "Pass --ontology-context or --base to supply a TTL for schema extraction."
+            )
+        return load_schema_context(grounding_path, config.base_namespace)

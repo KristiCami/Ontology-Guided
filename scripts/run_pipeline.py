@@ -29,6 +29,16 @@ def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
     parser.add_argument("--iterations", type=int, default=2, help="Maximum repair iterations")
     parser.add_argument("--temperature", type=float, default=0.2, help="LLM sampling temperature")
     parser.add_argument(
+        "--use-ontology-context",
+        action="store_true",
+        help="Extract schema vocabulary from a grounding ontology and feed it into the LLM prompt",
+    )
+    parser.add_argument(
+        "--ontology-context",
+        type=Path,
+        help="TTL file to use for schema extraction (defaults to --base if omitted)",
+    )
+    parser.add_argument(
         "--draft-only",
         action="store_true",
         help="Stop after the initial LLM draft and write the raw ontology without validation or repair",
@@ -54,6 +64,8 @@ def main() -> None:
         max_iterations=args.iterations,
         llm_temperature=args.temperature,
         draft_only=args.draft_only,
+        use_ontology_context=args.use_ontology_context,
+        grounding_ontology_path=args.ontology_context,
     )
     pipeline = OntologyDraftingPipeline(config)
     report = pipeline.run()

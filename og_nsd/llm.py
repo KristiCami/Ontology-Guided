@@ -5,8 +5,9 @@ import abc
 import os
 import re
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Sequence
+from typing import Dict, List, Sequence
 
+from .ontology import SchemaContext
 from .requirements import Requirement
 
 try:
@@ -35,7 +36,9 @@ class LLMClient(abc.ABC):
     """Abstract base class for LLM-backed ontology drafting."""
 
     @abc.abstractmethod
-    def generate_axioms(self, requirements: Sequence[Requirement]) -> LLMResponse:
+    def generate_axioms(
+        self, requirements: Sequence[Requirement], schema_context: SchemaContext | None = None
+    ) -> LLMResponse:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -60,7 +63,9 @@ class HeuristicLLM(LLMClient):
     def __init__(self, base_namespace: str) -> None:
         self.base_ns = base_namespace.rstrip("#/") + "#"
 
-    def generate_axioms(self, requirements: Sequence[Requirement]) -> LLMResponse:
+    def generate_axioms(
+        self, requirements: Sequence[Requirement], schema_context: SchemaContext | None = None
+    ) -> LLMResponse:
         triples: List[str] = [
             f"@prefix atm: <{self.base_ns}> .",
             "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .",
@@ -151,10 +156,12 @@ class OpenAILLM(LLMClient):
         self.temperature = temperature
         self.system_prompt = system_prompt or self._default_system_prompt()
 
-    def generate_axioms(self, requirements: Sequence[Requirement]) -> LLMResponse:
+    def generate_axioms(
+        self, requirements: Sequence[Requirement], schema_context: SchemaContext | None = None
+    ) -> LLMResponse:
         messages = [
             {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": self._build_prompt(requirements)},
+            {"role": "user", "content": self._build_prompt(requirements, schema_context)},
         ]
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
@@ -186,7 +193,18 @@ class OpenAILLM(LLMClient):
         content = response.choices[0].message.content.strip() if response.choices else ""
         return LLMResponse(turtle=content, reasoning_notes="Patch generated via OpenAI chat.completions")
 
-    def _build_prompt(self, requirements: Sequence[Requirement]) -> str:
+    def _build_prompt(self, requirements: Sequence[Requirement], schema_context: SchemaContext | None) -> str:
+        schema_section = self._format_schema_context(schema_context) if schema_context else ""
+
+        spec_section = (
+            "SECTION B — Drafting Specification\n"
+            "- Use only the allowed classes and properties listed above.\n"
+            "- Do not invent new class or property names unless a requirement introduces a clear new concept.\n"
+            "- Respect domain/range constraints; align datatype properties to their declared datatypes.\n"
+            "- Use the atm: namespace consistently; declare prefixes as needed.\n"
+            "- Output only valid Turtle OWL axioms; do not include explanations.\n"
+        )
+
         body = []
         for req in requirements:
             context = f"Title: {req.title}\nText: {req.text}"
@@ -194,7 +212,39 @@ class OpenAILLM(LLMClient):
                 context += f"\nBoilerplate:\n{req.boilerplate}"
             body.append(context)
         joined = "\n\n".join(body)
-        return f"Convert the following requirements into OWL Turtle axioms. Use atm: as the base prefix.\n\n{joined}"
+
+        requirements_section = f"SECTION C — Requirements Input\n{joined}"
+        return "\n\n".join(filter(None, [schema_section, spec_section, requirements_section]))
+
+    def _format_schema_context(self, schema_context: SchemaContext) -> str:
+        lines = ["SECTION A — Allowed Vocabulary (schema constraints)"]
+
+        if schema_context.prefixes:
+            lines.append("Prefixes:")
+            for prefix, uri in schema_context.prefixes.items():
+                lines.append(f"- {prefix}: <{uri}>")
+
+        if schema_context.classes:
+            lines.append("Valid classes:")
+            for cls in schema_context.classes:
+                lines.append(f"- {cls}")
+
+        if schema_context.object_properties:
+            lines.append("Valid object properties (domain → range):")
+            for name, details in schema_context.object_properties.items():
+                lines.append(f"- {name}: {details['domain']} → {details['range']}")
+
+        if schema_context.datatype_properties:
+            lines.append("Valid datatype properties (domain → datatype):")
+            for name, details in schema_context.datatype_properties.items():
+                lines.append(f"- {name}: {details['domain']} → {details['range']}")
+
+        if schema_context.labels:
+            lines.append("Labels / comments:")
+            for term, label in schema_context.labels.items():
+                lines.append(f"- {term}: {label}")
+
+        return "\n".join(lines)
 
     def _default_system_prompt(self) -> str:
         return (
