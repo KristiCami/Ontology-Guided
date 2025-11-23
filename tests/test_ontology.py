@@ -30,6 +30,16 @@ class EnsureStandardPrefixesTests(unittest.TestCase):
         self.assertEqual(1, enriched.count("@prefix owl:"))
         Graph().parse(data=enriched, format="turtle")
 
+    def test_additional_prefixes_added_when_missing(self) -> None:
+        turtle = "atm:ATM a owl:Class ."
+
+        enriched = _ensure_standard_prefixes(
+            turtle, additional_prefixes={"atm": "http://example.org/atm#"}
+        )
+
+        self.assertIn("@prefix atm: <http://example.org/atm#> .", enriched)
+        Graph().parse(data=enriched, format="turtle")
+
 
 class SanitizeTurtleTests(unittest.TestCase):
     def test_comments_lines_starting_with_not(self) -> None:
