@@ -35,10 +35,22 @@ atm_cqs.rq                ← CQ suite for coverage evaluation
    python -m pip install --upgrade pip
    pip install -r requirements.txt
    ```
+   **macOS (Terminal / zsh)**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   python -m pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
 2. **(Optional) Enable OpenAI-backed prompting.** Install `openai` and set `OPENAI_API_KEY`:
    ```powershell
    python -m pip install openai
    $env:OPENAI_API_KEY="sk-..."
+   ```
+   **macOS (Terminal / zsh)**
+   ```bash
+   python -m pip install openai
+   export OPENAI_API_KEY="sk-..."
    ```
    The default mode (`--llm-mode heuristic`) is offline-safe and derives axioms with lightweight pattern rules for reproducibility.
 
@@ -52,6 +64,18 @@ python scripts/run_pipeline.py `
   --output build/atm_generated.ttl `
   --report build/atm_report.json `
   --max-reqs 50 `
+  --iterations 2
+```
+**macOS (Terminal / zsh)**
+```bash
+python scripts/run_pipeline.py \
+  --requirements atm_requirements.jsonl \
+  --shapes gold/shapes_atm.ttl \
+  --base gold/atm_gold.ttl \
+  --cqs atm_cqs.rq \
+  --output build/atm_generated.ttl \
+  --report build/atm_report.json \
+  --max-reqs 50 \
   --iterations 2
 ```
 Key outputs:
