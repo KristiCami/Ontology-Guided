@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Dict, Iterable, List, Sequence
 
 from .requirements import Requirement
+from .schema import OntologyContext
 
 try:
     from openai import OpenAI
@@ -35,7 +36,9 @@ class LLMClient(abc.ABC):
     """Abstract base class for LLM-backed ontology drafting."""
 
     @abc.abstractmethod
-    def generate_axioms(self, requirements: Sequence[Requirement]) -> LLMResponse:
+    def generate_axioms(
+        self, requirements: Sequence[Requirement], ontology_context: OntologyContext | None = None
+    ) -> LLMResponse:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -60,7 +63,9 @@ class HeuristicLLM(LLMClient):
     def __init__(self, base_namespace: str) -> None:
         self.base_ns = base_namespace.rstrip("#/") + "#"
 
-    def generate_axioms(self, requirements: Sequence[Requirement]) -> LLMResponse:
+    def generate_axioms(
+        self, requirements: Sequence[Requirement], ontology_context: OntologyContext | None = None
+    ) -> LLMResponse:
         triples: List[str] = [
             f"@prefix atm: <{self.base_ns}> .",
             "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .",
@@ -151,10 +156,12 @@ class OpenAILLM(LLMClient):
         self.temperature = temperature
         self.system_prompt = system_prompt or self._default_system_prompt()
 
-    def generate_axioms(self, requirements: Sequence[Requirement]) -> LLMResponse:
+    def generate_axioms(
+        self, requirements: Sequence[Requirement], ontology_context: OntologyContext | None = None
+    ) -> LLMResponse:
         messages = [
             {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": self._build_prompt(requirements)},
+            {"role": "user", "content": self._build_prompt(requirements, ontology_context)},
         ]
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
@@ -186,7 +193,9 @@ class OpenAILLM(LLMClient):
         content = response.choices[0].message.content.strip() if response.choices else ""
         return LLMResponse(turtle=content, reasoning_notes="Patch generated via OpenAI chat.completions")
 
-    def _build_prompt(self, requirements: Sequence[Requirement]) -> str:
+    def _build_prompt(
+        self, requirements: Sequence[Requirement], ontology_context: OntologyContext | None
+    ) -> str:
         body = []
         for req in requirements:
             context = f"Title: {req.title}\nText: {req.text}"
@@ -194,7 +203,24 @@ class OpenAILLM(LLMClient):
                 context += f"\nBoilerplate:\n{req.boilerplate}"
             body.append(context)
         joined = "\n\n".join(body)
-        return f"Convert the following requirements into OWL Turtle axioms. Use atm: as the base prefix.\n\n{joined}"
+
+        schema_section = (
+            "SECTION A — Allowed Vocabulary (schema constraints)\n" + ontology_context.as_prompt_section() + "\n\n"
+            if ontology_context
+            else ""
+        )
+
+        drafting_spec = (
+            "SECTION B — Drafting Specification\n"
+            "- Use only the above classes and properties; do not invent new terms unless strictly necessary.\n"
+            "- Align object and datatype properties to their domain/range constraints.\n"
+            "- Use the atm: namespace consistently and emit valid Turtle.\n"
+            "- Do not include the gold ontology itself; rely only on the provided schema.\n\n"
+        )
+
+        requirements_section = f"SECTION C — Requirements Input\n{joined}"
+
+        return schema_section + drafting_spec + requirements_section
 
     def _default_system_prompt(self) -> str:
         return (
