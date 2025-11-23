@@ -221,6 +221,84 @@ Together, these metrics capture precision/recall trade-offs, constraint satisfac
 ### Protocol
 Split requirements into train/dev/test documents (if applicable for prompt tuning), fix seeds, and average over $N$ runs. Use McNemar/Bhattacharyya or bootstrap to assess significance. In our reference experiments we run three seeds per setting to stabilize variance across LLM samples.
 
+### Planned Experiments
+
+#### Table A: Main Experiments (Main Results)
+
+| ID | Name | Question / Hypothesis | Setup (Datasets / Models / Shapes) | Primary Metrics |
+| --- | --- | --- | --- | --- |
+| E1 | LLM-only | Without symbolic checks, quality degrades (drift and inconsistencies). | ATM, Health, Auto; LLM:=GPT-X (fixed); **no** SHACL/Reasoner; zero-shot/few-shot prompting. | P/R/F1 (axioms); qualitative errors. |
+| E2 | Symbolic-only | Rules/alignment only → high precision, low recall. | Hand-crafted rules + aligners; **no** LLM drafting; full SHACL/Reasoner. | P/R/F1; violations; unsat classes. |
+| E3 | Ours (no-repair) | Drafting + validation **without** the loop: how far does a single pass get? | OG–NSD with ontology-aware prompting; SHACL+Reasoner; **no** V→Prompt loop. | P/R/F1; violations@iter0. |
+| E4 | **Ours (full)** | **Closed-loop CEGIR (wSHACL + Patch Calculus) improves F1 and compliance.** | OG–NSD full: ontology-aware prompting; SHACL+Reasoner; V→Prompt; Patch Calculus; admissibility. | **P/R/F1**; **#viol. ↓**; unsat=0; CQ%; iters to conform. |
+| E5 | Cross-domain | Plug-and-play portability without retraining the LLM. | Swap DSOs+SHACL: ATM→Health→Auto; same LLM/prompts. | ΔF1 vs ATM; ΔCQ%; iters dist. |
+| E6 | CQ-oriented | Improvement on Competency Questions via repair. | Sufficient SPARQL ASK set per domain; run per iteration. | CQ pass rate per iter; first conforming iter. |
+
+**Experiment rationale**
+- **E1 — LLM-only:** Tests the neural baseline by converting requirements directly to OWL axioms without symbolic validation. Demonstrates semantic drift, redundancy, and inconsistent ontologies (low precision, unstable recall).
+- **E2 — Symbolic-only:** Tests the symbolic baseline with deterministic rules, aligners, and SHACL validation only. Measures high-precision upper bound but limited coverage and flexibility (low recall).
+- **E3 — Ours (no-repair):** Evaluates a single-pass pipeline without the feedback loop. Quantifies coverage without iterative repair and serves as a baseline for the loop.
+- **E4 — Ours (full):** Full neuro–symbolic loop with weighted SHACL, Patch Calculus, and admissibility checks. Converts violations into repair prompts and tests whether counterexample-guided repair improves F1, eliminates SHACL violations, ensures coherence (no unsat classes), and converges efficiently.
+- **E5 — Cross-domain:** Evaluates portability by swapping domain ontologies and shapes (ATM → Healthcare → Automotive) without retraining. Demonstrates domain-agnostic adaptability of the prompting strategy.
+- **E6 — CQ-oriented:** Assesses whether repaired ontologies better satisfy competency questions and how many iterations are needed to reach full CQ coverage.
+
+#### Table B: Ablations & Sensitivity
+
+| ID | Name | What is varied | Setup detail | Readouts |
+| --- | --- | --- | --- | --- |
+| A1 | -wSHACL | Απενεργοποίηση weighted severities (treat all equal). | λ₁=λ₂=λ₃ uniform; no hard/soft split. | #iters, #viol. post, CQ%, time/iter. |
+| A2 | -PatchCalc | Ελεύθερο Turtle αντί για typed patches. | Same loop, αλλά LLM επιστρέφει raw Turtle. | Soft error rate, invalid RDF rate, regressions. |
+| A3 | -Admissibility | Commit χωρίς προέλεγχο hard-safety. | Skip tentative validate; commit→validate. | Hard regressions (#new hard viol.), unsat>0 incidents. |
+| A4 | -OntoAwarePrompt | Χωρίς grounding (labels/synonyms/types). | Αφαιρείς H_m(s), μόνο generic few-shot. | Δ(F1), #iters, lexical drift cases. |
+| A5 | Reasoner order | Reasoner πριν/μετά SHACL. | Swap ordering per iter. | Δ(#viol.), runtime, coherence. |
+| A6 | LLM swap | Μοντέλο: GPT-X vs Claude-Y vs Llama-Z. | Same prompts; temperature=τ grid. | F1, iters, time/iter, cost/ontology. |
+| A7 | K_max budget | Ευαισθησία σε K_max∈{1,2,3,5}. | Keep other params fixed. | Conformance rate, F1@budget, time. |
+| A8 | Top-m hints | m∈{0,5,10,20} & λ∈{0.25,0.5,0.75}. | Hybrid BM25/embeddings. | Δ(F1), #iters, grounding errors. |
+| A9 | Weights λ | λ₁,λ₂,λ₃ grid. | Trade-off soft cost vs edits vs CQ. | Pareto curves (F1 vs edits vs CQ%). |
+| A10 | Noisy reqs | Προσθήκη θορύβου/παραφράσεων. | Noise levels: 5%, 15%, 30%. | Robustness: Δ(F1), Δ(#iters), conformance%. |
+| A11 | Long docs | Κλιμάκωση με μήκος/πλήθος προτάσεων. | Buckets: 5/15/30/60 sentences. | Runtime scaling, mem, conformance. |
+| A12 | Shapes coverage | Λειψή/υπερπλήρης δέσμη SHACL. | Remove 20% vs add 20% optional shapes. | Under/over-constraint impact on loop. |
+| A13 | Aligners | Διαφορετικοί matchers (labels/syn/struct). | String vs Embedding vs Hybrid. | Alignment P/R, downstream Δ(F1). |
+| A14 | CQ design | Πυκνότητα/αυστηρότητα CQs. | N={5,10,20}; stricter ASK variants. | CQ% vs F1 correlation. |
+
+**Ablation and sensitivity rationale**
+- **A1 – −wSHACL:** Disables weighted severities to test whether distinguishing hard vs. soft violations improves convergence speed and prioritization.
+- **A2 – −PatchCalc:** Removes typed Patch Calculus so the LLM emits raw Turtle, evaluating how structured edits affect syntactic validity and semantic precision.
+- **A3 – −Admissibility:** Commits patches without safety re-validation to measure how admissibility checks prevent new hard violations or unsatisfiable classes.
+- **A4 – −OntoAwarePrompt:** Drops ontology grounding (labels, synonyms, type hints) to quantify the role of vocabulary grounding in recall, iteration count, and lexical drift reduction.
+- **A5 – Reasoner order:** Swaps reasoning and SHACL ordering per iteration to test how sequencing affects convergence and runtime.
+- **A6 – LLM swap:** Compares different foundation models (e.g., GPT-X vs Claude-Y vs Llama-Z) for cost-performance trade-offs and model dependence.
+- **A7 – $K_{\max}$ budget:** Limits maximum repair iterations to examine convergence efficiency and quality under constrained budgets.
+- **A8 – Top-m hints:** Varies the number of vocabulary hints and weighting parameter λ in prompt grounding to test alignment and grounding sensitivity.
+- **A9 – Weights λ:** Sweeps weighted SHACL coefficients to explore trade-offs between soft-violation tolerance, edit cost, and CQ coverage.
+- **A10 – Noisy requirements:** Adds noise/paraphrases to evaluate robustness to linguistic variation.
+- **A11 – Long documents:** Scales document length/requirement count to assess runtime and memory behavior of the repair loop.
+- **A12 – Shapes coverage:** Removes/adds 20% of SHACL shapes to measure under- vs. over-constraining effects on convergence and F1.
+- **A13 – Aligners:** Compares alignment strategies (string-based, embedding-based, hybrid) and their impact on vocabulary reuse and downstream extraction quality.
+- **A14 – CQ design:** Varies number/strictness of CQs to study correlation between CQ satisfaction and ontology-level F1 or compliance.
+
+### Metrics & Reporting (Summary)
+- **Extraction:** Macro/micro F1 per axiom type plus semantic matching (reasoner entailment).
+- **Compliance:** #SHACL violations (by severity), first conforming iteration, and % reduction.
+- **Reasoning:** Consistency flag and #unsatisfiable classes.
+- **CQs:** % ASK queries that evaluate to true per iteration.
+- **Efficiency/Cost:** Iterations to conform, time/iteration, total time/ontology, LLM tokens/cost.
+- **Safety:** #hard regressions (must be 0 for full system).
+- **Extraction quality details:** Macro-/micro-averaged Precision, Recall, and F1 per axiom type (Classes, SubClassOf, Domain, Range, ObjectProperty, DatatypeProperty) using both syntactic (IRI) and semantic (entailment) matching.
+- **Constraint compliance details:** SHACL violations tracked by severity (Violation/Warning/Info), first conforming iteration, and violation reduction per repair round.
+- **Reasoning coherence details:** Consistency and unsatisfiable class counts after reasoning, ideally converging to zero unsats.
+- **Competency questions:** Requirement-driven SPARQL ASK queries with per-iteration pass rate to measure domain expressiveness and correctness.
+- **Efficiency and cost:** Iterations to conformance, mean time per iteration, total repair time per ontology, and LLM token usage/cost for runtime and economic analysis.
+- **Safety:** Number of new hard regressions (hard SHACL violations or new inconsistencies); must stay at zero for the full system.
+
+### Plots
+- **Repair dynamics:** Stacked bars of SHACL violations per iteration (by severity) with CQ% line overlay to show compliance and CQ progression.
+- **F1 vs. Iterations:** Macro-F1 over iterations comparing E3 (no-repair) vs. E4 (full) to visualize gains from closed-loop repair.
+- **Domain transfer:** ΔF1 across domains (ATM → Healthcare → Automotive) with conformance rate to show portability without retraining.
+- **Ablation summary (A1–A4):** Spider/radar plot covering F1, #iters, CQ%, hard regressions for at-a-glance component impact.
+- **Sensitivity analysis:** Heatmaps for Top-m vocabulary hints and λ weighting parameters (wSHACL) to reveal optimal ranges and trade-offs.
+- **Budget curves:** F1@K_max and Conformance@%time lines comparing iteration budgets to depict efficiency under limited time/budget.
+
 ## V. Results
 ### A. Ontology Element Extraction
 OG–NSD improves both precision and recall relative to the heuristic-only and neural-only ablations by grounding generation in available vocabularies and iteratively repairing constraint-breaking triples.
