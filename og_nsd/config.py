@@ -27,6 +27,8 @@ class PipelineConfig:
     save_intermediate: bool = True
     intermediate_dir: Path = field(default_factory=lambda: Path("build"))
     draft_only: bool = False
+    use_ontology_context: bool = False
+    grounding_ontology_path: Optional[Path] = None
 
     def ensure_output_dirs(self) -> None:
         self.output_path.parent.mkdir(parents=True, exist_ok=True)

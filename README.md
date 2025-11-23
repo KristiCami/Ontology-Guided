@@ -106,6 +106,20 @@ Key points:
 | Tune the repair loop | Set `--iterations` and `--temperature` to control how many violation→prompt rounds the pipeline attempts. |
 | Use another domain | Point `--shapes`, `--base`, and `--cqs` to the new ontology assets. |
 | Save intermediate Turtle | Edit `PipelineConfig` (see `og_nsd/config.py`) or extend `scripts/run_pipeline.py`. |
+| Turn on ontology-aware prompting | Add `--use-ontology-context --ontology-context gold/atm_gold.ttl` (or rely on `--base` as the grounding file) to feed schema vocabulary into the LLM prompt without copying gold axioms. |
+
+Example ontology-aware draft run (OpenAI-backed):
+```bash
+python scripts/run_pipeline.py \
+  --requirements atm_requirements.jsonl \
+  --shapes gold/shapes_atm.ttl \
+  --output build/atm_generated.ttl \
+  --report build/atm_report.json \
+  --llm-mode openai \
+  --use-ontology-context \
+  --ontology-context gold/atm_gold.ttl \
+  --iterations 1
+```
 
 ### Development tips
 - The pipeline is modular: swap in a domain-specific LLM by subclassing `LLMClient` or plug in another validator by editing `og_nsd/shacl.py`.
@@ -180,6 +194,35 @@ Our pipeline can be understood as an instance of Counterexample-Guided Inductive
 Given preloaded ontologies $O$ and their vocabularies $A$, we ground the LLM with (i) preferred labels and synonyms, (ii) domain relations, and (iii) naming/typing conventions (e.g., class vs. object property) to reduce semantic drift. We use few-shot exemplars in Turtle with comments mapping NL phrases to OWL axioms; Listing 1 shows a minimal example.
 
 **Component 1 (E3) — Ontology-Aware Prompting.** The ontology-aware mode redraws the ontology from the requirements text but constrains the vocabulary using a schema extracted from the gold ontology. The gold TTL is never injected verbatim; instead, a structured grounding context is built from classes, object properties with domain/range, datatype properties with datatypes, labels/comments, and prefix rules. The prompt is organised into three sections: (A) allowed vocabulary and domain/range constraints, (B) drafting specifications that forbid inventing names outside the schema and enforce namespace alignment, and (C) the requirements input (identical to the E1 baseline). Execution order is: requirements → ontology-aware prompting → fresh LLM draft → reasoner/SHACL → metrics/CQs. This keeps the raw baseline (`pred.ttl`) intact while guiding a new draft toward the gold schema without copying it.
+
+The ontology-aware flow is intentionally “guided but not copied” and mirrors the following checklist:
+1. **Starting point.** The draft always begins from the requirements text, not from the baseline `pred.ttl`. A fresh LLM run is triggered with a guided prompt, leaving the raw baseline untouched.
+2. **What goes into the prompt.** Only structured vocabulary extracted from the gold ontology is injected (classes, object properties + domain/range, datatype properties + datatypes, labels/comments, and prefix rules). Full gold TTL is never pasted into the prompt to avoid copy/paste leakage.
+3. **Schema extraction.** A lightweight JSON-like context is created from the gold TTL to capture the above vocabulary. Example shape:
+   ```json
+   {
+     "classes": ["ATM", "Bank", ...],
+     "object_properties": {"operatedBy": {"domain": "ATM", "range": "Bank"}},
+     "datatype_properties": {"requestedAmount": {"domain": "Transaction", "range": "xsd:decimal"}},
+     "labels": {"ATM": "Automated Teller Machine"},
+     "prefixes": {"atm": "http://lod.csd.auth.gr/atm/atm.ttl#"}
+   }
+   ```
+4. **Prompt structure.**
+   - **Section A — Allowed Vocabulary:** lists the schema context (classes, properties, domain/range, prefixes).
+   - **Section B — Drafting Specification:** instructs the LLM to stay within the schema, respect domain/range, avoid inventing names unless necessary, and emit valid Turtle using the `atm:` namespace.
+   - **Section C — Requirements Input:** the same requirements text used by the baseline.
+5. **Execution order.** Requirements → ontology-aware prompting (with the schema context) → LLM draft (`pred.ttl` for this run) → reasoner/SHACL → metrics/CQs. The LLM never edits the baseline graph; it writes a new ontology inside the schema rails.
+6. **LLM behavior.** The gold acts as a “contract,” not a solution. Vocabulary is provided, axioms are not; the model drafts new axioms that respect domain/range constraints while avoiding lexical drift.
+7. **Contrast with E1.**
+   | Feature | E1 (LLM-only) | E3 (ontology-aware) |
+   | --- | --- | --- |
+   | Vocabulary | Free-form, names invented | Locked to gold schema vocabulary |
+   | Domain/Range | None | Provided in prompt |
+   | Lexical drift | High | Low |
+   | Structure | Unconstrained | Semi-structured |
+   | Validity | Often invalid | Higher validity |
+   | Iterations | 1 | 1 |
 
 ```turtle
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .

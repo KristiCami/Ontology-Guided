@@ -4,15 +4,26 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import re
-from typing import Optional
+from typing import Dict, Optional
 
-from rdflib import Graph
+from rdflib import Graph, OWL, RDF, RDFS
 
 
 @dataclass
 class OntologyState:
     graph: Graph
     turtle_snippets: list[str]
+
+
+@dataclass
+class SchemaContext:
+    """Structured vocabulary extracted from a gold ontology for grounding prompts."""
+
+    classes: list[str]
+    object_properties: Dict[str, Dict[str, str]]
+    datatype_properties: Dict[str, Dict[str, str]]
+    labels: Dict[str, str]
+    prefixes: Dict[str, str]
 
 
 class OntologyAssembler:
@@ -47,6 +58,76 @@ class OntologyAssembler:
 
     def serialize(self, state: OntologyState, path: Path) -> None:
         path.write_text(state.graph.serialize(format="turtle"), encoding="utf-8")
+
+
+def load_schema_context(path: Path, base_namespace: str | None = None) -> SchemaContext:
+    """Parse a Turtle ontology and extract a lightweight schema context.
+
+    Only structural vocabulary is returned; axioms are intentionally omitted so the
+    LLM receives guidance without an easy-to-copy solution. If ``base_namespace``
+    is provided, terms outside that namespace are ignored.
+    """
+
+    graph = Graph()
+    graph.parse(path)
+    return extract_schema_context(graph, base_namespace)
+
+
+def extract_schema_context(graph: Graph, base_namespace: str | None = None) -> SchemaContext:
+    """Build a :class:`SchemaContext` from an rdflib graph."""
+
+    def _qname(term) -> str:
+        try:
+            return graph.namespace_manager.normalizeUri(term)
+        except Exception:  # pragma: no cover - rdflib normalization edge cases
+            return str(term)
+
+    def _in_scope(term) -> bool:
+        return base_namespace is None or str(term).startswith(base_namespace)
+
+    classes = {_qname(cls) for cls in graph.subjects(RDF.type, OWL.Class) if _in_scope(cls)}
+
+    object_properties: Dict[str, Dict[str, str]] = {}
+    for prop in graph.subjects(RDF.type, OWL.ObjectProperty):
+        if not _in_scope(prop):
+            continue
+        qname = _qname(prop)
+        domain = next(graph.objects(prop, RDFS.domain), None)
+        range_ = next(graph.objects(prop, RDFS.range), None)
+        object_properties[qname] = {
+            "domain": _qname(domain) if domain else "(unspecified)",
+            "range": _qname(range_) if range_ else "(unspecified)",
+        }
+
+    datatype_properties: Dict[str, Dict[str, str]] = {}
+    for prop in graph.subjects(RDF.type, OWL.DatatypeProperty):
+        if not _in_scope(prop):
+            continue
+        qname = _qname(prop)
+        domain = next(graph.objects(prop, RDFS.domain), None)
+        range_ = next(graph.objects(prop, RDFS.range), None)
+        datatype_properties[qname] = {
+            "domain": _qname(domain) if domain else "(unspecified)",
+            "range": _qname(range_) if range_ else "(unspecified)",
+        }
+
+    labels: Dict[str, str] = {}
+    for subject, _, label in graph.triples((None, RDFS.label, None)):
+        if not _in_scope(subject):
+            continue
+        labels[_qname(subject)] = str(label)
+
+    prefixes = {prefix: str(uri) for prefix, uri in graph.namespace_manager.namespaces()}
+    if base_namespace and not any(str(uri) == base_namespace for uri in prefixes.values()):
+        prefixes["base"] = base_namespace
+
+    return SchemaContext(
+        classes=sorted(classes),
+        object_properties=dict(sorted(object_properties.items())),
+        datatype_properties=dict(sorted(datatype_properties.items())),
+        labels=dict(sorted(labels.items())),
+        prefixes=dict(sorted(prefixes.items())),
+    )
 
 
 _CODE_FENCE_RE = re.compile(r"```(?:turtle)?\s*(.*?)\s*```", re.IGNORECASE | re.DOTALL)
