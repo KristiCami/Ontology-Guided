@@ -24,6 +24,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cqs", type=Path, help="Optional SPARQL ASK queries for competency evaluation")
     parser.add_argument("--report", type=Path, help="Optional JSON report path")
     parser.add_argument("--llm-mode", choices=["heuristic", "openai"], default="heuristic")
+    parser.add_argument(
+        "--use-ontology-context",
+        action="store_true",
+        help="Enable ontology-aware prompting by extracting schema from the gold ontology",
+    )
+    parser.add_argument(
+        "--context-ontology",
+        type=Path,
+        help="Optional path to an ontology used solely for schema extraction (defaults to --base)",
+    )
     parser.add_argument("--max-reqs", type=int, default=20, help="Maximum number of requirements to process")
     parser.add_argument("--reasoning", action="store_true", help="Enable owlready2 reasoning (requires Pellet)")
     parser.add_argument("--iterations", type=int, default=2, help="Maximum repair iterations")
@@ -41,6 +51,8 @@ def main() -> None:
         output_path=args.output,
         report_path=args.report,
         llm_mode=args.llm_mode,
+        use_ontology_context=args.use_ontology_context,
+        ontology_context_path=args.context_ontology,
         max_requirements=args.max_reqs,
         reasoning_enabled=args.reasoning,
         max_iterations=args.iterations,

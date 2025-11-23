@@ -23,6 +23,8 @@ class PipelineConfig:
     include_boilerplate_context: bool = True
     llm_temperature: float = 0.2
     prompt_template_path: Optional[Path] = None
+    use_ontology_context: bool = False
+    ontology_context_path: Optional[Path] = None
     reasoning_enabled: bool = False
     save_intermediate: bool = True
     intermediate_dir: Path = field(default_factory=lambda: Path("build"))

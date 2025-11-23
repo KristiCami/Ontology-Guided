@@ -86,6 +86,7 @@ Key outputs:
 | Need | How |
 | ---- | --- |
 | Switch to OpenAI generation | Pass `--llm-mode openai` (requires API key). |
+| Run ontology-aware drafting (E3) | Pass `--use-ontology-context` (optionally `--context-ontology` to point to a schema-only TTL). |
 | Limit runtime | Adjust `--max-reqs` to sample the requirement corpus. |
 | Enable DL reasoning | Append `--reasoning` (Pellet must be installed on the host; otherwise the code falls back gracefully). |
 | Tune the repair loop | Set `--iterations` and `--temperature` to control how many violation→prompt rounds the pipeline attempts. |
@@ -163,6 +164,22 @@ Our pipeline can be understood as an instance of Counterexample-Guided Inductive
 
 ### E. Ontology-Aware Prompting
 Given preloaded ontologies $O$ and their vocabularies $A$, we ground the LLM with (i) preferred labels and synonyms, (ii) domain relations, and (iii) naming/typing conventions (e.g., class vs. object property) to reduce semantic drift. We use few-shot exemplars in Turtle with comments mapping NL phrases to OWL axioms; Listing 1 shows a minimal example.
+
+#### Component 1 — Ontology-Aware Prompting (E3)
+*Starting point.* E3 starts from the same requirements text as the baseline (E1) but **does not** reuse `pred.ttl` as context. The LLM drafts a fresh ontology in one shot using a guided prompt.
+*Gold usage.* The gold ontology is never pasted verbatim. Instead, we extract a structured vocabulary (classes, properties, domain/range, labels, prefixes) that acts as a schema contract. This grounding context fences the LLM onto valid names without encouraging copy–paste of the target axioms.
+*Schema extraction.* A lightweight extractor reads the gold TTL and emits JSON like:
+```
+{
+  "classes": ["ATM", "Bank", "Transaction"],
+  "object_properties": {"operatedBy": {"domain": "ATM", "range": "Bank"}},
+  "datatype_properties": {"requestedAmount": {"domain": "Transaction", "range": "xsd:decimal"}},
+  "labels": {"ATM": "Automated Teller Machine"},
+  "prefixes": {"atm": "http://lod.csd.auth.gr/atm/atm.ttl#"}
+}
+```
+*Prompt layout.* The drafting prompt is split into three sections: (A) **Allowed Vocabulary**, listing the schema constraints above; (B) **Drafting Specification**, which instructs the LLM to only use the vocabulary, align to domain/range, avoid inventing names, and output valid Turtle; (C) **Requirements Input**, which mirrors the raw requirements used in E1. The gold axioms are never shown—only the schema.
+*Execution order.* Requirements → Ontology-Aware Prompting (E3) → LLM drafting (with schema) → `pred.ttl` (iter0) → Reasoner → SHACL → Metrics/CQs. Because we restart from requirements, we avoid compounding E1 errors; incremental repair happens later in E4.
 
 ```turtle
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
