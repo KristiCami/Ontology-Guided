@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import List, Optional
 
-from rdflib import Graph
-from rdflib.namespace import RDF, SH
+from rdflib import Graph, Literal
+from rdflib.namespace import RDF, SH, XSD
 
 try:
     from pyshacl import validate
@@ -51,6 +52,16 @@ class ShaclValidator:
                 f" ({_PYSHACL_IMPORT_ERROR}); install dependencies via 'pip install -r requirements.txt'"
             )
             return ShaclReport(False, reason, None, [])
+
+        invalid_decimals = self._find_invalid_decimal_literals(data_graph)
+        if invalid_decimals:
+            message_lines = ["Invalid xsd:decimal literals detected before SHACL validation:"]
+            for subject, predicate, literal_value in invalid_decimals:
+                message_lines.append(
+                    f"- {subject} {predicate} literal=\"{literal_value}\""
+                )
+            message = "\n".join(message_lines)
+            return ShaclReport(False, message, None, [])
         conforms, report_graph, text_report = validate(
             data_graph,
             shacl_graph=self.shapes_graph,
@@ -67,6 +78,24 @@ class ShaclValidator:
             report_graph_ttl = report_graph.serialize(format="turtle")
             parsed_results = self._extract_results(report_graph)
         return ShaclReport(bool(conforms), str(text_report), report_graph_ttl, parsed_results)
+
+    def _find_invalid_decimal_literals(self, data_graph: Graph) -> list[tuple[str, str, str]]:
+        """Return any literals with datatype xsd:decimal that cannot be parsed.
+
+        PySHACL's OWL-RL inference raises a runtime error when encountering an
+        invalid xsd:decimal lexical form. Detecting these upfront lets the
+        pipeline return a structured report instead of crashing.
+        """
+
+        invalid_literals: list[tuple[str, str, str]] = []
+        for subject, predicate, obj in data_graph:
+            if isinstance(obj, Literal) and obj.datatype == XSD.decimal:
+                lexical_value = str(obj)
+                try:
+                    Decimal(lexical_value)
+                except (InvalidOperation, ValueError):
+                    invalid_literals.append((str(subject), str(predicate), lexical_value))
+        return invalid_literals
 
     def _extract_results(self, report_graph: Graph) -> List[ShaclResult]:
         results: List[ShaclResult] = []
