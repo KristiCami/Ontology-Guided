@@ -15,10 +15,10 @@ if str(PROJECT_ROOT) not in sys.path:
 from og_nsd import OntologyDraftingPipeline, PipelineConfig
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
     parser = argparse.ArgumentParser(description="Run the OG-NSD ontology drafting pipeline")
     parser.add_argument("--requirements", type=Path, required=True, help="Path to JSON/JSONL requirements file")
-    parser.add_argument("--shapes", type=Path, required=True, help="Path to SHACL shapes file")
+    parser.add_argument("--shapes", type=Path, help="Path to SHACL shapes file (required unless --draft-only)")
     parser.add_argument("--output", type=Path, required=True, help="Where to write the generated ontology (TTL)")
     parser.add_argument("--base", type=Path, help="Optional bootstrap ontology for grounding")
     parser.add_argument("--cqs", type=Path, help="Optional SPARQL ASK queries for competency evaluation")
@@ -28,11 +28,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--reasoning", action="store_true", help="Enable owlready2 reasoning (requires Pellet)")
     parser.add_argument("--iterations", type=int, default=2, help="Maximum repair iterations")
     parser.add_argument("--temperature", type=float, default=0.2, help="LLM sampling temperature")
-    return parser.parse_args()
+    parser.add_argument(
+        "--draft-only",
+        action="store_true",
+        help="Stop after the initial LLM draft and write the raw ontology without validation or repair",
+    )
+    args = parser.parse_args()
+    return parser, args
 
 
 def main() -> None:
-    args = parse_args()
+    parser, args = parse_args()
+    if not args.draft_only and args.shapes is None:
+        parser.error("--shapes is required unless --draft-only is set.")
     config = PipelineConfig(
         requirements_path=args.requirements,
         shapes_path=args.shapes,
@@ -45,6 +53,7 @@ def main() -> None:
         reasoning_enabled=args.reasoning,
         max_iterations=args.iterations,
         llm_temperature=args.temperature,
+        draft_only=args.draft_only,
     )
     pipeline = OntologyDraftingPipeline(config)
     report = pipeline.run()
