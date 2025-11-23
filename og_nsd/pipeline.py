@@ -19,7 +19,7 @@ class OntologyDraftingPipeline:
         self.config = config
         self.config.ensure_output_dirs()
         self.assembler = OntologyAssembler(config.base_ontology_path)
-        self.validator = ShaclValidator(config.shapes_path)
+        self.validator = ShaclValidator(config.shapes_path) if config.shapes_path else None
         self.reasoner = OwlreadyReasoner(enabled=config.reasoning_enabled)
         self.cq_runner: Optional[CompetencyQuestionRunner] = None
         if config.competency_questions_path:
@@ -42,8 +42,21 @@ class OntologyDraftingPipeline:
         if llm_response is None:
             raise RuntimeError("LLM returned no axioms")
 
+        if self.config.draft_only:
+            report = {
+                "mode": "draft_only",
+                "triples": len(state.graph),
+                "llm_notes": llm_response.reasoning_notes,
+            }
+            self.assembler.serialize(state, self.config.output_path)
+            if self.config.report_path:
+                save_report(report, self.config.report_path)
+            return report
+
         iteration_reports = []
         patch_notes: list[str] = []
+        if self.validator is None:
+            raise RuntimeError("SHACL validator not configured; provide --shapes or use --draft-only.")
         for iteration in range(self.config.max_iterations + 1):
             reasoner_report = self.reasoner.run(state.graph)
             shacl_report = self.validator.validate(state.graph)

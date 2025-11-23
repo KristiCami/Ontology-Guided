@@ -82,6 +82,21 @@ Key outputs:
 - `build/atm_generated.ttl`: merged ontology (bootstrap + generated axioms + any repair patches).
 - `build/atm_report.json`: SHACL summary, structured violation list, CQ pass/fail list, iteration-by-iteration diagnostics, LLM notes, and reasoning diagnostics if enabled (`--reasoning`).
 
+### Draft-only baseline (raw ontology)
+To reproduce the raw, no-assistance baseline (`pred.ttl` in the paper's notation), stop the pipeline after the first drafting pass and omit grounding assets. The command below writes the unvalidated ontology to `build/pred.ttl`:
+
+```bash
+python scripts/run_pipeline.py \
+  --requirements atm_requirements.jsonl \
+  --output build/pred.ttl \
+  --llm-mode openai \
+  --max-reqs 50 \
+  --draft-only
+```
+Key points:
+- Skip `--shapes` and `--base` to keep the model free-form; `--draft-only` bypasses SHACL/reasoner checks and any repair loop.
+- You can still use `--llm-mode heuristic` for offline reproducibility; the command above shows the OpenAI-backed baseline.
+
 ### Customising runs
 | Need | How |
 | ---- | --- |
@@ -163,6 +178,8 @@ Our pipeline can be understood as an instance of Counterexample-Guided Inductive
 
 ### E. Ontology-Aware Prompting
 Given preloaded ontologies $O$ and their vocabularies $A$, we ground the LLM with (i) preferred labels and synonyms, (ii) domain relations, and (iii) naming/typing conventions (e.g., class vs. object property) to reduce semantic drift. We use few-shot exemplars in Turtle with comments mapping NL phrases to OWL axioms; Listing 1 shows a minimal example.
+
+**Component 1 (E3) — Ontology-Aware Prompting.** The ontology-aware mode redraws the ontology from the requirements text but constrains the vocabulary using a schema extracted from the gold ontology. The gold TTL is never injected verbatim; instead, a structured grounding context is built from classes, object properties with domain/range, datatype properties with datatypes, labels/comments, and prefix rules. The prompt is organised into three sections: (A) allowed vocabulary and domain/range constraints, (B) drafting specifications that forbid inventing names outside the schema and enforce namespace alignment, and (C) the requirements input (identical to the E1 baseline). Execution order is: requirements → ontology-aware prompting → fresh LLM draft → reasoner/SHACL → metrics/CQs. This keeps the raw baseline (`pred.ttl`) intact while guiding a new draft toward the gold schema without copying it.
 
 ```turtle
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .

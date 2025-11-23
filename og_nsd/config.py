@@ -11,7 +11,7 @@ class PipelineConfig:
     """Runtime configuration for :class:`OntologyDraftingPipeline`."""
 
     requirements_path: Path
-    shapes_path: Path
+    shapes_path: Optional[Path]
     base_ontology_path: Optional[Path]
     competency_questions_path: Optional[Path]
     output_path: Path
@@ -26,6 +26,7 @@ class PipelineConfig:
     reasoning_enabled: bool = False
     save_intermediate: bool = True
     intermediate_dir: Path = field(default_factory=lambda: Path("build"))
+    draft_only: bool = False
 
     def ensure_output_dirs(self) -> None:
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
