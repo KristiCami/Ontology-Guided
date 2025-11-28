@@ -13,7 +13,6 @@
 - CQ execution από `atm_cqs.rq` αν δοθεί στο config.
 
 ## Εντολή εκτέλεσης
-Δεν δημιουργώ εδώ τα outputs. Για να τα πάρεις, τρέξε μόνος σου:
 
 ```bash
 python scripts/run_atm_examples.py --config configs/atm_ontology_aware.json
@@ -32,9 +31,3 @@ runs/E3_no_repair/
   reasoning_report.json       # unsat classes από τον reasoner (αν υπάρχει)
   cq_results_iter0.json       # αποτελέσματα CQs (αν δώσαμε atm_cqs.rq)
 ```
-
-## Σημειώσεις χρήσης
-- Μην αντικαθιστάς/τροποποιείς τα περιεχόμενα του φακέλου `gold/`.
-- Το σχήμα SHACL (`gold/shapes_atm.ttl`) θεωρείται ήδη έτοιμο και δεν ξαναχτίζεται.
-- Τα αρχεία στο `build/` (π.χ. `build/pred.ttl`) παραμένουν ως έχουν· το E3 preset γράφει σε ξεχωριστό φάκελο `runs/`.
-- Αν χρειαστεί να αλλάξεις paths, ενημέρωσε το `configs/atm_ontology_aware.json` αντί να πειράξεις τον κώδικα του runner.
