@@ -30,6 +30,10 @@ class OntologyDraftingPipeline:
         if config.competency_questions_path:
             self.cq_runner = CompetencyQuestionRunner(config.competency_questions_path)
         self.llm = self._select_llm(config)
+        self.last_shacl_report = None
+        self.last_reasoner_report = None
+        self.last_cq_results = None
+        self.state_graph = None
 
     def _select_llm(self, config: PipelineConfig) -> LLMClient:
         if config.llm_mode == "openai":
@@ -95,6 +99,10 @@ class OntologyDraftingPipeline:
             patch_notes=patch_notes,
         )
         self.assembler.serialize(state, self.config.output_path)
+        self.state_graph = state.graph
+        self.last_shacl_report = iteration_reports[-1]["shacl"]
+        self.last_reasoner_report = iteration_reports[-1]["reasoner"]
+        self.last_cq_results = iteration_reports[-1]["cq_results"]
         if self.config.report_path:
             save_report(report, self.config.report_path)
         return report

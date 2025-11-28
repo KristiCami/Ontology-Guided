@@ -65,7 +65,8 @@ class ShaclValidator:
         conforms, report_graph, text_report = validate(
             data_graph,
             shacl_graph=self.shapes_graph,
-            inference="both",
+            inference="rdfs",
+            advanced=True,
             serialize_report_graph=False,
         )
         report_graph_ttl: Optional[str] = None
@@ -116,3 +117,24 @@ class ShaclValidator:
                 )
             )
         return results
+
+
+def summarize_shacl_report(report: ShaclReport) -> dict:
+    """Aggregate SHACL results into a compact severity summary."""
+
+    hard = 0
+    soft = 0
+    for result in report.results:
+        severity_value = (result.severity or "").lower()
+        if "violation" in severity_value:
+            hard += 1
+        else:
+            soft += 1
+    total = len(report.results)
+    return {
+        "total": total,
+        "violations": {
+            "hard": hard,
+            "soft": soft,
+        },
+    }

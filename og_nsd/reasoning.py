@@ -40,6 +40,10 @@ class OwlreadyReasoner:
         else:
             with onto:
                 sync_reasoner_pellet(infer_property_values=True, infer_data_property_values=True)
-            unsat = [cls.name for cls in onto.classes() if cls.is_a and cls.equivalent_to]
+            unsat = [
+                cls.name
+                for cls in onto.classes()
+                if any(str(eq) == "Nothing" for eq in cls.equivalent_to)
+            ]
             consistent = True
         return ReasonerReport(True, consistent, unsat, " ".join(notes))
