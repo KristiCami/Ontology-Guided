@@ -1,6 +1,7 @@
 """Optional DL reasoning helpers."""
 from __future__ import annotations
 
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
@@ -29,7 +30,8 @@ class OwlreadyReasoner:
     def run(self, graph: Graph) -> ReasonerReport:
         if not self.enabled or get_ontology is None:
             return ReasonerReport(False, None, [], "Reasoner disabled or owlready2 unavailable.")
-        tmp_path = Path("/tmp/og_nsd_reasoner.ttl")
+        tmp_dir = Path(tempfile.gettempdir())
+        tmp_path = tmp_dir / "og_nsd_reasoner.ttl"
         tmp_path.write_text(graph.serialize(format="turtle"), encoding="utf-8")
         onto = get_ontology(tmp_path.as_uri()).load()
         notes = []
