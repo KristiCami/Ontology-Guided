@@ -97,6 +97,32 @@ Key points:
 - Skip `--shapes` and `--base` to keep the model free-form; `--draft-only` bypasses SHACL/reasoner checks and any repair loop.
 - You can still use `--llm-mode heuristic` for offline reproducibility; the command above shows the OpenAI-backed baseline.
 
+### ATM ontology-aware preset (E3 / no-repair)
+- **Grounding TTL:** `gold/atm_gold.ttl` (η μοναδική gold οντολογία στο repo).
+- **SHACL shapes:** `gold/shapes_atm.ttl` (χρησιμοποιείται αυτούσιο, δεν αναπαράγεται).
+- **Baseline draft path:** `build/pred.ttl` (όλα τα αρχεία draft/metrics που παράγονται από το νέο preset γράφονται στο `runs/E3_no_repair/`).
+
+Ο ευκολότερος τρόπος για να τρέξετε το E3 preset χωρίς repair loop είναι το προρυθμισμένο script:
+
+```bash
+python scripts/run_atm_examples.py --config configs/atm_ontology_aware.json
+```
+
+Το config χρησιμοποιεί `use_ontology_context=true` ώστε να τροφοδοτήσει το LLM με λεξιλόγιο από το `gold/atm_gold.ttl` χωρίς να το συγχωνεύσει στο γράφημα. Η έξοδος γράφεται σε:
+
+```
+runs/E3_no_repair/
+  iter0/pred.ttl          ← draft της 1ης (και μοναδικής) iter
+  validation_report.ttl   ← SHACL report από το gold/shapes_atm.ttl
+  validation_summary.json ← μετρητής hard/soft παραβιάσεων
+  metrics_exact.json      ← precision/recall/F1 vs gold/atm_gold.ttl
+  metrics_semantic.json   ← semantic placeholder (ίδιο schema με exact)
+  reasoning_report.json   ← unsat classes από reasoner (αν owlready2/ Pellet διαθέσιμο)
+  cq_results_iter0.json   ← αποτελέσματα από `atm_cqs.rq` (αν το path είναι στο config)
+```
+
+Τα αρχεία αυτά **δεν είναι προϋπάρχοντα**. Παράγονται μόνο όταν εκτελεστεί η παραπάνω εντολή και δεν αγγίζουν/αναγράφουν τα δεδομένα στον φάκελο `gold/`.
+
 ### Customising runs
 | Need | How |
 | ---- | --- |
