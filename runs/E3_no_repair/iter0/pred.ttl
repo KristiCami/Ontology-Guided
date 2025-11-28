@@ -1,0 +1,92 @@
+@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+atm:ATM_dispenses_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-011" .
+
+atm:ATM_logs_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-006" .
+
+atm:ATM_relatesTo_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-002",
+        "REQ-003" .
+
+atm:ATM_relatesTo_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-001" .
+
+atm:ATM_relatesTo_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-016" .
+
+atm:Bank_logs_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-007" .
+
+atm:Bank_logs_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-009" .
+
+atm:Bank_relatesTo_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-005",
+        "REQ-008",
+        "REQ-017" .
+
+atm:Bank_relatesTo_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-018",
+        "REQ-020" .
+
+atm:Bank_relatesTo_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-013" .
+
+atm:Bank_verifies_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-019" .
+
+atm:Customer_dispenses_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-014" .
+
+atm:Customer_logs_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-015" .
+
+atm:Customer_logs_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-012" .
+
+atm:Customer_relatesTo_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-004",
+        "REQ-010" .
+
+atm:dispenses a owl:ObjectProperty ;
+    rdfs:domain atm:ATM,
+        atm:Customer ;
+    rdfs:range atm:RequirementTarget,
+        atm:Transaction .
+
+atm:logs a owl:ObjectProperty ;
+    rdfs:domain atm:ATM,
+        atm:Bank,
+        atm:Customer ;
+    rdfs:range atm:CashCard,
+        atm:RequirementTarget,
+        atm:Transaction .
+
+atm:relatesTo a owl:ObjectProperty ;
+    rdfs:domain atm:ATM,
+        atm:Bank,
+        atm:Customer ;
+    rdfs:range atm:CashCard,
+        atm:RequirementTarget,
+        atm:Transaction .
+
+atm:verifies a owl:ObjectProperty ;
+    rdfs:domain atm:Bank ;
+    rdfs:range atm:CashCard .
+
+atm:ATM a owl:Class .
+
+atm:Bank a owl:Class .
+
+atm:CashCard a owl:Class .
+
+atm:Customer a owl:Class .
+
+atm:RequirementTarget a owl:Class .
+
+atm:Transaction a owl:Class .
+
