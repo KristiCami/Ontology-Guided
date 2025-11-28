@@ -31,8 +31,8 @@ class OwlreadyReasoner:
         if not self.enabled or get_ontology is None:
             return ReasonerReport(False, None, [], "Reasoner disabled or owlready2 unavailable.")
         tmp_dir = Path(tempfile.gettempdir())
-        tmp_path = tmp_dir / "og_nsd_reasoner.ttl"
-        tmp_path.write_text(graph.serialize(format="turtle"), encoding="utf-8")
+        tmp_path = tmp_dir / "og_nsd_reasoner.owl"
+        tmp_path.write_text(graph.serialize(format="pretty-xml"), encoding="utf-8")
 
         # Path.as_uri() can yield a leading slash on Windows (e.g., "/C:/...")
         # which owlready2 fails to open. Using the plain filesystem path keeps
