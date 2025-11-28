@@ -33,7 +33,11 @@ class OwlreadyReasoner:
         tmp_dir = Path(tempfile.gettempdir())
         tmp_path = tmp_dir / "og_nsd_reasoner.ttl"
         tmp_path.write_text(graph.serialize(format="turtle"), encoding="utf-8")
-        onto = get_ontology(tmp_path.as_uri()).load()
+
+        # Path.as_uri() can yield a leading slash on Windows (e.g., "/C:/...")
+        # which owlready2 fails to open. Using the plain filesystem path keeps
+        # compatibility across platforms.
+        onto = get_ontology(str(tmp_path)).load()
         notes = []
         consistent = None
         if sync_reasoner_pellet is None:
