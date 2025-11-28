@@ -34,12 +34,13 @@ class OwlreadyReasoner:
         tmp_path = tmp_dir / "og_nsd_reasoner.owl"
         tmp_path.write_text(graph.serialize(format="pretty-xml"), encoding="utf-8")
 
-        # Owlready2 and Pellet expect forward-slash file URIs. On Windows,
-        # passing a raw filesystem path with backslashes results in invalid
-        # escape sequences (e.g., "\\s") that Pellet cannot parse. Using
-        # ``Path.as_uri`` normalizes the path to a proper ``file:///`` URI
-        # while remaining portable.
-        onto = get_ontology(tmp_path.as_uri()).load()
+        # Owlready2 and Pellet expect forward-slash paths. On Windows, passing
+        # a raw filesystem path with backslashes results in invalid escape
+        # sequences (e.g., "\\s") that Pellet cannot parse. Using
+        # ``Path.as_posix`` normalizes the path to a portable forward-slash
+        # string without introducing ``file://`` prefixes that some Owlready2
+        # versions mishandle on Windows.
+        onto = get_ontology(tmp_path.as_posix()).load()
         notes = []
         consistent = None
         if sync_reasoner_pellet is None:
