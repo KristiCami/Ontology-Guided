@@ -20,8 +20,9 @@ class OntologyDraftingPipeline:
         self.config.ensure_output_dirs()
         self.schema_context = self._load_schema_context(config)
         default_prefixes = self.schema_context.prefixes if self.schema_context else None
+        base_path = None if config.use_ontology_context else config.base_ontology_path
         self.assembler = OntologyAssembler(
-            config.base_ontology_path, default_prefixes=default_prefixes
+            base_path, default_prefixes=default_prefixes
         )
         self.validator = ShaclValidator(config.shapes_path) if config.shapes_path else None
         self.reasoner = OwlreadyReasoner(enabled=config.reasoning_enabled)
