@@ -6,3 +6,5 @@
 
 # Byte-compiled Python files
 *.pyc
+
+env
