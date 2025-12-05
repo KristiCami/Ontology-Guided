@@ -24,20 +24,21 @@ class CompetencyQuestionRunner:
 
     def _load_queries(self, path: Path) -> List[str]:
         content = path.read_text(encoding="utf-8")
-        buffer: List[str] = []
+        # Split competency questions on blank lines rather than closing braces so
+        # nested FILTER / UNION blocks do not prematurely terminate a query.
+        blocks = [block.strip() for block in content.split("\n\n") if block.strip()]
+
         queries: List[str] = []
-        for line in content.splitlines():
-            if line.strip().startswith("#") and not buffer:
+        for block in blocks:
+            # Ignore standalone comment blocks
+            lines = [line for line in block.splitlines() if line.strip()]
+            if lines and all(line.lstrip().startswith("#") for line in lines):
                 continue
-            buffer.append(line)
-            if line.strip().endswith("}"):
-                query = "\n".join(buffer).strip()
-                if query:
-                    queries.append(query)
-                buffer = []
-        if buffer:
-            queries.append("\n".join(buffer).strip())
-        return [q for q in queries if "ASK" in q.upper()]
+            query = "\n".join(lines).strip()
+            if query and "ASK" in query.upper():
+                queries.append(query)
+
+        return queries
 
     def run(self, graph: Graph) -> List[CompetencyQuestionResult]:
         results: List[CompetencyQuestionResult] = []
