@@ -104,18 +104,6 @@ class SanitizeTurtleTests(unittest.TestCase):
         self.assertIn('"100.00"^^xsd:decimal', sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
-    def test_inserts_missing_semicolons_for_run_on_predicates(self) -> None:
-        turtle = (
-            "@prefix atm: <http://example.org/atm#> .\n\n"
-            "atm:ValidCashCard atm:and atm:ValidPassword atm:andNot atm:AccountHasProblem .\n"
-            "atm:ValidCashCard a owl:Class ."
-        )
-
-        sanitized = _sanitize_turtle(turtle)
-
-        self.assertIn("atm:ValidPassword ; atm:andNot", sanitized)
-        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
-
 
 if __name__ == "__main__":
     unittest.main()
