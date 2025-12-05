@@ -91,10 +91,11 @@ class RequirementLoader:
 
     def _as_requirement(self, idx: int, record: dict) -> Requirement:
         boilerplate = record.get("boilerplate", {})
+        text = (record.get("text") or record.get("description") or "").strip()
         return Requirement(
             identifier=record.get("id") or f"REQ-{idx:03d}",
             title=record.get("title", f"Requirement {idx}"),
-            text=record.get("text", "").strip(),
+            text=text,
             boilerplate_prefix=boilerplate.get("prefix"),
             boilerplate_main=boilerplate.get("main"),
             boilerplate_suffix=boilerplate.get("suffix"),
