@@ -185,7 +185,6 @@ _CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 _QUOTED_PREFIX_RE = re.compile(r"'([A-Za-z][\w-]*:)")
 _BYTE_LITERAL_RE = re.compile(r"^b['\"](.*)['\"]$", re.DOTALL)
 _BARE_DECIMAL_RE = re.compile(r"(?<!\")([+-]?\d+(?:\.\d+)?)(\s*\^\^xsd:decimal)")
-_RUN_ON_PREDICATE_RE = re.compile(r"([A-Za-z][\w-]*:[\w.-]+)\s+([A-Za-z][\w-]*:)")
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -207,10 +206,6 @@ def _sanitize_turtle(turtle: str) -> str:
         # Ensure decimals are quoted so rdflib can parse them as literals
         if "^^xsd:decimal" in line and "\"" not in line:
             line = _BARE_DECIMAL_RE.sub(r'"\1"\2', line)
-
-        # Insert missing semicolons when multiple predicate/object pairs run together
-        if ";" not in line:
-            line = _RUN_ON_PREDICATE_RE.sub(r"\1 ; \2", line)
 
         stripped = line.lstrip()
         if stripped.upper().startswith("NOT "):
