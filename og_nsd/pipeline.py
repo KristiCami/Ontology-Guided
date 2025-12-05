@@ -20,6 +20,8 @@ class OntologyDraftingPipeline:
         self.config.ensure_output_dirs()
         self.schema_context = self._load_schema_context(config)
         default_prefixes = self.schema_context.prefixes if self.schema_context else None
+        if not default_prefixes and config.base_namespace:
+            default_prefixes = {self._guess_prefix(config.base_namespace): config.base_namespace}
         base_path = None if config.use_ontology_context else config.base_ontology_path
         self.assembler = OntologyAssembler(
             base_path, default_prefixes=default_prefixes
@@ -133,3 +135,13 @@ class OntologyDraftingPipeline:
                 "Pass --ontology-context or --base to supply a TTL for schema extraction."
             )
         return load_schema_context(grounding_path, config.base_namespace)
+
+    @staticmethod
+    def _guess_prefix(namespace: str) -> str:
+        """Derive a reasonable prefix from a base namespace URI."""
+
+        stripped = namespace.rstrip("/#")
+        tail = stripped.rsplit("/", maxsplit=1)[-1]
+        if "." in tail:
+            tail = tail.split(".", maxsplit=1)[0]
+        return tail or "ns"
