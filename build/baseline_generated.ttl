@@ -1,0 +1,12 @@
+@prefix atm: <http://example.org/atm#> .
+
+atm:FunctionalRequirement10 a atm:Requirement .
+
+atm:PerformanceRequirement1 a atm:Requirement .
+
+atm:PerformanceRequirement2 a atm:Requirement .
+
+atm:PerformanceRequirement3 a atm:Requirement .
+
+atm:PerformanceRequirement4 a atm:Requirement .
+
