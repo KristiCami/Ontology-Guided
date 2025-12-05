@@ -185,6 +185,8 @@ _CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 _QUOTED_PREFIX_RE = re.compile(r"'([A-Za-z][\w-]*:)")
 _BYTE_LITERAL_RE = re.compile(r"^b['\"](.*)['\"]$", re.DOTALL)
 _BARE_DECIMAL_RE = re.compile(r"(?<!\")([+-]?\d+(?:\.\d+)?)(\s*\^\^xsd:decimal)")
+_BYTES_PREFIX_BEFORE_LIST_RE = re.compile(r"'\^?b'(?=\[)")
+_BYTES_PREFIX_BEFORE_QNAME_RE = re.compile(r"'\^?b'(?=[A-Za-z][\w-]*:)")
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -199,6 +201,14 @@ def _sanitize_turtle(turtle: str) -> str:
     for raw_line in turtle.splitlines():
         # Remove non-printable control characters that often sneak into LLM output
         line = _CONTROL_CHAR_RE.sub("", raw_line)
+
+        # Drop stray ``'^b'`` fragments that sometimes precede list brackets in malformed
+        # byte-string outputs from the LLM (e.g., "owl:intersectionOf '^b'[ ...]")
+        line = _BYTES_PREFIX_BEFORE_LIST_RE.sub("", line)
+
+        # Drop the same fragment when it appears immediately before a prefixed name,
+        # such as "'^b'atm:ErrorMessage"
+        line = _BYTES_PREFIX_BEFORE_QNAME_RE.sub("", line)
 
         # Remove accidental single quotes directly before prefixed names (e.g., 'atm:Class)
         line = _QUOTED_PREFIX_RE.sub(r"\1", line)
