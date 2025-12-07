@@ -3,12 +3,10 @@ from __future__ import annotations
 
 import tempfile
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import List, Optional
 
-from rdflib import Graph, Literal
-from rdflib.namespace import XSD
+from rdflib import Graph
 
 try:  # pragma: no cover - optional heavy dependency
     from owlready2 import get_ontology, sync_reasoner_pellet
@@ -48,30 +46,10 @@ class OwlreadyReasoner:
         base_graph = Graph()
         base_graph.parse(data=graph.serialize(format="turtle"))
 
-        # Owlready/Pellet will choke on invalid xsd:decimal lexical forms. Detect
-        # and coerce any such literals to plain strings so reasoning can
-        # continue rather than failing with an XML parse error (e.g., when a
-        # literal like "amount" is incorrectly typed as xsd:decimal).
-        invalid_decimals: list[tuple] = []
-        for subject, predicate, obj in list(base_graph):
-            if isinstance(obj, Literal) and obj.datatype == XSD.decimal:
-                try:
-                    Decimal(str(obj))
-                except (InvalidOperation, ValueError):
-                    base_graph.remove((subject, predicate, obj))
-                    base_graph.add((subject, predicate, Literal(str(obj))))
-                    invalid_decimals.append((subject, predicate, obj))
-        notes = []
-        if invalid_decimals:
-            notes.append(
-                f"Coerced {len(invalid_decimals)} invalid xsd:decimal literals to plain strings before reasoning."
-            )
-
         if not self.enabled or get_ontology is None:
-            message = "Reasoner disabled or owlready2 unavailable."
-            if notes:
-                message = " ".join(notes + [message])
-            report = ReasonerReport(False, None, [], message)
+            report = ReasonerReport(
+                False, None, [], "Reasoner disabled or owlready2 unavailable."
+            )
             return ReasonerResult(report=report, expanded_graph=base_graph)
 
         tmp_dir = Path(tempfile.gettempdir())
@@ -85,6 +63,7 @@ class OwlreadyReasoner:
         # string without introducing ``file://`` prefixes that some Owlready2
         # versions mishandle on Windows.
         onto = get_ontology(tmp_path.as_posix()).load()
+        notes = []
         consistent = None
         if sync_reasoner_pellet is None:
             notes.append("Pellet not available; skipped reasoning.")
