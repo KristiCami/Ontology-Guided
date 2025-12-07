@@ -60,7 +60,11 @@ def main() -> None:
     pipeline = OntologyDraftingPipeline(pipeline_config)
     pipeline.run()
 
-    data_graph = pipeline.state_graph or Graph().parse(pipeline_config.output_path)
+    data_graph = (
+        pipeline.reasoned_graph
+        or pipeline.state_graph
+        or Graph().parse(pipeline_config.output_path)
+    )
 
     validator = ShaclValidator(pipeline_config.shapes_path) if pipeline_config.shapes_path else None
     if validator:
