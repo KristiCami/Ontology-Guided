@@ -1,6 +1,7 @@
 """High-level orchestration for the OG-NSD pipeline."""
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Optional
 
@@ -38,7 +39,13 @@ class OntologyDraftingPipeline:
 
     def _select_llm(self, config: PipelineConfig) -> LLMClient:
         if config.llm_mode == "openai":
-            return OpenAILLM(temperature=config.llm_temperature)
+            try:
+                return OpenAILLM(temperature=config.llm_temperature)
+            except RuntimeError:
+                logging.warning(
+                    "openai package missing; falling back to heuristic LLM for offline execution"
+                )
+                return HeuristicLLM(base_namespace=config.base_namespace)
         return HeuristicLLM(base_namespace=config.base_namespace)
 
     def run(self) -> dict:
@@ -48,7 +55,26 @@ class OntologyDraftingPipeline:
         llm_response: Optional[LLMResponse] = None
         for batch in chunk_requirements(requirements, size=5):
             llm_response = self.llm.generate_axioms(batch, schema_context=self.schema_context)
-            self.assembler.add_turtle(state, llm_response.turtle)
+            try:
+                self.assembler.add_turtle(state, llm_response.turtle)
+            except ValueError as exc:
+                if isinstance(self.llm, HeuristicLLM):
+                    raise
+                logging.warning(
+                    "Primary LLM produced unparsable Turtle; retrying batch with heuristic fallback: %s",
+                    exc,
+                )
+                fallback_llm = HeuristicLLM(base_namespace=self.config.base_namespace)
+                fallback_response = fallback_llm.generate_axioms(
+                    batch, schema_context=self.schema_context
+                )
+                fallback_response.reasoning_notes = (
+                    f"Heuristic fallback after parse failure: {exc}\n"
+                    f"{fallback_response.reasoning_notes}"
+                )
+                self.assembler.add_turtle(state, fallback_response.turtle)
+                llm_response = fallback_response
+                self.llm = fallback_llm
         if llm_response is None:
             raise RuntimeError("LLM returned no axioms")
 
