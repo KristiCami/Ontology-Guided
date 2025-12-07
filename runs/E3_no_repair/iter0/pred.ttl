@@ -1,92 +1,60 @@
 @prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-atm:ATM_dispenses_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "REQ-011" .
+atm:Bank_1 a atm:Bank ;
+    atm:issuesCard atm:CashCard_1 ;
+    atm:maintainsAccount atm:Account_1 .
 
-atm:ATM_logs_CashCard a owl:Axiom ;
-    atm:sourceRequirement "REQ-006" .
+atm:ATM_1 a atm:ATM ;
+    atm:handlesTransaction atm:Transaction_1 ;
+    atm:performedBy atm:Customer_1 ;
+    atm:sendsMessageTo atm:BankComputer_1 ;
+    atm:transactionTimestamp "2023-10-01T12:00:00"^^xsd:dateTime .
 
-atm:ATM_relatesTo_CashCard a owl:Axiom ;
-    atm:sourceRequirement "REQ-002",
-        "REQ-003" .
+atm:CashCard_1 a atm:CashCard ;
+    atm:bankCode "XYZ123"^^xsd:string ;
+    atm:serialNumber "123456789"^^xsd:string .
 
-atm:ATM_relatesTo_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "REQ-001" .
+atm:Customer a atm:Customer ;
+    atm:hasAccount atm:Account ;
+    atm:ownsCard atm:CashCard ;
+    atm:performedBy atm:Transaction .
 
-atm:ATM_relatesTo_Transaction a owl:Axiom ;
-    atm:sourceRequirement "REQ-016" .
+atm:Transaction_1 a atm:Transaction ;
+    atm:authorizedBy atm:Authorization_1 ;
+    atm:messageCode "Transaction NOT successful"^^xsd:string ;
+    atm:receivesMessageFrom atm:BankComputer_1 ;
+    atm:transactionTimestamp "2023-10-01T12:00:00"^^xsd:dateTime .
 
-atm:Bank_logs_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "REQ-007" .
+atm:ATM a atm:ATM ;
+    atm:contactsBank "Environment:bank" ;
+    atm:displaysMessage "Item:error message",
+        "Item:message" ;
+    atm:ejectsCard "Item:card" ;
+    atm:handlesTransaction atm:Transaction,
+        atm:Withdrawal ;
+    atm:issuesCard atm:Bank ;
+    atm:keepsCard "Item:card" ;
+    atm:operatedBy atm:Bank,
+        atm:BankComputer ;
+    atm:receivesMessageFrom atm:BankComputer ;
+    atm:sendsMessageTo atm:BankComputer ;
+    atm:startsTransactionDialog "Item:transaction dialog" ;
+    atm:verifiesBankCode "Item:bank code"^^xsd:string ;
+    atm:verifiesPassword "Item:password"^^xsd:string .
 
-atm:Bank_logs_Transaction a owl:Axiom ;
-    atm:sourceRequirement "REQ-009" .
+atm:BankComputer_1 a atm:BankComputer ;
+    atm:messageCode "bad bank code"^^xsd:string,
+        "password is invalid"^^xsd:string ;
+    atm:receivesMessageFrom atm:ATM_1 .
 
-atm:Bank_relatesTo_CashCard a owl:Axiom ;
-    atm:sourceRequirement "REQ-005",
-        "REQ-008",
-        "REQ-017" .
+atm:CashCard a atm:CashCard ;
+    atm:bankCode "bank_code"^^xsd:string ;
+    atm:logs "Item:log file" ;
+    atm:serialNumber "Item:Serial number"^^xsd:string,
+        "serial_number"^^xsd:string .
 
-atm:Bank_relatesTo_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "REQ-018",
-        "REQ-020" .
-
-atm:Bank_relatesTo_Transaction a owl:Axiom ;
-    atm:sourceRequirement "REQ-013" .
-
-atm:Bank_verifies_CashCard a owl:Axiom ;
-    atm:sourceRequirement "REQ-019" .
-
-atm:Customer_dispenses_Transaction a owl:Axiom ;
-    atm:sourceRequirement "REQ-014" .
-
-atm:Customer_logs_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "REQ-015" .
-
-atm:Customer_logs_Transaction a owl:Axiom ;
-    atm:sourceRequirement "REQ-012" .
-
-atm:Customer_relatesTo_CashCard a owl:Axiom ;
-    atm:sourceRequirement "REQ-004",
-        "REQ-010" .
-
-atm:dispenses a owl:ObjectProperty ;
-    rdfs:domain atm:ATM,
-        atm:Customer ;
-    rdfs:range atm:RequirementTarget,
-        atm:Transaction .
-
-atm:logs a owl:ObjectProperty ;
-    rdfs:domain atm:ATM,
-        atm:Bank,
-        atm:Customer ;
-    rdfs:range atm:CashCard,
-        atm:RequirementTarget,
-        atm:Transaction .
-
-atm:relatesTo a owl:ObjectProperty ;
-    rdfs:domain atm:ATM,
-        atm:Bank,
-        atm:Customer ;
-    rdfs:range atm:CashCard,
-        atm:RequirementTarget,
-        atm:Transaction .
-
-atm:verifies a owl:ObjectProperty ;
-    rdfs:domain atm:Bank ;
-    rdfs:range atm:CashCard .
-
-atm:ATM a owl:Class .
-
-atm:Bank a owl:Class .
-
-atm:CashCard a owl:Class .
-
-atm:Customer a owl:Class .
-
-atm:RequirementTarget a owl:Class .
-
-atm:Transaction a owl:Class .
+atm:Transaction a atm:Transaction ;
+    atm:authorizedBy atm:Authorization ;
+    atm:requestedAmount "t"^^xsd:decimal .
 

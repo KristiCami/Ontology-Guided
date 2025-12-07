@@ -1,6 +1,92 @@
+@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 [] a sh:ValidationReport ;
-    sh:conforms true .
+    sh:conforms false ;
+    sh:result [ a sh:ValidationResult ;
+            sh:focusNode atm:ATM ;
+            sh:resultMessage "ATM must be associated with a Bank via operatedBy." ;
+            sh:resultPath atm:operatedBy ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:ClassConstraintComponent ;
+            sh:sourceShape _:nac53268c55ef49cb891f6d0ca1f67cdfb16 ;
+            sh:value atm:Bank ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:ATM ;
+            sh:resultMessage "ATM must be associated with a Bank via operatedBy." ;
+            sh:resultPath atm:operatedBy ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:ClassConstraintComponent ;
+            sh:sourceShape _:nac53268c55ef49cb891f6d0ca1f67cdfb16 ;
+            sh:value atm:BankComputer ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:CashCard_1 ;
+            sh:resultMessage "Each CashCard must be owned by at least one Customer." ;
+            sh:resultPath [ sh:inversePath atm:ownsCard ] ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:MinCountConstraintComponent ;
+            sh:sourceShape [ sh:class atm:Customer ;
+                    sh:message "Each CashCard must be owned by at least one Customer." ;
+                    sh:minCount 1 ;
+                    sh:path [ sh:inversePath atm:ownsCard ] ;
+                    sh:severity sh:Violation ] ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:Transaction ;
+            sh:resultMessage "Every transaction must have a timestamp (xsd:dateTime)." ;
+            sh:resultPath atm:transactionTimestamp ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:MinCountConstraintComponent ;
+            sh:sourceShape [ sh:datatype xsd:dateTime ;
+                    sh:message "Every transaction must have a timestamp (xsd:dateTime)." ;
+                    sh:minCount 1 ;
+                    sh:path atm:transactionTimestamp ;
+                    sh:severity sh:Violation ] ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:Transaction ;
+            sh:resultMessage "Every transaction must be linked to an Authorization." ;
+            sh:resultPath atm:authorizedBy ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:ClassConstraintComponent ;
+            sh:sourceShape _:nac53268c55ef49cb891f6d0ca1f67cdfb7 ;
+            sh:value atm:Authorization ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:ATM_1 ;
+            sh:resultMessage "ATM must be associated with a Bank via operatedBy." ;
+            sh:resultPath atm:operatedBy ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:MinCountConstraintComponent ;
+            sh:sourceShape _:nac53268c55ef49cb891f6d0ca1f67cdfb16 ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:CashCard ;
+            sh:resultMessage "CashCard must have exactly one serialNumber." ;
+            sh:resultPath atm:serialNumber ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:MaxCountConstraintComponent ;
+            sh:sourceShape [ sh:datatype xsd:string ;
+                    sh:maxCount 1 ;
+                    sh:message "CashCard must have exactly one serialNumber." ;
+                    sh:minCount 1 ;
+                    sh:path atm:serialNumber ;
+                    sh:severity sh:Violation ] ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:Transaction_1 ;
+            sh:resultMessage "Every transaction must be linked to an Authorization." ;
+            sh:resultPath atm:authorizedBy ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:ClassConstraintComponent ;
+            sh:sourceShape _:nac53268c55ef49cb891f6d0ca1f67cdfb7 ;
+            sh:value atm:Authorization_1 ] .
+
+_:nac53268c55ef49cb891f6d0ca1f67cdfb7 sh:class atm:Authorization ;
+    sh:message "Every transaction must be linked to an Authorization." ;
+    sh:minCount 1 ;
+    sh:path atm:authorizedBy ;
+    sh:severity sh:Violation .
+
+_:nac53268c55ef49cb891f6d0ca1f67cdfb16 sh:class atm:Bank ;
+    sh:message "ATM must be associated with a Bank via operatedBy." ;
+    sh:minCount 1 ;
+    sh:path atm:operatedBy ;
+    sh:severity sh:Violation .
 
