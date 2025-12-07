@@ -187,13 +187,6 @@ _BYTE_LITERAL_RE = re.compile(r"^b['\"](.*)['\"]$", re.DOTALL)
 _BARE_DECIMAL_RE = re.compile(r"(?<!\")([+-]?\d+(?:\.\d+)?)(\s*\^\^xsd:decimal)")
 _BYTES_PREFIX_BEFORE_LIST_RE = re.compile(r"'\^?b'(?=\[)")
 _BYTES_PREFIX_BEFORE_QNAME_RE = re.compile(r"'\^?b'(?=[A-Za-z][\w-]*:)")
-_BYTES_FRAGMENT_RE = re.compile(r"'\^?b'")
-_INCOMPLETE_STATEMENT_RE = re.compile(
-    r"^[A-Za-z][\w-]*:[\w-]*\s+(?:A|a|[A-Za-z][\w-]*:[\w-]*)\s*[.;]\s*$"
-)
-_INCOMPLETE_UNQUALIFIED_RE = re.compile(
-    r"^[A-Za-z][\w-]*\s+[A-Za-z][\w-]*:[\w-]*\s*[.;]\s*$"
-)
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -211,19 +204,11 @@ def _sanitize_turtle(turtle: str) -> str:
 
         # Drop stray ``'^b'`` fragments that sometimes precede list brackets in malformed
         # byte-string outputs from the LLM (e.g., "owl:intersectionOf '^b'[ ...]")
-        line = _BYTES_PREFIX_BEFORE_LIST_RE.sub(" ", line)
+        line = _BYTES_PREFIX_BEFORE_LIST_RE.sub("", line)
 
         # Drop the same fragment when it appears immediately before a prefixed name,
         # such as "'^b'atm:ErrorMessage"
-        line = _BYTES_PREFIX_BEFORE_QNAME_RE.sub(" ", line)
-
-        # Remove leftover stray ``'^b'`` fragments that might follow literals or other
-        # tokens and confuse the Turtle parser.
-        line = _BYTES_FRAGMENT_RE.sub(" ", line)
-
-        # Collapse any doubled spaces introduced by fragment replacement to avoid
-        # altering indentation while keeping token separation intact.
-        line = re.sub(r" {2,}", " ", line)
+        line = _BYTES_PREFIX_BEFORE_QNAME_RE.sub("", line)
 
         # Remove accidental single quotes directly before prefixed names (e.g., 'atm:Class)
         line = _QUOTED_PREFIX_RE.sub(r"\1", line)
@@ -232,37 +217,9 @@ def _sanitize_turtle(turtle: str) -> str:
         if "^^xsd:decimal" in line and "\"" not in line:
             line = _BARE_DECIMAL_RE.sub(r'"\1"\2', line)
 
-        # Comment out statements that no longer contain an object after sanitization
-        # (e.g., "atm:Subject atm:predicate ;") so they do not break parsing.
-        stripped_no_indent = line.strip()
-        if stripped_no_indent and not stripped_no_indent.startswith("#"):
-            if _INCOMPLETE_STATEMENT_RE.match(stripped_no_indent) or _INCOMPLETE_UNQUALIFIED_RE.match(
-                stripped_no_indent
-            ):
-                sanitized_lines.append(f"# {stripped_no_indent}")
-                continue
-
         stripped = line.lstrip()
         if stripped.upper().startswith("NOT "):
             sanitized_lines.append(f"# {line}" if not line.lstrip().startswith("#") else line)
             continue
         sanitized_lines.append(line)
-
-    adjusted_lines: list[str] = []
-    for idx, line in enumerate(sanitized_lines):
-        stripped = line.strip()
-        if stripped.endswith(";") and not stripped.startswith("#"):
-            next_noncomment = None
-            for later in sanitized_lines[idx + 1 :]:
-                later_stripped = later.strip()
-                if not later_stripped or later_stripped.startswith("#"):
-                    continue
-                next_noncomment = later
-                break
-
-            if next_noncomment is None or not next_noncomment[:1].isspace():
-                line = line.rstrip()
-                line = line[:-1] + "."
-        adjusted_lines.append(line)
-
-    return "\n".join(adjusted_lines)
+    return "\n".join(sanitized_lines)
