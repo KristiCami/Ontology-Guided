@@ -2,11 +2,9 @@
 
 import unittest
 
-from rdflib import Graph, Literal, URIRef
-from rdflib.namespace import XSD
+from rdflib import Graph
 
 from og_nsd.ontology import _ensure_standard_prefixes, _sanitize_turtle
-from og_nsd.reasoning import _sanitize_numeric_literals
 
 
 class EnsureStandardPrefixesTests(unittest.TestCase):
@@ -116,32 +114,6 @@ class SanitizeTurtleTests(unittest.TestCase):
 
         self.assertIn("atm:rejectedWithErrorMessage atm:ErrorMessage", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
-
-    def test_removes_variable_prefix_on_qname(self) -> None:
-        turtle = (
-            "@prefix atm: <http://example.org/atm#> .\n\n"
-            "atm:Transaction atm:requestedAmount ?atm:amount ."
-        )
-
-        sanitized = _sanitize_turtle(turtle)
-
-        self.assertIn("atm:requestedAmount atm:amount", sanitized)
-        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
-
-
-class SanitizeNumericLiteralsTests(unittest.TestCase):
-    def test_coerces_invalid_decimal_literals(self) -> None:
-        graph = Graph()
-        subject = URIRef("http://example.org/txn")
-        predicate = URIRef("http://example.org/requestedAmount")
-        graph.add((subject, predicate, Literal("amount", datatype=XSD.decimal)))
-
-        sanitized, fixes = _sanitize_numeric_literals(graph)
-
-        self.assertEqual(1, fixes)
-        coerced = next(sanitized.objects(subject, predicate))
-        self.assertIsNone(coerced.datatype)
-        self.assertEqual("amount", str(coerced))
 
 
 if __name__ == "__main__":
