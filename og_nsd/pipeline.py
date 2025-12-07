@@ -1,6 +1,7 @@
 """High-level orchestration for the OG-NSD pipeline."""
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Optional
 
@@ -38,7 +39,13 @@ class OntologyDraftingPipeline:
 
     def _select_llm(self, config: PipelineConfig) -> LLMClient:
         if config.llm_mode == "openai":
-            return OpenAILLM(temperature=config.llm_temperature)
+            try:
+                return OpenAILLM(temperature=config.llm_temperature)
+            except RuntimeError:
+                logging.warning(
+                    "openai package missing; falling back to heuristic LLM for offline execution"
+                )
+                return HeuristicLLM(base_namespace=config.base_namespace)
         return HeuristicLLM(base_namespace=config.base_namespace)
 
     def run(self) -> dict:

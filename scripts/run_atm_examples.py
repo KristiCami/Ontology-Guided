@@ -26,6 +26,11 @@ def load_config(path: Path) -> dict:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the ATM ontology-aware example (E3)")
     parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs/atm_ontology_aware.json")
+    parser.add_argument(
+        "--requirements",
+        type=Path,
+        help="Optional override for the requirements JSONL file (relative paths are resolved from the project root)",
+    )
     return parser.parse_args()
 
 
@@ -36,12 +41,18 @@ def ensure_dir(path: Path) -> None:
 def main() -> None:
     args = parse_args()
     cfg = load_config(args.config)
+    requirements_path = args.requirements or Path(cfg["requirements_path"])
+    if not requirements_path.is_absolute():
+        requirements_path = PROJECT_ROOT / requirements_path
+    if not requirements_path.exists():
+        raise FileNotFoundError(f"Requirements file not found: {requirements_path}")
+
     output_root = PROJECT_ROOT / cfg.get("output_root", "runs/E3_no_repair")
     iter_dir = output_root / "iter0"
     ensure_dir(iter_dir)
 
     pipeline_config = PipelineConfig(
-        requirements_path=PROJECT_ROOT / cfg["requirements_path"],
+        requirements_path=requirements_path,
         shapes_path=PROJECT_ROOT / cfg["shapes_path"],
         base_ontology_path=None,
         competency_questions_path=PROJECT_ROOT / cfg.get("competency_questions")
@@ -60,11 +71,9 @@ def main() -> None:
     pipeline = OntologyDraftingPipeline(pipeline_config)
     pipeline.run()
 
-    data_graph = (
-        pipeline.reasoned_graph
-        or pipeline.state_graph
-        or Graph().parse(pipeline_config.output_path)
-    )
+    asserted_graph = pipeline.state_graph or Graph().parse(pipeline_config.output_path)
+    reasoning_result = pipeline.reasoner.run(asserted_graph)
+    data_graph = reasoning_result.expanded_graph
 
     validator = ShaclValidator(pipeline_config.shapes_path) if pipeline_config.shapes_path else None
     if validator:
@@ -90,23 +99,29 @@ def main() -> None:
         encoding="utf-8",
     )
 
-    if pipeline.last_reasoner_report:
-        reasoning_payload = {
-            "unsat_classes": pipeline.last_reasoner_report.unsatisfiable_classes,
-            "total_unsat": len(pipeline.last_reasoner_report.unsatisfiable_classes),
-            "notes": pipeline.last_reasoner_report.notes,
-        }
-        (output_root / "reasoning_report.json").write_text(
-            json.dumps(reasoning_payload, indent=2), encoding="utf-8"
-        )
+    reasoning_payload = {
+        "unsat_classes": reasoning_result.report.unsatisfiable_classes,
+        "total_unsat": len(reasoning_result.report.unsatisfiable_classes),
+        "notes": reasoning_result.report.notes,
+    }
+    (output_root / "reasoning_report.json").write_text(
+        json.dumps(reasoning_payload, indent=2), encoding="utf-8"
+    )
 
     if pipeline_config.competency_questions_path:
         cq_runner = CompetencyQuestionRunner(pipeline_config.competency_questions_path)
         cq_results = cq_runner.run(data_graph)
-        cq_payload = [
-            {"query": result.query, "success": result.success, "message": result.message}
-            for result in cq_results
-        ]
+        passed = sum(1 for result in cq_results if result.success)
+        total = len(cq_results)
+        cq_payload = {
+            "pass_rate": (passed / total) if total else 0.0,
+            "passed": passed,
+            "total": total,
+            "results": [
+                {"query": result.query, "success": result.success, "message": result.message}
+                for result in cq_results
+            ],
+        }
         (output_root / "cq_results_iter0.json").write_text(
             json.dumps(cq_payload, indent=2), encoding="utf-8"
         )
