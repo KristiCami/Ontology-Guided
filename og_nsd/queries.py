@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from rdflib import Graph
 
@@ -12,7 +12,6 @@ from rdflib import Graph
 class CompetencyQuestionResult:
     query: str
     success: bool
-    answer: Optional[bool]
     message: str
 
 
@@ -27,51 +26,25 @@ class CompetencyQuestionRunner:
         content = path.read_text(encoding="utf-8")
         buffer: List[str] = []
         queries: List[str] = []
-        brace_depth = 0
-
-        def flush_buffer() -> None:
-            nonlocal buffer
-            query = "\n".join(buffer).strip()
-            if query:
-                queries.append(query)
-            buffer = []
-
         for line in content.splitlines():
-            stripped = line.strip()
-            if not buffer and (not stripped or stripped.startswith("#")):
+            if line.strip().startswith("#") and not buffer:
                 continue
-
             buffer.append(line)
-            brace_depth += line.count("{") - line.count("}")
-
-            if buffer and brace_depth == 0 and any("ASK" in b.upper() for b in buffer):
-                flush_buffer()
-
+            if line.strip().endswith("}"):
+                query = "\n".join(buffer).strip()
+                if query:
+                    queries.append(query)
+                buffer = []
         if buffer:
-            flush_buffer()
-
+            queries.append("\n".join(buffer).strip())
         return [q for q in queries if "ASK" in q.upper()]
 
     def run(self, graph: Graph) -> List[CompetencyQuestionResult]:
         results: List[CompetencyQuestionResult] = []
         for query in self.queries:
             try:
-                answer = bool(graph.query(query).askAnswer)
-                results.append(
-                    CompetencyQuestionResult(
-                        query=query,
-                        success=True,
-                        answer=answer,
-                        message="",
-                    )
-                )
+                success = bool(graph.query(query).askAnswer)
+                results.append(CompetencyQuestionResult(query=query, success=success, message=""))
             except Exception as exc:  # pragma: no cover - rdflib runtime
-                results.append(
-                    CompetencyQuestionResult(
-                        query=query,
-                        success=False,
-                        answer=None,
-                        message=str(exc),
-                    )
-                )
+                results.append(CompetencyQuestionResult(query=query, success=False, message=str(exc)))
         return results
