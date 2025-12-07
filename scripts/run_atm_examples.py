@@ -26,11 +26,6 @@ def load_config(path: Path) -> dict:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the ATM ontology-aware example (E3)")
     parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs/atm_ontology_aware.json")
-    parser.add_argument(
-        "--requirements",
-        type=Path,
-        help="Optional override for the requirements JSONL file (relative paths are resolved from the project root)",
-    )
     return parser.parse_args()
 
 
@@ -41,18 +36,12 @@ def ensure_dir(path: Path) -> None:
 def main() -> None:
     args = parse_args()
     cfg = load_config(args.config)
-    requirements_path = args.requirements or Path(cfg["requirements_path"])
-    if not requirements_path.is_absolute():
-        requirements_path = PROJECT_ROOT / requirements_path
-    if not requirements_path.exists():
-        raise FileNotFoundError(f"Requirements file not found: {requirements_path}")
-
     output_root = PROJECT_ROOT / cfg.get("output_root", "runs/E3_no_repair")
     iter_dir = output_root / "iter0"
     ensure_dir(iter_dir)
 
     pipeline_config = PipelineConfig(
-        requirements_path=requirements_path,
+        requirements_path=PROJECT_ROOT / cfg["requirements_path"],
         shapes_path=PROJECT_ROOT / cfg["shapes_path"],
         base_ontology_path=None,
         competency_questions_path=PROJECT_ROOT / cfg.get("competency_questions")
