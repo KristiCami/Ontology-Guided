@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 import re
 from typing import Dict, Optional
@@ -185,8 +186,11 @@ _CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 _QUOTED_PREFIX_RE = re.compile(r"'([A-Za-z][\w-]*:)")
 _BYTE_LITERAL_RE = re.compile(r"^b['\"](.*)['\"]$", re.DOTALL)
 _BARE_DECIMAL_RE = re.compile(r"(?<!\")([+-]?\d+(?:\.\d+)?)(\s*\^\^xsd:decimal)")
+_QUOTED_DECIMAL_RE = re.compile(r'"([^"]*)"(\s*\^\^xsd:decimal)')
 _BYTES_PREFIX_BEFORE_LIST_RE = re.compile(r"'\^?b'(?=\[)")
 _BYTES_PREFIX_BEFORE_QNAME_RE = re.compile(r"'\^?b'(?=[A-Za-z][\w-]*:)")
+_BYTES_INLINE_FRAGMENT_RE = re.compile(r"'\^?b'")
+_UNICODE_ARROW_RE = re.compile(r"[\u2190-\u21ff]")
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -210,12 +214,43 @@ def _sanitize_turtle(turtle: str) -> str:
         # such as "'^b'atm:ErrorMessage"
         line = _BYTES_PREFIX_BEFORE_QNAME_RE.sub("", line)
 
+        # If a stray byte-string fragment remains inline (e.g., ``atm:logsSerialNumber'^b' a``),
+        # drop the fragment entirely to preserve the rest of the triple structure.
+        if _BYTES_INLINE_FRAGMENT_RE.search(line):
+            line = _BYTES_INLINE_FRAGMENT_RE.sub("", line)
+
+        # Comment out lines containing Unicode arrow symbols that commonly appear in
+        # natural-language output but are invalid in Turtle triples (e.g., "→"). If the
+        # previous sanitized line ended with a semicolon, close the statement to avoid
+        # leaving an unterminated predicate list.
+        if _UNICODE_ARROW_RE.search(line):
+            if sanitized_lines:
+                prev_idx = len(sanitized_lines) - 1
+                prev = sanitized_lines[prev_idx]
+                if not prev.lstrip().startswith("#") and prev.rstrip().endswith(";"):
+                    sanitized_lines[prev_idx] = re.sub(r";\s*$", " .", prev)
+            sanitized_lines.append(f"# {line}" if not line.lstrip().startswith("#") else line)
+            continue
+
         # Remove accidental single quotes directly before prefixed names (e.g., 'atm:Class)
         line = _QUOTED_PREFIX_RE.sub(r"\1", line)
 
         # Ensure decimals are quoted so rdflib can parse them as literals
         if "^^xsd:decimal" in line and "\"" not in line:
             line = _BARE_DECIMAL_RE.sub(r'"\1"\2', line)
+
+        # If a quoted xsd:decimal literal contains a non-numeric lexical value, downgrade
+        # it to an xsd:string literal to avoid parse errors in downstream reasoners.
+        if "^^xsd:decimal" in line:
+            def _coerce_decimal(match: re.Match[str]) -> str:
+                lexical = match.group(1)
+                try:
+                    Decimal(lexical)
+                except (InvalidOperation, ValueError):
+                    return f'"{lexical}"^^xsd:string'
+                return match.group(0)
+
+            line = _QUOTED_DECIMAL_RE.sub(_coerce_decimal, line)
 
         stripped = line.lstrip()
         if stripped.upper().startswith("NOT "):
