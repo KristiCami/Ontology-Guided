@@ -15,7 +15,6 @@ from .shacl import ShaclReport
 def build_report(
     llm_response: LLMResponse,
     shacl_report: ShaclReport,
-    shacl_summary: Optional[Dict[str, Any]] = None,
     cq_results: Optional[List[CompetencyQuestionResult]] = None,
     reasoner_report: Optional[ReasonerReport] = None,
     iterations: Optional[List[Dict[str, Any]]] = None,
@@ -29,8 +28,6 @@ def build_report(
             "results": [asdict(res) for res in shacl_report.results],
         },
     }
-    if shacl_summary is not None:
-        report["shacl_summary"] = shacl_summary
     if cq_results is not None:
         report["competency_questions"] = [asdict(result) for result in cq_results]
     if reasoner_report is not None:
@@ -45,7 +42,6 @@ def build_report(
                     "text_report": item["shacl"].text_report,
                     "results": [asdict(res) for res in item["shacl"].results],
                 },
-                "shacl_summary": item.get("shacl_summary"),
                 "reasoner": asdict(item["reasoner"]) if item["reasoner"] else None,
                 "cq_results": [asdict(r) for r in item["cq_results"]]
                 if item["cq_results"]
