@@ -2,9 +2,11 @@
 
 import unittest
 
-from rdflib import Graph
+from rdflib import Graph, Literal, URIRef, OWL, RDF
+from rdflib.namespace import XSD
 
 from og_nsd.ontology import _ensure_standard_prefixes, _sanitize_turtle
+from og_nsd.reasoning import OwlreadyReasoner, _sanitize_numeric_literals
 
 
 class EnsureStandardPrefixesTests(unittest.TestCase):
@@ -114,6 +116,74 @@ class SanitizeTurtleTests(unittest.TestCase):
 
         self.assertIn("atm:rejectedWithErrorMessage atm:ErrorMessage", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
+    def test_removes_variable_prefix_on_qname(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n\n"
+            "atm:Transaction atm:requestedAmount ?atm:amount ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertIn("atm:requestedAmount atm:amount", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
+
+class SanitizeNumericLiteralsTests(unittest.TestCase):
+    def test_coerces_invalid_decimal_literals(self) -> None:
+        graph = Graph()
+        subject = URIRef("http://example.org/txn")
+        predicate = URIRef("http://example.org/requestedAmount")
+        graph.add((subject, predicate, Literal("amount", datatype=XSD.decimal)))
+
+        sanitized, fixes = _sanitize_numeric_literals(graph)
+
+        self.assertEqual(1, fixes)
+        coerced = next(sanitized.objects(subject, predicate))
+        self.assertIsNone(coerced.datatype)
+        self.assertEqual("amount", str(coerced))
+
+    def test_reasoner_uses_sanitized_graph_when_disabled(self) -> None:
+        graph = Graph()
+        subject = URIRef("http://example.org/txn")
+        predicate = URIRef("http://example.org/requestedAmount")
+        graph.add((subject, predicate, Literal("t", datatype=XSD.decimal)))
+
+        reasoner = OwlreadyReasoner(enabled=False)
+        result = reasoner.run(graph)
+
+        coerced = next(result.expanded_graph.objects(subject, predicate))
+        self.assertIsNone(coerced.datatype)
+        self.assertEqual("t", str(coerced))
+        self.assertIn("Coerced 1 invalid literal", result.report.notes)
+
+    def test_coerces_invalid_datetime_literals(self) -> None:
+        graph = Graph()
+        subject = URIRef("http://example.org/txn")
+        predicate = URIRef("http://example.org/timestamp")
+        graph.add((subject, predicate, Literal("timestamp", datatype=XSD.dateTime)))
+
+        sanitized, fixes = _sanitize_numeric_literals(graph)
+
+        self.assertEqual(1, fixes)
+        coerced = next(sanitized.objects(subject, predicate))
+        self.assertIsNone(coerced.datatype)
+        self.assertEqual("timestamp", str(coerced))
+
+    def test_coerces_resource_objects_on_datatype_properties(self) -> None:
+        graph = Graph()
+        subject = URIRef("http://example.org/card")
+        predicate = URIRef("http://example.org/serialNumber")
+        object_resource = URIRef("http://example.org/CashCard")
+        graph.add((predicate, RDF.type, OWL.DatatypeProperty))
+        graph.add((subject, predicate, object_resource))
+
+        sanitized, fixes = _sanitize_numeric_literals(graph)
+
+        self.assertEqual(1, fixes)
+        coerced = next(sanitized.objects(subject, predicate))
+        self.assertIsNone(coerced.datatype)
+        self.assertEqual(str(object_resource), str(coerced))
 
 
 if __name__ == "__main__":
