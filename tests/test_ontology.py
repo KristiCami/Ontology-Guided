@@ -115,19 +115,6 @@ class SanitizeTurtleTests(unittest.TestCase):
         self.assertIn("atm:rejectedWithErrorMessage atm:ErrorMessage", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
-    def test_skips_leading_non_turtle_lines(self) -> None:
-        turtle = "requirement 6\n\natm:ATM a owl:Class ."
-
-        sanitized = _sanitize_turtle(turtle)
-
-        self.assertNotIn("requirement 6", sanitized)
-        Graph().parse(
-            data=_ensure_standard_prefixes(
-                sanitized, additional_prefixes={"atm": "http://example.org/atm#"}
-            ),
-            format="turtle",
-        )
-
 
 if __name__ == "__main__":
     unittest.main()

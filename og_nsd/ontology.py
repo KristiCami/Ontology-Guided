@@ -50,21 +50,17 @@ class OntologyAssembler:
         try:
             state.graph.parse(data=cleaned, format="turtle")
         except Exception as exc:  # pragma: no cover - requires rdflib parse error
-            preview = _preview_turtle(cleaned)
             sanitized = _sanitize_turtle(cleaned)
             if sanitized != cleaned:
                 try:
                     state.graph.parse(data=sanitized, format="turtle")
                 except Exception as exc2:  # pragma: no cover - requires rdflib parse error
                     raise ValueError(
-                        "Failed to parse Turtle from LLM response after sanitization: "
-                        f"{exc2}; preview: {preview}"
+                        f"Failed to parse Turtle from LLM response after sanitization: {exc2}"
                     ) from exc2
                 state.turtle_snippets.append(sanitized)
                 return
-            raise ValueError(
-                f"Failed to parse Turtle from LLM response: {exc}; preview: {preview}"
-            ) from exc
+            raise ValueError(f"Failed to parse Turtle from LLM response: {exc}") from exc
         state.turtle_snippets.append(cleaned)
 
     def serialize(self, state: OntologyState, path: Path) -> None:
@@ -202,25 +198,7 @@ def _sanitize_turtle(turtle: str) -> str:
         turtle = match.group(1).replace("\\n", "\n")
 
     sanitized_lines = []
-    started = False
     for raw_line in turtle.splitlines():
-        stripped = raw_line.strip()
-
-        # Skip conversational chatter before the first plausible Turtle statement
-        # or prefix declaration. A common failure mode is prepending requirement
-        # headings like "requirement 6" before the graph content.
-        if not started:
-            if not stripped:
-                continue
-            if (
-                stripped.startswith(("@prefix", "@base", "PREFIX", "BASE"))
-                or ":" in stripped
-                or stripped.startswith("<")
-            ):
-                started = True
-            else:
-                continue
-
         # Remove non-printable control characters that often sneak into LLM output
         line = _CONTROL_CHAR_RE.sub("", raw_line)
 
@@ -245,12 +223,3 @@ def _sanitize_turtle(turtle: str) -> str:
             continue
         sanitized_lines.append(line)
     return "\n".join(sanitized_lines)
-
-
-def _preview_turtle(turtle: str, *, limit: int = 200) -> str:
-    """Return a short, whitespace-condensed preview to aid debugging."""
-
-    normalized = " ".join(line.strip() for line in turtle.splitlines() if line.strip())
-    if len(normalized) <= limit:
-        return normalized
-    return f"{normalized[:limit]}..."
