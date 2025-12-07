@@ -78,6 +78,11 @@ class OntologyDraftingPipeline:
             reasoner_result = self.reasoner.run(state.graph)
             reasoner_report = reasoner_result.report
             shacl_input_graph = reasoner_result.expanded_graph
+            # Carry forward the sanitized/inferred graph so downstream consumers
+            # (including the final serialization and any follow-up reasoning
+            # calls) operate on a representation that will not trip parsers or
+            # Pellet with malformed literals.
+            state.graph = shacl_input_graph
             shacl_report = self.validator.validate(shacl_input_graph)
             cq_results = self.cq_runner.run(shacl_input_graph) if self.cq_runner else None
             iteration_reports.append(
