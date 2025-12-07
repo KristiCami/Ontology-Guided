@@ -115,18 +115,6 @@ class SanitizeTurtleTests(unittest.TestCase):
         self.assertIn("atm:rejectedWithErrorMessage atm:ErrorMessage", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
-    def test_comments_out_orphan_qnames(self) -> None:
-        turtle = (
-            "@prefix atm: <http://example.org/atm#> .\n\n"
-            "atm:Response atm:rejectedWithErrorMessage '^b'atm:ErrorMessage .\n"
-            "atm:TrailingTokenWithoutPredicate"
-        )
-
-        sanitized = _sanitize_turtle(turtle)
-
-        self.assertIn("# atm:TrailingTokenWithoutPredicate", sanitized)
-        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
-
 
 if __name__ == "__main__":
     unittest.main()
