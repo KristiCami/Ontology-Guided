@@ -104,7 +104,14 @@ atm:CashCardKeyShape a sh:NodeShape ;
     a sh:SPARQLConstraint ;
     sh:message "bankCode+serialNumber must be globally unique across CashCards." ;
     sh:severity sh:Violation ;
+    sh:prefixes [
+      sh:declare [
+        sh:prefix "atm" ;
+        sh:namespace <http://lod.csd.auth.gr/atm/atm.ttl#>
+      ]
+    ] ;
     sh:select """
+      PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>
       SELECT ?this
       WHERE {
         ?this atm:bankCode ?bc ; atm:serialNumber ?sn .

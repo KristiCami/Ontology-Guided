@@ -53,6 +53,8 @@ atm_cqs.rq                ← CQ suite for coverage evaluation
    export OPENAI_API_KEY="sk-..."
    ```
    The default mode (`--llm-mode heuristic`) is offline-safe and derives axioms with lightweight pattern rules for reproducibility.
+   The provided ATM ontology-aware config (`configs/atm_ontology_aware.json`) is now set to use the OpenAI backend, so ensure
+   `OPENAI_API_KEY` is configured (or override `llm_mode` to `heuristic`) before running that example.
 
 ### Running the pipeline (ATM example)
 ```powershell
