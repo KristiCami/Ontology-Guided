@@ -115,6 +115,18 @@ class SanitizeTurtleTests(unittest.TestCase):
         self.assertIn("atm:rejectedWithErrorMessage atm:ErrorMessage", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
+    def test_removes_trailing_bytes_fragment(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n\n"
+            "atm:Response atm:hasErrorMessage \"Error\"^^xsd:string'^b' .\n"
+            "atm:Response a atm:ResponseType ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertNotIn("'^b'", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
 
 if __name__ == "__main__":
     unittest.main()
