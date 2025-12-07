@@ -55,26 +55,7 @@ class OntologyDraftingPipeline:
         llm_response: Optional[LLMResponse] = None
         for batch in chunk_requirements(requirements, size=5):
             llm_response = self.llm.generate_axioms(batch, schema_context=self.schema_context)
-            try:
-                self.assembler.add_turtle(state, llm_response.turtle)
-            except ValueError as exc:
-                if isinstance(self.llm, HeuristicLLM):
-                    raise
-                logging.warning(
-                    "Primary LLM produced unparsable Turtle; retrying batch with heuristic fallback: %s",
-                    exc,
-                )
-                fallback_llm = HeuristicLLM(base_namespace=self.config.base_namespace)
-                fallback_response = fallback_llm.generate_axioms(
-                    batch, schema_context=self.schema_context
-                )
-                fallback_response.reasoning_notes = (
-                    f"Heuristic fallback after parse failure: {exc}\n"
-                    f"{fallback_response.reasoning_notes}"
-                )
-                self.assembler.add_turtle(state, fallback_response.turtle)
-                llm_response = fallback_response
-                self.llm = fallback_llm
+            self.assembler.add_turtle(state, llm_response.turtle)
         if llm_response is None:
             raise RuntimeError("LLM returned no axioms")
 
