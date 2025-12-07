@@ -5,7 +5,7 @@
   "ontology_path": "gold/atm_gold.ttl",
   "prompt_mode": "ontology_aware",
   "validation": false,
-  "llm_mode": "heuristic",
+  "llm_mode": "openai",
   "max_requirements": 20,
   "output_root": "runs/E3_no_repair",
   "iterations": 0,

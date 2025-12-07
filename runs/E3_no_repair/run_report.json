@@ -7,9 +7,9 @@
   },
   "competency_questions": [
     {
-      "query": "PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nASK {\n  FILTER NOT EXISTS {\n    VALUES ?cls {\n      atm:ATM atm:Bank atm:Customer atm:Account atm:CashCard\n      atm:Transaction atm:Withdrawal atm:Deposit atm:Authorization\n    }",
-      "success": false,
-      "message": "Expected AskQuery, found 'FILTER'  (at char 103), (line:4, col:3)"
+      "query": "PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nASK {\n  FILTER NOT EXISTS {\n    VALUES ?cls {\n      atm:ATM atm:Bank atm:Customer atm:Account atm:CashCard\n      atm:Transaction atm:Withdrawal atm:Deposit atm:Authorization\n    }\n    FILTER NOT EXISTS { ?cls a owl:Class . }\n  }\n}",
+      "success": true,
+      "message": ""
     },
     {
       "query": "# Withdrawals specialise the transaction concept (directly or indirectly)\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:Withdrawal rdfs:subClassOf+ atm:Transaction .\n}",
@@ -72,9 +72,9 @@
       "message": ""
     },
     {
-      "query": "# ATM user interfaces capture both normal and error displays\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:displays rdfs:domain atm:ATM ;\n               rdfs:range ?displayUnion .\n  ?displayUnion owl:unionOf ?list .\n  FILTER EXISTS { ?list rdf:rest*/rdf:first atm:NormalDisplay }",
+      "query": "# ATM user interfaces capture both normal and error displays\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:displays rdfs:domain atm:ATM ;\n               rdfs:range ?displayUnion .\n  ?displayUnion owl:unionOf ?list .\n  FILTER EXISTS { ?list rdf:rest*/rdf:first atm:NormalDisplay }\n  FILTER EXISTS { ?list rdf:rest*/rdf:first atm:ErrorDisplay }\n}",
       "success": false,
-      "message": "Expected AskQuery, found end of text  (at char 451), (line:10, col:64)"
+      "message": ""
     },
     {
       "query": "# Resilience features include backup or main power supplies\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:hasBackUpPowerSupply rdfs:domain atm:ATM ;\n                             rdfs:range atm:PowerSupply .\n  } AS ?backup)\n  BIND(EXISTS {\n    atm:hasMainPowerSupply rdfs:domain atm:ATM ;\n                           rdfs:range atm:PowerSupply .\n  } AS ?main)\n  FILTER (?backup || ?main)\n}",
@@ -92,9 +92,9 @@
       "message": ""
     },
     {
-      "query": "# ATM and bank systems update transactional metrics\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:updates rdfs:range ?rangeNode .\n  ?rangeNode owl:unionOf ?union .\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:ATMtotalFundOfATM }",
+      "query": "# ATM and bank systems update transactional metrics\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:updates rdfs:range ?rangeNode .\n  ?rangeNode owl:unionOf ?union .\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:ATMtotalFundOfATM }\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:AccountBalanceOFAccount }\n}",
       "success": false,
-      "message": "Expected AskQuery, found end of text  (at char 404), (line:9, col:69)"
+      "message": ""
     },
     {
       "query": "# Requirements modelling captures subject, verb, condition and else branches\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:subject rdfs:domain atm:BasicRequirement ;\n                rdfs:range atm:Subject .\n  } AS ?subject)\n  BIND(EXISTS {\n    atm:verb rdfs:domain atm:BasicRequirement ;\n             rdfs:range atm:Verb .\n  } AS ?verb)\n  BIND(EXISTS {\n    atm:condition rdfs:domain atm:ComplexRequirement ;\n                  rdfs:range atm:BasicRequirement .\n  } AS ?condition)\n  BIND(EXISTS {\n    atm:else rdfs:domain atm:ComplexRequirement ;\n             rdfs:range atm:BasicRequirement .\n  } AS ?else)\n  FILTER (?subject && ?verb && ?condition && ?else)\n}",
@@ -102,9 +102,9 @@
       "message": ""
     },
     {
-      "query": "# Customers interacting with ATMs use both passwords and transaction amounts\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:types rdfs:domain atm:Customer ;\n            rdfs:range ?rangeNode .\n  ?rangeNode owl:unionOf ?union .\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:PasswordOfCustomer }",
+      "query": "# Customers interacting with ATMs use both passwords and transaction amounts\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:types rdfs:domain atm:Customer ;\n            rdfs:range ?rangeNode .\n  ?rangeNode owl:unionOf ?union .\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:PasswordOfCustomer }\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:TransactionAmountOfTransaction }\n}",
       "success": false,
-      "message": "Expected AskQuery, found end of text  (at char 467), (line:10, col:70)"
+      "message": ""
     },
     {
       "query": "# ATM keypads are defined with explicit key components\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:consistOfKeys rdfs:domain atm:Keypad ;\n                    rdfs:range atm:Keys .\n}",
@@ -135,9 +135,9 @@
       },
       "cq_results": [
         {
-          "query": "PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nASK {\n  FILTER NOT EXISTS {\n    VALUES ?cls {\n      atm:ATM atm:Bank atm:Customer atm:Account atm:CashCard\n      atm:Transaction atm:Withdrawal atm:Deposit atm:Authorization\n    }",
-          "success": false,
-          "message": "Expected AskQuery, found 'FILTER'  (at char 103), (line:4, col:3)"
+          "query": "PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nASK {\n  FILTER NOT EXISTS {\n    VALUES ?cls {\n      atm:ATM atm:Bank atm:Customer atm:Account atm:CashCard\n      atm:Transaction atm:Withdrawal atm:Deposit atm:Authorization\n    }\n    FILTER NOT EXISTS { ?cls a owl:Class . }\n  }\n}",
+          "success": true,
+          "message": ""
         },
         {
           "query": "# Withdrawals specialise the transaction concept (directly or indirectly)\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:Withdrawal rdfs:subClassOf+ atm:Transaction .\n}",
@@ -200,9 +200,9 @@
           "message": ""
         },
         {
-          "query": "# ATM user interfaces capture both normal and error displays\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:displays rdfs:domain atm:ATM ;\n               rdfs:range ?displayUnion .\n  ?displayUnion owl:unionOf ?list .\n  FILTER EXISTS { ?list rdf:rest*/rdf:first atm:NormalDisplay }",
+          "query": "# ATM user interfaces capture both normal and error displays\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:displays rdfs:domain atm:ATM ;\n               rdfs:range ?displayUnion .\n  ?displayUnion owl:unionOf ?list .\n  FILTER EXISTS { ?list rdf:rest*/rdf:first atm:NormalDisplay }\n  FILTER EXISTS { ?list rdf:rest*/rdf:first atm:ErrorDisplay }\n}",
           "success": false,
-          "message": "Expected AskQuery, found end of text  (at char 451), (line:10, col:64)"
+          "message": ""
         },
         {
           "query": "# Resilience features include backup or main power supplies\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:hasBackUpPowerSupply rdfs:domain atm:ATM ;\n                             rdfs:range atm:PowerSupply .\n  } AS ?backup)\n  BIND(EXISTS {\n    atm:hasMainPowerSupply rdfs:domain atm:ATM ;\n                           rdfs:range atm:PowerSupply .\n  } AS ?main)\n  FILTER (?backup || ?main)\n}",
@@ -220,9 +220,9 @@
           "message": ""
         },
         {
-          "query": "# ATM and bank systems update transactional metrics\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:updates rdfs:range ?rangeNode .\n  ?rangeNode owl:unionOf ?union .\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:ATMtotalFundOfATM }",
+          "query": "# ATM and bank systems update transactional metrics\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:updates rdfs:range ?rangeNode .\n  ?rangeNode owl:unionOf ?union .\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:ATMtotalFundOfATM }\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:AccountBalanceOFAccount }\n}",
           "success": false,
-          "message": "Expected AskQuery, found end of text  (at char 404), (line:9, col:69)"
+          "message": ""
         },
         {
           "query": "# Requirements modelling captures subject, verb, condition and else branches\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:subject rdfs:domain atm:BasicRequirement ;\n                rdfs:range atm:Subject .\n  } AS ?subject)\n  BIND(EXISTS {\n    atm:verb rdfs:domain atm:BasicRequirement ;\n             rdfs:range atm:Verb .\n  } AS ?verb)\n  BIND(EXISTS {\n    atm:condition rdfs:domain atm:ComplexRequirement ;\n                  rdfs:range atm:BasicRequirement .\n  } AS ?condition)\n  BIND(EXISTS {\n    atm:else rdfs:domain atm:ComplexRequirement ;\n             rdfs:range atm:BasicRequirement .\n  } AS ?else)\n  FILTER (?subject && ?verb && ?condition && ?else)\n}",
@@ -230,9 +230,9 @@
           "message": ""
         },
         {
-          "query": "# Customers interacting with ATMs use both passwords and transaction amounts\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:types rdfs:domain atm:Customer ;\n            rdfs:range ?rangeNode .\n  ?rangeNode owl:unionOf ?union .\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:PasswordOfCustomer }",
+          "query": "# Customers interacting with ATMs use both passwords and transaction amounts\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:types rdfs:domain atm:Customer ;\n            rdfs:range ?rangeNode .\n  ?rangeNode owl:unionOf ?union .\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:PasswordOfCustomer }\n  FILTER EXISTS { ?union rdf:rest*/rdf:first atm:TransactionAmountOfTransaction }\n}",
           "success": false,
-          "message": "Expected AskQuery, found end of text  (at char 467), (line:10, col:70)"
+          "message": ""
         },
         {
           "query": "# ATM keypads are defined with explicit key components\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:consistOfKeys rdfs:domain atm:Keypad ;\n                    rdfs:range atm:Keys .\n}",
