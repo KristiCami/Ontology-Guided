@@ -187,6 +187,7 @@ _BYTE_LITERAL_RE = re.compile(r"^b['\"](.*)['\"]$", re.DOTALL)
 _BARE_DECIMAL_RE = re.compile(r"(?<!\")([+-]?\d+(?:\.\d+)?)(\s*\^\^xsd:decimal)")
 _BYTES_PREFIX_BEFORE_LIST_RE = re.compile(r"'\^?b'(?=\[)")
 _BYTES_PREFIX_BEFORE_QNAME_RE = re.compile(r"'\^?b'(?=[A-Za-z][\w-]*:)")
+_LONE_QNAME_RE = re.compile(r"^[A-Za-z][\w-]*:[^\s]+$")
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -216,6 +217,12 @@ def _sanitize_turtle(turtle: str) -> str:
         # Ensure decimals are quoted so rdflib can parse them as literals
         if "^^xsd:decimal" in line and "\"" not in line:
             line = _BARE_DECIMAL_RE.sub(r'"\1"\2', line)
+
+        # Comment out orphaned qnames (e.g., truncated lines such as "atm:FooBar") that
+        # rdflib cannot parse and that typically indicate incomplete LLM output.
+        if _LONE_QNAME_RE.match(line.strip()):
+            sanitized_lines.append(f"# {line}")
+            continue
 
         stripped = line.lstrip()
         if stripped.upper().startswith("NOT "):
