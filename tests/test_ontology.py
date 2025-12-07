@@ -40,6 +40,14 @@ class EnsureStandardPrefixesTests(unittest.TestCase):
         self.assertIn("@prefix atm: <http://example.org/atm#> .", enriched)
         Graph().parse(data=enriched, format="turtle")
 
+    def test_base_namespace_fills_missing_prefix(self) -> None:
+        turtle = "atm:ATM a owl:Class ."
+
+        enriched = _ensure_standard_prefixes(turtle, base_namespace="http://example.org/atm/atm.ttl#")
+
+        self.assertIn("@prefix atm: <http://example.org/atm/atm.ttl#> .", enriched)
+        Graph().parse(data=enriched, format="turtle")
+
 
 class SanitizeTurtleTests(unittest.TestCase):
     def test_comments_lines_starting_with_not(self) -> None:
@@ -113,6 +121,18 @@ class SanitizeTurtleTests(unittest.TestCase):
         sanitized = _sanitize_turtle(turtle)
 
         self.assertIn("atm:rejectedWithErrorMessage atm:ErrorMessage", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
+    def test_comments_out_orphan_qnames(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n\n"
+            "atm:Response atm:rejectedWithErrorMessage '^b'atm:ErrorMessage .\n"
+            "atm:TrailingTokenWithoutPredicate"
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertIn("# atm:TrailingTokenWithoutPredicate", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
 
