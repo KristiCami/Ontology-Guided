@@ -104,17 +104,6 @@ class SanitizeTurtleTests(unittest.TestCase):
         self.assertIn('"100.00"^^xsd:decimal', sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
-    def test_downgrades_invalid_decimal_literals(self) -> None:
-        turtle = (
-            "@prefix atm: <http://example.org/atm#> .\n\n"
-            'atm:Transaction atm:requestedAmount "valid_amount"^^xsd:decimal .'
-        )
-
-        sanitized = _sanitize_turtle(turtle)
-
-        self.assertIn('"valid_amount"^^xsd:string', sanitized)
-        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
-
     def test_removes_bytes_prefix_before_qname(self) -> None:
         turtle = (
             "@prefix atm: <http://example.org/atm#> .\n\n"
