@@ -1,6 +1,7 @@
 """High-level orchestration for the OG-NSD pipeline."""
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Optional
 
@@ -11,7 +12,7 @@ from .queries import CompetencyQuestionRunner
 from .reasoning import OwlreadyReasoner
 from .reporting import build_report, save_report
 from .requirements import RequirementLoader, chunk_requirements
-from .shacl import ShaclValidator
+from .shacl import ShaclValidator, summarize_shacl_report
 
 
 class OntologyDraftingPipeline:
@@ -31,6 +32,7 @@ class OntologyDraftingPipeline:
             self.cq_runner = CompetencyQuestionRunner(config.competency_questions_path)
         self.llm = self._select_llm(config)
         self.last_shacl_report = None
+        self.last_shacl_summary = None
         self.last_reasoner_report = None
         self.last_cq_results = None
         self.state_graph = None
@@ -69,12 +71,14 @@ class OntologyDraftingPipeline:
         for iteration in range(self.config.max_iterations + 1):
             reasoner_report = self.reasoner.run(state.graph)
             shacl_report = self.validator.validate(state.graph)
+            shacl_summary = self._persist_validation_artifacts(shacl_report, iteration)
             cq_results = self.cq_runner.run(state.graph) if self.cq_runner else None
             iteration_reports.append(
                 {
                     "iteration": iteration,
                     "conforms": shacl_report.conforms,
                     "shacl": shacl_report,
+                    "shacl_summary": shacl_summary,
                     "reasoner": reasoner_report,
                     "cq_results": cq_results,
                 }
@@ -93,6 +97,7 @@ class OntologyDraftingPipeline:
         report = build_report(
             llm_response=llm_response,
             shacl_report=iteration_reports[-1]["shacl"],
+            shacl_summary=iteration_reports[-1]["shacl_summary"],
             cq_results=iteration_reports[-1]["cq_results"],
             reasoner_report=iteration_reports[-1]["reasoner"],
             iterations=iteration_reports,
@@ -121,6 +126,34 @@ class OntologyDraftingPipeline:
         if not prompts and shacl_report.text_report:
             prompts.append(shacl_report.text_report.splitlines()[0])
         return prompts
+
+    def _persist_validation_artifacts(self, shacl_report, iteration: int) -> dict:
+        summary = summarize_shacl_report(shacl_report)
+        self.last_shacl_summary = summary
+        if not self.config.save_intermediate:
+            return summary
+
+        iteration_dir = self.config.intermediate_dir / f"iter_{iteration:02d}"
+        iteration_dir.mkdir(parents=True, exist_ok=True)
+
+        if shacl_report.report_graph_ttl:
+            (iteration_dir / "validation_report.ttl").write_text(
+                shacl_report.report_graph_ttl, encoding="utf-8"
+            )
+            (self.config.intermediate_dir / "validation_report.ttl").write_text(
+                shacl_report.report_graph_ttl, encoding="utf-8"
+            )
+        else:
+            (iteration_dir / "validation_report.txt").write_text(
+                shacl_report.text_report, encoding="utf-8"
+            )
+
+        summary_path = iteration_dir / "validation_summary.json"
+        summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+        (self.config.intermediate_dir / "validation_summary.json").write_text(
+            json.dumps(summary, indent=2), encoding="utf-8"
+        )
+        return summary
 
     def _load_schema_context(self, config: PipelineConfig):
         if not config.use_ontology_context:

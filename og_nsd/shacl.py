@@ -67,7 +67,7 @@ class ShaclValidator:
             shacl_graph=self.shapes_graph,
             inference="rdfs",
             advanced=True,
-            serialize_report_graph=False,
+            serialize_report_graph=True,
         )
         report_graph_ttl: Optional[str] = None
         parsed_results: List[ShaclResult] = []
@@ -77,7 +77,13 @@ class ShaclValidator:
             report_graph_ttl = report_graph
         elif report_graph:
             report_graph_ttl = report_graph.serialize(format="turtle")
-            parsed_results = self._extract_results(report_graph)
+
+        if report_graph_ttl and not parsed_results:
+            try:
+                parsed_graph = Graph().parse(data=report_graph_ttl, format="turtle")
+                parsed_results = self._extract_results(parsed_graph)
+            except Exception:  # pragma: no cover - rdflib parse error
+                parsed_results = []
         return ShaclReport(bool(conforms), str(text_report), report_graph_ttl, parsed_results)
 
     def _find_invalid_decimal_literals(self, data_graph: Graph) -> list[tuple[str, str, str]]:
@@ -124,9 +130,11 @@ def summarize_shacl_report(report: ShaclReport) -> dict:
 
     hard = 0
     soft = 0
+    classified: list[dict] = []
     for result in report.results:
-        severity_value = (result.severity or "").lower()
-        if "violation" in severity_value:
+        category = classify_shacl_result(result)
+        classified.append({"category": category, "result": result.__dict__})
+        if category == "hard":
             hard += 1
         else:
             soft += 1
@@ -137,4 +145,24 @@ def summarize_shacl_report(report: ShaclReport) -> dict:
             "hard": hard,
             "soft": soft,
         },
+        "classified_results": classified,
     }
+
+
+def classify_shacl_result(result: ShaclResult) -> str:
+    """Label a SHACL result as ``hard`` or ``soft`` based on severity and component."""
+
+    severity_value = (result.severity or "").lower()
+    if "warning" in severity_value or "info" in severity_value:
+        return "soft"
+
+    component_fragment = (result.constraint_component or "").split("#")[-1].lower()
+    hard_components = {
+        "mincountconstraintcomponent",
+        "datatypeconstraintcomponent",
+        "classconstraintcomponent",
+        "nodekindconstraintcomponent",
+    }
+    if component_fragment in hard_components:
+        return "hard"
+    return "soft"
