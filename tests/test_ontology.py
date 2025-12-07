@@ -115,6 +115,79 @@ class SanitizeTurtleTests(unittest.TestCase):
         self.assertIn("atm:rejectedWithErrorMessage atm:ErrorMessage", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
+    def test_preserves_spacing_when_bytes_fragments_are_embedded(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n\n"
+            "atm:ATM atm:hasValidity atm:Invalid .\n"
+            "atm:BankComputer atm:sendsMessage '^b'atm:ATM ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertIn("atm:BankComputer atm:sendsMessage atm:ATM", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
+    def test_removes_trailing_bytes_fragment(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n\n"
+            "atm:Response atm:hasErrorMessage \"Error\"^^xsd:string'^b' .\n"
+            "atm:Response a atm:ResponseType ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertNotIn("'^b'", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
+    def test_comments_incomplete_statements_left_by_bytes_fragments(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n\n"
+            "atm:logsSerialNumber atm:hasSerialNumber'^b' ;\n"
+            "atm:logs atm:LogFile ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertIn("# atm:logsSerialNumber atm:hasSerialNumber ;", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
+    def test_comments_incomplete_statements_with_a_predicate(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n\n"
+            "atm:processTransaction'^b' a ;\n"
+            "atm:processTransaction rdfs:domain atm:Bank ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertIn("# atm:processTransaction a ;", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
+    def test_comments_unqualified_statements_missing_prefix(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n\n"
+            "asValidity atm:Invalid ;\n"
+            "atm:BankComputer atm:sendsMessage '^b'atm:ATM ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertIn("# asValidity atm:Invalid ;", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
+    def test_converts_trailing_semicolons_without_follow_up_predicates(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n\n"
+            "atm:processTransaction a owl:ObjectProperty ;\n"
+            "# atm:hasDomain atm:Bank ;\n"
+            "# atm:hasRange atm:Account ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertIn("atm:processTransaction a owl:ObjectProperty .", sanitized)
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
 
 if __name__ == "__main__":
     unittest.main()
