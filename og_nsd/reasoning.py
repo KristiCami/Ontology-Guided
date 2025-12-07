@@ -3,13 +3,10 @@ from __future__ import annotations
 
 import tempfile
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
-from isodate import parse_datetime
 from pathlib import Path
 from typing import List, Optional
 
-from rdflib import Graph, Literal
-from rdflib.namespace import XSD
+from rdflib import Graph
 
 try:  # pragma: no cover - optional heavy dependency
     from owlready2 import get_ontology, sync_reasoner_pellet
@@ -49,48 +46,15 @@ class OwlreadyReasoner:
         base_graph = Graph()
         base_graph.parse(data=graph.serialize(format="turtle"))
 
-        # Owlready/Pellet will choke on invalid lexical forms for xsd:decimal
-        # and xsd:dateTime. Detect and coerce any such literals to plain
-        # strings so reasoning can continue rather than failing with an XML
-        # parse error (e.g., when "amount" is typed as xsd:decimal or a
-        # datetime string lacks the "T" separator).
-        invalid_decimals: list[tuple] = []
-        invalid_datetimes: list[tuple] = []
-        for subject, predicate, obj in list(base_graph):
-            if isinstance(obj, Literal) and obj.datatype == XSD.decimal:
-                try:
-                    Decimal(str(obj))
-                except (InvalidOperation, ValueError):
-                    base_graph.remove((subject, predicate, obj))
-                    base_graph.add((subject, predicate, Literal(str(obj))))
-                    invalid_decimals.append((subject, predicate, obj))
-            if isinstance(obj, Literal) and obj.datatype == XSD.dateTime:
-                try:
-                    parse_datetime(str(obj))
-                except Exception:
-                    base_graph.remove((subject, predicate, obj))
-                    base_graph.add((subject, predicate, Literal(str(obj))))
-                    invalid_datetimes.append((subject, predicate, obj))
-        notes = []
-        if invalid_decimals:
-            notes.append(
-                f"Coerced {len(invalid_decimals)} invalid xsd:decimal literals to plain strings before reasoning."
-            )
-        if invalid_datetimes:
-            notes.append(
-                f"Coerced {len(invalid_datetimes)} invalid xsd:dateTime literals to plain strings before reasoning."
-            )
-
         if not self.enabled or get_ontology is None:
-            message = "Reasoner disabled or owlready2 unavailable."
-            if notes:
-                message = " ".join(notes + [message])
-            report = ReasonerReport(False, None, [], message)
+            report = ReasonerReport(
+                False, None, [], "Reasoner disabled or owlready2 unavailable."
+            )
             return ReasonerResult(report=report, expanded_graph=base_graph)
 
         tmp_dir = Path(tempfile.gettempdir())
         tmp_path = tmp_dir / "og_nsd_reasoner.owl"
-        tmp_path.write_text(base_graph.serialize(format="pretty-xml"), encoding="utf-8")
+        tmp_path.write_text(graph.serialize(format="pretty-xml"), encoding="utf-8")
 
         # Owlready2 and Pellet expect forward-slash paths. On Windows, passing
         # a raw filesystem path with backslashes results in invalid escape
@@ -99,6 +63,7 @@ class OwlreadyReasoner:
         # string without introducing ``file://`` prefixes that some Owlready2
         # versions mishandle on Windows.
         onto = get_ontology(tmp_path.as_posix()).load()
+        notes = []
         consistent = None
         if sync_reasoner_pellet is None:
             notes.append("Pellet not available; skipped reasoning.")
