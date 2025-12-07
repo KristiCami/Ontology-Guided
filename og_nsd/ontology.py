@@ -187,6 +187,7 @@ _BYTE_LITERAL_RE = re.compile(r"^b['\"](.*)['\"]$", re.DOTALL)
 _BARE_DECIMAL_RE = re.compile(r"(?<!\")([+-]?\d+(?:\.\d+)?)(\s*\^\^xsd:decimal)")
 _BYTES_PREFIX_BEFORE_LIST_RE = re.compile(r"'\^?b'(?=\[)")
 _BYTES_PREFIX_BEFORE_QNAME_RE = re.compile(r"'\^?b'(?=[A-Za-z][\w-]*:)")
+_BYTES_FRAGMENT_RE = re.compile(r"'\^?b'")
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -209,6 +210,10 @@ def _sanitize_turtle(turtle: str) -> str:
         # Drop the same fragment when it appears immediately before a prefixed name,
         # such as "'^b'atm:ErrorMessage"
         line = _BYTES_PREFIX_BEFORE_QNAME_RE.sub("", line)
+
+        # Remove leftover stray ``'^b'`` fragments that might follow literals or other
+        # tokens and confuse the Turtle parser.
+        line = _BYTES_FRAGMENT_RE.sub("", line)
 
         # Remove accidental single quotes directly before prefixed names (e.g., 'atm:Class)
         line = _QUOTED_PREFIX_RE.sub(r"\1", line)
