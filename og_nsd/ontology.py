@@ -187,6 +187,8 @@ _BYTE_LITERAL_RE = re.compile(r"^b['\"](.*)['\"]$", re.DOTALL)
 _BARE_DECIMAL_RE = re.compile(r"(?<!\")([+-]?\d+(?:\.\d+)?)(\s*\^\^xsd:decimal)")
 _BYTES_PREFIX_BEFORE_LIST_RE = re.compile(r"'\^?b'(?=\[)")
 _BYTES_PREFIX_BEFORE_QNAME_RE = re.compile(r"'\^?b'(?=[A-Za-z][\w-]*:)")
+_BYTES_INLINE_FRAGMENT_RE = re.compile(r"'\^?b'")
+_UNICODE_ARROW_RE = re.compile(r"[\u2190-\u21ff]")
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -209,6 +211,18 @@ def _sanitize_turtle(turtle: str) -> str:
         # Drop the same fragment when it appears immediately before a prefixed name,
         # such as "'^b'atm:ErrorMessage"
         line = _BYTES_PREFIX_BEFORE_QNAME_RE.sub("", line)
+
+        # If a stray byte-string fragment remains inline (e.g., ``atm:logsSerialNumber'^b' a``),
+        # comment out the entire line rather than trying to salvage partial triples.
+        if _BYTES_INLINE_FRAGMENT_RE.search(line):
+            sanitized_lines.append(f"# {line}" if not line.lstrip().startswith("#") else line)
+            continue
+
+        # Comment out lines containing Unicode arrow symbols that commonly appear in
+        # natural-language output but are invalid in Turtle triples (e.g., "→").
+        if _UNICODE_ARROW_RE.search(line):
+            sanitized_lines.append(f"# {line}" if not line.lstrip().startswith("#") else line)
+            continue
 
         # Remove accidental single quotes directly before prefixed names (e.g., 'atm:Class)
         line = _QUOTED_PREFIX_RE.sub(r"\1", line)
