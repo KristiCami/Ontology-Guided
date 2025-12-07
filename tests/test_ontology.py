@@ -117,6 +117,21 @@ class SanitizeTurtleTests(unittest.TestCase):
         self.assertIn("atm:rejectedWithErrorMessage atm:ErrorMessage", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
+    def test_removes_infix_bytes_token(self) -> None:
+        turtle = (
+            "@prefix atm: <http://example.org/atm#> .\n\n"
+            "atm:logsSerialNumber a owl:DatatypeProperty .\n"
+            "atm:logsSerialNumber'^b' a atm:Transaction ; atm:serialNumber atm:CashCard ."
+        )
+
+        sanitized = _sanitize_turtle(turtle)
+
+        self.assertIn(
+            "atm:logsSerialNumber a atm:Transaction ; atm:serialNumber atm:CashCard",
+            sanitized,
+        )
+        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
+
     def test_removes_variable_prefix_on_qname(self) -> None:
         turtle = (
             "@prefix atm: <http://example.org/atm#> .\n\n"
