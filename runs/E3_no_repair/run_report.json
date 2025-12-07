@@ -2,79 +2,43 @@
   "llm_notes": "Generated via OpenAI chat.completions",
   "shacl": {
     "conforms": false,
-    "text_report": "Validation Report\nConforms: False\nResults (8):\nConstraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Bank ; sh:message Literal(\"ATM must be associated with a Bank via operatedBy.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:operatedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#ATM_1>\n\tResult Path: atm:operatedBy\n\tMessage: ATM must be associated with a Bank via operatedBy.\nConstraint Violation in ClassConstraintComponent (http://www.w3.org/ns/shacl#ClassConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Bank ; sh:message Literal(\"ATM must be associated with a Bank via operatedBy.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:operatedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#ATM>\n\tValue Node: <http://lod.csd.auth.gr/atm/atm.ttl#BankComputer>\n\tResult Path: atm:operatedBy\n\tMessage: ATM must be associated with a Bank via operatedBy.\nConstraint Violation in ClassConstraintComponent (http://www.w3.org/ns/shacl#ClassConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Bank ; sh:message Literal(\"ATM must be associated with a Bank via operatedBy.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:operatedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#ATM>\n\tValue Node: <http://lod.csd.auth.gr/atm/atm.ttl#Bank>\n\tResult Path: atm:operatedBy\n\tMessage: ATM must be associated with a Bank via operatedBy.\nConstraint Violation in MaxCountConstraintComponent (http://www.w3.org/ns/shacl#MaxCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:datatype xsd:string ; sh:maxCount Literal(\"1\", datatype=xsd:integer) ; sh:message Literal(\"CashCard must have exactly one serialNumber.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:serialNumber ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#CashCard>\n\tResult Path: atm:serialNumber\n\tMessage: CashCard must have exactly one serialNumber.\nConstraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Customer ; sh:message Literal(\"Each CashCard must be owned by at least one Customer.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path [ sh:inversePath atm:ownsCard ] ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#CashCard_1>\n\tResult Path: [ sh:inversePath atm:ownsCard ]\n\tMessage: Each CashCard must be owned by at least one Customer.\nConstraint Violation in ClassConstraintComponent (http://www.w3.org/ns/shacl#ClassConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Authorization ; sh:message Literal(\"Every transaction must be linked to an Authorization.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:authorizedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#Transaction_1>\n\tValue Node: <http://lod.csd.auth.gr/atm/atm.ttl#Authorization_1>\n\tResult Path: atm:authorizedBy\n\tMessage: Every transaction must be linked to an Authorization.\nConstraint Violation in ClassConstraintComponent (http://www.w3.org/ns/shacl#ClassConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Authorization ; sh:message Literal(\"Every transaction must be linked to an Authorization.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:authorizedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#Transaction>\n\tValue Node: <http://lod.csd.auth.gr/atm/atm.ttl#Authorization>\n\tResult Path: atm:authorizedBy\n\tMessage: Every transaction must be linked to an Authorization.\nConstraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:datatype xsd:dateTime ; sh:message Literal(\"Every transaction must have a timestamp (xsd:dateTime).\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:transactionTimestamp ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#Transaction>\n\tResult Path: atm:transactionTimestamp\n\tMessage: Every transaction must have a timestamp (xsd:dateTime).\n",
+    "text_report": "Validation Report\nConforms: False\nResults (4):\nConstraint Violation in MaxCountConstraintComponent (http://www.w3.org/ns/shacl#MaxCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:datatype xsd:string ; sh:maxCount Literal(\"1\", datatype=xsd:integer) ; sh:message Literal(\"CashCard must have exactly one serialNumber.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:serialNumber ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#CashCard>\n\tResult Path: atm:serialNumber\n\tMessage: CashCard must have exactly one serialNumber.\nConstraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Customer ; sh:message Literal(\"Each CashCard must be owned by at least one Customer.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path [ sh:inversePath atm:ownsCard ] ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#CashCard>\n\tResult Path: [ sh:inversePath atm:ownsCard ]\n\tMessage: Each CashCard must be owned by at least one Customer.\nConstraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:datatype xsd:dateTime ; sh:message Literal(\"Every transaction must have a timestamp (xsd:dateTime).\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:transactionTimestamp ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#Transaction>\n\tResult Path: atm:transactionTimestamp\n\tMessage: Every transaction must have a timestamp (xsd:dateTime).\nConstraint Violation in ClassConstraintComponent (http://www.w3.org/ns/shacl#ClassConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Bank ; sh:message Literal(\"ATM must be associated with a Bank via operatedBy.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:operatedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#ATM>\n\tValue Node: <http://lod.csd.auth.gr/atm/atm.ttl#Bank>\n\tResult Path: atm:operatedBy\n\tMessage: ATM must be associated with a Bank via operatedBy.\n",
     "results": [
-      {
-        "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#ATM_1",
-        "path": "http://lod.csd.auth.gr/atm/atm.ttl#operatedBy",
-        "message": "ATM must be associated with a Bank via operatedBy.",
-        "severity": "http://www.w3.org/ns/shacl#Violation",
-        "source_shape": "nf8efa46bde4c4c7582b87611542bb854b16",
-        "constraint_component": "http://www.w3.org/ns/shacl#MinCountConstraintComponent",
-        "value": null
-      },
-      {
-        "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#ATM",
-        "path": "http://lod.csd.auth.gr/atm/atm.ttl#operatedBy",
-        "message": "ATM must be associated with a Bank via operatedBy.",
-        "severity": "http://www.w3.org/ns/shacl#Violation",
-        "source_shape": "nf8efa46bde4c4c7582b87611542bb854b16",
-        "constraint_component": "http://www.w3.org/ns/shacl#ClassConstraintComponent",
-        "value": "http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"
-      },
-      {
-        "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#ATM",
-        "path": "http://lod.csd.auth.gr/atm/atm.ttl#operatedBy",
-        "message": "ATM must be associated with a Bank via operatedBy.",
-        "severity": "http://www.w3.org/ns/shacl#Violation",
-        "source_shape": "nf8efa46bde4c4c7582b87611542bb854b16",
-        "constraint_component": "http://www.w3.org/ns/shacl#ClassConstraintComponent",
-        "value": "http://lod.csd.auth.gr/atm/atm.ttl#Bank"
-      },
       {
         "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
         "path": "http://lod.csd.auth.gr/atm/atm.ttl#serialNumber",
         "message": "CashCard must have exactly one serialNumber.",
         "severity": "http://www.w3.org/ns/shacl#Violation",
-        "source_shape": "nf8efa46bde4c4c7582b87611542bb854b9",
+        "source_shape": "n28bb7dadb1834fc89182df56536fc179b9",
         "constraint_component": "http://www.w3.org/ns/shacl#MaxCountConstraintComponent",
         "value": null
       },
       {
-        "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard_1",
-        "path": "nf8efa46bde4c4c7582b87611542bb854b12",
+        "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
+        "path": "n28bb7dadb1834fc89182df56536fc179b12",
         "message": "Each CashCard must be owned by at least one Customer.",
         "severity": "http://www.w3.org/ns/shacl#Violation",
-        "source_shape": "nf8efa46bde4c4c7582b87611542bb854b11",
+        "source_shape": "n28bb7dadb1834fc89182df56536fc179b11",
         "constraint_component": "http://www.w3.org/ns/shacl#MinCountConstraintComponent",
         "value": null
-      },
-      {
-        "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#Transaction_1",
-        "path": "http://lod.csd.auth.gr/atm/atm.ttl#authorizedBy",
-        "message": "Every transaction must be linked to an Authorization.",
-        "severity": "http://www.w3.org/ns/shacl#Violation",
-        "source_shape": "nf8efa46bde4c4c7582b87611542bb854b7",
-        "constraint_component": "http://www.w3.org/ns/shacl#ClassConstraintComponent",
-        "value": "http://lod.csd.auth.gr/atm/atm.ttl#Authorization_1"
-      },
-      {
-        "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#Transaction",
-        "path": "http://lod.csd.auth.gr/atm/atm.ttl#authorizedBy",
-        "message": "Every transaction must be linked to an Authorization.",
-        "severity": "http://www.w3.org/ns/shacl#Violation",
-        "source_shape": "nf8efa46bde4c4c7582b87611542bb854b7",
-        "constraint_component": "http://www.w3.org/ns/shacl#ClassConstraintComponent",
-        "value": "http://lod.csd.auth.gr/atm/atm.ttl#Authorization"
       },
       {
         "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#Transaction",
         "path": "http://lod.csd.auth.gr/atm/atm.ttl#transactionTimestamp",
         "message": "Every transaction must have a timestamp (xsd:dateTime).",
         "severity": "http://www.w3.org/ns/shacl#Violation",
-        "source_shape": "nf8efa46bde4c4c7582b87611542bb854b8",
+        "source_shape": "n28bb7dadb1834fc89182df56536fc179b8",
         "constraint_component": "http://www.w3.org/ns/shacl#MinCountConstraintComponent",
         "value": null
+      },
+      {
+        "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#ATM",
+        "path": "http://lod.csd.auth.gr/atm/atm.ttl#operatedBy",
+        "message": "ATM must be associated with a Bank via operatedBy.",
+        "severity": "http://www.w3.org/ns/shacl#Violation",
+        "source_shape": "n28bb7dadb1834fc89182df56536fc179b16",
+        "constraint_component": "http://www.w3.org/ns/shacl#ClassConstraintComponent",
+        "value": "http://lod.csd.auth.gr/atm/atm.ttl#Bank"
       }
     ]
   },
@@ -189,7 +153,7 @@
     "enabled": true,
     "consistent": true,
     "unsatisfiable_classes": [],
-    "notes": "Coerced 1 invalid literal(s) or datatype-property values to xsd:string for reasoning."
+    "notes": ""
   },
   "iterations": [
     {
@@ -197,79 +161,43 @@
       "conforms": false,
       "shacl": {
         "conforms": false,
-        "text_report": "Validation Report\nConforms: False\nResults (8):\nConstraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Bank ; sh:message Literal(\"ATM must be associated with a Bank via operatedBy.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:operatedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#ATM_1>\n\tResult Path: atm:operatedBy\n\tMessage: ATM must be associated with a Bank via operatedBy.\nConstraint Violation in ClassConstraintComponent (http://www.w3.org/ns/shacl#ClassConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Bank ; sh:message Literal(\"ATM must be associated with a Bank via operatedBy.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:operatedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#ATM>\n\tValue Node: <http://lod.csd.auth.gr/atm/atm.ttl#BankComputer>\n\tResult Path: atm:operatedBy\n\tMessage: ATM must be associated with a Bank via operatedBy.\nConstraint Violation in ClassConstraintComponent (http://www.w3.org/ns/shacl#ClassConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Bank ; sh:message Literal(\"ATM must be associated with a Bank via operatedBy.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:operatedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#ATM>\n\tValue Node: <http://lod.csd.auth.gr/atm/atm.ttl#Bank>\n\tResult Path: atm:operatedBy\n\tMessage: ATM must be associated with a Bank via operatedBy.\nConstraint Violation in MaxCountConstraintComponent (http://www.w3.org/ns/shacl#MaxCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:datatype xsd:string ; sh:maxCount Literal(\"1\", datatype=xsd:integer) ; sh:message Literal(\"CashCard must have exactly one serialNumber.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:serialNumber ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#CashCard>\n\tResult Path: atm:serialNumber\n\tMessage: CashCard must have exactly one serialNumber.\nConstraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Customer ; sh:message Literal(\"Each CashCard must be owned by at least one Customer.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path [ sh:inversePath atm:ownsCard ] ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#CashCard_1>\n\tResult Path: [ sh:inversePath atm:ownsCard ]\n\tMessage: Each CashCard must be owned by at least one Customer.\nConstraint Violation in ClassConstraintComponent (http://www.w3.org/ns/shacl#ClassConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Authorization ; sh:message Literal(\"Every transaction must be linked to an Authorization.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:authorizedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#Transaction_1>\n\tValue Node: <http://lod.csd.auth.gr/atm/atm.ttl#Authorization_1>\n\tResult Path: atm:authorizedBy\n\tMessage: Every transaction must be linked to an Authorization.\nConstraint Violation in ClassConstraintComponent (http://www.w3.org/ns/shacl#ClassConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Authorization ; sh:message Literal(\"Every transaction must be linked to an Authorization.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:authorizedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#Transaction>\n\tValue Node: <http://lod.csd.auth.gr/atm/atm.ttl#Authorization>\n\tResult Path: atm:authorizedBy\n\tMessage: Every transaction must be linked to an Authorization.\nConstraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:datatype xsd:dateTime ; sh:message Literal(\"Every transaction must have a timestamp (xsd:dateTime).\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:transactionTimestamp ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#Transaction>\n\tResult Path: atm:transactionTimestamp\n\tMessage: Every transaction must have a timestamp (xsd:dateTime).\n",
+        "text_report": "Validation Report\nConforms: False\nResults (4):\nConstraint Violation in MaxCountConstraintComponent (http://www.w3.org/ns/shacl#MaxCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:datatype xsd:string ; sh:maxCount Literal(\"1\", datatype=xsd:integer) ; sh:message Literal(\"CashCard must have exactly one serialNumber.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:serialNumber ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#CashCard>\n\tResult Path: atm:serialNumber\n\tMessage: CashCard must have exactly one serialNumber.\nConstraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Customer ; sh:message Literal(\"Each CashCard must be owned by at least one Customer.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path [ sh:inversePath atm:ownsCard ] ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#CashCard>\n\tResult Path: [ sh:inversePath atm:ownsCard ]\n\tMessage: Each CashCard must be owned by at least one Customer.\nConstraint Violation in MinCountConstraintComponent (http://www.w3.org/ns/shacl#MinCountConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:datatype xsd:dateTime ; sh:message Literal(\"Every transaction must have a timestamp (xsd:dateTime).\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:transactionTimestamp ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#Transaction>\n\tResult Path: atm:transactionTimestamp\n\tMessage: Every transaction must have a timestamp (xsd:dateTime).\nConstraint Violation in ClassConstraintComponent (http://www.w3.org/ns/shacl#ClassConstraintComponent):\n\tSeverity: sh:Violation\n\tSource Shape: [ sh:class atm:Bank ; sh:message Literal(\"ATM must be associated with a Bank via operatedBy.\") ; sh:minCount Literal(\"1\", datatype=xsd:integer) ; sh:path atm:operatedBy ; sh:severity sh:Violation ]\n\tFocus Node: <http://lod.csd.auth.gr/atm/atm.ttl#ATM>\n\tValue Node: <http://lod.csd.auth.gr/atm/atm.ttl#Bank>\n\tResult Path: atm:operatedBy\n\tMessage: ATM must be associated with a Bank via operatedBy.\n",
         "results": [
-          {
-            "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#ATM_1",
-            "path": "http://lod.csd.auth.gr/atm/atm.ttl#operatedBy",
-            "message": "ATM must be associated with a Bank via operatedBy.",
-            "severity": "http://www.w3.org/ns/shacl#Violation",
-            "source_shape": "nf8efa46bde4c4c7582b87611542bb854b16",
-            "constraint_component": "http://www.w3.org/ns/shacl#MinCountConstraintComponent",
-            "value": null
-          },
-          {
-            "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#ATM",
-            "path": "http://lod.csd.auth.gr/atm/atm.ttl#operatedBy",
-            "message": "ATM must be associated with a Bank via operatedBy.",
-            "severity": "http://www.w3.org/ns/shacl#Violation",
-            "source_shape": "nf8efa46bde4c4c7582b87611542bb854b16",
-            "constraint_component": "http://www.w3.org/ns/shacl#ClassConstraintComponent",
-            "value": "http://lod.csd.auth.gr/atm/atm.ttl#BankComputer"
-          },
-          {
-            "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#ATM",
-            "path": "http://lod.csd.auth.gr/atm/atm.ttl#operatedBy",
-            "message": "ATM must be associated with a Bank via operatedBy.",
-            "severity": "http://www.w3.org/ns/shacl#Violation",
-            "source_shape": "nf8efa46bde4c4c7582b87611542bb854b16",
-            "constraint_component": "http://www.w3.org/ns/shacl#ClassConstraintComponent",
-            "value": "http://lod.csd.auth.gr/atm/atm.ttl#Bank"
-          },
           {
             "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
             "path": "http://lod.csd.auth.gr/atm/atm.ttl#serialNumber",
             "message": "CashCard must have exactly one serialNumber.",
             "severity": "http://www.w3.org/ns/shacl#Violation",
-            "source_shape": "nf8efa46bde4c4c7582b87611542bb854b9",
+            "source_shape": "n28bb7dadb1834fc89182df56536fc179b9",
             "constraint_component": "http://www.w3.org/ns/shacl#MaxCountConstraintComponent",
             "value": null
           },
           {
-            "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard_1",
-            "path": "nf8efa46bde4c4c7582b87611542bb854b12",
+            "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
+            "path": "n28bb7dadb1834fc89182df56536fc179b12",
             "message": "Each CashCard must be owned by at least one Customer.",
             "severity": "http://www.w3.org/ns/shacl#Violation",
-            "source_shape": "nf8efa46bde4c4c7582b87611542bb854b11",
+            "source_shape": "n28bb7dadb1834fc89182df56536fc179b11",
             "constraint_component": "http://www.w3.org/ns/shacl#MinCountConstraintComponent",
             "value": null
-          },
-          {
-            "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#Transaction_1",
-            "path": "http://lod.csd.auth.gr/atm/atm.ttl#authorizedBy",
-            "message": "Every transaction must be linked to an Authorization.",
-            "severity": "http://www.w3.org/ns/shacl#Violation",
-            "source_shape": "nf8efa46bde4c4c7582b87611542bb854b7",
-            "constraint_component": "http://www.w3.org/ns/shacl#ClassConstraintComponent",
-            "value": "http://lod.csd.auth.gr/atm/atm.ttl#Authorization_1"
-          },
-          {
-            "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#Transaction",
-            "path": "http://lod.csd.auth.gr/atm/atm.ttl#authorizedBy",
-            "message": "Every transaction must be linked to an Authorization.",
-            "severity": "http://www.w3.org/ns/shacl#Violation",
-            "source_shape": "nf8efa46bde4c4c7582b87611542bb854b7",
-            "constraint_component": "http://www.w3.org/ns/shacl#ClassConstraintComponent",
-            "value": "http://lod.csd.auth.gr/atm/atm.ttl#Authorization"
           },
           {
             "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#Transaction",
             "path": "http://lod.csd.auth.gr/atm/atm.ttl#transactionTimestamp",
             "message": "Every transaction must have a timestamp (xsd:dateTime).",
             "severity": "http://www.w3.org/ns/shacl#Violation",
-            "source_shape": "nf8efa46bde4c4c7582b87611542bb854b8",
+            "source_shape": "n28bb7dadb1834fc89182df56536fc179b8",
             "constraint_component": "http://www.w3.org/ns/shacl#MinCountConstraintComponent",
             "value": null
+          },
+          {
+            "focus_node": "http://lod.csd.auth.gr/atm/atm.ttl#ATM",
+            "path": "http://lod.csd.auth.gr/atm/atm.ttl#operatedBy",
+            "message": "ATM must be associated with a Bank via operatedBy.",
+            "severity": "http://www.w3.org/ns/shacl#Violation",
+            "source_shape": "n28bb7dadb1834fc89182df56536fc179b16",
+            "constraint_component": "http://www.w3.org/ns/shacl#ClassConstraintComponent",
+            "value": "http://lod.csd.auth.gr/atm/atm.ttl#Bank"
           }
         ]
       },
@@ -277,7 +205,7 @@
         "enabled": true,
         "consistent": true,
         "unsatisfiable_classes": [],
-        "notes": "Coerced 1 invalid literal(s) or datatype-property values to xsd:string for reasoning."
+        "notes": ""
       },
       "cq_results": [
         {

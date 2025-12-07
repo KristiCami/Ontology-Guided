@@ -1,60 +1,60 @@
 @prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-atm:Bank_1 a atm:Bank ;
-    atm:issuesCard atm:CashCard_1 ;
-    atm:maintainsAccount atm:Account_1 .
+atm:Withdrawal a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:dispensedAmount ;
+            owl:someValuesFrom xsd:decimal ] .
 
-atm:ATM_1 a atm:ATM ;
-    atm:handlesTransaction atm:Transaction_1 ;
-    atm:performedBy atm:Customer_1 ;
-    atm:sendsMessageTo atm:BankComputer_1 ;
-    atm:transactionTimestamp "2023-10-01T12:00:00"^^xsd:dateTime .
+atm:Message a atm:Message ;
+    atm:messageCode "Error: Transaction not successful"^^xsd:string .
 
-atm:CashCard_1 a atm:CashCard ;
-    atm:bankCode "XYZ123"^^xsd:string ;
-    atm:serialNumber "123456789"^^xsd:string .
+atm:Authorization a atm:Authorization ;
+    atm:authorizedBy atm:Transaction .
 
-atm:Customer a atm:Customer ;
-    atm:hasAccount atm:Account ;
-    atm:ownsCard atm:CashCard ;
-    atm:performedBy atm:Transaction .
+atm:Transaction a atm:Transaction,
+        owl:Class ;
+    atm:authorizedBy atm:Authorization ;
+    atm:onAccount atm:Account ;
+    atm:receivesMessageFrom atm:BankComputer ;
+    atm:usesCard atm:CashCard ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:authorizedBy ;
+            owl:someValuesFrom atm:Authorization ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:requestedAmount ;
+            owl:someValuesFrom [ a owl:Restriction ;
+                    owl:maxExclusive 1000.0 ;
+                    owl:onProperty atm:requestedAmount ] ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:handlesTransaction ;
+            owl:someValuesFrom atm:ATM ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:usesCard ;
+            owl:someValuesFrom atm:CashCard ] .
 
-atm:Transaction_1 a atm:Transaction ;
-    atm:authorizedBy atm:Authorization_1 ;
-    atm:messageCode "Transaction NOT successful"^^xsd:string ;
-    atm:receivesMessageFrom atm:BankComputer_1 ;
-    atm:transactionTimestamp "2023-10-01T12:00:00"^^xsd:dateTime .
+atm:BankComputer a atm:BankComputer ;
+    atm:checksBankCode atm:CashCard ;
+    atm:checksPassword atm:CashCard ;
+    atm:operatedBy atm:ATM ;
+    atm:receivesMessageFrom atm:ATM ;
+    atm:sendsMessageTo atm:ATM .
 
 atm:ATM a atm:ATM ;
-    atm:contactsBank "Environment:bank" ;
-    atm:displaysMessage "Item:error message",
-        "Item:message" ;
-    atm:ejectsCard "Item:card" ;
-    atm:handlesTransaction atm:Transaction,
-        atm:Withdrawal ;
+    atm:bankCode atm:CashCard ;
+    atm:handlesTransaction atm:Transaction ;
     atm:issuesCard atm:Bank ;
-    atm:keepsCard "Item:card" ;
-    atm:operatedBy atm:Bank,
-        atm:BankComputer ;
+    atm:operatedBy atm:Bank ;
     atm:receivesMessageFrom atm:BankComputer ;
     atm:sendsMessageTo atm:BankComputer ;
-    atm:startsTransactionDialog "Item:transaction dialog" ;
-    atm:verifiesBankCode "Item:bank code"^^xsd:string ;
-    atm:verifiesPassword "Item:password"^^xsd:string .
-
-atm:BankComputer_1 a atm:BankComputer ;
-    atm:messageCode "bad bank code"^^xsd:string,
-        "password is invalid"^^xsd:string ;
-    atm:receivesMessageFrom atm:ATM_1 .
+    atm:serialNumber atm:CashCard ;
+    atm:usesCard atm:CashCard .
 
 atm:CashCard a atm:CashCard ;
-    atm:bankCode "bank_code"^^xsd:string ;
-    atm:logs "Item:log file" ;
-    atm:serialNumber "Item:Serial number"^^xsd:string,
-        "serial_number"^^xsd:string .
-
-atm:Transaction a atm:Transaction ;
-    atm:authorizedBy atm:Authorization ;
-    atm:requestedAmount "t"^^xsd:decimal .
+    atm:bankCode "XYZ123"^^xsd:string ;
+    atm:issuesCard atm:Bank ;
+    atm:serialNumber "123456789"^^xsd:string,
+        "retrieved_serial_number"^^xsd:string .
 

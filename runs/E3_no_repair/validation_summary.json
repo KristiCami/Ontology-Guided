@@ -1,7 +1,7 @@
 {
-  "total": 8,
+  "total": 12,
   "violations": {
-    "hard": 8,
-    "soft": 0
+    "hard": 10,
+    "soft": 2
   }
 }

@@ -5,32 +5,61 @@
 [] a sh:ValidationReport ;
     sh:conforms false ;
     sh:result [ a sh:ValidationResult ;
-            sh:focusNode atm:ATM ;
-            sh:resultMessage "ATM must be associated with a Bank via operatedBy." ;
-            sh:resultPath atm:operatedBy ;
-            sh:resultSeverity sh:Violation ;
-            sh:sourceConstraintComponent sh:ClassConstraintComponent ;
-            sh:sourceShape _:nac53268c55ef49cb891f6d0ca1f67cdfb16 ;
-            sh:value atm:Bank ],
-        [ a sh:ValidationResult ;
-            sh:focusNode atm:ATM ;
-            sh:resultMessage "ATM must be associated with a Bank via operatedBy." ;
-            sh:resultPath atm:operatedBy ;
-            sh:resultSeverity sh:Violation ;
-            sh:sourceConstraintComponent sh:ClassConstraintComponent ;
-            sh:sourceShape _:nac53268c55ef49cb891f6d0ca1f67cdfb16 ;
-            sh:value atm:BankComputer ],
-        [ a sh:ValidationResult ;
-            sh:focusNode atm:CashCard_1 ;
-            sh:resultMessage "Each CashCard must be owned by at least one Customer." ;
-            sh:resultPath [ sh:inversePath atm:ownsCard ] ;
+            sh:focusNode atm:Withdrawal ;
+            sh:resultMessage "Withdrawal must use exactly one CashCard." ;
+            sh:resultPath atm:usesCard ;
             sh:resultSeverity sh:Violation ;
             sh:sourceConstraintComponent sh:MinCountConstraintComponent ;
-            sh:sourceShape [ sh:class atm:Customer ;
-                    sh:message "Each CashCard must be owned by at least one Customer." ;
+            sh:sourceShape [ sh:class atm:CashCard ;
+                    sh:maxCount 1 ;
+                    sh:message "Withdrawal must use exactly one CashCard." ;
                     sh:minCount 1 ;
-                    sh:path [ sh:inversePath atm:ownsCard ] ;
+                    sh:path atm:usesCard ;
                     sh:severity sh:Violation ] ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:Withdrawal ;
+            sh:resultMessage "requestedAmount must exist and be a non-negative decimal." ;
+            sh:resultPath atm:requestedAmount ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:MinInclusiveConstraintComponent ;
+            sh:sourceShape _:nd0b660aebf754846bd49fd6c49d1e7b4b4 ;
+            sh:value "amount_to_dispense"^^xsd:string ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:Transaction ;
+            sh:resultMessage "Every transaction must be linked to an Authorization." ;
+            sh:resultPath atm:authorizedBy ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:ClassConstraintComponent ;
+            sh:sourceShape [ sh:class atm:Authorization ;
+                    sh:message "Every transaction must be linked to an Authorization." ;
+                    sh:minCount 1 ;
+                    sh:path atm:authorizedBy ;
+                    sh:severity sh:Violation ] ;
+            sh:value atm:Authorization ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:Withdrawal ;
+            sh:resultMessage "Requested amount exceeds policy limit (soft)." ;
+            sh:resultPath atm:requestedAmount ;
+            sh:resultSeverity sh:Warning ;
+            sh:sourceConstraintComponent sh:DatatypeConstraintComponent ;
+            sh:sourceShape _:nd0b660aebf754846bd49fd6c49d1e7b4b6 ;
+            sh:value "amount_to_dispense"^^xsd:string ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:Withdrawal ;
+            sh:resultMessage "dispensedAmount must exist and be a non-negative decimal." ;
+            sh:resultPath atm:dispensedAmount ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:DatatypeConstraintComponent ;
+            sh:sourceShape _:nd0b660aebf754846bd49fd6c49d1e7b4b5 ;
+            sh:value "amount_dispensed"^^xsd:string ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:Withdrawal ;
+            sh:resultMessage "requestedAmount must exist and be a non-negative decimal." ;
+            sh:resultPath atm:requestedAmount ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:DatatypeConstraintComponent ;
+            sh:sourceShape _:nd0b660aebf754846bd49fd6c49d1e7b4b4 ;
+            sh:value "amount_to_dispense"^^xsd:string ],
         [ a sh:ValidationResult ;
             sh:focusNode atm:Transaction ;
             sh:resultMessage "Every transaction must have a timestamp (xsd:dateTime)." ;
@@ -43,20 +72,17 @@
                     sh:path atm:transactionTimestamp ;
                     sh:severity sh:Violation ] ],
         [ a sh:ValidationResult ;
-            sh:focusNode atm:Transaction ;
-            sh:resultMessage "Every transaction must be linked to an Authorization." ;
-            sh:resultPath atm:authorizedBy ;
-            sh:resultSeverity sh:Violation ;
-            sh:sourceConstraintComponent sh:ClassConstraintComponent ;
-            sh:sourceShape _:nac53268c55ef49cb891f6d0ca1f67cdfb7 ;
-            sh:value atm:Authorization ],
-        [ a sh:ValidationResult ;
-            sh:focusNode atm:ATM_1 ;
+            sh:focusNode atm:ATM ;
             sh:resultMessage "ATM must be associated with a Bank via operatedBy." ;
             sh:resultPath atm:operatedBy ;
             sh:resultSeverity sh:Violation ;
-            sh:sourceConstraintComponent sh:MinCountConstraintComponent ;
-            sh:sourceShape _:nac53268c55ef49cb891f6d0ca1f67cdfb16 ],
+            sh:sourceConstraintComponent sh:ClassConstraintComponent ;
+            sh:sourceShape [ sh:class atm:Bank ;
+                    sh:message "ATM must be associated with a Bank via operatedBy." ;
+                    sh:minCount 1 ;
+                    sh:path atm:operatedBy ;
+                    sh:severity sh:Violation ] ;
+            sh:value atm:Bank ],
         [ a sh:ValidationResult ;
             sh:focusNode atm:CashCard ;
             sh:resultMessage "CashCard must have exactly one serialNumber." ;
@@ -70,23 +96,51 @@
                     sh:path atm:serialNumber ;
                     sh:severity sh:Violation ] ],
         [ a sh:ValidationResult ;
-            sh:focusNode atm:Transaction_1 ;
-            sh:resultMessage "Every transaction must be linked to an Authorization." ;
-            sh:resultPath atm:authorizedBy ;
+            sh:focusNode atm:Withdrawal ;
+            sh:resultMessage "Requested amount exceeds policy limit (soft)." ;
+            sh:resultPath atm:requestedAmount ;
+            sh:resultSeverity sh:Warning ;
+            sh:sourceConstraintComponent sh:MaxInclusiveConstraintComponent ;
+            sh:sourceShape _:nd0b660aebf754846bd49fd6c49d1e7b4b6 ;
+            sh:value "amount_to_dispense"^^xsd:string ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:Withdrawal ;
+            sh:resultMessage "Withdrawal must refer to exactly one Account." ;
+            sh:resultPath atm:onAccount ;
             sh:resultSeverity sh:Violation ;
-            sh:sourceConstraintComponent sh:ClassConstraintComponent ;
-            sh:sourceShape _:nac53268c55ef49cb891f6d0ca1f67cdfb7 ;
-            sh:value atm:Authorization_1 ] .
+            sh:sourceConstraintComponent sh:MinCountConstraintComponent ;
+            sh:sourceShape [ sh:class atm:Account ;
+                    sh:maxCount 1 ;
+                    sh:message "Withdrawal must refer to exactly one Account." ;
+                    sh:minCount 1 ;
+                    sh:path atm:onAccount ;
+                    sh:severity sh:Violation ] ],
+        [ a sh:ValidationResult ;
+            sh:focusNode atm:Withdrawal ;
+            sh:resultMessage "dispensedAmount must exist and be a non-negative decimal." ;
+            sh:resultPath atm:dispensedAmount ;
+            sh:resultSeverity sh:Violation ;
+            sh:sourceConstraintComponent sh:MinInclusiveConstraintComponent ;
+            sh:sourceShape _:nd0b660aebf754846bd49fd6c49d1e7b4b5 ;
+            sh:value "amount_dispensed"^^xsd:string ] .
 
-_:nac53268c55ef49cb891f6d0ca1f67cdfb7 sh:class atm:Authorization ;
-    sh:message "Every transaction must be linked to an Authorization." ;
+_:nd0b660aebf754846bd49fd6c49d1e7b4b4 sh:datatype xsd:decimal ;
+    sh:message "requestedAmount must exist and be a non-negative decimal." ;
     sh:minCount 1 ;
-    sh:path atm:authorizedBy ;
+    sh:minInclusive 0.0 ;
+    sh:path atm:requestedAmount ;
     sh:severity sh:Violation .
 
-_:nac53268c55ef49cb891f6d0ca1f67cdfb16 sh:class atm:Bank ;
-    sh:message "ATM must be associated with a Bank via operatedBy." ;
+_:nd0b660aebf754846bd49fd6c49d1e7b4b5 sh:datatype xsd:decimal ;
+    sh:message "dispensedAmount must exist and be a non-negative decimal." ;
     sh:minCount 1 ;
-    sh:path atm:operatedBy ;
+    sh:minInclusive 0.0 ;
+    sh:path atm:dispensedAmount ;
     sh:severity sh:Violation .
+
+_:nd0b660aebf754846bd49fd6c49d1e7b4b6 sh:datatype xsd:decimal ;
+    sh:maxInclusive 1000.0 ;
+    sh:message "Requested amount exceeds policy limit (soft)." ;
+    sh:path atm:requestedAmount ;
+    sh:severity sh:Warning .
 
