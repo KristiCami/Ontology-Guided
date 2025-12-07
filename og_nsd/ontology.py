@@ -31,11 +31,9 @@ class OntologyAssembler:
         self,
         base_ontology_path: Optional[Path] = None,
         default_prefixes: Optional[Dict[str, str]] = None,
-        base_namespace: str | None = None,
     ) -> None:
         self.base_path = base_ontology_path
         self.default_prefixes = default_prefixes or {}
-        self.base_namespace = base_namespace
 
     def bootstrap(self) -> OntologyState:
         graph = Graph()
@@ -47,9 +45,7 @@ class OntologyAssembler:
 
     def add_turtle(self, state: OntologyState, turtle: str) -> None:
         cleaned = _ensure_standard_prefixes(
-            _strip_code_fence(turtle),
-            additional_prefixes=self.default_prefixes,
-            base_namespace=self.base_namespace,
+            _strip_code_fence(turtle), additional_prefixes=self.default_prefixes
         )
         try:
             state.graph.parse(data=cleaned, format="turtle")
@@ -162,10 +158,7 @@ _STANDARD_PREFIXES = {
 
 
 def _ensure_standard_prefixes(
-    turtle: str,
-    *,
-    additional_prefixes: Optional[Dict[str, str]] = None,
-    base_namespace: str | None = None,
+    turtle: str, *, additional_prefixes: Optional[Dict[str, str]] = None
 ) -> str:
     """Prepend common prefixes if they are referenced but not declared."""
 
@@ -174,42 +167,18 @@ def _ensure_standard_prefixes(
         for match in re.finditer(r"@prefix\s+([A-Za-z][\w-]*):", turtle)
     }
 
-    prefix_map: Dict[str, str] = {k.lower(): v for k, v in _STANDARD_PREFIXES.items()}
+    prefix_map: Dict[str, str] = dict(_STANDARD_PREFIXES)
     if additional_prefixes:
-        prefix_map.update({k.lower(): v for k, v in additional_prefixes.items()})
-    if base_namespace:
-        guessed_prefix = _guess_prefix(base_namespace)
-        prefix_map.setdefault(guessed_prefix, base_namespace)
-
-    used_prefixes = set()
-    for line in turtle.splitlines():
-        if line.lstrip().startswith("@prefix"):
-            continue
-        for match in re.finditer(r"(?<![@<])\b([A-Za-z][\w-]*):(?=[A-Za-z_])", line):
-            used_prefixes.add(match.group(1).lower())
+        prefix_map.update(additional_prefixes)
 
     missing = [
         f"@prefix {prefix}: <{uri}> ."
         for prefix, uri in prefix_map.items()
-        if prefix in used_prefixes and prefix not in declared
+        if prefix not in declared
     ]
     if not missing:
         return turtle
     return "\n".join(missing + [turtle])
-
-
-def _guess_prefix(base_namespace: str) -> str:
-    """Derive a prefix from the trailing portion of a namespace URI."""
-
-    trimmed = base_namespace.rstrip("/#")
-    candidate = trimmed.rsplit("/", maxsplit=1)[-1]
-    # Remove fragment identifiers that remain after stripping
-    candidate = candidate.split("#", maxsplit=1)[-1]
-    candidate = re.sub(r"\.[A-Za-z0-9]+$", "", candidate)
-    candidate = re.sub(r"[^A-Za-z0-9_-]", "", candidate)
-    if not candidate or not candidate[0].isalpha():
-        return "base"
-    return candidate.lower()
 
 
 _CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
@@ -218,7 +187,6 @@ _BYTE_LITERAL_RE = re.compile(r"^b['\"](.*)['\"]$", re.DOTALL)
 _BARE_DECIMAL_RE = re.compile(r"(?<!\")([+-]?\d+(?:\.\d+)?)(\s*\^\^xsd:decimal)")
 _BYTES_PREFIX_BEFORE_LIST_RE = re.compile(r"'\^?b'(?=\[)")
 _BYTES_PREFIX_BEFORE_QNAME_RE = re.compile(r"'\^?b'(?=[A-Za-z][\w-]*:)")
-_LONE_QNAME_RE = re.compile(r"^[A-Za-z][\w-]*:[^\s]+$")
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -248,12 +216,6 @@ def _sanitize_turtle(turtle: str) -> str:
         # Ensure decimals are quoted so rdflib can parse them as literals
         if "^^xsd:decimal" in line and "\"" not in line:
             line = _BARE_DECIMAL_RE.sub(r'"\1"\2', line)
-
-        # Comment out orphaned qnames (e.g., truncated lines such as "atm:FooBar") that
-        # rdflib cannot parse and that typically indicate incomplete LLM output.
-        if _LONE_QNAME_RE.match(line.strip()):
-            sanitized_lines.append(f"# {line}")
-            continue
 
         stripped = line.lstrip()
         if stripped.upper().startswith("NOT "):
