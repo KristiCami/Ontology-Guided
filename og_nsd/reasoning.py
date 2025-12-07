@@ -9,11 +9,10 @@ from typing import List, Optional
 from rdflib import Graph
 
 try:  # pragma: no cover - optional heavy dependency
-    from owlready2 import OwlReadyOntologyParsingError, get_ontology, sync_reasoner_pellet
+    from owlready2 import get_ontology, sync_reasoner_pellet
 except Exception:  # pragma: no cover
     get_ontology = None  # type: ignore
     sync_reasoner_pellet = None  # type: ignore
-    OwlReadyOntologyParsingError = Exception  # type: ignore
 
 
 @dataclass
@@ -63,16 +62,7 @@ class OwlreadyReasoner:
         # ``Path.as_posix`` normalizes the path to a portable forward-slash
         # string without introducing ``file://`` prefixes that some Owlready2
         # versions mishandle on Windows.
-        try:
-            onto = get_ontology(tmp_path.as_posix()).load()
-        except OwlReadyOntologyParsingError as e:
-            notes = [f"Failed to parse ontology for reasoning: {e}"]
-            report = ReasonerReport(True, None, [], " ".join(notes))
-            return ReasonerResult(report=report, expanded_graph=base_graph)
-        except Exception as e:  # pragma: no cover - defensive fallback
-            notes = [f"Unexpected reasoning failure: {e}"]
-            report = ReasonerReport(True, None, [], " ".join(notes))
-            return ReasonerResult(report=report, expanded_graph=base_graph)
+        onto = get_ontology(tmp_path.as_posix()).load()
         notes = []
         consistent = None
         if sync_reasoner_pellet is None:
