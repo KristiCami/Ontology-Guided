@@ -34,6 +34,7 @@ class OntologyDraftingPipeline:
         self.last_reasoner_report = None
         self.last_cq_results = None
         self.state_graph = None
+        self.reasoned_graph = None
 
     def _select_llm(self, config: PipelineConfig) -> LLMClient:
         if config.llm_mode == "openai":
@@ -67,9 +68,11 @@ class OntologyDraftingPipeline:
         if self.validator is None:
             raise RuntimeError("SHACL validator not configured; provide --shapes or use --draft-only.")
         for iteration in range(self.config.max_iterations + 1):
-            reasoner_report = self.reasoner.run(state.graph)
-            shacl_report = self.validator.validate(state.graph)
-            cq_results = self.cq_runner.run(state.graph) if self.cq_runner else None
+            reasoner_result = self.reasoner.run(state.graph)
+            reasoner_report = reasoner_result.report
+            shacl_input_graph = reasoner_result.expanded_graph
+            shacl_report = self.validator.validate(shacl_input_graph)
+            cq_results = self.cq_runner.run(shacl_input_graph) if self.cq_runner else None
             iteration_reports.append(
                 {
                     "iteration": iteration,
@@ -100,6 +103,7 @@ class OntologyDraftingPipeline:
         )
         self.assembler.serialize(state, self.config.output_path)
         self.state_graph = state.graph
+        self.reasoned_graph = shacl_input_graph if "shacl_input_graph" in locals() else None
         self.last_shacl_report = iteration_reports[-1]["shacl"]
         self.last_reasoner_report = iteration_reports[-1]["reasoner"]
         self.last_cq_results = iteration_reports[-1]["cq_results"]

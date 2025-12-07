@@ -23,13 +23,35 @@ class ReasonerReport:
     notes: str
 
 
+@dataclass
+class ReasonerResult:
+    """Bundle of the reasoner diagnostics and the expanded graph."""
+
+    report: ReasonerReport
+    expanded_graph: Graph
+
+
 class OwlreadyReasoner:
     def __init__(self, enabled: bool = False) -> None:
         self.enabled = enabled and get_ontology is not None
 
-    def run(self, graph: Graph) -> ReasonerReport:
+    def run(self, graph: Graph) -> ReasonerResult:
+        """Run Pellet reasoning and return the expanded graph.
+
+        The expanded graph is always populated: when reasoning is disabled or
+        owlready2 is missing we return a defensive copy of the input graph so
+        downstream SHACL validation still receives a graph object.
+        """
+
+        base_graph = Graph()
+        base_graph.parse(data=graph.serialize(format="turtle"))
+
         if not self.enabled or get_ontology is None:
-            return ReasonerReport(False, None, [], "Reasoner disabled or owlready2 unavailable.")
+            report = ReasonerReport(
+                False, None, [], "Reasoner disabled or owlready2 unavailable."
+            )
+            return ReasonerResult(report=report, expanded_graph=base_graph)
+
         tmp_dir = Path(tempfile.gettempdir())
         tmp_path = tmp_dir / "og_nsd_reasoner.owl"
         tmp_path.write_text(graph.serialize(format="pretty-xml"), encoding="utf-8")
@@ -46,6 +68,7 @@ class OwlreadyReasoner:
         if sync_reasoner_pellet is None:
             notes.append("Pellet not available; skipped reasoning.")
             unsat = []
+            expanded_graph = base_graph
         else:
             with onto:
                 sync_reasoner_pellet(infer_property_values=True, infer_data_property_values=True)
@@ -55,4 +78,7 @@ class OwlreadyReasoner:
                 if any(str(eq) == "Nothing" for eq in cls.equivalent_to)
             ]
             consistent = True
-        return ReasonerReport(True, consistent, unsat, " ".join(notes))
+            expanded_graph = onto.world.as_rdflib_graph()
+
+        report = ReasonerReport(True, consistent, unsat, " ".join(notes))
+        return ReasonerResult(report=report, expanded_graph=expanded_graph)
