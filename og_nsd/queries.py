@@ -26,29 +26,17 @@ class CompetencyQuestionRunner:
         content = path.read_text(encoding="utf-8")
         buffer: List[str] = []
         queries: List[str] = []
-        brace_depth = 0
-
-        def flush_buffer() -> None:
-            nonlocal buffer
-            query = "\n".join(buffer).strip()
-            if query:
-                queries.append(query)
-            buffer = []
-
         for line in content.splitlines():
-            stripped = line.strip()
-            if not buffer and (not stripped or stripped.startswith("#")):
+            if line.strip().startswith("#") and not buffer:
                 continue
-
             buffer.append(line)
-            brace_depth += line.count("{") - line.count("}")
-
-            if buffer and brace_depth == 0 and any("ASK" in b.upper() for b in buffer):
-                flush_buffer()
-
+            if line.strip().endswith("}"):
+                query = "\n".join(buffer).strip()
+                if query:
+                    queries.append(query)
+                buffer = []
         if buffer:
-            flush_buffer()
-
+            queries.append("\n".join(buffer).strip())
         return [q for q in queries if "ASK" in q.upper()]
 
     def run(self, graph: Graph) -> List[CompetencyQuestionResult]:
