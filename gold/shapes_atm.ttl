@@ -107,7 +107,7 @@ atm:CashCardKeyShape a sh:NodeShape ;
     sh:prefixes [
       sh:declare [
         sh:prefix "atm" ;
-        sh:namespace <http://lod.csd.auth.gr/atm/atm.ttl#>
+        sh:namespace "http://lod.csd.auth.gr/atm/atm.ttl#"^^xsd:anyURI
       ]
     ] ;
     sh:select """
