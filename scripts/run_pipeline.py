@@ -69,9 +69,24 @@ def main() -> None:
     )
     pipeline = OntologyDraftingPipeline(config)
     report = pipeline.run()
+    def _format_summary(key: str, value: object) -> str:
+        if isinstance(value, dict):
+            if key == "shacl":
+                return f"conforms={value.get('conforms')} ({len(value.get('results', []))} results)"
+            if key == "reasoner":
+                return f"consistent={value.get('consistent')}"
+            return ", ".join(value.keys())
+        if isinstance(value, list):
+            if key == "competency_questions" and value:
+                passed = sum(1 for item in value if item.get("success"))
+                return f"{passed}/{len(value)} passed"
+            if key == "iterations":
+                return f"{len(value)} recorded"
+        return str(value)
+
     print("Pipeline complete. Summary:")
     for key, value in report.items():
-        print(f"- {key}: {value if not isinstance(value, dict) else ''}")
+        print(f"- {key}: {_format_summary(key, value)}")
 
 
 if __name__ == "__main__":
