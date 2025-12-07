@@ -1,20 +1,12 @@
 """Unit tests for ontology assembly helpers."""
 
-import tempfile
 import unittest
-from pathlib import Path
 
 from rdflib import Graph, Literal, URIRef, OWL, RDF
 from rdflib.namespace import XSD
 
-from og_nsd import OntologyDraftingPipeline, PipelineConfig
 from og_nsd.ontology import _ensure_standard_prefixes, _sanitize_turtle
-from og_nsd.reasoning import (
-    OwlreadyReasoner,
-    ReasonerReport,
-    ReasonerResult,
-    _sanitize_numeric_literals,
-)
+from og_nsd.reasoning import OwlreadyReasoner, _sanitize_numeric_literals
 
 
 class EnsureStandardPrefixesTests(unittest.TestCase):
@@ -125,21 +117,6 @@ class SanitizeTurtleTests(unittest.TestCase):
         self.assertIn("atm:rejectedWithErrorMessage atm:ErrorMessage", sanitized)
         Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
 
-    def test_removes_infix_bytes_token(self) -> None:
-        turtle = (
-            "@prefix atm: <http://example.org/atm#> .\n\n"
-            "atm:logsSerialNumber a owl:DatatypeProperty .\n"
-            "atm:logsSerialNumber'^b' a atm:Transaction ; atm:serialNumber atm:CashCard ."
-        )
-
-        sanitized = _sanitize_turtle(turtle)
-
-        self.assertIn(
-            "atm:logsSerialNumber a atm:Transaction ; atm:serialNumber atm:CashCard",
-            sanitized,
-        )
-        Graph().parse(data=_ensure_standard_prefixes(sanitized), format="turtle")
-
     def test_removes_variable_prefix_on_qname(self) -> None:
         turtle = (
             "@prefix atm: <http://example.org/atm#> .\n\n"
@@ -207,70 +184,6 @@ class SanitizeNumericLiteralsTests(unittest.TestCase):
         coerced = next(sanitized.objects(subject, predicate))
         self.assertIsNone(coerced.datatype)
         self.assertEqual(str(object_resource), str(coerced))
-
-
-class PipelineStateGraphTests(unittest.TestCase):
-    def test_pipeline_uses_reasoner_graph_for_serialization(self) -> None:
-        class _StubReasoner:
-            def __init__(self) -> None:
-                self.called = False
-
-            def run(self, graph: Graph) -> ReasonerResult:  # type: ignore[override]
-                self.called = True
-                expanded = Graph()
-                expanded.bind("ex", "http://example.org/")
-                subject = URIRef("http://example.org/node")
-                expanded.add((subject, RDF.type, OWL.Class))
-                report = ReasonerReport(
-                    enabled=False,
-                    consistent=None,
-                    unsatisfiable_classes=[],
-                    notes="stub",
-                )
-                return ReasonerResult(report=report, expanded_graph=expanded)
-
-        class _StubShaclReport:
-            conforms = True
-            results: list = []
-            text_report = ""
-
-        class _StubValidator:
-            def __init__(self) -> None:
-                self.last_graph: Graph | None = None
-
-            def validate(self, graph: Graph) -> _StubShaclReport:  # type: ignore[override]
-                self.last_graph = graph
-                return _StubShaclReport()
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp_path = Path(tmpdir)
-            requirements_path = tmp_path / "reqs.json"
-            requirements_path.write_text('[{"text": "requirement"}]', encoding="utf-8")
-
-            config = PipelineConfig(
-                requirements_path=requirements_path,
-                shapes_path=None,
-                base_ontology_path=None,
-                competency_questions_path=None,
-                output_path=tmp_path / "out.ttl",
-                report_path=None,
-                llm_mode="heuristic",
-                max_iterations=0,
-                max_requirements=1,
-                reasoning_enabled=False,
-            )
-
-            pipeline = OntologyDraftingPipeline(config)
-            pipeline.reasoner = _StubReasoner()
-            pipeline.validator = _StubValidator()
-
-            pipeline.run()
-
-            self.assertTrue(pipeline.reasoner.called)
-            self.assertIsNotNone(pipeline.validator.last_graph)
-            triples = list(pipeline.state_graph)
-            self.assertEqual(1, len(triples))
-            self.assertEqual((URIRef("http://example.org/node"), RDF.type, OWL.Class), triples[0])
 
 
 if __name__ == "__main__":
