@@ -26,15 +26,27 @@ class CompetencyQuestionRunner:
         content = path.read_text(encoding="utf-8")
         buffer: List[str] = []
         queries: List[str] = []
+        brace_balance = 0
+        seen_brace = False
         for line in content.splitlines():
             if line.strip().startswith("#") and not buffer:
                 continue
             buffer.append(line)
-            if line.strip().endswith("}"):
+
+            # Track balanced braces so nested blocks do not prematurely end a query.
+            code_segment = line.split("#", maxsplit=1)[0]
+            brace_balance += code_segment.count("{")
+            brace_balance -= code_segment.count("}")
+            seen_brace = seen_brace or "{" in code_segment or "}" in code_segment
+
+            if brace_balance <= 0 and buffer and seen_brace:
                 query = "\n".join(buffer).strip()
                 if query:
                     queries.append(query)
                 buffer = []
+                brace_balance = 0
+                seen_brace = False
+
         if buffer:
             queries.append("\n".join(buffer).strip())
         return [q for q in queries if "ASK" in q.upper()]
