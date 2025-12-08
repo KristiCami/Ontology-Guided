@@ -19,7 +19,7 @@
 
 ## 3. Τι πρέπει να κάνει το E3 (βήμα-βήμα)
 1. **Φόρτωση schema context πριν το drafting.** Εξάγουμε κλάσεις, object/datatype properties (με domain/range) και labels από το `gold/atm_gold.ttl` και τα περνάμε στο prompt ως δεσμευμένο λεξιλόγιο.
-2. **Reasoner πριν το SHACL.** Ο SHACL validator πρέπει να δει το reasoning-expanded γράφημα (κληρονομημένοι περιορισμοί). Αν γίνει skip, προκύπτουν λάθος αρνητικά.
+2. **Reasoner πριν το SHACL.** Ο SHACL validator πρέπει να δει το reasoning-expanded γράφημα (κληρονομημένοι περιορισμοί). 
 3. **SHACL μόνο για διάγνωση.** Δεν τρέχει repair loop· απλώς μετράμε total/hard/soft violations.
 4. **Metrics στο draft.**
    - Exact axiom metrics: precision/recall/F1 με string-identical matching.
