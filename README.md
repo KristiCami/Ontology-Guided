@@ -9,22 +9,23 @@ The repository contains an end-to-end implementation of the OG–NSD pipeline de
 
 ### Repository layout
 ```
-README.md                 ← This document (methodology + hands-on instructions)
-og_nsd/                   ← Python package with reusable pipeline modules
-  config.py               ← Dataclass for configuring runs
-  llm.py                  ← OpenAI adapter + heuristic fallback LLM
-  ontology.py             ← Graph assembly helpers built on rdflib
-  pipeline.py             ← High-level orchestration logic
-  queries.py              ← CQ loader/runner for SPARQL ASK suites
-  reasoning.py            ← Optional owlready2 + Pellet reasoning hooks
-  reporting.py            ← JSON report builder
-  requirements.py         ← JSON/JSONL requirement ingestion helpers
-  shacl.py                ← SHACL validation wrapper (pySHACL)
-scripts/run_pipeline.py   ← CLI entry point wrapping `OntologyDraftingPipeline`
-requirements.txt          ← Minimal Python dependencies (rdflib, pyshacl, owlready2)
-gold/                     ← Domain assets (ATM gold ontology + SHACL shapes)
-atm_requirements.jsonl    ← Benchmark requirements used in the paper
-atm_cqs.rq                ← CQ suite for coverage evaluation
+README.md                   ← This document (methodology + hands-on instructions)
+og_nsd/                     ← Python package with reusable pipeline modules
+  config.py                 ← Dataclass for configuring runs
+  llm.py                    ← OpenAI adapter + heuristic fallback LLM
+  ontology.py               ← Graph assembly helpers built on rdflib
+  pipeline.py               ← High-level orchestration logic
+  queries.py                ← CQ loader/runner for SPARQL ASK suites
+  reasoning.py              ← Optional owlready2 + Pellet reasoning hooks
+  reporting.py              ← JSON report builder
+  requirements.py           ← JSON/JSONL requirement ingestion helpers
+  shacl.py                  ← SHACL validation wrapper (pySHACL)
+scripts/run_pipeline.py     ← CLI entry point wrapping `OntologyDraftingPipeline`
+requirements.txt            ← Minimal Python dependencies (rdflib, pyshacl, owlready2)
+gold/                       ← Domain assets (ATM gold ontology + SHACL shapes)
+atm_requirements.jsonl      ← Benchmark requirements used in the paper
+baseline_requirements.jsonl
+atm_cqs.rq                  ← CQ suite for coverage evaluation
 ```
 
 ### Installation
