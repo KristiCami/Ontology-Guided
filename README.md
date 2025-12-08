@@ -97,7 +97,7 @@ python scripts/run_pipeline.py \
 ```
 Key points:
 - Skip `--shapes` and `--base` to keep the model free-form; `--draft-only` bypasses SHACL/reasoner checks and any repair loop.
-- You can still use `--llm-mode heuristic` for offline reproducibility; the command above shows the OpenAI-backed baseline.
+- You can still use `--llm-mode heuristic` for offline reproducibility, the command above shows the OpenAI-backed baseline.
 
 ### Customising runs
 | Need | How |
