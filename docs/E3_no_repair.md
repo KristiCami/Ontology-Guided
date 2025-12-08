@@ -17,7 +17,7 @@
 | Repair loop                | Όχι                    | Όχι                  |
 | Iterations                 | 1                      | 1                    |
 
-### (E3 / no-repair)
+## 3. (E3 / no-repair)
 - **Grounding TTL:** `gold/atm_gold.ttl` (η μοναδική gold οντολογία στο repo).
 - **SHACL shapes:** `gold/shapes_atm.ttl` (χρησιμοποιείται αυτούσιο, δεν αναπαράγεται).
 - **Baseline draft path:** `build/pred.ttl` (όλα τα αρχεία draft/metrics που παράγονται από το νέο preset γράφονται στο `runs/E3_no_repair/`).
