@@ -17,42 +17,34 @@
 | Repair loop                | Όχι                    | Όχι                  |
 | Iterations                 | 1                      | 1                    |
 
-## 3. Τι πρέπει να κάνει το E3 (βήμα-βήμα)
-1. **Φόρτωση schema context πριν το drafting.** Εξάγουμε κλάσεις, object/datatype properties (με domain/range) και labels από το `gold/atm_gold.ttl` και τα περνάμε στο prompt ως δεσμευμένο λεξιλόγιο.
-2. **Reasoner πριν το SHACL.** Ο SHACL validator πρέπει να δει το reasoning-expanded γράφημα (κληρονομημένοι περιορισμοί). 
-3. **SHACL μόνο για διάγνωση.** Δεν τρέχει repair loop· απλώς μετράμε total/hard/soft violations.
-4. **Metrics στο draft.**
-   - Exact axiom metrics: precision/recall/F1 με string-identical matching.
-   - Semantic metrics: πιο ανεκτικό matching (πρέπει να είναι ≥ των exact scores).
-   - CQ pass rate: SPARQL ASK πάνω στο reasoning-expanded γράφημα (`atm_cqs.rq`).
-   - SHACL σύνοψη: total/hard/soft violations από το report.
-5. **Δομή εξόδου (αυτοτελής).**
-   ```
-   runs/E3_no_repair/
-       iter0/pred.ttl
-       validation_report.ttl
-       validation_summary.json
-       metrics_exact.json
-       metrics_semantic.json
-       cq_results_iter0.json
-   ```
-   Το `pred.ttl` είναι το raw draft· όλα τα υπόλοιπα προκύπτουν από το reasoning-expanded γράφημα. Τα gold αρχεία μένουν ως έχουν στο `gold/`.
+### (E3 / no-repair)
+- **Grounding TTL:** `gold/atm_gold.ttl` (η μοναδική gold οντολογία στο repo).
+- **SHACL shapes:** `gold/shapes_atm.ttl` (χρησιμοποιείται αυτούσιο, δεν αναπαράγεται).
+- **Baseline draft path:** `build/pred.ttl` (όλα τα αρχεία draft/metrics που παράγονται από το νέο preset γράφονται στο `runs/E3_no_repair/`).
 
-## 4. Πώς να το τρέξεις
-Χρησιμοποιήστε τον preset runner (heuristic LLM by default):
+Ο ευκολότερος τρόπος για να τρέξετε το E3 preset χωρίς repair loop είναι το προρυθμισμένο script:
 
 ```bash
 python scripts/run_atm_examples.py --config configs/atm_ontology_aware.json
 ```
 
-### Windows PowerShell
-```powershell
-python scripts/run_atm_examples.py --config configs/atm_ontology_aware.json
+Τι κάνει το preset:
+- Φορτώνει λεξιλόγιο από `gold/atm_gold.ttl` ως ontology-aware context, χωρίς να συγχωνεύει τις gold τριπλέτες στο draft.
+- Τρέχει reasoner και περνά το reasoning-expanded γράφημα στον SHACL validator, ώστε τα κληρονομημένα constraints να ελεγχθούν σωστά.
+- Εκτελεί CQs (`atm_cqs.rq`) πάνω στο ίδιο expanded γράφημα.
+- Υπολογίζει exact/semantic metrics (η semantic βαθμολογία δεν πέφτει κάτω από την exact) και σύνοψη hard/soft violations.
+
+Η έξοδος γράφεται σε:
+
+```
+runs/E3_no_repair/
+  iter0/pred.ttl          ← draft της 1ης (και μοναδικής) iter
+  validation_report.ttl   ← SHACL report από το gold/shapes_atm.ttl
+  validation_summary.json ← μετρητής hard/soft παραβιάσεων
+  metrics_exact.json      ← precision/recall/F1 vs gold/atm_gold.ttl
+  metrics_semantic.json   ← semantic scorer με tolerance/normalisation
+  reasoning_report.json   ← unsat classes από reasoner (αν owlready2/ Pellet διαθέσιμο)
+  cq_results_iter0.json   ← αποτελέσματα από `atm_cqs.rq` (αν το path είναι στο config)
 ```
 
-### macOS / Linux (bash, zsh)
-```bash
-python scripts/run_atm_examples.py --config configs/atm_ontology_aware.json
-```
-
-Βεβαιώσου ότι το `pellet` είναι διαθέσιμο για πλήρες reasoning. Αν λείπει, ο runner θα επιστρέψει μόνο το asserted γράφημα και το SHACL θα το χρησιμοποιήσει χωρίς τα inferred triples.
+Τα αρχεία αυτά **δεν είναι προϋπάρχοντα**. Παράγονται μόνο όταν εκτελεστεί η παραπάνω εντολή και δεν αγγίζουν/αναγράφουν τα δεδομένα στον φάκελο `gold/`. Δείτε και το `docs/E3_no_repair.md` για πλήρη περιγραφή του πειράματος.
