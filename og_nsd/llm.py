@@ -56,6 +56,16 @@ class LLMClient(abc.ABC):
         """
         raise NotImplementedError
 
+    def apply_patches(self, patches: Sequence[dict], context_ttl: str) -> LLMResponse:
+        """Apply structured patches to the provided ontology graph.
+
+        Implementations may delegate to :meth:`generate_patch` or construct a
+        new prompt that includes the JSON patch plan. The default implementation
+        raises ``NotImplementedError`` so callers must explicitly handle LLM
+        capabilities.
+        """
+        raise NotImplementedError
+
 
 class HeuristicLLM(LLMClient):
     """Rule-based fallback model for offline experimentation."""
@@ -116,6 +126,57 @@ class HeuristicLLM(LLMClient):
             notes.append("No violations provided; emitted empty patch.")
         turtle = "\n".join(triples)
         return LLMResponse(turtle=turtle, reasoning_notes="\n".join(notes))
+
+    def apply_patches(self, patches: Sequence[dict], context_ttl: str) -> LLMResponse:
+        """Deterministically apply patch instructions to the ontology graph."""
+
+        from rdflib import Graph, Literal, Namespace, URIRef
+        from rdflib.namespace import OWL, RDF, RDFS, XSD
+
+        graph = Graph()
+        graph.parse(data=context_ttl, format="turtle")
+        atm = Namespace(self.base_ns)
+        graph.bind("atm", atm)
+        notes: List[str] = []
+
+        def _iri(value: str) -> URIRef:
+            if value.startswith("http"):
+                return URIRef(value)
+            if ":" in value:
+                prefix, local = value.split(":", 1)
+                ns = dict(graph.namespace_manager.namespaces()).get(prefix)
+                if ns:
+                    return URIRef(ns + local)
+            return URIRef(self.base_ns + value)
+
+        for patch in patches:
+            action = patch.get("action", "").lower()
+            subject = patch.get("subject") or "UnknownSubject"
+            predicate = patch.get("predicate") or "rdfs:comment"
+            obj = patch.get("object") or "xsd:string"
+            message = patch.get("message") or ""
+
+            subj_iri = _iri(subject)
+            pred_iri = _iri(predicate)
+
+            if obj.startswith("xsd:"):
+                graph.add((pred_iri, RDFS.domain, subj_iri))
+                graph.add((pred_iri, RDFS.range, _iri(obj)))
+                graph.add((pred_iri, RDFS.label, Literal(message or "Patched property")))
+                graph.add((pred_iri, RDF.type, OWL.DatatypeProperty))
+                graph.add((subj_iri, RDF.type, OWL.Class))
+            else:
+                obj_iri = _iri(obj)
+                graph.add((pred_iri, RDFS.domain, subj_iri))
+                graph.add((pred_iri, RDFS.range, obj_iri))
+                graph.add((pred_iri, RDF.type, OWL.ObjectProperty))
+                graph.add((subj_iri, RDF.type, OWL.Class))
+                graph.add((obj_iri, RDF.type, OWL.Class))
+
+            notes.append(f"{action or 'patch'}: {subject} {predicate} {obj}")
+
+        turtle = graph.serialize(format="turtle")
+        return LLMResponse(turtle=turtle, reasoning_notes="\n".join(notes) or "Applied patches without notes")
 
     def _extract_subject(self, requirement: Requirement) -> str:
         if "customer" in requirement.text.lower():
@@ -193,6 +254,24 @@ class OpenAILLM(LLMClient):
         content = response.choices[0].message.content.strip() if response.choices else ""
         return LLMResponse(turtle=content, reasoning_notes="Patch generated via OpenAI chat.completions")
 
+    def apply_patches(self, patches: Sequence[dict], context_ttl: str) -> LLMResponse:
+        patch_prompt = self._build_patch_application_prompt(patches, context_ttl)
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": patch_prompt},
+        ]
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY is not set")
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
+        )
+        content = response.choices[0].message.content.strip() if response.choices else ""
+        return LLMResponse(turtle=content, reasoning_notes="Applied patches via OpenAI chat.completions")
+
     def _build_prompt(self, requirements: Sequence[Requirement], schema_context: SchemaContext | None) -> str:
         schema_section = self._format_schema_context(schema_context) if schema_context else ""
 
@@ -262,4 +341,19 @@ class OpenAILLM(LLMClient):
             "Context (truncated Turtle):\n"
             f"{context_ttl[:4000]}\n"
             "Respond only with Turtle additions that address the issues."
+        )
+
+    def _build_patch_application_prompt(self, patches: Sequence[dict], context_ttl: str) -> str:
+        import json
+
+        patch_block = json.dumps(patches, indent=2, ensure_ascii=False)
+        return (
+            "You are repairing an OWL ontology using a deterministic patch plan.\n"
+            "Apply only the patches provided; do not invent new resources or delete existing triples.\n"
+            "Preserve all prefixes and re-emit the entire ontology in Turtle syntax.\n\n"
+            "Patch plan (JSON):\n"
+            f"{patch_block}\n\n"
+            "Current ontology (Turtle):\n"
+            f"{context_ttl[:6000]}\n"
+            "Return a full Turtle serialization that applies the patches and keeps all other triples intact."
         )
