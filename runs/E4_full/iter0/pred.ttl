@@ -1,0 +1,69 @@
+@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+atm:ATM_dispenses_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-014" .
+
+atm:ATM_logs_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-006" .
+
+atm:ATM_logs_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-015" .
+
+atm:ATM_relatesTo_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-002",
+        "REQ-003",
+        "REQ-004" .
+
+atm:ATM_relatesTo_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-001",
+        "REQ-009",
+        "REQ-011" .
+
+atm:ATM_relatesTo_Transaction a owl:Axiom ;
+    atm:sourceRequirement "REQ-012",
+        "REQ-013",
+        "REQ-016" .
+
+atm:Bank_logs_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-008" .
+
+atm:Bank_relatesTo_CashCard a owl:Axiom ;
+    atm:sourceRequirement "REQ-005",
+        "REQ-010",
+        "REQ-017",
+        "REQ-019" .
+
+atm:Bank_relatesTo_RequirementTarget a owl:Axiom ;
+    atm:sourceRequirement "REQ-007",
+        "REQ-018",
+        "REQ-020" .
+
+atm:dispenses a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:Transaction .
+
+atm:logs a owl:ObjectProperty ;
+    rdfs:domain atm:ATM,
+        atm:Bank ;
+    rdfs:range atm:CashCard,
+        atm:RequirementTarget .
+
+atm:relatesTo a owl:ObjectProperty ;
+    rdfs:domain atm:ATM,
+        atm:Bank ;
+    rdfs:range atm:CashCard,
+        atm:RequirementTarget,
+        atm:Transaction .
+
+atm:Bank a owl:Class .
+
+atm:CashCard a owl:Class .
+
+atm:RequirementTarget a owl:Class .
+
+atm:Transaction a owl:Class .
+
+atm:ATM a owl:Class .
+
