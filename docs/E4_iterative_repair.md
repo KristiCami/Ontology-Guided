@@ -9,7 +9,7 @@
 
 2. **Iteration 0 — Drafting χωρίς patches**
    - Το LLM συνθέτει την αρχική οντολογία από requirements + schema context. Το `pred.ttl` γράφεται στο `runs/E4_full/iter0/pred.ttl`.
-   - Δεν φορτώνεται προηγούμενη οντολογία ή `pred.ttl` από άλλα runs· το draft είναι **from scratch**.
+   - Δεν φορτώνεται προηγούμενη οντολογία ή `pred.ttl` από άλλα runs το draft είναι **from scratch**.
 
 3. **Reasoning ανά iteration**
    - Ο Pellet (ή fallback reasoner) τρέχει **πάντα** πάνω στο `pred.ttl` του τρέχοντος iteration και παράγει expanded graph στη μνήμη.
