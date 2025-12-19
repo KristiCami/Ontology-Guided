@@ -101,7 +101,7 @@ def main() -> None:
         cq_pass_rate = (sum(1 for res in cq_results if res.success) / len(cq_results)) if cq_results else 0.0
 
         save_shacl_report(shacl_report, iter_dir / "shacl_report.ttl")
-        patches = shacl_report_to_patches(shacl_report)
+        patches = shacl_report_to_patches(shacl_report, validator.shapes_graph)
         save_patch_plan(patches, iter_dir / "patches.json")
 
         if should_stop(
