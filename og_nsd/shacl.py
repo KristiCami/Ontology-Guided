@@ -31,7 +31,6 @@ class ShaclResult:
 
     focus_node: Optional[str]
     path: Optional[str]
-    path_is_inverse: bool
     message: Optional[str]
     severity: Optional[str]
     source_shape: Optional[str]
@@ -106,22 +105,10 @@ class ShaclValidator:
                 node = report_graph.value(result_node, SH[pred])
                 return str(node) if node else None
 
-            path_node = report_graph.value(result_node, SH.resultPath)
-            path_is_inverse = False
-            path_value: Optional[str] = None
-            if path_node is not None:
-                inverse_path = report_graph.value(path_node, SH.inversePath)
-                if inverse_path is not None:
-                    path_is_inverse = True
-                    path_value = str(inverse_path)
-                else:
-                    path_value = str(path_node)
-
             results.append(
                 ShaclResult(
                     focus_node=_maybe("focusNode"),
-                    path=path_value,
-                    path_is_inverse=path_is_inverse,
+                    path=_maybe("resultPath"),
                     message=_maybe("resultMessage"),
                     severity=_maybe("resultSeverity"),
                     source_shape=_maybe("sourceShape"),

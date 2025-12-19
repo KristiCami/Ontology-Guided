@@ -7,8 +7,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable, List, Sequence
 
-from rdflib import BNode, Graph, URIRef
-from rdflib.namespace import SH
+from rdflib import Graph
 
 from .metrics import compute_exact_metrics_from_graphs, compute_semantic_metrics
 from .shacl import ShaclReport, summarize_shacl_report
@@ -28,72 +27,20 @@ class Patch:
         return asdict(self)
 
 
-def _node_from_identifier(identifier: str) -> URIRef | BNode:
-    if identifier.startswith("http"):
-        return URIRef(identifier)
-    return BNode(identifier)
-
-
-def _shape_expected_value(report_graph: Graph, shape_node: URIRef | BNode) -> str | None:
-    expected = report_graph.value(shape_node, SH["class"])
-    if expected is None:
-        expected = report_graph.value(shape_node, SH["datatype"])
-    if expected is None:
-        expected = report_graph.value(shape_node, SH["nodeKind"])
-    return str(expected) if expected else None
-
-
-def _shape_path(report_graph: Graph, shape_node: URIRef | BNode) -> tuple[str | None, bool]:
-    path_node = report_graph.value(shape_node, SH["path"])
-    if path_node is None:
-        return None, False
-    inverse_path = report_graph.value(path_node, SH["inversePath"])
-    if inverse_path is not None:
-        return str(inverse_path), True
-    return str(path_node), False
-
-
 def shacl_report_to_patches(report: ShaclReport) -> List[Patch]:
     """Translate hard SHACL violations into a JSON-friendly patch plan."""
-
-    report_graph = None
-    if report.report_graph_ttl:
-        report_graph = Graph()
-        report_graph.parse(data=report.report_graph_ttl, format="turtle")
 
     patches: List[Patch] = []
     for result in report.results:
         severity = (result.severity or "").lower()
         if "violation" not in severity:
             continue
-        constraint_component = result.constraint_component or ""
-        if "MaxCountConstraintComponent" in constraint_component:
-            continue
-
-        predicate = result.path
-        path_is_inverse = result.path_is_inverse
-        expected_value = None
-        if report_graph is not None and result.source_shape:
-            shape_node = _node_from_identifier(result.source_shape)
-            expected_value = _shape_expected_value(report_graph, shape_node)
-            if predicate is None:
-                predicate, path_is_inverse = _shape_path(report_graph, shape_node)
-
-        predicate = predicate or "rdfs:comment"
-        expected_value = expected_value or result.value or "xsd:string"
-
-        subject = result.focus_node or "atm:UnknownFocus"
-        obj = expected_value
-        if path_is_inverse:
-            subject = expected_value or "atm:UnknownSubject"
-            obj = result.focus_node or "atm:UnknownFocus"
-
         patches.append(
             Patch(
                 action="addProperty",
-                subject=subject,
-                predicate=predicate,
-                object=obj,
+                subject=result.focus_node or "atm:UnknownFocus",
+                predicate=result.path or "rdfs:comment",
+                object=result.value or "xsd:string",
                 message=result.message,
                 source_shape=result.source_shape,
                 severity=result.severity,
