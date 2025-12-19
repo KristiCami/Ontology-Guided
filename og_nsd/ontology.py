@@ -187,9 +187,7 @@ _BYTE_LITERAL_RE = re.compile(r"^b['\"](.*)['\"]$", re.DOTALL)
 _BARE_DECIMAL_RE = re.compile(r"(?<!\")([+-]?\d+(?:\.\d+)?)(\s*\^\^xsd:decimal)")
 _BYTES_PREFIX_BEFORE_LIST_RE = re.compile(r"'\^?b'(?=\[)")
 _BYTES_PREFIX_BEFORE_QNAME_RE = re.compile(r"'\^?b'(?=[A-Za-z][\w-]*:)")
-_STRAY_BYTES_FRAGMENT_RE = re.compile(r"'\^?b'")
 _VARIABLE_QNAME_RE = re.compile(r"\?([A-Za-z][\w-]*:[\w-]+)")
-_ARROW_RE = re.compile(r"(->|→)")
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -213,9 +211,6 @@ def _sanitize_turtle(turtle: str) -> str:
         # such as "'^b'atm:ErrorMessage"
         line = _BYTES_PREFIX_BEFORE_QNAME_RE.sub("", line)
 
-        # Drop stray byte-string fragments that appear mid-line (e.g., "atm:prop'^b' a ...")
-        line = _STRAY_BYTES_FRAGMENT_RE.sub("", line)
-
         # Remove accidental single quotes directly before prefixed names (e.g., 'atm:Class)
         line = _QUOTED_PREFIX_RE.sub(r"\1", line)
 
@@ -223,10 +218,6 @@ def _sanitize_turtle(turtle: str) -> str:
         # emits SPARQL-like variables inside Turtle content (e.g., ``?atm:amount``),
         # which rdflib rejects.
         line = _VARIABLE_QNAME_RE.sub(r"\1", line)
-
-        if _ARROW_RE.search(line):
-            sanitized_lines.append(f"# {line}" if not line.lstrip().startswith("#") else line)
-            continue
 
         # Ensure decimals are quoted so rdflib can parse them as literals
         if "^^xsd:decimal" in line and "\"" not in line:
