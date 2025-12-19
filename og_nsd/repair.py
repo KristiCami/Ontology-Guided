@@ -80,21 +80,31 @@ def should_stop(
     iteration: int,
     max_iterations: int,
     patches: Sequence[Patch],
-    previous_patches: Sequence[Patch] | None,
     shacl_report: ShaclReport,
     cq_pass_rate: float,
     cq_threshold: float,
-) -> bool:
+    hard_history: Sequence[int],
+    delta: int = 1,
+    stagnation_limit: int = 0,
+) -> tuple[bool, str | None]:
     summary = summarize_shacl_report(shacl_report)
     hard = summary["violations"]["hard"]
     if hard == 0:
-        return True
+        return True, "hard_zero"
     if not patches:
-        return True
-    if previous_patches is not None and [p.to_dict() for p in previous_patches] == [p.to_dict() for p in patches]:
-        return True
+        return True, "no_patches"
+    if stagnation_limit > 0 and len(hard_history) >= stagnation_limit + 1:
+        stagnated = True
+        for idx in range(-stagnation_limit, 0):
+            hard_prev = hard_history[idx - 1]
+            hard_current = hard_history[idx]
+            if hard_prev - hard_current >= delta:
+                stagnated = False
+                break
+        if stagnated:
+            return True, "stagnation"
     if cq_pass_rate >= cq_threshold:
-        return True
+        return True, "cq_threshold"
     if iteration >= max_iterations:
-        return True
-    return False
+        return True, "kmax"
+    return False, None
