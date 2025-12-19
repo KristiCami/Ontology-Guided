@@ -20,10 +20,7 @@
    - Έξοδος: `shacl_report.ttl` και `validation_summary.json` με hard/soft counts.
 
 5. **Patch calculus**
-   - Μεταφράζει **μόνο** τα hard violations σε `patches.json` (δομή τύπου `{action, subject, predicate, object, message}`).
-   - Χρησιμοποιεί `sourceShape` από το SHACL report ώστε να αντλεί το αναμενόμενο `sh:class` ή `sh:datatype` για κάθε violation.
-   - Αν το `sh:path` είναι inverse (`sh:inversePath`), αντιστρέφεται η κατεύθυνση domain/range στο patch ώστε να διορθώνεται το σωστό predicate.
-   - Δεν γίνεται καμία αναφορά στο gold ontology.
+   - Μεταφράζει **μόνο** τα hard violations σε `patches.json` (δομή τύπου `{action, subject, predicate, object, message}`) χωρίς καμία αναφορά στο gold ontology.
 
 6. **Εφαρμογή patches με LLM**
    - Input: τρέχον `pred.ttl` + `patches.json`.
@@ -60,9 +57,9 @@ runs/E4_full/
 - Reasoning + SHACL τρέχουν πριν από κάθε patch calculus.
 
 ## Αποτελέσματα του run `E4_full`
-- Το loop υλοποιήθηκε όπως ορίζεται: iter0 drafting από requirements + ontology-aware context του gold, μετά reasoning → SHACL → patch calculus → εφαρμογή patches σε κάθε iteration.
-- `repair_log.json`: iter0 hard=7 soft=0, iter1 hard=7 soft=0. Τα `patches.json` στο iter0/iter1 είναι ίδια, άρα δεν υπήρξε πρόοδος.
-- **Stopping reason:** τερματισμός στο iteration 1 λόγω σταθεροποίησης (ίδιο patch plan με το προηγούμενο), πριν το `kmax=3`.
-- `validation_summary.json`: 7 hard violations (total=7), άρα οι διορθώσεις δεν μείωσαν τα hard violations.
-- `cq_results.json`: pass rate 1/21 ≈ 4.76%.
-- `metrics_exact.json` και `metrics_semantic.json`: precision/recall/f1 = 0.0 (0 overlaps από 125 gold triples, pred_triples=47).
+- Το loop υλοποιήθηκε όπως περιγράφεται: iter0 drafting από requirements + ontology-aware context του gold, μετά reasoning → SHACL → patch calculus → LLM εφαρμογή patches σε κάθε iteration.
+- Η πρόοδος δεν βελτιώθηκε: `repair_log.json` δείχνει hard=7 και soft=0 τόσο στο iter0 όσο και στο iter1, και τα `patches.json` των iter0/iter1 είναι ίδια.
+- Το loop σταμάτησε στο iteration 1 επειδή δεν υπήρξε νέα πληροφορία (ίδιο patch plan με το προηγούμενο), άρα ενεργοποιήθηκε το κριτήριο σταθερότητας αντί να συνεχίσει μέχρι το `iterations=3`.
+- Η τελική SHACL σύνοψη παραμένει με 7 hard violations (`validation_summary.json`), δείχνοντας ότι τα patches δεν διορθώθηκαν στο pred.
+- Η CQ pass rate παρέμεινε χαμηλή: 1/21 ≈ 4.76% (`cq_results.json`).
+- Τα exact/semantic metrics ήταν 0.0 (0 overlaps από 125 gold triples), άρα το draft/repair δεν προσέγγισε το gold στο τελικό αποτέλεσμα.
