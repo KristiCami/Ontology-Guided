@@ -124,6 +124,29 @@ python scripts/run_pipeline.py \
   --iterations 1
 ```
 
+### Experiment runners (Table A)
+The following scripts map directly to the experiments in Table A. Each script writes outputs under `runs/`.
+
+```bash
+# E1: LLM-only baseline
+python scripts/run_e1_llm_only.py --config configs/atm_e1_llm_only.json
+
+# E2: Symbolic-only baseline (heuristic rules + SHACL/Reasoner)
+python scripts/run_e2_symbolic_only.py --config configs/atm_e2_symbolic_only.json
+
+# E3: Ours (no-repair)
+python scripts/run_atm_examples.py --config configs/atm_ontology_aware.json
+
+# E4: Ours (full closed-loop)
+python scripts/run_e4_iterative.py --config configs/atm_e4_iterative.json
+
+# E5: Cross-domain (edit configs/e5_cross_domain.json to add domains)
+python scripts/run_e5_cross_domain.py --config configs/e5_cross_domain.json
+
+# E6: CQ-oriented (per-iteration CQ summary)
+python scripts/run_e6_cq_oriented.py --config configs/atm_e6_cq_oriented.json
+```
+
 ### Development tips
 - The pipeline is modular: swap in a domain-specific LLM by subclassing `LLMClient` or plug in another validator by editing `og_nsd/shacl.py`.
 - `RequirementLoader` supports both pure JSON (list/dict) and JSONL files.  It also exposes `chunk_requirements` for few-shot prompt batching.
