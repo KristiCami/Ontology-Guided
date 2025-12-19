@@ -32,7 +32,9 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the E4 iterative repair experiment")
     parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs/atm_ontology_aware.json")
     parser.add_argument("--cq-threshold", type=float, default=0.8)
+    parser.add_argument("--hard-delta", type=int, default=1)
     parser.add_argument("--kmax", type=int, default=3)
+    parser.add_argument("--stagnation-limit", type=int, default=2)
     return parser.parse_args()
 
 
@@ -87,15 +89,18 @@ def main() -> None:
     assembler.serialize(state, iter_dir / "pred.ttl")
 
     repair_log: dict = {}
-    previous_patches = None
     current_iter = 0
     cq_pass_rate = 0.0
+    hard_history: list[int] = []
+    soft_history: list[int] = []
 
     while True:
         reasoning_result = reasoner.run(state.graph)
         shacl_report = validator.validate(reasoning_result.expanded_graph)
         summary = summarize_shacl_report(shacl_report)
-        repair_log[f"iter{current_iter}"] = summary["violations"]
+        hard_history.append(summary["violations"]["hard"])
+        soft_history.append(summary["violations"]["soft"])
+        repair_log[f"iter{current_iter}"] = {"violations": summary["violations"]}
 
         cq_results = cq_runner.run(reasoning_result.expanded_graph) if cq_runner else []
         cq_pass_rate = (sum(1 for res in cq_results if res.success) / len(cq_results)) if cq_results else 0.0
@@ -104,18 +109,21 @@ def main() -> None:
         patches = shacl_report_to_patches(shacl_report)
         save_patch_plan(patches, iter_dir / "patches.json")
 
-        if should_stop(
+        should_stop_now, stop_reason = should_stop(
             iteration=current_iter,
             max_iterations=args.kmax,
             patches=patches,
-            previous_patches=previous_patches,
             shacl_report=shacl_report,
             cq_pass_rate=cq_pass_rate,
             cq_threshold=args.cq_threshold,
+            hard_history=hard_history,
+            delta=args.hard_delta,
+            stagnation_limit=args.stagnation_limit,
         ):
+            if stop_reason:
+                repair_log[f"iter{current_iter}"]["stop_reason"] = stop_reason
             break
 
-        previous_patches = patches
         next_iter = current_iter + 1
         next_dir = output_root / f"iter{next_iter}"
         ensure_dir(next_dir)
