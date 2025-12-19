@@ -1,0 +1,9 @@
+{
+  "domains": [
+    {
+      "name": "atm",
+      "config": "configs/atm_ontology_aware.json",
+      "output_root": "runs/E5_cross_domain/atm"
+    }
+  ]
+}
