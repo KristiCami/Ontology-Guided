@@ -20,8 +20,7 @@
    - Έξοδος: `shacl_report.ttl` και `validation_summary.json` με hard/soft counts.
 
 5. **Patch calculus**
-   - Μεταφράζει **μόνο** τα hard violations σε `patches.json` με actions όπως `addClass`, `addDatatypeProperty`, `addObjectProperty`, `addRestriction`, `addProperty`.
-   - Το JSON schema περιλαμβάνει πεδία `{action, subject, predicate, object, restriction_type, message, source_shape, shape_path}` ώστε να ζητούνται OWL restrictions σε κλάσεις (π.χ. datatype/class/minCount).
+   - Μεταφράζει **μόνο** τα hard violations σε `patches.json` (δομή τύπου `{action, subject, predicate, object, message}`) χωρίς καμία αναφορά στο gold ontology.
 
 6. **Εφαρμογή patches με LLM**
    - Input: τρέχον `pred.ttl` + `patches.json`.
