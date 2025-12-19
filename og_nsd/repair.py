@@ -19,10 +19,8 @@ class Patch:
     subject: str
     predicate: str
     object: str
-    restriction_type: str | None = None
     message: str | None = None
     source_shape: str | None = None
-    shape_path: str | None = None
     severity: str | None = None
 
     def to_dict(self) -> dict:
@@ -37,107 +35,17 @@ def shacl_report_to_patches(report: ShaclReport) -> List[Patch]:
         severity = (result.severity or "").lower()
         if "violation" not in severity:
             continue
-        predicate = result.shape_path or result.path or "rdfs:comment"
-        restriction_target = result.target_class or result.focus_node or "atm:UnknownFocus"
-
-        if result.target_class:
-            patches.append(
-                Patch(
-                    action="addClass",
-                    subject=result.target_class,
-                    predicate="rdf:type",
-                    object="owl:Class",
-                    message=result.message,
-                    source_shape=result.source_shape,
-                    shape_path=result.shape_path,
-                    severity=result.severity,
-                )
+        patches.append(
+            Patch(
+                action="addProperty",
+                subject=result.focus_node or "atm:UnknownFocus",
+                predicate=result.path or "rdfs:comment",
+                object=result.value or "xsd:string",
+                message=result.message,
+                source_shape=result.source_shape,
+                severity=result.severity,
             )
-
-        if result.datatype_constraint:
-            patches.append(
-                Patch(
-                    action="addDatatypeProperty",
-                    subject=predicate,
-                    predicate="rdf:type",
-                    object="owl:DatatypeProperty",
-                    restriction_type="datatype",
-                    message=result.message,
-                    source_shape=result.source_shape,
-                    shape_path=result.shape_path,
-                    severity=result.severity,
-                )
-            )
-            patches.append(
-                Patch(
-                    action="addRestriction",
-                    subject=restriction_target,
-                    predicate=predicate,
-                    object=result.datatype_constraint,
-                    restriction_type="datatype",
-                    message=result.message,
-                    source_shape=result.source_shape,
-                    shape_path=result.shape_path,
-                    severity=result.severity,
-                )
-            )
-
-        if result.class_constraint:
-            patches.append(
-                Patch(
-                    action="addObjectProperty",
-                    subject=predicate,
-                    predicate="rdf:type",
-                    object="owl:ObjectProperty",
-                    restriction_type="class",
-                    message=result.message,
-                    source_shape=result.source_shape,
-                    shape_path=result.shape_path,
-                    severity=result.severity,
-                )
-            )
-            patches.append(
-                Patch(
-                    action="addRestriction",
-                    subject=restriction_target,
-                    predicate=predicate,
-                    object=result.class_constraint,
-                    restriction_type="class",
-                    message=result.message,
-                    source_shape=result.source_shape,
-                    shape_path=result.shape_path,
-                    severity=result.severity,
-                )
-            )
-
-        if result.min_count is not None:
-            patches.append(
-                Patch(
-                    action="addRestriction",
-                    subject=restriction_target,
-                    predicate=predicate,
-                    object=str(result.min_count),
-                    restriction_type="minCount",
-                    message=result.message,
-                    source_shape=result.source_shape,
-                    shape_path=result.shape_path,
-                    severity=result.severity,
-                )
-            )
-
-        if not (result.datatype_constraint or result.class_constraint or result.min_count is not None):
-            patches.append(
-                Patch(
-                    action="addProperty",
-                    subject=restriction_target,
-                    predicate=predicate,
-                    object=result.value or "xsd:string",
-                    message=result.message,
-                    source_shape=result.source_shape,
-                    shape_path=result.shape_path,
-                    severity=result.severity,
-                )
-            )
+        )
     return patches
 
 

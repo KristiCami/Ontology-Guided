@@ -149,60 +149,29 @@ class HeuristicLLM(LLMClient):
                     return URIRef(ns + local)
             return URIRef(self.base_ns + value)
 
-        def _add_restriction(
-            subject_iri: URIRef, property_iri: URIRef, restriction_type: str, value: str
-        ) -> None:
-            property_label = str(property_iri).split("#")[-1]
-            restriction = URIRef(f"{subject_iri}_Restriction_{slugify(property_label)}")
-            graph.add((restriction, RDF.type, OWL.Restriction))
-            graph.add((restriction, OWL.onProperty, property_iri))
-            if restriction_type == "mincount":
-                graph.add((restriction, OWL.minCardinality, Literal(int(value))))
-            else:
-                graph.add((restriction, OWL.allValuesFrom, _iri(value)))
-            graph.add((subject_iri, RDFS.subClassOf, restriction))
-
         for patch in patches:
             action = patch.get("action", "").lower()
             subject = patch.get("subject") or "UnknownSubject"
             predicate = patch.get("predicate") or "rdfs:comment"
             obj = patch.get("object") or "xsd:string"
             message = patch.get("message") or ""
-            restriction_type = (patch.get("restriction_type") or "").lower()
 
             subj_iri = _iri(subject)
             pred_iri = _iri(predicate)
 
-            if action == "addclass":
-                graph.add((subj_iri, RDF.type, OWL.Class))
-            elif action == "adddatatypeproperty":
-                graph.add((subj_iri, RDF.type, OWL.DatatypeProperty))
-                graph.add((subj_iri, RDFS.label, Literal(message or "Patched property")))
-            elif action == "addobjectproperty":
-                graph.add((subj_iri, RDF.type, OWL.ObjectProperty))
-                graph.add((subj_iri, RDFS.label, Literal(message or "Patched property")))
-            elif action == "addrestriction":
-                if restriction_type == "mincount":
-                    _add_restriction(subj_iri, pred_iri, "mincount", obj)
-                elif restriction_type in {"datatype", "class"}:
-                    _add_restriction(subj_iri, pred_iri, restriction_type, obj)
-                else:
-                    _add_restriction(subj_iri, pred_iri, "class", obj)
+            if obj.startswith("xsd:"):
+                graph.add((pred_iri, RDFS.domain, subj_iri))
+                graph.add((pred_iri, RDFS.range, _iri(obj)))
+                graph.add((pred_iri, RDFS.label, Literal(message or "Patched property")))
+                graph.add((pred_iri, RDF.type, OWL.DatatypeProperty))
                 graph.add((subj_iri, RDF.type, OWL.Class))
             else:
-                if obj.startswith("xsd:"):
-                    graph.add((pred_iri, RDFS.domain, subj_iri))
-                    graph.add((pred_iri, RDFS.range, _iri(obj)))
-                    graph.add((pred_iri, RDFS.label, Literal(message or "Patched property")))
-                    graph.add((pred_iri, RDF.type, OWL.DatatypeProperty))
-                    graph.add((subj_iri, RDF.type, OWL.Class))
-                else:
-                    obj_iri = _iri(obj)
-                    graph.add((pred_iri, RDFS.domain, subj_iri))
-                    graph.add((pred_iri, RDFS.range, obj_iri))
-                    graph.add((pred_iri, RDF.type, OWL.ObjectProperty))
-                    graph.add((subj_iri, RDF.type, OWL.Class))
-                    graph.add((obj_iri, RDF.type, OWL.Class))
+                obj_iri = _iri(obj)
+                graph.add((pred_iri, RDFS.domain, subj_iri))
+                graph.add((pred_iri, RDFS.range, obj_iri))
+                graph.add((pred_iri, RDF.type, OWL.ObjectProperty))
+                graph.add((subj_iri, RDF.type, OWL.Class))
+                graph.add((obj_iri, RDF.type, OWL.Class))
 
             notes.append(f"{action or 'patch'}: {subject} {predicate} {obj}")
 
@@ -381,8 +350,6 @@ class OpenAILLM(LLMClient):
         return (
             "You are repairing an OWL ontology using a deterministic patch plan.\n"
             "Apply only the patches provided; do not invent new resources or delete existing triples.\n"
-            "Supported actions: addClass, addDatatypeProperty, addObjectProperty, addRestriction, addProperty.\n"
-            "For addRestriction, use restriction_type to decide between datatype, class, and minCount restrictions.\n"
             "Preserve all prefixes and re-emit the entire ontology in Turtle syntax.\n\n"
             "Patch plan (JSON):\n"
             f"{patch_block}\n\n"
