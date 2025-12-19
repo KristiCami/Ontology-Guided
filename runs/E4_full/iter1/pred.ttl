@@ -1,13 +1,31 @@
 @prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-atm:Withdrawal owl:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:dispensedAmount ;
-            owl:someValuesFrom xsd:decimal ] .
+atm:Message a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:messageCode ;
+            owl:someValuesFrom xsd:string ] .
 
-atm:Message a atm:Message ;
-    atm:messageCode "Error: Transaction not successful"^^xsd:string .
+atm:Withdrawal atm:dispensedAmount xsd:decimal .
+
+atm:Authorization a atm:Authorization ;
+    atm:authorizedBy atm:Transaction .
+
+atm:BankComputer a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:issuesCard ;
+            owl:someValuesFrom atm:CashCard ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:sendsMessageTo ;
+            owl:someValuesFrom atm:ATM ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:operatedBy ;
+            owl:someValuesFrom atm:ATM ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:sendsMessageTo ;
+            owl:someValuesFrom atm:ATM ] .
 
 atm:ATM a atm:ATM ;
     atm:handlesTransaction atm:Transaction ;
@@ -15,40 +33,35 @@ atm:ATM a atm:ATM ;
     atm:operatedBy atm:Bank ;
     atm:receivesMessageFrom atm:BankComputer ;
     atm:sendsMessageTo atm:BankComputer ;
-    owl:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:handlesTransaction ;
-            owl:someValuesFrom atm:Transaction ] .
+    atm:usesCard atm:Transaction .
 
-atm:Authorization a atm:Authorization ;
-    atm:authorizedBy atm:Transaction ;
-    owl:subClassOf atm:Transaction .
-
-atm:BankComputer a atm:BankComputer ;
-    atm:checksBankCode atm:CashCard ;
-    atm:checksPassword atm:CashCard ;
-    atm:issuesCard atm:Bank ;
-    atm:sendsMessageTo atm:ATM .
-
-atm:Transaction a atm:Transaction ;
-    atm:authorizedBy atm:Authorization ;
-    atm:receivesMessageFrom atm:BankComputer ;
-    atm:requestedAmount "valid_requested_amount"^^xsd:decimal ;
-    atm:transactionTimestamp "valid_timestamp"^^xsd:string ;
+atm:Transaction a atm:Transaction,
+        owl:Class ;
+    atm:authorizedBy xsd:string ;
+    atm:onAccount atm:Account ;
+    atm:requestedAmount xsd:decimal,
+        "valid_requested_amount"^^xsd:decimal ;
+    atm:transactionTimestamp xsd:dateTime ;
     atm:usesCard atm:CashCard ;
-    owl:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:requestedAmount ;
-            owl:someValuesFrom xsd:decimal ],
-        [ a owl:Restriction ;
-            owl:onProperty atm:performedBy ;
-            owl:someValuesFrom atm:Customer ] .
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:receivesMessageFrom ;
+            owl:someValuesFrom atm:BankComputer ] .
 
-atm:CashCard a atm:CashCard ;
-    atm:bankCode atm:CashCard,
-        "XYZ123"^^xsd:string,
-        "exactly_one_bank_code"^^xsd:string ;
-    atm:n69929adb135548e99f22ee888a468f83b12 "exactly_one_customer"^^xsd:string ;
+atm:CashCard a atm:CashCard,
+        owl:Class ;
+    atm:bankCode atm:CashCard ;
     atm:serialNumber atm:CashCard,
-        "123456789"^^xsd:string,
-        "exactly_one_serial_number"^^xsd:string,
-        "retrieved_serial_number"^^xsd:string .
+        "retrieved_serial_number"^^xsd:string ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:bankCode ;
+            owl:someValuesFrom atm:CashCard ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:serialNumber ;
+            owl:someValuesFrom xsd:string ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:bankCode ;
+            owl:someValuesFrom xsd:string ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:serialNumber ;
+            owl:someValuesFrom atm:CashCard ] .
 

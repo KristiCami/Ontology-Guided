@@ -1,56 +1,56 @@
 [
   {
     "action": "addProperty",
-    "subject": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
-    "predicate": "http://lod.csd.auth.gr/atm/atm.ttl#serialNumber",
-    "object": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
-    "message": "CashCard must have exactly one serialNumber.",
-    "source_shape": "n69929adb135548e99f22ee888a468f83b9",
-    "severity": "http://www.w3.org/ns/shacl#Violation"
-  },
-  {
-    "action": "addProperty",
-    "subject": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
-    "predicate": "http://lod.csd.auth.gr/atm/atm.ttl#serialNumber",
+    "subject": "http://lod.csd.auth.gr/atm/atm.ttl#Transaction",
+    "predicate": "http://lod.csd.auth.gr/atm/atm.ttl#authorizedBy",
     "object": "xsd:string",
-    "message": "CashCard must have exactly one serialNumber.",
-    "source_shape": "n69929adb135548e99f22ee888a468f83b9",
-    "severity": "http://www.w3.org/ns/shacl#Violation"
-  },
-  {
-    "action": "addProperty",
-    "subject": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
-    "predicate": "http://lod.csd.auth.gr/atm/atm.ttl#bankCode",
-    "object": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
-    "message": "CashCard must have exactly one bankCode.",
-    "source_shape": "n69929adb135548e99f22ee888a468f83b10",
-    "severity": "http://www.w3.org/ns/shacl#Violation"
-  },
-  {
-    "action": "addProperty",
-    "subject": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
-    "predicate": "http://lod.csd.auth.gr/atm/atm.ttl#bankCode",
-    "object": "xsd:string",
-    "message": "CashCard must have exactly one bankCode.",
-    "source_shape": "n69929adb135548e99f22ee888a468f83b10",
-    "severity": "http://www.w3.org/ns/shacl#Violation"
-  },
-  {
-    "action": "addProperty",
-    "subject": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
-    "predicate": "n69929adb135548e99f22ee888a468f83b12",
-    "object": "xsd:string",
-    "message": "Each CashCard must be owned by at least one Customer.",
-    "source_shape": "n69929adb135548e99f22ee888a468f83b11",
+    "message": "Every transaction must be linked to an Authorization.",
+    "source_shape": "n77265ad357e84b55808a895673c5bc9ab7",
     "severity": "http://www.w3.org/ns/shacl#Violation"
   },
   {
     "action": "addProperty",
     "subject": "http://lod.csd.auth.gr/atm/atm.ttl#Transaction",
     "predicate": "http://lod.csd.auth.gr/atm/atm.ttl#transactionTimestamp",
-    "object": "xsd:string",
+    "object": "http://www.w3.org/2001/XMLSchema#dateTime",
     "message": "Every transaction must have a timestamp (xsd:dateTime).",
-    "source_shape": "n69929adb135548e99f22ee888a468f83b8",
+    "source_shape": "n77265ad357e84b55808a895673c5bc9ab8",
+    "severity": "http://www.w3.org/ns/shacl#Violation"
+  },
+  {
+    "action": "addProperty",
+    "subject": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
+    "predicate": "http://lod.csd.auth.gr/atm/atm.ttl#serialNumber",
+    "object": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
+    "message": "CashCard must have exactly one serialNumber.",
+    "source_shape": "n77265ad357e84b55808a895673c5bc9ab9",
+    "severity": "http://www.w3.org/ns/shacl#Violation"
+  },
+  {
+    "action": "addProperty",
+    "subject": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
+    "predicate": "http://lod.csd.auth.gr/atm/atm.ttl#serialNumber",
+    "object": "xsd:string",
+    "message": "CashCard must have exactly one serialNumber.",
+    "source_shape": "n77265ad357e84b55808a895673c5bc9ab9",
+    "severity": "http://www.w3.org/ns/shacl#Violation"
+  },
+  {
+    "action": "addProperty",
+    "subject": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
+    "predicate": "http://lod.csd.auth.gr/atm/atm.ttl#bankCode",
+    "object": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
+    "message": "CashCard must have exactly one bankCode.",
+    "source_shape": "n77265ad357e84b55808a895673c5bc9ab10",
+    "severity": "http://www.w3.org/ns/shacl#Violation"
+  },
+  {
+    "action": "addProperty",
+    "subject": "http://lod.csd.auth.gr/atm/atm.ttl#CashCard",
+    "predicate": "n77265ad357e84b55808a895673c5bc9ab12",
+    "object": "xsd:string",
+    "message": "Each CashCard must be owned by at least one Customer.",
+    "source_shape": "n77265ad357e84b55808a895673c5bc9ab11",
     "severity": "http://www.w3.org/ns/shacl#Violation"
   },
   {
@@ -59,7 +59,7 @@
     "predicate": "http://lod.csd.auth.gr/atm/atm.ttl#operatedBy",
     "object": "http://lod.csd.auth.gr/atm/atm.ttl#Bank",
     "message": "ATM must be associated with a Bank via operatedBy.",
-    "source_shape": "n69929adb135548e99f22ee888a468f83b16",
+    "source_shape": "n77265ad357e84b55808a895673c5bc9ab16",
     "severity": "http://www.w3.org/ns/shacl#Violation"
   }
 ]
