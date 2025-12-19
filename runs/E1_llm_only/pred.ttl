@@ -1,0 +1,160 @@
+@prefix atm: <http://example.org/atm#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+atm:ATM1 a atm:ATM ;
+    atm:authorizationFinished true ;
+    atm:cardEnteredMoreThanThreeTimes atm:CashCard1 ;
+    atm:displaysMessage "Please call the bank." ;
+    atm:keepsCard atm:CashCard1 ;
+    atm:logs atm:LogFile1 ;
+    atm:logsSerialNumber "serial_number_123" ;
+    atm:verifiesPassword atm:BankComputer1 ;
+    atm:wrongPassword true .
+
+atm:AuthorizationTrigger atm:triggers atm:MoneyDispensing .
+
+atm:CardEjected a owl:ObjectProperty ;
+    rdfs:domain atm:Card ;
+    rdfs:range atm:Transaction .
+
+atm:MoneyDispensed atm:logs atm:Amount .
+
+atm:TransactionNotSuccessful a owl:ObjectProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range atm:ErrorMessage .
+
+atm:TransactionPolicy atm:handles atm:TransactionRestart .
+
+atm:TransactionSuccess atm:dispenses atm:Money .
+
+atm:WithdrawalSequence atm:sets atm:TransactionInitiated .
+
+atm:authorizationFinished a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range xsd:boolean .
+
+atm:cardEnteredMoreThanThreeTimes a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:CashCard .
+
+atm:checksBankCode a owl:ObjectProperty ;
+    rdfs:domain atm:BankComputer ;
+    rdfs:range atm:BankCode .
+
+atm:checksPassword a owl:ObjectProperty ;
+    rdfs:domain atm:BankComputer ;
+    rdfs:range atm:Password .
+
+atm:displaysMessage a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range xsd:string .
+
+atm:hasBankCode a owl:ObjectProperty ;
+    rdfs:domain atm:CashCard,
+        atm:User ;
+    rdfs:range atm:BankCode,
+        xsd:string .
+
+atm:hasCard a owl:ObjectProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range atm:Card .
+
+atm:hasErrorMessage a owl:ObjectProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range atm:ErrorMessage .
+
+atm:hasNegativeResponse a owl:ObjectProperty ;
+    rdfs:domain atm:BankComputer ;
+    rdfs:range xsd:string .
+
+atm:hasPassword a owl:ObjectProperty ;
+    rdfs:domain atm:User ;
+    rdfs:range xsd:string .
+
+atm:hasSerialNumber a owl:ObjectProperty ;
+    rdfs:domain atm:CashCard ;
+    rdfs:range xsd:string .
+
+atm:ifInvalidPassword a owl:Class ;
+    rdfs:subClassOf atm:Transaction .
+
+atm:ifNotValidBankCode a owl:Class ;
+    rdfs:subClassOf atm:Transaction .
+
+atm:issuedBy a owl:ObjectProperty ;
+    rdfs:domain atm:CashCard ;
+    rdfs:range atm:Bank .
+
+atm:keepsCard a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:CashCard .
+
+atm:logs a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:LogFile .
+
+atm:logsSerialNumber a owl:FunctionalProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range xsd:string .
+
+atm:sendMessageToATM a owl:ObjectProperty ;
+    rdfs:domain atm:BankComputer ;
+    rdfs:range atm:ATM .
+
+atm:validBankCode a owl:ObjectProperty ;
+    rdfs:domain atm:BankCode ;
+    rdfs:range atm:Bank .
+
+atm:validBankCodeRule a owl:Class ;
+    rdfs:subClassOf atm:BankCode .
+
+atm:validPassword a owl:ObjectProperty ;
+    rdfs:domain atm:CashCard ;
+    rdfs:range atm:Password .
+
+atm:validPasswordRule a owl:Class ;
+    rdfs:subClassOf atm:Password .
+
+atm:verifiesPassword a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:BankComputer .
+
+atm:wrongPassword a owl:ObjectProperty ;
+    rdfs:domain atm:User ;
+    rdfs:range xsd:boolean .
+
+atm:LogFile a owl:Class .
+
+atm:ErrorMessage a owl:Class .
+
+atm:Password a owl:Class .
+
+atm:User a owl:Class .
+
+atm:Card a owl:Class .
+
+atm:BankCode a owl:Class .
+
+atm:BankComputer a owl:Class .
+
+atm:Transaction a owl:Class .
+
+atm:CashCard a owl:Class .
+
+atm:ATM a atm:System,
+        owl:Class ;
+    atm:checksCardValidity atm:Card ;
+    atm:displaysErrorMessage atm:ErrorMessage ;
+    atm:hasNoCashCard atm:InitialDisplay ;
+    atm:hasParameter atm:k,
+        atm:m,
+        atm:n ;
+    atm:initializedWith atm:t ;
+    atm:readsBankCode atm:BankCode ;
+    atm:readsSerialNumber atm:SerialNumber ;
+    atm:returnsCard atm:Card ;
+    atm:runningOutOfMoney atm:noCardAccepted ;
+    atm:validCashCard atm:CashCard .
+

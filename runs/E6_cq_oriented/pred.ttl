@@ -1,0 +1,97 @@
+@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+atm:Withdrawal atm:dispensedAmount xsd:decimal ;
+    rdfs:subClassOf atm:Transaction .
+
+atm:ATM a atm:ATM ;
+    atm:handlesTransaction atm:Transaction ;
+    atm:issuesCard atm:Bank ;
+    atm:operatedBy atm:Bank ;
+    atm:receivesMessageFrom atm:BankComputer ;
+    atm:sendsMessageTo atm:BankComputer ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:operatedBy ;
+            owl:someValuesFrom atm:Bank ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:operatedBy ;
+            owl:someValuesFrom atm:Bank ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:operatedBy ;
+            owl:someValuesFrom atm:Bank ],
+        atm:Transaction .
+
+atm:BankComputer atm:checksBankCode atm:CashCard ;
+    atm:checksPassword atm:CashCard ;
+    atm:issuesCard atm:Bank ;
+    atm:receivesMessageFrom atm:BankComputer ;
+    atm:sendsMessageTo atm:ATM .
+
+atm:Authorization a atm:Authorization ;
+    atm:authorizedBy atm:Authorization,
+        atm:Transaction ;
+    rdfs:subClassOf atm:Transaction .
+
+atm:CashCard a atm:CashCard ;
+    atm:bankCode atm:CashCard ;
+    atm:serialNumber atm:CashCard,
+        "retrieved_serial_number"^^xsd:string ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:cardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onProperty atm:serialNumber ],
+        [ a owl:Restriction ;
+            owl:cardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onProperty atm:bankCode ],
+        [ a owl:Restriction ;
+            owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onProperty atm:ownedBy ;
+            owl:someValuesFrom atm:Customer ],
+        [ a owl:Restriction ;
+            owl:cardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onProperty atm:serialNumber ],
+        [ a owl:Restriction ;
+            owl:cardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onProperty atm:bankCode ],
+        [ a owl:Restriction ;
+            owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onProperty atm:ownedBy ;
+            owl:someValuesFrom atm:Customer ],
+        [ a owl:Restriction ;
+            owl:cardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onProperty atm:serialNumber ],
+        [ a owl:Restriction ;
+            owl:cardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onProperty atm:bankCode ],
+        [ a owl:Restriction ;
+            owl:minCardinality "1"^^xsd:nonNegativeInteger ;
+            owl:onProperty atm:ownedBy ;
+            owl:someValuesFrom atm:Customer ] .
+
+atm:Transaction a atm:Transaction ;
+    atm:hasErrorMessage atm:Message ;
+    atm:requestedAmount xsd:decimal,
+        "valid_amount"^^xsd:decimal ;
+    atm:transactionTimestamp xsd:dateTime ;
+    atm:usesCard atm:CashCard ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:authorizedBy ;
+            owl:someValuesFrom atm:Authorization ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:transactionTimestamp ;
+            owl:someValuesFrom xsd:dateTime ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:authorizedBy ;
+            owl:someValuesFrom atm:Authorization ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:transactionTimestamp ;
+            owl:someValuesFrom xsd:dateTime ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:authorizedBy ;
+            owl:someValuesFrom atm:Authorization ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:transactionTimestamp ;
+            owl:someValuesFrom xsd:dateTime ],
+        atm:Transaction .
+
