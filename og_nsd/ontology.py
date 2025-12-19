@@ -191,6 +191,9 @@ _STRAY_BYTES_FRAGMENT_RE = re.compile(r"'\^?b'")
 _VARIABLE_QNAME_RE = re.compile(r"\?([A-Za-z][\w-]*:[\w-]+)")
 _ARROW_RE = re.compile(r"(->|→)")
 _BARE_XSD_DECIMAL_TOKEN_RE = re.compile(r"(?<!\^)\s+xsd:decimal\b")
+_PROPERTY_LIST_TYPE_MISUSE_RE = re.compile(
+    r"^(\s*[A-Za-z][\w-]*:[\w-]+)\s+a\s+([A-Za-z][\w-]*:[\w-]+)(\s*[;,.].*)?$"
+)
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -202,6 +205,7 @@ def _sanitize_turtle(turtle: str) -> str:
         turtle = match.group(1).replace("\\n", "\n")
 
     sanitized_lines = []
+    previous_line_ended = False
     for raw_line in turtle.splitlines():
         # Remove non-printable control characters that often sneak into LLM output
         line = _CONTROL_CHAR_RE.sub("", raw_line)
@@ -225,6 +229,9 @@ def _sanitize_turtle(turtle: str) -> str:
         # which rdflib rejects.
         line = _VARIABLE_QNAME_RE.sub(r"\1", line)
 
+        if previous_line_ended:
+            line = _PROPERTY_LIST_TYPE_MISUSE_RE.sub(r"\1 \2\3", line)
+
         if "xsd:decimal" in line and "^^xsd:decimal" not in line and "\"" not in line:
             line = _BARE_XSD_DECIMAL_TOKEN_RE.sub("", line)
 
@@ -241,4 +248,6 @@ def _sanitize_turtle(turtle: str) -> str:
             sanitized_lines.append(f"# {line}" if not line.lstrip().startswith("#") else line)
             continue
         sanitized_lines.append(line)
+        if stripped and not stripped.startswith("#"):
+            previous_line_ended = stripped.rstrip().endswith(";")
     return "\n".join(sanitized_lines)
