@@ -81,6 +81,7 @@ def should_stop(
     max_iterations: int,
     patches: Sequence[Patch],
     previous_patches: Sequence[Patch] | None,
+    previous_hard: int | None,
     shacl_report: ShaclReport,
     cq_pass_rate: float,
     cq_threshold: float,
@@ -92,7 +93,8 @@ def should_stop(
     if not patches:
         return True
     if previous_patches is not None and [p.to_dict() for p in previous_patches] == [p.to_dict() for p in patches]:
-        return True
+        if previous_hard is None or hard >= previous_hard:
+            return True
     if cq_pass_rate >= cq_threshold:
         return True
     if iteration >= max_iterations:

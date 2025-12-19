@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import asdict
 import json
 import sys
 from pathlib import Path
@@ -80,19 +81,40 @@ def main() -> None:
     iter_dir = output_root / "iter0"
     ensure_dir(iter_dir)
 
+    draft_log = []
     for batch in chunk_requirements(requirements, size=5):
         response = llm.generate_axioms(batch, schema_context=schema_context)
         assembler.add_turtle(state, response.turtle)
+        draft_log.append(
+            {
+                "requirements": [
+                    {
+                        "identifier": req.identifier,
+                        "title": req.title,
+                        "text": req.text,
+                        "boilerplate": req.boilerplate,
+                    }
+                    for req in batch
+                ],
+                "turtle": response.turtle,
+                "reasoning_notes": response.reasoning_notes,
+            }
+        )
 
     assembler.serialize(state, iter_dir / "pred.ttl")
+    (iter_dir / "llm_draft_log.json").write_text(json.dumps(draft_log, indent=2), encoding="utf-8")
 
     repair_log: dict = {}
     previous_patches = None
+    previous_hard = None
     current_iter = 0
     cq_pass_rate = 0.0
 
     while True:
         reasoning_result = reasoner.run(state.graph)
+        (iter_dir / "reasoner_report.json").write_text(
+            json.dumps(asdict(reasoning_result.report), indent=2), encoding="utf-8"
+        )
         shacl_report = validator.validate(reasoning_result.expanded_graph)
         summary = summarize_shacl_report(shacl_report)
         repair_log[f"iter{current_iter}"] = summary["violations"]
@@ -109,6 +131,7 @@ def main() -> None:
             max_iterations=args.kmax,
             patches=patches,
             previous_patches=previous_patches,
+            previous_hard=previous_hard,
             shacl_report=shacl_report,
             cq_pass_rate=cq_pass_rate,
             cq_threshold=args.cq_threshold,
@@ -116,12 +139,20 @@ def main() -> None:
             break
 
         previous_patches = patches
+        previous_hard = summary["violations"]["hard"]
         next_iter = current_iter + 1
         next_dir = output_root / f"iter{next_iter}"
         ensure_dir(next_dir)
 
         context_ttl = state.graph.serialize(format="turtle")
         patch_response = llm.apply_patches([p.to_dict() for p in patches], context_ttl)
+        (iter_dir / "patch_application.json").write_text(
+            json.dumps(
+                {"patches": [p.to_dict() for p in patches], "reasoning_notes": patch_response.reasoning_notes},
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
         state = assembler.bootstrap()
         assembler.add_turtle(state, patch_response.turtle)
         assembler.serialize(state, next_dir / "pred.ttl")
