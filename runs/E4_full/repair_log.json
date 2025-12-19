@@ -1,6 +1,10 @@
 {
   "iter0": {
-    "hard": 0,
+    "hard": 7,
+    "soft": 0
+  },
+  "iter1": {
+    "hard": 7,
     "soft": 0
   }
 }
