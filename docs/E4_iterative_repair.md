@@ -57,6 +57,9 @@ runs/E4_full/
 - Reasoning + SHACL τρέχουν πριν από κάθε patch calculus.
 
 ## Αποτελέσματα του run `E4_full`
-- Το loop σταμάτησε στο iteration 0 επειδή η SHACL αναφορά επέστρεψε `conforms = true`, άρα δεν υπήρξαν hard violations για να παραχθούν patches ή επόμενα iterations (βλ. `repair_log.json`).
-- Η τελική οντολογία απέτυχε να καλύψει τις περισσότερες απαιτήσεις η CQ pass rate ήταν ~4.8% (1/21) σύμφωνα με το `cq_results.json`, αποτυπώνοντας ότι το στάδιο drafting χρειάζεται βελτιώσεις παρά την απουσία SHACL σφαλμάτων.
-- Τα exact/semantic metrics ήταν χαμηλά (P=0.0833, R=0.032, F1=0.0462 με 4/125 overlaps), δείχνοντας μεγάλο κενό από το gold, οπότε απαιτούνται ισχυρότερα constraints ή διαφορετικό prompting στο drafting.
+- Το loop υλοποιήθηκε όπως περιγράφεται: iter0 drafting από requirements + ontology-aware context του gold, μετά reasoning → SHACL → patch calculus → LLM εφαρμογή patches σε κάθε iteration.
+- Η πρόοδος δεν βελτιώθηκε: `repair_log.json` δείχνει hard=7 και soft=0 τόσο στο iter0 όσο και στο iter1, και τα `patches.json` των iter0/iter1 είναι ίδια.
+- Το loop σταμάτησε στο iteration 1 επειδή δεν υπήρξε νέα πληροφορία (ίδιο patch plan με το προηγούμενο), άρα ενεργοποιήθηκε το κριτήριο σταθερότητας αντί να συνεχίσει μέχρι το `iterations=3`.
+- Η τελική SHACL σύνοψη παραμένει με 7 hard violations (`validation_summary.json`), δείχνοντας ότι τα patches δεν διορθώθηκαν στο pred.
+- Η CQ pass rate παρέμεινε χαμηλή: 1/21 ≈ 4.76% (`cq_results.json`).
+- Τα exact/semantic metrics ήταν 0.0 (0 overlaps από 125 gold triples), άρα το draft/repair δεν προσέγγισε το gold στο τελικό αποτέλεσμα.
