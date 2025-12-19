@@ -192,7 +192,7 @@ _VARIABLE_QNAME_RE = re.compile(r"\?([A-Za-z][\w-]*:[\w-]+)")
 _ARROW_RE = re.compile(r"(->|→)")
 _BARE_XSD_DECIMAL_TOKEN_RE = re.compile(r"(?<!\^)\s+xsd:decimal\b")
 _PROPERTY_LIST_TYPE_MISUSE_RE = re.compile(
-    r"^(\s*[A-Za-z][\w-]*:[\w-]+)\s+a\s+([A-Za-z][\w-]*:[\w-]+)(\s*[;,.].*)?$"
+    r"^(\s*[A-Za-z][\w-]*:[\w-]+)\s+(a)\s+([A-Za-z][\w-]*:[\w-]+)(\s*[;,.].*)?$"
 )
 
 
@@ -230,7 +230,7 @@ def _sanitize_turtle(turtle: str) -> str:
         line = _VARIABLE_QNAME_RE.sub(r"\1", line)
 
         if previous_line_ended:
-            line = _PROPERTY_LIST_TYPE_MISUSE_RE.sub(r"\1 \2\3", line)
+            line = _PROPERTY_LIST_TYPE_MISUSE_RE.sub(r"\2 \3\4", line)
 
         if "xsd:decimal" in line and "^^xsd:decimal" not in line and "\"" not in line:
             line = _BARE_XSD_DECIMAL_TOKEN_RE.sub("", line)
