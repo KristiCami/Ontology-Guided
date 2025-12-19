@@ -149,6 +149,22 @@ class HeuristicLLM(LLMClient):
                     return URIRef(ns + local)
             return URIRef(self.base_ns + value)
 
+        def _datatype_for(value: str) -> URIRef | None:
+            if value.startswith("xsd:"):
+                return XSD[value.split(":", 1)[1]]
+            if value.startswith(str(XSD)):
+                return URIRef(value)
+            return None
+
+        def _literal_for_datatype(datatype: URIRef) -> Literal:
+            if datatype == XSD.decimal:
+                return Literal("0.0", datatype=datatype)
+            if datatype in {XSD.integer, XSD.int, XSD.long, XSD.short}:
+                return Literal("0", datatype=datatype)
+            if datatype in {XSD.dateTime, XSD.dateTimeStamp}:
+                return Literal("2024-01-01T00:00:00Z", datatype=datatype)
+            return Literal("TODO", datatype=datatype)
+
         for patch in patches:
             action = patch.get("action", "").lower()
             subject = patch.get("subject") or "UnknownSubject"
@@ -159,14 +175,17 @@ class HeuristicLLM(LLMClient):
             subj_iri = _iri(subject)
             pred_iri = _iri(predicate)
 
-            if obj.startswith("xsd:"):
+            datatype = _datatype_for(obj)
+            if datatype:
+                graph.add((subj_iri, pred_iri, _literal_for_datatype(datatype)))
                 graph.add((pred_iri, RDFS.domain, subj_iri))
-                graph.add((pred_iri, RDFS.range, _iri(obj)))
+                graph.add((pred_iri, RDFS.range, datatype))
                 graph.add((pred_iri, RDFS.label, Literal(message or "Patched property")))
                 graph.add((pred_iri, RDF.type, OWL.DatatypeProperty))
                 graph.add((subj_iri, RDF.type, OWL.Class))
             else:
                 obj_iri = _iri(obj)
+                graph.add((subj_iri, pred_iri, obj_iri))
                 graph.add((pred_iri, RDFS.domain, subj_iri))
                 graph.add((pred_iri, RDFS.range, obj_iri))
                 graph.add((pred_iri, RDF.type, OWL.ObjectProperty))
