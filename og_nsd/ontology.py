@@ -183,6 +183,7 @@ def _ensure_standard_prefixes(
 
 _CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 _QUOTED_PREFIX_RE = re.compile(r"'([A-Za-z][\w-]*:)")
+_TRAILING_QUOTE_AFTER_QNAME_RE = re.compile(r"([A-Za-z][\w-]*:[\w-]+)'(?=\s|[;,.])")
 _BYTE_LITERAL_RE = re.compile(r"^b['\"](.*)['\"]$", re.DOTALL)
 _BARE_DECIMAL_RE = re.compile(r"(?<!\")([+-]?\d+(?:\.\d+)?)(\s*\^\^xsd:decimal)")
 _BYTES_PREFIX_BEFORE_LIST_RE = re.compile(r"'\^?b'(?=\[)")
@@ -219,6 +220,8 @@ def _sanitize_turtle(turtle: str) -> str:
 
         # Remove accidental single quotes directly before prefixed names (e.g., 'atm:Class)
         line = _QUOTED_PREFIX_RE.sub(r"\1", line)
+        # Remove accidental trailing quotes after prefixed names (e.g., atm:Class' a ...)
+        line = _TRAILING_QUOTE_AFTER_QNAME_RE.sub(r"\1", line)
 
         # Drop leading ``?`` that sometimes appears before prefixed names when the LLM
         # emits SPARQL-like variables inside Turtle content (e.g., ``?atm:amount``),
