@@ -31,6 +31,7 @@ class OntologyDraftingPipeline:
         if config.competency_questions_path:
             self.cq_runner = CompetencyQuestionRunner(config.competency_questions_path)
         self.llm = self._select_llm(config)
+        self.last_llm_response: Optional[LLMResponse] = None
         self.last_shacl_report = None
         self.last_reasoner_report = None
         self.last_cq_results = None
@@ -58,12 +59,14 @@ class OntologyDraftingPipeline:
             self.assembler.add_turtle(state, llm_response.turtle)
         if llm_response is None:
             raise RuntimeError("LLM returned no axioms")
+        self.last_llm_response = llm_response
 
         if self.config.draft_only:
             report = {
                 "mode": "draft_only",
                 "triples": len(state.graph),
                 "llm_notes": llm_response.reasoning_notes,
+                "token_usage": llm_response.token_usage,
             }
             self.assembler.serialize(state, self.config.output_path)
             if self.config.report_path:
@@ -114,6 +117,7 @@ class OntologyDraftingPipeline:
         self.last_shacl_report = iteration_reports[-1]["shacl"]
         self.last_reasoner_report = iteration_reports[-1]["reasoner"]
         self.last_cq_results = iteration_reports[-1]["cq_results"]
+        self.last_llm_response = llm_response
         if self.config.report_path:
             save_report(report, self.config.report_path)
         return report
