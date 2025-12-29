@@ -90,5 +90,3 @@
 3. **Συμμόρφωση:** `validation_summary.json` → αριθμός `hard`/`soft` παραβιάσεων. Για λεπτομέρειες δείτε `validation_report.ttl` ή `shacl_report.ttl`.
 4. **Συνεκτικότητα:** `reasoning_report.json` ή πεδίο `reasoner` μέσα στο `run_report.json` → unsatisfiable classes / consistency.
 5. **Παραγόμενο ontology:** `pred.ttl` (και, όπου υπάρχει, `final/pred.ttl`) → τελικό μοντέλο προς επιθεώρηση ή φόρτωση σε reasoner/editor.
-
-Με τα παραπάνω βήματα μπορεί κανείς να αναγνώσει και να παρουσιάσει γρήγορα τα αποτελέσματα κάθε πειράματος E1–E6, χωρίς να χρειάζεται να ανοίξει όλα τα logs κάθε φορά.
