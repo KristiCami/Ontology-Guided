@@ -349,8 +349,10 @@ class OpenAILLM(LLMClient):
         patch_block = json.dumps(patches, indent=2, ensure_ascii=False)
         return (
             "You are repairing an OWL ontology using a deterministic patch plan.\n"
-            "Apply only the patches provided; do not invent new resources or delete existing triples.\n"
-            "Preserve all prefixes and re-emit the entire ontology in Turtle syntax.\n\n"
+            "Apply only the patches provided; do not invent new resources, change namespaces, or delete existing triples.\n"
+            "Preserve all prefixes and re-emit the entire ontology in Turtle syntax. Keep every triple that already\n"
+            "exists unless a patch explicitly deletes it. Do not introduce new URIs or classes outside the provided\n"
+            "namespaces. Maintain domains/ranges unless the patch changes them.\n\n"
             "Patch plan (JSON):\n"
             f"{patch_block}\n\n"
             "Current ontology (Turtle):\n"
