@@ -210,7 +210,7 @@ class HeuristicLLM(LLMClient):
 class OpenAILLM(LLMClient):
     """Adapter for the OpenAI Chat Completions API."""
 
-    def __init__(self, model: str = "gpt-4o-mini", temperature: float = 0.1, system_prompt: str | None = None) -> None:
+    def __init__(self, model: str = "gpt-5.2", temperature: float = 0.1, system_prompt: str | None = None) -> None:
         if OpenAI is None:
             raise RuntimeError("openai package is not installed")
         self.model = model
