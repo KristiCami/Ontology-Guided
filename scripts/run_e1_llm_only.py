@@ -6,8 +6,9 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import List
 
-from rdflib import Graph
+from rdflib import Graph, URIRef
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -31,6 +32,62 @@ def parse_args() -> argparse.Namespace:
 
 def ensure_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
+
+
+_STANDARD_NAMESPACES = (
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "http://www.w3.org/2000/01/rdf-schema#",
+    "http://www.w3.org/2002/07/owl#",
+    "http://www.w3.org/2001/XMLSchema#",
+)
+
+
+def _normalize_base_ns(base_namespace: str | None) -> str:
+    if not base_namespace:
+        return ""
+    base_ns = base_namespace.rstrip("#/")
+    return f"{base_ns}#"
+
+
+def _qname(graph: Graph, term) -> str:
+    try:
+        return graph.namespace_manager.normalizeUri(term)
+    except Exception:
+        return str(term)
+
+
+def collect_drift_samples(graph: Graph, base_namespace: str | None, limit: int = 10) -> List[str]:
+    base_ns = _normalize_base_ns(base_namespace)
+    samples: List[str] = []
+    for subj, pred, obj in graph:
+        for term in (subj, pred, obj):
+            if not isinstance(term, URIRef):
+                continue
+            iri = str(term)
+            if (base_ns and iri.startswith(base_ns)) or iri.startswith(_STANDARD_NAMESPACES):
+                continue
+            qname = _qname(graph, term)
+            if qname not in samples:
+                samples.append(qname)
+            if len(samples) >= limit:
+                return samples
+    return samples
+
+
+def collect_redundant_axioms(graph: Graph, limit: int = 10) -> List[str]:
+    occurrences = {}
+    redundant_samples: List[str] = []
+    for subj, pred, obj in graph:
+        if isinstance(pred, URIRef) and str(pred).endswith("sourceRequirement"):
+            occurrences.setdefault(str(obj), []).append(subj)
+    for req_id, subjects in occurrences.items():
+        if len(subjects) < 2:
+            continue
+        for subj in subjects:
+            redundant_samples.append(f"{_qname(graph, subj)} repeats sourceRequirement {req_id}")
+            if len(redundant_samples) >= limit:
+                return redundant_samples
+    return redundant_samples
 
 
 def main() -> None:
@@ -60,6 +117,7 @@ def main() -> None:
 
     pipeline = OntologyDraftingPipeline(pipeline_config)
     pipeline.run()
+    run_report_path = pipeline_config.report_path or output_root / "run_report.json"
 
     pred_graph = Graph().parse(pipeline_config.output_path)
     gold_path = PROJECT_ROOT / cfg.get("ontology_path", "gold/atm_gold.ttl")
@@ -88,6 +146,16 @@ def main() -> None:
             ],
         }
         (output_root / "cq_results.json").write_text(json.dumps(cq_payload, indent=2), encoding="utf-8")
+
+    run_report = json.loads(Path(run_report_path).read_text(encoding="utf-8")) if run_report_path else {}
+    if pipeline.last_llm_response and pipeline.last_llm_response.token_usage:
+        run_report["token_usage"] = pipeline.last_llm_response.token_usage
+    run_report["drift_axioms_sample"] = collect_drift_samples(
+        pred_graph, pipeline_config.base_namespace
+    )
+    run_report["redundant_axioms_sample"] = collect_redundant_axioms(pred_graph)
+    if run_report_path:
+        Path(run_report_path).write_text(json.dumps(run_report, indent=2), encoding="utf-8")
 
     print("E1 run complete. Key outputs written under", output_root)
 

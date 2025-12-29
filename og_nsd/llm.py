@@ -30,6 +30,7 @@ def slugify(label: str) -> str:
 class LLMResponse:
     turtle: str
     reasoning_notes: str
+    token_usage: Dict[str, int] | None = None
 
 
 class LLMClient(abc.ABC):
@@ -234,7 +235,12 @@ class OpenAILLM(LLMClient):
             temperature=self.temperature,
         )
         content = response.choices[0].message.content.strip() if response.choices else ""
-        return LLMResponse(turtle=content, reasoning_notes="Generated via OpenAI chat.completions")
+        token_usage = _extract_token_usage(response)
+        return LLMResponse(
+            turtle=content,
+            reasoning_notes="Generated via OpenAI chat.completions",
+            token_usage=token_usage,
+        )
 
     def generate_patch(self, prompts: Sequence[str], context_ttl: str) -> LLMResponse:
         repair_prompt = self._build_repair_prompt(prompts, context_ttl)
@@ -252,7 +258,12 @@ class OpenAILLM(LLMClient):
             temperature=self.temperature,
         )
         content = response.choices[0].message.content.strip() if response.choices else ""
-        return LLMResponse(turtle=content, reasoning_notes="Patch generated via OpenAI chat.completions")
+        token_usage = _extract_token_usage(response)
+        return LLMResponse(
+            turtle=content,
+            reasoning_notes="Patch generated via OpenAI chat.completions",
+            token_usage=token_usage,
+        )
 
     def apply_patches(self, patches: Sequence[dict], context_ttl: str) -> LLMResponse:
         patch_prompt = self._build_patch_application_prompt(patches, context_ttl)
@@ -270,7 +281,12 @@ class OpenAILLM(LLMClient):
             temperature=self.temperature,
         )
         content = response.choices[0].message.content.strip() if response.choices else ""
-        return LLMResponse(turtle=content, reasoning_notes="Applied patches via OpenAI chat.completions")
+        token_usage = _extract_token_usage(response)
+        return LLMResponse(
+            turtle=content,
+            reasoning_notes="Applied patches via OpenAI chat.completions",
+            token_usage=token_usage,
+        )
 
     def _build_prompt(self, requirements: Sequence[Requirement], schema_context: SchemaContext | None) -> str:
         schema_section = self._format_schema_context(schema_context) if schema_context else ""
@@ -359,3 +375,23 @@ class OpenAILLM(LLMClient):
             f"{context_ttl[:6000]}\n"
             "Return a full Turtle serialization that applies the patches and keeps all other triples intact."
         )
+
+
+def _extract_token_usage(response) -> Dict[str, int] | None:
+    usage = getattr(response, "usage", None)
+    if usage is None:
+        return None
+
+    token_usage: Dict[str, int] = {}
+    for field in ("prompt_tokens", "completion_tokens", "total_tokens", "input_tokens", "output_tokens"):
+        value = getattr(usage, field, None)
+        if value is not None:
+            token_usage[field] = int(value)
+
+    # Some response objects expose a to_dict helper; merge to capture additional keys
+    if hasattr(usage, "to_dict"):
+        for key, value in usage.to_dict().items():  # type: ignore[call-arg]
+            if isinstance(value, int):
+                token_usage.setdefault(key, value)
+
+    return token_usage or None

@@ -22,6 +22,7 @@ def build_report(
 ) -> Dict[str, Any]:
     report: Dict[str, Any] = {
         "llm_notes": llm_response.reasoning_notes,
+        "token_usage": llm_response.token_usage,
         "shacl": {
             "conforms": shacl_report.conforms,
             "text_report": shacl_report.text_report,
