@@ -1,6 +1,6 @@
 {
-  "pass_rate": 0.047619047619047616,
-  "passed": 1,
+  "pass_rate": 0.09523809523809523,
+  "passed": 2,
   "total": 21,
   "results": [
     {
@@ -45,7 +45,7 @@
     },
     {
       "query": "# Cash card bank codes are captured with an appropriate datatype\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK {\n  BIND(EXISTS { atm:bankCode rdfs:range xsd:string . } AS ?stringRange)\n  BIND(EXISTS { atm:bankCode rdfs:range xsd:integer . } AS ?integerRange)\n  BIND(EXISTS { atm:bankCode rdfs:domain atm:CashCard . } AS ?cashCardDomain)\n  BIND(EXISTS {\n    atm:bankCode rdfs:domain ?domain .\n    ?domain owl:unionOf ?union .\n  } AS ?unionDomain)\n  FILTER ((?stringRange || ?integerRange) && (?cashCardDomain || ?unionDomain))\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
