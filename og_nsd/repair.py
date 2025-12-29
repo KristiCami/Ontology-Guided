@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable, List, Sequence
+from typing import Iterable, List, Optional, Sequence
 
 from rdflib import Graph
 
@@ -27,26 +27,41 @@ class Patch:
         return asdict(self)
 
 
+@dataclass
+class StopDecision:
+    stop: bool
+    reason: str
+
+
 def shacl_report_to_patches(report: ShaclReport) -> List[Patch]:
     """Translate hard SHACL violations into a JSON-friendly patch plan."""
 
     patches: List[Patch] = []
+    seen: set[tuple[str, str, str]] = set()
     for result in report.results:
         severity = (result.severity or "").lower()
         if "violation" not in severity:
             continue
+        key = (
+            result.focus_node or "atm:UnknownFocus",
+            result.path or "rdfs:comment",
+            result.value or "xsd:string",
+        )
+        if key in seen:
+            continue
+        seen.add(key)
         patches.append(
             Patch(
                 action="addProperty",
-                subject=result.focus_node or "atm:UnknownFocus",
-                predicate=result.path or "rdfs:comment",
-                object=result.value or "xsd:string",
+                subject=key[0],
+                predicate=key[1],
+                object=key[2],
                 message=result.message,
                 source_shape=result.source_shape,
                 severity=result.severity,
             )
         )
-    return patches
+    return sorted(patches, key=lambda p: (p.subject, p.predicate, p.object))
 
 
 def save_patch_plan(patches: Sequence[Patch], path: Path) -> None:
@@ -81,20 +96,20 @@ def should_stop(
     max_iterations: int,
     patches: Sequence[Patch],
     previous_patches: Sequence[Patch] | None,
-    shacl_report: ShaclReport,
+    shacl_report: Optional[ShaclReport],
     cq_pass_rate: float,
     cq_threshold: float,
-) -> bool:
-    summary = summarize_shacl_report(shacl_report)
+) -> StopDecision:
+    summary = summarize_shacl_report(shacl_report) if shacl_report else {"violations": {"hard": 0}}
     hard = summary["violations"]["hard"]
     if hard == 0:
-        return True
+        return StopDecision(True, "no_hard_violations")
     if not patches:
-        return True
+        return StopDecision(True, "no_patches_available")
     if previous_patches is not None and [p.to_dict() for p in previous_patches] == [p.to_dict() for p in patches]:
-        return True
+        return StopDecision(True, "patches_unchanged")
     if cq_pass_rate >= cq_threshold:
-        return True
+        return StopDecision(True, "cq_threshold_met")
     if iteration >= max_iterations:
-        return True
-    return False
+        return StopDecision(True, "max_iterations_reached")
+    return StopDecision(False, "continue")
