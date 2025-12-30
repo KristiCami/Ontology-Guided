@@ -1,0 +1,170 @@
+@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+atm:dailyOrMonthlyCashCardLimit a owl:DatatypeProperty ;
+    rdfs:domain atm:Account ;
+    rdfs:range xsd:decimal .
+
+atm:dispensesMoneyFor a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:Withdrawal .
+
+atm:processesTransaction a owl:ObjectProperty ;
+    rdfs:domain atm:BankComputer ;
+    rdfs:range atm:Transaction ;
+    owl:equivalentProperty atm:BankComputerProcessesTransaction .
+
+atm:updatesAccount a owl:ObjectProperty ;
+    rdfs:domain atm:Bank ;
+    rdfs:range atm:Account .
+
+atm:BankComputerProcessesTransaction a owl:ObjectProperty ;
+    rdfs:domain atm:BankComputer ;
+    rdfs:range atm:Transaction .
+
+atm:Message a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:messageCode ;
+            owl:someValuesFrom xsd:string ] .
+
+atm:Withdrawal a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:dispensedAmount ;
+            owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:decimal ;
+            owl:onProperty atm:dispensedAmount ] .
+
+atm:messageCode a owl:DatatypeProperty ;
+    rdfs:domain atm:Message ;
+    rdfs:range xsd:string .
+
+atm:Authorization a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:authorizedBy ;
+            owl:someValuesFrom atm:Transaction ] .
+
+atm:Customer rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:ownsCard ;
+            owl:someValuesFrom atm:CashCard ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:hasAccount ;
+            owl:someValuesFrom atm:Account ] .
+
+atm:bankCode a owl:DatatypeProperty ;
+    rdfs:domain atm:CashCard ;
+    rdfs:range xsd:string .
+
+atm:serialNumber a owl:DatatypeProperty ;
+    rdfs:domain atm:CashCard ;
+    rdfs:range xsd:string .
+
+atm:ATM a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:operatedBy ;
+            owl:someValuesFrom atm:Bank ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:sendsMessageTo ;
+            owl:someValuesFrom atm:BankComputer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:receivesMessageFrom ;
+            owl:someValuesFrom atm:BankComputer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:handlesTransaction ;
+            owl:someValuesFrom atm:Transaction ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:Bank ;
+            owl:onProperty atm:operatedBy ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:Transaction ;
+            owl:onProperty atm:handlesTransaction ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:BankComputer ;
+            owl:onProperty atm:sendsMessageTo ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:BankComputer ;
+            owl:onProperty atm:receivesMessageFrom ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:sendsMessageTo ;
+            owl:someValuesFrom atm:BankComputer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:receivesMessageFrom ;
+            owl:someValuesFrom atm:BankComputer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:handlesTransaction ;
+            owl:someValuesFrom atm:Transaction ] .
+
+atm:Bank rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:issuesCard ;
+            owl:someValuesFrom atm:CashCard ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:maintainsAccount ;
+            owl:someValuesFrom atm:Account ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:Account ;
+            owl:onProperty atm:maintainsAccount ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:CashCard ;
+            owl:onProperty atm:issuesCard ] .
+
+atm:receivesMessageFrom a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:BankComputer .
+
+atm:sendsMessageTo a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:BankComputer .
+
+atm:Transaction a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:usesCard ;
+            owl:someValuesFrom atm:CashCard ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:performedBy ;
+            owl:someValuesFrom atm:Customer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:onAccount ;
+            owl:someValuesFrom atm:Account ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:Authorization ;
+            owl:onProperty atm:authorizedBy ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:decimal ;
+            owl:onProperty atm:requestedAmount ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:dateTime ;
+            owl:onProperty atm:transactionTimestamp ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:Customer ;
+            owl:onProperty atm:performedBy ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:Account ;
+            owl:onProperty atm:onAccount ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:CashCard ;
+            owl:onProperty atm:usesCard ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:authorizedBy ;
+            owl:someValuesFrom atm:Authorization ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:usesCard ;
+            owl:someValuesFrom atm:CashCard ] .
+
+atm:CashCard a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:bankCode ;
+            owl:someValuesFrom xsd:string ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:serialNumber ;
+            owl:someValuesFrom xsd:string ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:serialNumber ;
+            owl:someValuesFrom xsd:string ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:bankCode ;
+            owl:someValuesFrom xsd:string ] .
+
+atm:BankComputer a owl:Class .
+
