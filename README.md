@@ -140,8 +140,6 @@ python scripts/run_atm_examples.py --config configs/atm_ontology_aware.json
 # E4: Ours (full closed-loop)
 python scripts/run_e4_iterative.py --config configs/atm_e4_iterative.json
 
-- Draft priming: Set `"seed_target_instances": true` in the E4 config (default in `configs/atm_e4_iterative.json`) to auto-generate one placeholder individual per `sh:targetClass` in `gold/shapes_atm.ttl` with minimal literals/links that satisfy `sh:minCount` and `sh:datatype`. Disable by setting the flag to `false` if you want the loop to start from the raw LLM draft.
-
 # E5: Cross-domain (edit configs/e5_cross_domain.json to add domains)
 python scripts/run_e5_cross_domain.py --config configs/e5_cross_domain.json
 
