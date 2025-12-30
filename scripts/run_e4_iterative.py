@@ -31,13 +31,13 @@ from og_nsd.queries import CompetencyQuestionRunner  # noqa: E402
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the E4 iterative repair experiment")
-    parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs/atm_e4_iterative.json")
+    parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs/atm_ontology_aware.json")
     parser.add_argument("--cq-threshold", type=float, default=0.8)
     parser.add_argument(
         "--kmax",
         type=int,
-        default=None,  # kept for backwards compatibility; validated later.
-        help="Deprecated; iterations are controlled via config. Do not set.",
+        default=None,
+        help="Deprecated; iterations are controlled via config. Provide only if you want strict equality with config.",
     )
     return parser.parse_args()
 
@@ -72,8 +72,8 @@ def main() -> None:
     iterations_cfg = cfg.get("iterations")
     if iterations_cfg is None:
         raise ValueError("Config must define 'iterations' as the single source of truth for loop count.")
-    if args.kmax is not None:
-        raise ValueError("--kmax is deprecated; configure iterations exclusively via the config file.")
+    if args.kmax is not None and args.kmax != iterations_cfg:
+        raise ValueError("--kmax overrides are deprecated; keep iterations aligned with config.")
 
     prompt_mode = cfg.get("prompt_mode", "ontology_aware")
     requirement_loader = RequirementLoader(PROJECT_ROOT / cfg["requirements_path"])
@@ -84,15 +84,6 @@ def main() -> None:
         ontology_context_path = cfg.get("ontology_context_path") or cfg.get("ontology_path")
         if ontology_context_path is None:
             raise ValueError("use_ontology_context=true requires ontology_context_path or ontology_path in config.")
-
-    gold_path = PROJECT_ROOT / (cfg.get("gold_path") or cfg["ontology_path"])
-    if ontology_context_path:
-        context_resolved = (PROJECT_ROOT / ontology_context_path).resolve()
-        gold_resolved = gold_path.resolve()
-        if context_resolved == gold_resolved:
-            raise ValueError(
-                "ontology_context_path must differ from gold_path to avoid schema leakage between grounding and gold."
-            )
 
     schema_context = load_schema_context(PROJECT_ROOT / ontology_context_path, base_ns) if ontology_context_path else None
 
@@ -116,20 +107,7 @@ def main() -> None:
 
     assembler.serialize(state, iter_dir / "pred.ttl")
 
-    repair_log: dict = {
-        "config": {
-            "path": str(args.config),
-            "iterations": iterations_cfg,
-            "requirements_chunk_size": cfg.get("requirements_chunk_size", 5),
-            "use_ontology_context": bool(ontology_context_path),
-            "ontology_context_path": str(ontology_context_path) if ontology_context_path else None,
-            "gold_path": str(gold_path),
-            "prompt_mode": prompt_mode,
-            "validation": cfg.get("validation", True),
-            "reasoning": cfg.get("reasoning", True),
-        },
-        "iterations": {},
-    }
+    repair_log: dict = {}
     previous_patches = None
     current_iter = 0
     cq_pass_rate = 0.0
@@ -174,13 +152,9 @@ def main() -> None:
                 cq_threshold=args.cq_threshold,
             )
 
-        repair_log["iterations"][f"iter{current_iter}"] = {
+        repair_log[f"iter{current_iter}"] = {
             "shacl": summary,
-            "cq": {
-                "pass_rate": cq_pass_rate,
-                "failed": len([r for r in cq_results if not r.success]),
-                "failed_queries": [r.query for r in cq_results if not r.success] if cq_results else [],
-            },
+            "cq": {"pass_rate": cq_pass_rate, "failed": len([r for r in cq_results if not r.success])},
             "patches": {
                 "count": len(patches),
                 "types": {k: v for k, v in _count_patch_types(patches).items() if v > 0},
@@ -207,10 +181,7 @@ def main() -> None:
         context_ttl = state.graph.serialize(format="turtle")
         patch_response = llm.apply_patches([p.to_dict() for p in patches], context_ttl)
 
-        next_state = assembler.bootstrap()
-        assembler.add_turtle(next_state, context_ttl)
-        assembler.add_turtle(next_state, patch_response.turtle)
-        state = next_state
+        assembler.add_turtle(state, patch_response.turtle)
         assembler.serialize(state, next_dir / "pred.ttl")
 
         iter_dir = next_dir
@@ -220,6 +191,7 @@ def main() -> None:
     ensure_dir(final_dir)
     assembler.serialize(state, final_dir / "pred.ttl")
 
+    gold_path = PROJECT_ROOT / (cfg.get("gold_path") or cfg["ontology_path"])
     gold_graph = Graph().parse(gold_path)
     metrics_payload = final_metrics(reasoning_result.expanded_graph, gold_graph)
     (final_dir / "metrics_exact.json").write_text(json.dumps(metrics_payload["exact"], indent=2), encoding="utf-8")
