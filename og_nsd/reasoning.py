@@ -24,6 +24,7 @@ class ReasonerReport:
     consistent: Optional[bool]
     unsatisfiable_classes: List[str]
     notes: str
+    backend: Optional[str] = None
 
 
 @dataclass
@@ -37,6 +38,7 @@ class ReasonerResult:
 class OwlreadyReasoner:
     def __init__(self, enabled: bool = False) -> None:
         self.enabled = enabled and get_ontology is not None
+        self.backend = "pellet" if self.enabled and sync_reasoner_pellet is not None else None
 
     def run(self, graph: Graph) -> ReasonerResult:
         """Run Pellet reasoning and return the expanded graph.
@@ -55,7 +57,7 @@ class OwlreadyReasoner:
 
         if not self.enabled or get_ontology is None:
             notes.append("Reasoner disabled or owlready2 unavailable.")
-            report = ReasonerReport(False, None, [], " ".join(notes))
+            report = ReasonerReport(False, None, [], " ".join(notes), backend=None)
             return ReasonerResult(report=report, expanded_graph=base_graph)
 
         tmp_dir = Path(tempfile.gettempdir())
@@ -85,7 +87,7 @@ class OwlreadyReasoner:
             consistent = True
             expanded_graph = onto.world.as_rdflib_graph()
 
-        report = ReasonerReport(True, consistent, unsat, " ".join(notes))
+        report = ReasonerReport(True, consistent, unsat, " ".join(notes), backend=self.backend)
         return ReasonerResult(report=report, expanded_graph=expanded_graph)
 
 
