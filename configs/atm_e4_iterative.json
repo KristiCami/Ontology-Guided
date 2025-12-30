@@ -14,5 +14,6 @@
   "iterations": 20,
   "reasoning": true,
   "competency_questions": "atm_cqs.rq",
-  "base_namespace": "http://lod.csd.auth.gr/atm/atm.ttl#"
+  "base_namespace": "http://lod.csd.auth.gr/atm/atm.ttl#",
+  "seed_target_instances": true
 }

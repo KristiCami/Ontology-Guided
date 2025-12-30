@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
+import re
 from pathlib import Path
 from typing import List, Optional
 
-from rdflib import Graph, Literal
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import RDF, SH, XSD
 
 try:
@@ -138,3 +140,123 @@ def summarize_shacl_report(report: ShaclReport) -> dict:
             "soft": soft,
         },
     }
+
+
+def generate_minimal_target_instances(
+    shapes_graph: Graph, base_namespace: str, *, instance_prefix: str = "Seed"
+) -> Graph:
+    """Generate placeholder individuals for each ``sh:targetClass``.
+
+    For every ``sh:NodeShape`` with a ``sh:targetClass``, the returned graph contains
+    one instance of that class plus placeholder values that satisfy ``sh:minCount``
+    constraints for properties declaring ``sh:datatype`` or ``sh:class``. This is
+    intended to prime drafts with minimally conforming focus nodes before the first
+    validation pass.
+    """
+
+    seeds = Graph()
+    for prefix, uri in shapes_graph.namespace_manager.namespaces():
+        seeds.bind(prefix, uri)
+
+    base = Namespace(_normalize_namespace(base_namespace))
+    class_counts: dict[URIRef, int] = {}
+
+    for node_shape in shapes_graph.subjects(RDF.type, SH.NodeShape):
+        target_class = shapes_graph.value(node_shape, SH.targetClass)
+        if not isinstance(target_class, URIRef):
+            continue
+
+        focus_instance = _build_instance_uri(base, target_class, instance_prefix, class_counts)
+        seeds.add((focus_instance, RDF.type, target_class))
+
+        for prop_shape in shapes_graph.objects(node_shape, SH.property):
+            min_count_raw = shapes_graph.value(prop_shape, SH.minCount)
+            if min_count_raw is None:
+                continue
+            try:
+                min_count = int(min_count_raw)
+            except (TypeError, ValueError):
+                continue
+            if min_count <= 0:
+                continue
+
+            path = shapes_graph.value(prop_shape, SH.path)
+            if path is None:
+                continue
+            datatype = shapes_graph.value(prop_shape, SH.datatype)
+            class_constraint = shapes_graph.value(prop_shape, SH.class)
+
+            for occurrence in range(min_count):
+                if isinstance(path, BNode):
+                    inverse_predicate = shapes_graph.value(path, SH.inversePath)
+                    if not isinstance(inverse_predicate, URIRef):
+                        continue
+                    target = _target_for_class_constraint(
+                        seeds, base, class_constraint, instance_prefix, class_counts
+                    )
+                    seeds.add((target, inverse_predicate, focus_instance))
+                    continue
+
+                if datatype:
+                    literal_value = _placeholder_literal(datatype, occurrence)
+                    seeds.add((focus_instance, path, literal_value))
+                else:
+                    target = _target_for_class_constraint(
+                        seeds, base, class_constraint, instance_prefix, class_counts
+                    )
+                    seeds.add((focus_instance, path, target))
+
+    return seeds
+
+
+def _normalize_namespace(base_namespace: str) -> str:
+    if base_namespace.endswith(("#", "/")):
+        return base_namespace
+    return f"{base_namespace}#"
+
+
+_NON_ALNUM_RE = re.compile(r"[^A-Za-z0-9]")
+
+
+def _build_instance_uri(
+    namespace: Namespace, target_class: URIRef, prefix: str, counts: dict[URIRef, int]
+) -> URIRef:
+    counts[target_class] = counts.get(target_class, 0) + 1
+    local = _NON_ALNUM_RE.sub("", _local_name(target_class)) or "Instance"
+    suffix = counts[target_class]
+    return namespace[f"{prefix}{local}{'' if suffix == 1 else '_' + str(suffix)}"]
+
+
+def _target_for_class_constraint(
+    graph: Graph,
+    namespace: Namespace,
+    class_constraint: Optional[URIRef],
+    prefix: str,
+    counts: dict[URIRef, int],
+):
+    if isinstance(class_constraint, URIRef):
+        target = _build_instance_uri(namespace, class_constraint, prefix, counts)
+        graph.add((target, RDF.type, class_constraint))
+        return target
+    return BNode()
+
+
+def _local_name(term: URIRef) -> str:
+    text = str(term)
+    if "#" in text:
+        return text.rsplit("#", 1)[1]
+    return text.rstrip("/").rsplit("/", 1)[-1]
+
+
+def _placeholder_literal(datatype: URIRef, occurrence: int) -> Literal:
+    if datatype == XSD.string:
+        return Literal(f"placeholder_{occurrence + 1}", datatype=datatype)
+    if datatype == XSD.decimal:
+        return Literal("0", datatype=datatype)
+    if datatype == XSD.integer:
+        return Literal(0, datatype=datatype)
+    if datatype == XSD.boolean:
+        return Literal(False, datatype=datatype)
+    if datatype == XSD.dateTime:
+        return Literal(datetime.now(timezone.utc).isoformat(), datatype=datatype)
+    return Literal(f"value_{occurrence + 1}", datatype=datatype)
