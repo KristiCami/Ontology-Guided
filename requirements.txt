@@ -3,3 +3,4 @@ pyshacl==0.23.0
 owlready2==0.45
 setuptools>=70.0.0
 openai>=1.30.0
+owlrl>=6.0.2
