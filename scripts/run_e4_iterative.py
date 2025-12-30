@@ -25,7 +25,11 @@ from og_nsd.repair import (  # noqa: E402
     should_stop,
 )
 from og_nsd.requirements import RequirementLoader, chunk_requirements  # noqa: E402
-from og_nsd.shacl import ShaclValidator, summarize_shacl_report  # noqa: E402
+from og_nsd.shacl import (  # noqa: E402
+    ShaclValidator,
+    generate_minimal_target_instances,
+    summarize_shacl_report,
+)
 from og_nsd.queries import CompetencyQuestionRunner  # noqa: E402
 
 
@@ -169,6 +173,7 @@ def main() -> None:
                         "prompt_mode": prompt_mode,
                         "validation": cfg.get("validation", True),
                         "reasoning": cfg.get("reasoning", True),
+                        "seed_target_instances": cfg.get("seed_target_instances", False),
                         "stop_policy": policy,
                     },
                     "iterations": {},
@@ -177,6 +182,10 @@ def main() -> None:
                 (output_root / "repair_log.json").write_text(json.dumps(repair_log, indent=2), encoding="utf-8")
                 print(f"[{policy}] Aborted at draft due to Turtle parse error. See {iter_dir / 'llm_error.txt'}")
                 return
+
+        if cfg.get("seed_target_instances", False) and validator:
+            seeds = generate_minimal_target_instances(validator.shapes_graph, base_ns)
+            state.graph += seeds
 
         assembler.serialize(state, iter_dir / "pred.ttl")
 
@@ -191,6 +200,7 @@ def main() -> None:
                 "prompt_mode": prompt_mode,
                 "validation": cfg.get("validation", True),
                 "reasoning": cfg.get("reasoning", True),
+                "seed_target_instances": cfg.get("seed_target_instances", False),
                 "stop_policy": policy,
             },
             "iterations": {},
