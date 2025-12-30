@@ -8,10 +8,10 @@
   "validation": true,
   "llm_mode": "openai",
   "temperature": 0.1,
-  "max_requirements": 20,
+  "max_requirements": 50,
   "requirements_chunk_size": 5,
   "output_root": "runs/E4_full",
-  "iterations": 3,
+  "iterations": 20,
   "reasoning": true,
   "competency_questions": "atm_cqs.rq",
   "base_namespace": "http://lod.csd.auth.gr/atm/atm.ttl#"
