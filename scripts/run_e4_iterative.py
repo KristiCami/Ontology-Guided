@@ -82,10 +82,16 @@ def main() -> None:
     iterations_cfg = cfg.get("iterations")
     if iterations_cfg is None:
         raise ValueError("Config must define 'iterations' as the single source of truth for loop count.")
+    if iterations_cfg <= 0:
+        raise ValueError("Config field 'iterations' must be a positive integer.")
     if args.kmax is not None:
         raise ValueError("--kmax is deprecated; configure iterations exclusively via the config file.")
 
     prompt_mode = cfg.get("prompt_mode", "ontology_aware")
+    valid_modes = {"ontology_aware", "baseline"}
+    if prompt_mode not in valid_modes:
+        raise ValueError(f"Unsupported prompt_mode '{prompt_mode}'. Choose from {sorted(valid_modes)}.")
+
     requirement_loader = RequirementLoader(PROJECT_ROOT / cfg["requirements_path"])
     requirements = requirement_loader.load(cfg.get("max_requirements", 20))
 
@@ -200,6 +206,7 @@ def main() -> None:
                 "consistent": reasoning_result.report.consistent,
                 "unsat_classes": len(reasoning_result.report.unsatisfiable_classes),
                 "notes": reasoning_result.report.notes,
+                "backend": reasoning_result.report.backend,
                 "triples_before_reasoning": len(state.graph),
                 "triples_after_reasoning": len(reasoning_result.expanded_graph),
             },
@@ -225,6 +232,8 @@ def main() -> None:
 
         iter_dir = next_dir
         current_iter = next_iter
+
+    repair_log["stop"] = {"iteration": current_iter, "reason": stop_decision.reason}
 
     final_dir = output_root / "final"
     ensure_dir(final_dir)

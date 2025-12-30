@@ -28,7 +28,7 @@
    - Output: νέο `pred.ttl` για το επόμενο iteration.
 
 7. **Loop logic / stopping criteria**
-   - Τερματισμός αν: (α) hard violations == 0, (β) `patches.json` κενό, (γ) ίδιο patch plan με το προηγούμενο, (δ) CQ pass rate ≥ threshold (π.χ. 0.8), (ε) `iteration >= kmax`.
+   - Τερματισμός αν: (α) hard violations == 0, (β) `patches.json` κενό, (γ) ίδιο patch plan με το προηγούμενο, (δ) CQ pass rate ≥ threshold (π.χ. 0.8), (ε) `iteration` φτάσει το `iterations` του config.
 
 8. **Τελική αξιολόγηση**
    - Στο `runs/E4_full/final/` γράφονται `pred.ttl`, `metrics_exact.json`, `metrics_semantic.json`, `cq_results.json`, `validation_summary.json`.
@@ -36,7 +36,7 @@
 
 ## Πώς τρέχει
 ```bash
-python scripts/run_e4_iterative.py --config configs/atm_e4_iterative.json --kmax 3 --cq-threshold 0.8
+python scripts/run_e4_iterative.py --config configs/atm_e4_iterative.json --cq-threshold 0.8
 ```
 
 Η έξοδος ακολουθεί την επιβεβαιωμένη δομή:
@@ -59,7 +59,7 @@ runs/E4_full/
 ## Αποτελέσματα του run `E4_full`
 - Το loop υλοποιήθηκε όπως περιγράφεται: iter0 drafting από requirements + ontology-aware context του gold, μετά reasoning → SHACL → patch calculus → LLM εφαρμογή patches σε κάθε iteration.
 - Το `repair_log.json` δείχνει hard=8 και soft=0 τόσο στο iter0 όσο και στο iter1. Τα patches παρέμειναν μη-κενά και το pred άλλαξε (προστέθηκαν restrictions και properties), αλλά τα hard violations δεν μειώθηκαν.
-- Το loop σταμάτησε στο iteration 1 επειδή ενεργοποιήθηκε το κριτήριο τερματισμού `iteration >= kmax` για το συγκεκριμένο run (δεν παρήχθη iter2).
+- Το loop σταμάτησε στο iteration 1 επειδή ενεργοποιήθηκε το κριτήριο τερματισμού `iteration >= iterations` (όπως ορίζεται στο config) για το συγκεκριμένο run (δεν παρήχθη iter2).
 - Η τελική SHACL σύνοψη παραμένει με 8 hard violations (`final/validation_summary.json`), δείχνοντας ότι τα patches δεν έλυσαν τα προβλήματα.
 - Η CQ pass rate παρέμεινε χαμηλή: 1/21 ≈ 4.76% (`final/cq_results.json`).
 - Τα exact/semantic metrics ήταν 0.0 (0 overlaps από 125 gold triples, 49 pred triples), άρα το draft/repair δεν προσέγγισε το gold στο τελικό αποτέλεσμα.
