@@ -99,11 +99,36 @@ def should_stop(
     shacl_report: Optional[ShaclReport],
     cq_pass_rate: float,
     cq_threshold: float,
+    stop_policy: str = "default",
 ) -> StopDecision:
+    """Decide whether the iterative repair loop should stop.
+
+    stop_policy controls how aggressively the loop stops:
+    - default: original behaviour, stop immediately when hard violations are zero.
+    - hard_and_cq: require both zero hard violations AND CQ pass rate >= threshold to stop.
+    - ignore_no_hard: do not stop on zero hard violations; rely on patches/CQ/max-iterations.
+    - max_only: ignore SHACL/CQ signals and stop only when iteration >= max_iterations.
+    """
+
     summary = summarize_shacl_report(shacl_report) if shacl_report else {"violations": {"hard": 0}}
     hard = summary["violations"]["hard"]
-    if hard == 0:
-        return StopDecision(True, "no_hard_violations")
+
+    if stop_policy == "max_only":
+        if iteration >= max_iterations:
+            return StopDecision(True, "max_iterations_reached")
+        return StopDecision(False, "continue")
+
+    if stop_policy == "hard_and_cq":
+        if hard == 0 and cq_pass_rate >= cq_threshold:
+            return StopDecision(True, "no_hard_violations_and_cq_threshold_met")
+    elif stop_policy == "default":
+        if hard == 0:
+            return StopDecision(True, "no_hard_violations")
+    elif stop_policy == "ignore_no_hard":
+        pass
+    else:
+        raise ValueError(f"Unsupported stop_policy '{stop_policy}'.")
+
     if not patches:
         return StopDecision(True, "no_patches_available")
     if previous_patches is not None and [p.to_dict() for p in previous_patches] == [p.to_dict() for p in patches]:

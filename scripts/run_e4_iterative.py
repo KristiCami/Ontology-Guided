@@ -34,6 +34,21 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs/atm_e4_iterative.json")
     parser.add_argument("--cq-threshold", type=float, default=0.8)
     parser.add_argument(
+        "--stop-policies",
+        type=str,
+        default="default",
+        help=(
+            "Comma-separated list of stop policies to sweep. "
+            "Supported: default,hard_and_cq,ignore_no_hard,max_only."
+        ),
+    )
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        default=None,
+        help="Override output root (defaults to config). When multiple stop policies are provided, each run is stored in a subfolder.",
+    )
+    parser.add_argument(
         "--kmax",
         type=int,
         default=None,  # kept for backwards compatibility; validated later.
@@ -76,8 +91,14 @@ def main() -> None:
     args = parse_args()
     cfg = load_config(args.config)
     base_ns = cfg.get("base_namespace", "http://lod.csd.auth.gr/atm/atm.ttl#")
-    output_root = PROJECT_ROOT / cfg.get("output_root", "runs/E4_full")
-    ensure_dir(output_root)
+    stop_policies = [policy.strip() for policy in args.stop_policies.split(",") if policy.strip()]
+    if not stop_policies:
+        stop_policies = ["default"]
+
+    output_root_base = PROJECT_ROOT / cfg.get("output_root", "runs/E4_full")
+    if args.output_root:
+        output_root_base = args.output_root
+    ensure_dir(output_root_base)
 
     iterations_cfg = cfg.get("iterations")
     if iterations_cfg is None:
@@ -121,145 +142,155 @@ def main() -> None:
 
     llm = select_llm(cfg, base_ns)
 
-    state = assembler.bootstrap()
-    iter_dir = output_root / "iter0"
-    ensure_dir(iter_dir)
+    def run_single(policy: str, output_root: Path) -> None:
+        state = assembler.bootstrap()
+        iter_dir = output_root / "iter0"
+        ensure_dir(iter_dir)
 
-    chunk_size = cfg.get("requirements_chunk_size", 5)
-    for batch in chunk_requirements(requirements, size=chunk_size):
-        response = llm.generate_axioms(batch, schema_context=schema_context)
-        assembler.add_turtle(state, response.turtle)
+        chunk_size = cfg.get("requirements_chunk_size", 5)
+        for batch in chunk_requirements(requirements, size=chunk_size):
+            response = llm.generate_axioms(batch, schema_context=schema_context)
+            assembler.add_turtle(state, response.turtle)
 
-    assembler.serialize(state, iter_dir / "pred.ttl")
+        assembler.serialize(state, iter_dir / "pred.ttl")
 
-    repair_log: dict = {
-        "config": {
-            "path": str(args.config),
-            "iterations": iterations_cfg,
-            "requirements_chunk_size": cfg.get("requirements_chunk_size", 5),
-            "use_ontology_context": bool(ontology_context_path),
-            "ontology_context_path": str(ontology_context_path) if ontology_context_path else None,
-            "gold_path": str(gold_path),
-            "prompt_mode": prompt_mode,
-            "validation": cfg.get("validation", True),
-            "reasoning": cfg.get("reasoning", True),
-        },
-        "iterations": {},
-    }
-    previous_patches = None
-    current_iter = 0
-    cq_pass_rate = 0.0
-
-    while True:
-        reasoning_result = reasoner.run(state.graph)
-        if cfg.get("validation", True):
-            if validator is None:
-                raise RuntimeError("Validation enabled but SHACL validator is not configured.")
-            shacl_report = validator.validate(reasoning_result.expanded_graph)
-            summary = summarize_shacl_report(shacl_report)
-            save_shacl_report(shacl_report, iter_dir / "shacl_report.ttl")
-            patches = shacl_report_to_patches(shacl_report)
-            save_patch_plan(patches, iter_dir / "patches.json")
-        else:
-            shacl_report = None
-            summary = {"total": 0, "violations": {"hard": 0, "soft": 0}}
-            patches = []
-
-        cq_results = cq_runner.run(reasoning_result.expanded_graph) if cq_runner else []
-        cq_pass_rate = (sum(1 for res in cq_results if res.success) / len(cq_results)) if cq_results else 0.0
-
-        cq_payload = {
-            "pass_rate": cq_pass_rate,
-            "results": [
-                {"query": result.query, "success": result.success, "message": result.message}
-                for result in cq_results
-            ],
+        repair_log: dict = {
+            "config": {
+                "path": str(args.config),
+                "iterations": iterations_cfg,
+                "requirements_chunk_size": cfg.get("requirements_chunk_size", 5),
+                "use_ontology_context": bool(ontology_context_path),
+                "ontology_context_path": str(ontology_context_path) if ontology_context_path else None,
+                "gold_path": str(gold_path),
+                "prompt_mode": prompt_mode,
+                "validation": cfg.get("validation", True),
+                "reasoning": cfg.get("reasoning", True),
+                "stop_policy": policy,
+            },
+            "iterations": {},
         }
-        (iter_dir / "cq_results.json").write_text(json.dumps(cq_payload, indent=2), encoding="utf-8")
+        previous_patches = None
+        current_iter = 0
+        cq_pass_rate = 0.0
 
-        if not cfg.get("validation", True):
-            stop_decision = StopDecision(True, "validation_disabled")
-        else:
-            stop_decision = should_stop(
-                iteration=current_iter,
-                max_iterations=iterations_cfg,
-                patches=patches,
-                previous_patches=previous_patches,
-                shacl_report=shacl_report,
-                cq_pass_rate=cq_pass_rate,
-                cq_threshold=args.cq_threshold,
-            )
+        while True:
+            reasoning_result = reasoner.run(state.graph)
+            if cfg.get("validation", True):
+                if validator is None:
+                    raise RuntimeError("Validation enabled but SHACL validator is not configured.")
+                shacl_report = validator.validate(reasoning_result.expanded_graph)
+                summary = summarize_shacl_report(shacl_report)
+                save_shacl_report(shacl_report, iter_dir / "shacl_report.ttl")
+                patches = shacl_report_to_patches(shacl_report)
+                save_patch_plan(patches, iter_dir / "patches.json")
+            else:
+                shacl_report = None
+                summary = {"total": 0, "violations": {"hard": 0, "soft": 0}}
+                patches = []
 
-        repair_log["iterations"][f"iter{current_iter}"] = {
-            "shacl": summary,
-            "cq": {
+            cq_results = cq_runner.run(reasoning_result.expanded_graph) if cq_runner else []
+            cq_pass_rate = (sum(1 for res in cq_results if res.success) / len(cq_results)) if cq_results else 0.0
+
+            cq_payload = {
                 "pass_rate": cq_pass_rate,
-                "failed": len([r for r in cq_results if not r.success]),
-                "failed_queries": [r.query for r in cq_results if not r.success] if cq_results else [],
-            },
-            "patches": {
-                "count": len(patches),
-                "types": {k: v for k, v in _count_patch_types(patches).items() if v > 0},
-            },
-            "reasoning": {
-                "enabled": reasoning_result.report.enabled,
-                "consistent": reasoning_result.report.consistent,
-                "unsat_classes": len(reasoning_result.report.unsatisfiable_classes),
-                "notes": reasoning_result.report.notes,
-                "backend": reasoning_result.report.backend,
-                "triples_before_reasoning": len(state.graph),
-                "triples_after_reasoning": len(reasoning_result.expanded_graph),
-            },
-            "stop_decision": stop_decision.reason,
-        }
+                "results": [
+                    {"query": result.query, "success": result.success, "message": result.message}
+                    for result in cq_results
+                ],
+            }
+            (iter_dir / "cq_results.json").write_text(json.dumps(cq_payload, indent=2), encoding="utf-8")
 
-        if stop_decision.stop:
-            break
+            if not cfg.get("validation", True):
+                stop_decision = StopDecision(True, "validation_disabled")
+            else:
+                stop_decision = should_stop(
+                    iteration=current_iter,
+                    max_iterations=iterations_cfg,
+                    patches=patches,
+                    previous_patches=previous_patches,
+                    shacl_report=shacl_report,
+                    cq_pass_rate=cq_pass_rate,
+                    cq_threshold=args.cq_threshold,
+                    stop_policy=policy,
+                )
 
-        previous_patches = patches
-        next_iter = current_iter + 1
-        next_dir = output_root / f"iter{next_iter}"
-        ensure_dir(next_dir)
+            repair_log["iterations"][f"iter{current_iter}"] = {
+                "shacl": summary,
+                "cq": {
+                    "pass_rate": cq_pass_rate,
+                    "failed": len([r for r in cq_results if not r.success]),
+                    "failed_queries": [r.query for r in cq_results if not r.success] if cq_results else [],
+                },
+                "patches": {
+                    "count": len(patches),
+                    "types": {k: v for k, v in _count_patch_types(patches).items() if v > 0},
+                },
+                "reasoning": {
+                    "enabled": reasoning_result.report.enabled,
+                    "consistent": reasoning_result.report.consistent,
+                    "unsat_classes": len(reasoning_result.report.unsatisfiable_classes),
+                    "notes": reasoning_result.report.notes,
+                    "backend": reasoning_result.report.backend,
+                    "triples_before_reasoning": len(state.graph),
+                    "triples_after_reasoning": len(reasoning_result.expanded_graph),
+                },
+                "stop_decision": stop_decision.reason,
+            }
 
-        context_ttl = state.graph.serialize(format="turtle")
-        patch_response = llm.apply_patches([p.to_dict() for p in patches], context_ttl)
+            if stop_decision.stop:
+                break
 
-        next_state = assembler.bootstrap()
-        assembler.add_turtle(next_state, context_ttl)
-        assembler.add_turtle(next_state, patch_response.turtle)
-        state = next_state
-        assembler.serialize(state, next_dir / "pred.ttl")
+            previous_patches = patches
+            next_iter = current_iter + 1
+            next_dir = output_root / f"iter{next_iter}"
+            ensure_dir(next_dir)
 
-        iter_dir = next_dir
-        current_iter = next_iter
+            context_ttl = state.graph.serialize(format="turtle")
+            patch_response = llm.apply_patches([p.to_dict() for p in patches], context_ttl)
 
-    repair_log["stop"] = {"iteration": current_iter, "reason": stop_decision.reason}
+            next_state = assembler.bootstrap()
+            assembler.add_turtle(next_state, context_ttl)
+            assembler.add_turtle(next_state, patch_response.turtle)
+            state = next_state
+            assembler.serialize(state, next_dir / "pred.ttl")
 
-    final_dir = output_root / "final"
-    ensure_dir(final_dir)
-    assembler.serialize(state, final_dir / "pred.ttl")
+            iter_dir = next_dir
+            current_iter = next_iter
 
-    gold_graph = Graph().parse(gold_path)
-    metrics_payload = final_metrics(reasoning_result.expanded_graph, gold_graph)
-    (final_dir / "metrics_exact.json").write_text(json.dumps(metrics_payload["exact"], indent=2), encoding="utf-8")
-    (final_dir / "metrics_semantic.json").write_text(json.dumps(metrics_payload["semantic"], indent=2), encoding="utf-8")
+        repair_log["stop"] = {"iteration": current_iter, "reason": stop_decision.reason}
 
-    validation_summary_path = final_dir / "validation_summary.json"
-    validation_summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+        final_dir = output_root / "final"
+        ensure_dir(final_dir)
+        assembler.serialize(state, final_dir / "pred.ttl")
 
-    if cq_runner:
-        cq_payload = {
-            "pass_rate": cq_pass_rate,
-            "results": [
-                {"query": result.query, "success": result.success, "message": result.message}
-                for result in cq_results
-            ],
-        }
-        (final_dir / "cq_results.json").write_text(json.dumps(cq_payload, indent=2), encoding="utf-8")
+        gold_graph = Graph().parse(gold_path)
+        metrics_payload = final_metrics(reasoning_result.expanded_graph, gold_graph)
+        (final_dir / "metrics_exact.json").write_text(json.dumps(metrics_payload["exact"], indent=2), encoding="utf-8")
+        (final_dir / "metrics_semantic.json").write_text(json.dumps(metrics_payload["semantic"], indent=2), encoding="utf-8")
 
-    (output_root / "repair_log.json").write_text(json.dumps(repair_log, indent=2), encoding="utf-8")
+        validation_summary_path = final_dir / "validation_summary.json"
+        validation_summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
-    print("E4 run complete. Outputs written to", output_root)
+        if cq_runner:
+            cq_payload = {
+                "pass_rate": cq_pass_rate,
+                "results": [
+                    {"query": result.query, "success": result.success, "message": result.message}
+                    for result in cq_results
+                ],
+            }
+            (final_dir / "cq_results.json").write_text(json.dumps(cq_payload, indent=2), encoding="utf-8")
+
+        (output_root / "repair_log.json").write_text(json.dumps(repair_log, indent=2), encoding="utf-8")
+
+        print(f"[{policy}] E4 run complete. Outputs written to {output_root}")
+
+    for policy in stop_policies:
+        policy_output_root = output_root_base
+        if len(stop_policies) > 1:
+            policy_output_root = output_root_base / policy
+        ensure_dir(policy_output_root)
+        run_single(policy, policy_output_root)
 
 
 if __name__ == "__main__":
