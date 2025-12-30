@@ -194,6 +194,7 @@ _BARE_XSD_DECIMAL_TOKEN_RE = re.compile(r"(?<!\^)\s+xsd:decimal\b")
 _PROPERTY_LIST_TYPE_MISUSE_RE = re.compile(
     r"^(\s*[A-Za-z][\w-]*:[\w-]+)\s+a\s+([A-Za-z][\w-]*:[\w-]+)(\s*[;,.].*)?$"
 )
+_CARET_BEFORE_QNAME_RE = re.compile(r"\^\s*([A-Za-z][\w-]*:)")
 
 
 def _sanitize_turtle(turtle: str) -> str:
@@ -228,6 +229,10 @@ def _sanitize_turtle(turtle: str) -> str:
         # emits SPARQL-like variables inside Turtle content (e.g., ``?atm:amount``),
         # which rdflib rejects.
         line = _VARIABLE_QNAME_RE.sub(r"\1", line)
+
+        # Remove stray carets that prefix QNames (e.g., "^atm:operatedBy") coming from
+        # malformed byte-string fragments or caret-direction typos.
+        line = _CARET_BEFORE_QNAME_RE.sub(r"\1", line)
 
         if previous_line_ended:
             line = _PROPERTY_LIST_TYPE_MISUSE_RE.sub(r"\1 \2\3", line)
