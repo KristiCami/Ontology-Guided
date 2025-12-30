@@ -39,6 +39,19 @@
 python scripts/run_e4_iterative.py --config configs/atm_e4_iterative.json --cq-threshold 0.8
 ```
 
+### Παραλλαγές τερματισμού / sweep
+- **Επιλογή πολιτικής:** `--stop-policies` δέχεται λίστα (comma-separated) από: `default`, `hard_and_cq`, `ignore_no_hard`, `max_only`.
+- **Override φακέλου εξόδου:** `--output-root` αλλάζει το root (π.χ. `runs/E4_full_sweep`). Αν δώσεις πολλές πολιτικές, κάθε policy γράφει σε υποφάκελο με το όνομά της.
+
+Παράδειγμα για sweep όλων των πολιτικών με κοινή παραμετροποίηση:
+```bash
+python scripts/run_e4_iterative.py \
+  --config configs/atm_e4_iterative.json \
+  --cq-threshold 0.8 \
+  --stop-policies default,hard_and_cq,ignore_no_hard,max_only \
+  --output-root runs/E4_full_sweep
+```
+
 Η έξοδος ακολουθεί την επιβεβαιωμένη δομή:
 
 ```
