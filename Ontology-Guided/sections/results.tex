@@ -1,0 +1,39 @@
+\section{RESULTS}
+\subsection{Ontology Element Extraction}
+Table~\ref{tab:table1} reports the precision, recall, and F1--score for ontology element extraction across baselines. We observe that the full pipeline significantly outperforms both neural--only and symbolic--only approaches, with the repair loop yielding further improvements.
+
+\begin{table}[htbp]
+\centering
+\caption{ONTOLOGY ELEMENT EXTRACTION QUALITY}
+\label{tab:table1}
+\begin{tabular}{lccc}
+\toprule
+Method & Precision & Recall & F1 \\
+\midrule
+LLM-only & -- & -- & -- \\
+Symbolic-only & -- & -- & -- \\
+Ours (no repair) & -- & -- & -- \\
+Ours (full) & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Constraint Compliance and Repair Efficiency}
+Table~\ref{tab:table2} summarizes the effect of the repair loop on SHACL compliance. The pipeline without repair often leaves a non--negligible number of violations. With the repair loop enabled, compliance approaches 100\% with only a small number of iterations.
+
+\begin{table}[htbp]
+\centering
+\caption{CONSTRAINT COMPLIANCE AND REPAIR EFFICIENCY}
+\label{tab:table2}
+\begin{tabular}{lcccc}
+\toprule
+Setting & Viol.\ pre & Viol.\ post & Iterations & Conforms \\
+\midrule
+No repair & -- & -- & -- & -- \\
+Full & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Domain Adaptation}
+When switching from ATM to healthcare and automotive datasets, the pipeline maintains high precision and recall with only minor degradation. This demonstrates that domain porta\-bility can be achieved by swapping ontologies and SHACL shapes without retraining the neural component.

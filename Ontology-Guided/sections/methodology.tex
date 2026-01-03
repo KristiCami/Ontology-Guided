@@ -1,0 +1,76 @@
+\section{METHODOLOGY}
+\subsection{Pipeline Overview}
+The proposed pipeline follows a neuro--symbolic archi\-tecture that transforms natural language (NL) software re\-quirements into validated OWL ontologies. It integrates large language models (LLMs) for semantic interpretation with symbolic reasoning and SHACL validation in a closed repair loop. Figure~\ref{fig:pipeline} illustrates the workflow: (1) requirements are segmented into sentences, (2) candidate OWL axioms are drafted by the LLM, (3) axioms are aligned with existing ontologies, (4) the merged ontology is validated by logical reasoners and SHACL constraints, and (5) violations are re\-formulated as repair prompts that guide the LLM to iteratively correct its output until a compliant ontology is obtained.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+  \input{figures/pipeline_tikz}
+}
+\caption{Compact neuro--symbolic pipeline for ontology drafting. Neural stages (LLM), symbolic stages (reasoning and SHACL), and hybrid stages (alignment and repair loop) are integrated in a closed feedback loop.}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{Novel Contributions}
+Our methodology extends beyond existing ontology learning frameworks through the following innovations:
+\begin{itemize}
+\item Ontology--aware LLM prompting: The neural model is primed with available domain vocabularies (RBO, Lex\-ical, and domain--specific ontologies), improving align\-ment and reducing semantic drift.
+\item Closed neuro--symbolic repair loop: SHACL and rea\-soner violations are automatically transformed into struc\-tured repair prompts, enabling self--correcting OWL gen\-eration without human intervention.
+\item Hybrid validation and reasoning: Logical consistency checking (reasoners) is combined with constraint com\-pliance (SHACL) to capture both structural and semantic errors.
+\item Cross--domain adaptability: By swapping ontologies and SHACL shapes, the same pipeline generalizes across domains (e.g., ATM, healthcare, automo\-tive) without retraining the LLM.
+\end{itemize}
+
+\subsection{Algorithm}
+The pipeline can be formally described using the following pseudocode.
+
+\begin{algorithm}[htbp]
+\caption{Ontology--Guided Neuro--Symbolic Drafting (OG--NSD)}
+\begin{algorithmic}[1]
+\REQUIRE $R$: requirements documents; $O$: preloaded ontolo\-gies; $S$: SHACL shapes; $\iota$: base IRI; $L$: LLM; $K_{max}$: max repair iterations
+\ENSURE Validated ontology $G^{*}$, SHACL report
+\STATE $T \leftarrow$ LoadAndSegment($R$)
+\STATE $A \leftarrow$ ExtractAvailableTerms($O$)
+\STATE $G \leftarrow \emptyset$
+\FOR{each sentence $s \in T$}
+\STATE $p \leftarrow$ Prompt($L, s, A$)
+\STATE $\tau \leftarrow L$.GenerateOWL($p$)
+\STATE $G \leftarrow$ Merge($G$, ParseTurtle($\tau$))
+\ENDFOR
+\IF{Reasoning enabled}
+\STATE $G \leftarrow$ RunReasoner($G$)
+\ENDIF
+\STATE $(conforms, report) \leftarrow$ SHACLValidate($G, S$)
+\STATE $k \leftarrow 0$
+\WHILE{$\neg conforms$ and $k < K_{max}$}
+\STATE $V \leftarrow$ ExtractViolations(report)
+\STATE $R_{q} \leftarrow$ SynthesizeRepairPrompts($V, G, A$)
+\FOR{each repair prompt $r \in R_{q}$}
+\STATE $\tau' \leftarrow L$.GenerateOWL($r$)
+\STATE $G \leftarrow$ Merge($G$, ParseTurtle($\tau'$))
+\ENDFOR
+\IF{Reasoning enabled}
+\STATE $G \leftarrow$ RunReasoner($G$)
+\ENDIF
+\STATE $(conforms, report) \leftarrow$ SHACLValidate($G, S$)
+\STATE $k \leftarrow k + 1$
+\ENDWHILE
+\STATE \textbf{return} $G$, report
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[htbp]
+\caption{Violation $\rightarrow$ Repair Prompt Synthesis}
+\begin{algorithmic}[1]
+\REQUIRE $V$: SHACL/Reasoner violations; $G$: current ontol\-ogy; $A$: available terms
+\ENSURE $R_{q}$: set of repair prompts for the LLM
+\STATE $R_{q} \leftarrow \emptyset$
+\FOR{each violation $v \in V$}
+\STATE $ctx \leftarrow$ ExtractLocalContext($G, v$)
+\STATE $expl \leftarrow$ CanonicalizeViolation($v$)
+\STATE $hint \leftarrow$ SelectTerms($A, ctx$)
+\STATE $r \leftarrow$ FormatPrompt($expl, ctx, hint$)
+\STATE $R_{q} \leftarrow R_{q} \cup \{r\}$
+\ENDFOR
+\STATE \textbf{return} $R_{q}$
+\end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,21 @@
+\section{EXPERIMENTAL SETUP}
+\subsection{Datasets}
+We evaluate the proposed pipeline on a set of software requirement documents from multiple domains. The primary dataset is the Automated Teller Machine (ATM) requirements specification, a widely used benchmark in requirements en\-gineering research. To demonstrate cross--domain adaptabil\-ity, we additionally experiment with a healthcare scheduling dataset and an automotive diagnostic system dataset. For each domain, we prepare a manually curated gold standard ontology for evaluation.
+
+\subsection{Baselines}
+We compare our system against the following baselines:
+\begin{itemize}
+\item LLM--only: Requirement sentences are directly con\-verted to OWL axioms by the LLM, without alignment, validation, or repair.
+\item Symbolic--only: Requirements are formalized using handcrafted rules and ontology alignment, without neural generation.
+\item Ours (no repair): Our full pipeline but without the repair loop, providing insight into the effect of validation alone.
+\item Ours (full): Complete neuro--symbolic pipeline with iterative repair loop enabled.
+\end{itemize}
+
+\subsection{Evaluation Metrics}
+Performance is measured using the following metrics:
+\begin{itemize}
+\item Precision, Recall, F1: Agreement between generated ontology axioms and the gold standard.
+\item Constraint compliance: Number of SHACL violations before and after repair.
+\item Repair efficiency: Average number of iterations required to converge to a conformant ontology.
+\item Domain generalization: Drop in performance when moving from ATM to other domains.
+\end{itemize}
