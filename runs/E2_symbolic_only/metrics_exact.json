@@ -2,7 +2,7 @@
   "precision": 0.0,
   "recall": 0.0,
   "f1": 0.0,
-  "pred_triples": 222,
+  "pred_triples": 277,
   "gold_triples": 125,
   "overlap_triples": 0
 }

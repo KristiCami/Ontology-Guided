@@ -2,8 +2,8 @@
   "llm_notes": "Generated via OpenAI chat.completions",
   "token_usage": {
     "prompt_tokens": 260,
-    "completion_tokens": 392,
-    "total_tokens": 652
+    "completion_tokens": 425,
+    "total_tokens": 685
   },
   "few_shot_exemplars": null,
   "shacl": {
@@ -119,11 +119,11 @@
     }
   ],
   "reasoner": {
-    "enabled": false,
+    "enabled": true,
     "consistent": null,
     "unsatisfiable_classes": [],
-    "notes": "Reasoner disabled or owlready2 unavailable.",
-    "backend": null
+    "notes": "Pellet failed: Java error message is:\n\u0399\u03b1\u03bd 05, 2026 1:30:37 \u03a0.\u039c. org.mindswap.pellet.jena.graph.loader.DefaultGraphLoader addUnsupportedFeature\nWARNING: Unsupported axiom: Skipping invalid restriction\nException in thread \"main\" java.lang.NullPointerException\n\tat org.mindswap.pellet.Individual.getRNeighborEdges(Individual.java:680)\n\tat org.mindswap.pellet.tableau.completion.rule.SomeValuesRule.applySomeValuesRule(SomeValuesRule.java:120)\n\tat org.mindswap.pellet.tableau.completion.rule.SomeValuesRule.apply(SomeValuesRule.java:64)\n\tat org.mindswap.pellet.tableau.completion.rule.AbstractTableauRule.apply(AbstractTableauRule.java:64)\n\tat org.mindswap.pellet.tableau.completion.SROIQStrategy.complete(SROIQStrategy.java:157)\n\tat org.mindswap.pellet.ABox.isConsistent(ABox.java:1423)\n\tat org.mindswap.pellet.ABox.isConsistent(ABox.java:1260)\n\tat org.mindswap.pellet.KnowledgeBase.consistency(KnowledgeBase.java:1987)\n\tat org.mindswap.pellet.KnowledgeBase.isConsistent(KnowledgeBase.java:2061)\n\tat pellet.PelletRealize.run(PelletRealize.java:70)\n\tat pellet.Pellet.run(Pellet.java:105)\n\tat pellet.Pellet.main(Pellet.java:59)\n",
+    "backend": "pellet"
   },
   "iterations": [
     {
@@ -135,11 +135,11 @@
         "results": []
       },
       "reasoner": {
-        "enabled": false,
+        "enabled": true,
         "consistent": null,
         "unsatisfiable_classes": [],
-        "notes": "Reasoner disabled or owlready2 unavailable.",
-        "backend": null
+        "notes": "Pellet failed: Java error message is:\n\u0399\u03b1\u03bd 05, 2026 1:30:37 \u03a0.\u039c. org.mindswap.pellet.jena.graph.loader.DefaultGraphLoader addUnsupportedFeature\nWARNING: Unsupported axiom: Skipping invalid restriction\nException in thread \"main\" java.lang.NullPointerException\n\tat org.mindswap.pellet.Individual.getRNeighborEdges(Individual.java:680)\n\tat org.mindswap.pellet.tableau.completion.rule.SomeValuesRule.applySomeValuesRule(SomeValuesRule.java:120)\n\tat org.mindswap.pellet.tableau.completion.rule.SomeValuesRule.apply(SomeValuesRule.java:64)\n\tat org.mindswap.pellet.tableau.completion.rule.AbstractTableauRule.apply(AbstractTableauRule.java:64)\n\tat org.mindswap.pellet.tableau.completion.SROIQStrategy.complete(SROIQStrategy.java:157)\n\tat org.mindswap.pellet.ABox.isConsistent(ABox.java:1423)\n\tat org.mindswap.pellet.ABox.isConsistent(ABox.java:1260)\n\tat org.mindswap.pellet.KnowledgeBase.consistency(KnowledgeBase.java:1987)\n\tat org.mindswap.pellet.KnowledgeBase.isConsistent(KnowledgeBase.java:2061)\n\tat pellet.PelletRealize.run(PelletRealize.java:70)\n\tat pellet.Pellet.run(Pellet.java:105)\n\tat pellet.Pellet.main(Pellet.java:59)\n",
+        "backend": "pellet"
       },
       "cq_results": [
         {
