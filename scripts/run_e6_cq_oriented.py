@@ -26,6 +26,12 @@ def load_config(path: Path) -> dict:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the E6 CQ-oriented experiment")
     parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs/atm_e6_cq_oriented.json")
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        default=None,
+        help="Override output root directory (defaults to output_root in config).",
+    )
     return parser.parse_args()
 
 
@@ -44,7 +50,16 @@ def main() -> None:
     args = parse_args()
     cfg = load_config(args.config)
     output_root = PROJECT_ROOT / cfg.get("output_root", "runs/E6_cq_oriented")
+    if args.output_root:
+        output_root = args.output_root
     ensure_dir(output_root)
+
+    gold_path = PROJECT_ROOT / cfg.get("gold_path", "gold/atm_gold.ttl")
+    grounding_path = cfg.get("ontology_context_path") or cfg.get("ontology_path")
+    if cfg.get("use_ontology_context", False) and grounding_path is None:
+        raise ValueError(
+            "Ontology-aware prompting is enabled but no ontology_context_path/ontology_path was provided in the config."
+        )
 
     pipeline_config = PipelineConfig(
         requirements_path=PROJECT_ROOT / cfg["requirements_path"],
@@ -60,7 +75,7 @@ def main() -> None:
         reasoning_enabled=cfg.get("reasoning", True),
         max_iterations=cfg.get("iterations", 3),
         use_ontology_context=cfg.get("use_ontology_context", True),
-        grounding_ontology_path=PROJECT_ROOT / cfg["ontology_path"] if cfg.get("ontology_path") else None,
+        grounding_ontology_path=PROJECT_ROOT / grounding_path if grounding_path else None,
         base_namespace=cfg.get("base_namespace", "http://lod.csd.auth.gr/atm/atm.ttl#"),
     )
 
@@ -76,7 +91,6 @@ def main() -> None:
             encoding="utf-8",
         )
 
-    gold_path = PROJECT_ROOT / cfg.get("ontology_path", "gold/atm_gold.ttl")
     (output_root / "metrics_exact.json").write_text(
         json.dumps(compute_exact_metrics(pipeline_config.output_path, gold_path), indent=2),
         encoding="utf-8",
