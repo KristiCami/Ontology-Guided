@@ -40,6 +40,9 @@ def main() -> None:
     iter_dir = output_root / "iter0"
     ensure_dir(iter_dir)
 
+    ontology_context = cfg.get("ontology_context_path") or cfg.get("ontology_path")
+    grounding_path = PROJECT_ROOT / ontology_context if ontology_context else None
+
     pipeline_config = PipelineConfig(
         requirements_path=PROJECT_ROOT / cfg["requirements_path"],
         shapes_path=PROJECT_ROOT / cfg["shapes_path"],
@@ -54,7 +57,9 @@ def main() -> None:
         reasoning_enabled=cfg.get("reasoning", False),
         max_iterations=cfg.get("iterations", 0),
         use_ontology_context=cfg.get("use_ontology_context", False),
-        grounding_ontology_path=PROJECT_ROOT / cfg["ontology_path"] if cfg.get("ontology_path") else None,
+        grounding_ontology_path=grounding_path,
+        dev_split_path=PROJECT_ROOT / cfg.get("dev_split") if cfg.get("dev_split") else None,
+        test_split_path=PROJECT_ROOT / cfg.get("test_split") if cfg.get("test_split") else None,
     )
 
     pipeline = OntologyDraftingPipeline(pipeline_config)
@@ -73,7 +78,7 @@ def main() -> None:
         summary_path = output_root / "validation_summary.json"
         summary_path.write_text(json.dumps(summarize_shacl_report(shacl_report), indent=2), encoding="utf-8")
 
-    gold_path = PROJECT_ROOT / cfg.get("ontology_path", "gold/atm_gold.ttl")
+    gold_path = PROJECT_ROOT / cfg.get("gold_path", "gold/atm_gold.ttl")
     exact_metrics_path = output_root / "metrics_exact.json"
     semantic_metrics_path = output_root / "metrics_semantic.json"
     exact_metrics_path.write_text(

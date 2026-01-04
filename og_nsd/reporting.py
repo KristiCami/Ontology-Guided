@@ -19,10 +19,12 @@ def build_report(
     reasoner_report: Optional[ReasonerReport] = None,
     iterations: Optional[List[Dict[str, Any]]] = None,
     patch_notes: Optional[List[str]] = None,
+    unmatched_split_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     report: Dict[str, Any] = {
         "llm_notes": llm_response.reasoning_notes,
         "token_usage": llm_response.token_usage,
+        "few_shot_exemplars": llm_response.exemplar_ids,
         "shacl": {
             "conforms": shacl_report.conforms,
             "text_report": shacl_report.text_report,
@@ -52,6 +54,8 @@ def build_report(
         ]
     if patch_notes:
         report["patch_notes"] = patch_notes
+    if unmatched_split_ids:
+        report["unmatched_split_ids"] = unmatched_split_ids
     return report
 
 
