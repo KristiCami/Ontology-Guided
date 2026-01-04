@@ -1,6 +1,7 @@
 """Unit tests for ontology assembly helpers."""
 
 import unittest
+from unittest.mock import patch
 
 from rdflib import Graph, Literal, URIRef, OWL, RDF
 from rdflib.namespace import XSD
@@ -184,6 +185,49 @@ class SanitizeNumericLiteralsTests(unittest.TestCase):
         coerced = next(sanitized.objects(subject, predicate))
         self.assertIsNone(coerced.datatype)
         self.assertEqual(str(object_resource), str(coerced))
+
+
+class ReasonerFailureHandlingTests(unittest.TestCase):
+    def test_handles_pellet_errors_gracefully(self) -> None:
+        graph = Graph()
+        subject = URIRef("http://example.org/txn")
+        predicate = URIRef("http://example.org/requestedAmount")
+        graph.add((subject, predicate, Literal("amount")))
+
+        class DummyWorld:
+            def as_rdflib_graph(self) -> Graph:
+                copy = Graph()
+                for triple in graph:
+                    copy.add(triple)
+                return copy
+
+        class DummyOntology:
+            def __init__(self) -> None:
+                self.world = DummyWorld()
+
+            def load(self):
+                return self
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb) -> bool:
+                return False
+
+            def classes(self):
+                return []
+
+        with patch("og_nsd.reasoning.get_ontology", return_value=DummyOntology()), patch(
+            "og_nsd.reasoning.sync_reasoner_pellet", side_effect=RuntimeError("pellet failure")
+        ):
+            reasoner = OwlreadyReasoner(enabled=True)
+            result = reasoner.run(graph)
+
+        self.assertTrue(result.report.enabled)
+        self.assertIsNone(result.report.consistent)
+        self.assertEqual([], result.report.unsatisfiable_classes)
+        self.assertIn("Pellet failed: pellet failure", result.report.notes)
+        self.assertEqual(len(graph), len(result.expanded_graph))
 
 
 if __name__ == "__main__":
