@@ -49,11 +49,14 @@ class OwlreadyReasoner:
         """
 
         base_graph, coerced_literals = _sanitize_numeric_literals(graph)
+        base_graph, stripped_restrictions = _strip_invalid_restrictions(base_graph)
         notes: List[str] = []
         if coerced_literals:
             notes.append(
                 f"Coerced {coerced_literals} invalid literal(s) or datatype-property values to xsd:string for reasoning."
             )
+        if stripped_restrictions:
+            notes.append(f"Removed {stripped_restrictions} invalid restriction(s) before reasoning.")
 
         if not self.enabled or get_ontology is None:
             notes.append("Reasoner disabled or owlready2 unavailable.")
@@ -77,15 +80,26 @@ class OwlreadyReasoner:
             unsat = []
             expanded_graph = base_graph
         else:
-            with onto:
-                sync_reasoner_pellet(infer_property_values=True, infer_data_property_values=True)
-            unsat = [
-                cls.name
-                for cls in onto.classes()
-                if any(str(eq) == "Nothing" for eq in cls.equivalent_to)
-            ]
-            consistent = True
-            expanded_graph = onto.world.as_rdflib_graph()
+            try:
+                with onto:
+                    sync_reasoner_pellet(infer_property_values=True, infer_data_property_values=True)
+                unsat = [
+                    cls.name
+                    for cls in onto.classes()
+                    if any(str(eq) == "Nothing" for eq in cls.equivalent_to)
+                ]
+                consistent = True
+                expanded_graph = onto.world.as_rdflib_graph()
+            except Exception as exc:  # pragma: no cover - exercised via mocks in tests
+                notes.append(f"Pellet failed: {exc}")
+                report = ReasonerReport(
+                    True,
+                    consistent,
+                    [],
+                    " ".join(notes),
+                    backend=self.backend,
+                )
+                return ReasonerResult(report=report, expanded_graph=base_graph)
 
         report = ReasonerReport(True, consistent, unsat, " ".join(notes), backend=self.backend)
         return ReasonerResult(report=report, expanded_graph=expanded_graph)
@@ -136,6 +150,53 @@ def _sanitize_numeric_literals(graph: Graph) -> Tuple[Graph, int]:
         sanitized.add(triple)
 
     return sanitized, fixes
+
+
+def _strip_invalid_restrictions(graph: Graph) -> Tuple[Graph, int]:
+    """Remove malformed OWL restrictions that Pellet cannot handle.
+
+    Some LLM outputs create ``owl:Restriction`` nodes that combine
+    ``owl:onProperty`` with unsupported constructs such as ``owl:complementOf``,
+    or omit a filler/cardinality. Pellet treats these as fatal errors, so we
+    defensively drop the offending blank nodes (and any triples that reference
+    them) before invoking the reasoner.
+    """
+
+    valid_fillers = {
+        OWL.someValuesFrom,
+        OWL.allValuesFrom,
+        OWL.hasValue,
+        OWL.minCardinality,
+        OWL.maxCardinality,
+        OWL.cardinality,
+        OWL.qualifiedCardinality,
+        OWL.minQualifiedCardinality,
+        OWL.maxQualifiedCardinality,
+    }
+
+    invalid_nodes: set = set()
+    for restriction in graph.subjects(RDF.type, OWL.Restriction):
+        on_props = list(graph.objects(restriction, OWL.onProperty))
+        has_filler = any(graph.objects(restriction, filler) for filler in valid_fillers)
+        has_complement = any(graph.objects(restriction, OWL.complementOf))
+        if len(on_props) != 1 or not has_filler or has_complement:
+            invalid_nodes.add(restriction)
+
+    if not invalid_nodes:
+        return graph, 0
+
+    filtered = Graph()
+    for prefix, uri in graph.namespace_manager.namespaces():
+        filtered.bind(prefix, uri)
+
+    removed = 0
+    for triple in graph:
+        if triple[0] in invalid_nodes or triple[2] in invalid_nodes:
+            removed += 1
+            continue
+        filtered.add(triple)
+
+    return filtered, removed
 
 
 def _is_valid_numeric_literal(literal: Literal) -> bool:
