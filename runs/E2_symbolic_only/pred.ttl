@@ -4,101 +4,75 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-atm:AccountOkMessage a owl:Class ;
-    owl:equivalentClass [ a owl:Class ;
-            owl:intersectionOf ( atm:Message [ a owl:Restriction ;
-                        owl:onProperty atm:isSentBy ;
-                        owl:someValuesFrom atm:BankComputer ] [ a owl:Restriction ;
-                        owl:onProperty atm:isSentTo ;
-                        owl:someValuesFrom atm:ATM ] [ a owl:Restriction ;
-                        owl:hasValue true ;
-                        owl:onProperty atm:hasCashCardValidity ] [ a owl:Restriction ;
-                        owl:hasValue true ;
-                        owl:onProperty atm:hasPasswordValidity ] [ a owl:Restriction ;
-                        owl:hasValue false ;
-                        owl:onProperty atm:hasAccountProblem ] ) ] .
-
-atm:AccountProblemMessage a owl:Class ;
-    owl:equivalentClass [ a owl:Class ;
-            owl:intersectionOf ( atm:Message [ a owl:Restriction ;
-                        owl:onProperty atm:isSentBy ;
-                        owl:someValuesFrom atm:Bank ] [ a owl:Restriction ;
-                        owl:onProperty atm:isSentTo ;
-                        owl:someValuesFrom atm:ATM ] [ a owl:Restriction ;
-                        owl:hasValue true ;
-                        owl:onProperty atm:hasCashCardValidity ] [ a owl:Restriction ;
-                        owl:hasValue true ;
-                        owl:onProperty atm:hasPasswordValidity ] [ a owl:Restriction ;
-                        owl:hasValue true ;
-                        owl:onProperty atm:hasAccountProblem ] ) ] .
-
-atm:AccountUpdatedAfterDispense a owl:Class ;
-    owl:equivalentClass [ a owl:Class ;
-            owl:intersectionOf ( atm:AccountUpdate [ a owl:Restriction ;
-                        owl:onProperty atm:updatesAccount ;
-                        owl:someValuesFrom atm:Account ] [ a owl:Restriction ;
-                        owl:onProperty atm:hasPrecedingEvent ;
-                        owl:someValuesFrom atm:MoneyDispense ] ) ] .
-
 atm:AmountExceedsTransactionPolicy rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty atm:triggers ;
             owl:someValuesFrom atm:TransactionRestart ] .
 
-atm:BankAccountCashCardLimitPolicy a owl:Class ;
+atm:Bank a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom [ a owl:Class ;
+                    owl:unionOf ( atm:BankComputer atm:BankSoftware ) ] ;
+            owl:onProperty atm:providesSecurityFor ],
+        [ a owl:Restriction ;
+            owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+            owl:onClass atm:ATM ;
+            owl:onProperty atm:processesTransactionsFrom ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:hasLimitK ;
+            owl:someValuesFrom xsd:decimal ] .
+
+atm:FR5Situation a owl:Class ;
     owl:equivalentClass [ a owl:Class ;
-            owl:intersectionOf ( atm:LimitPolicy [ a owl:Restriction ;
-                        owl:onProperty atm:isDefinedBy ;
-                        owl:someValuesFrom atm:Bank ] [ a owl:Restriction ;
-                        owl:onProperty atm:appliesToAccount ;
-                        owl:someValuesFrom atm:Account ] [ a owl:Restriction ;
-                        owl:onProperty atm:hasLimitK ;
-                        owl:someValuesFrom xsd:decimal ] [ a owl:Restriction ;
-                        owl:onProperty atm:hasLimitPeriod ;
-                        owl:someValuesFrom atm:DayOrMonth ] [ a owl:Restriction ;
-                        owl:hasValue atm:CashCard ;
-                        owl:onProperty atm:concernsChannel ] ) ] .
+            owl:intersectionOf ( atm:ValidCashCard atm:ValidPassword atm:AccountProblem [ a owl:Restriction ;
+                        owl:onProperty atm:triggers ;
+                        owl:someValuesFrom atm:BankSendsMessageToATM ] ) ] .
 
-atm:FunctionalRequirement1 a owl:NamedIndividual ;
-    atm:text "If ATM is initialized with t dollars and parameters k,m,n are entered, then parameters are set."^^xsd:string ;
-    atm:title "Functional requirement 1"^^xsd:string .
+atm:FR6Situation a owl:Class ;
+    owl:equivalentClass [ a owl:Class ;
+            owl:intersectionOf ( atm:ValidCashCard atm:ValidPassword [ a owl:Class ;
+                        owl:complementOf atm:AccountProblem ] [ a owl:Restriction ;
+                        owl:onProperty atm:triggers ;
+                        owl:someValuesFrom atm:BankComputerSendsOkMessageToATM ] ) ] .
 
-atm:FunctionalRequirement2 a owl:NamedIndividual ;
-    atm:text "If no cash card is in the ATM, the system should display initial display."^^xsd:string ;
-    atm:title "Functional requirement 2"^^xsd:string .
+atm:FR7Situation a owl:Class ;
+    owl:equivalentClass [ a owl:Class ;
+            owl:intersectionOf ( atm:Request [ a owl:Restriction ;
+                        owl:onProperty atm:followedBy ;
+                        owl:someValuesFrom atm:BankComputerProcessesTransaction ] ) ] .
 
-atm:FunctionalRequirement3 a owl:NamedIndividual ;
-    atm:text "If the ATM is running out of money, no card should be accepted. An error message is displayed."^^xsd:string ;
-    atm:title "Functional requirement 3"^^xsd:string .
+atm:FR8Situation a owl:Class ;
+    owl:equivalentClass [ a owl:Class ;
+            owl:intersectionOf ( atm:MoneyDispensed [ a owl:Restriction ;
+                        owl:onProperty atm:followedBy ;
+                        owl:someValuesFrom atm:AccountUpdated ] ) ] .
 
-atm:FunctionalRequirement4 a owl:NamedIndividual ;
-    atm:text "The ATM checks if the entered card is valid. If not, it displays an error message and returns the card."^^xsd:string ;
-    atm:title "Functional requirement 4"^^xsd:string .
+atm:FunctionalRequirement1 a atm:FunctionalRequirement,
+        owl:NamedIndividual ;
+    atm:hasText "If ATM is initialized with t dollars and parameters k,m,n are entered, then parameters are set."^^xsd:string ;
+    atm:hasTitle "Functional requirement 1"^^xsd:string .
 
-atm:FunctionalRequirement5 a owl:NamedIndividual ;
-    atm:text "If the cash card is valid, the ATM should read the serial number and bank code."^^xsd:string ;
-    atm:title "Functional requirement 5"^^xsd:string .
+atm:FunctionalRequirement16 a atm:FunctionalRequirement,
+        owl:NamedIndividual .
 
-atm:InvalidBankCode rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:triggers ;
-            owl:someValuesFrom [ a owl:Class ;
-                    owl:intersectionOf ( atm:Message [ a owl:Restriction ;
-                                owl:onProperty atm:sentBy ;
-                                owl:someValuesFrom atm:BankComputer ] [ a owl:Restriction ;
-                                owl:onProperty atm:sentTo ;
-                                owl:someValuesFrom atm:ATM ] ) ] ],
-        atm:BankCode ;
-    owl:disjointWith atm:ValidBankCode .
+atm:FunctionalRequirement2 a atm:FunctionalRequirement,
+        owl:NamedIndividual ;
+    atm:hasText "If no cash card is in the ATM, the system should display initial display."^^xsd:string ;
+    atm:hasTitle "Functional requirement 2"^^xsd:string .
 
-atm:InvalidPassword rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:triggers ;
-            owl:someValuesFrom [ a owl:Class ;
-                    owl:intersectionOf ( atm:Message [ a owl:Restriction ;
-                                owl:onProperty atm:sentBy ;
-                                owl:someValuesFrom atm:BankComputer ] [ a owl:Restriction ;
-                                owl:onProperty atm:sentTo ;
-                                owl:someValuesFrom atm:ATM ] ) ] ],
-        atm:Password ;
-    owl:disjointWith atm:ValidPassword .
+atm:FunctionalRequirement3 a atm:FunctionalRequirement,
+        owl:NamedIndividual ;
+    atm:hasText "If the ATM is running out of money, no card should be accepted. An error message is displayed."^^xsd:string ;
+    atm:hasTitle "Functional requirement 3"^^xsd:string .
+
+atm:FunctionalRequirement4 a atm:FunctionalRequirement,
+        owl:NamedIndividual ;
+    atm:hasText "The ATM checks if the entered card is valid. If not, it displays an error message and returns the card."^^xsd:string ;
+    atm:hasTitle "Functional requirement 4"^^xsd:string .
+
+atm:FunctionalRequirement5 a atm:FunctionalRequirement,
+        owl:NamedIndividual ;
+    atm:hasText "If the cash card is valid, the ATM should read the serial number and bank code."^^xsd:string ;
+    atm:hasTitle "Functional requirement 5"^^xsd:string .
 
 atm:SuccessfulAuthorization rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty atm:triggers ;
@@ -118,62 +92,21 @@ atm:System rdfs:subClassOf [ a owl:Restriction ;
                     owl:onDatatype xsd:decimal ;
                     owl:withRestrictions ( [ xsd:minInclusive 30.0 ] ) ] ] .
 
-atm:TransactionNotSuccessful rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:displays ;
-            owl:someValuesFrom atm:ErrorMessage ],
-        [ a owl:Restriction ;
-            owl:onProperty atm:ejects ;
-            owl:someValuesFrom atm:Card ],
-        atm:Transaction .
+atm:ATM rdfs:subClassOf [ a owl:Class ;
+            owl:equivalentClass [ a owl:Class ;
+                    owl:intersectionOf ( [ a owl:Restriction ;
+                                owl:hasValue true ;
+                                owl:onProperty atm:dispensesMoney ] [ a owl:Restriction ;
+                                owl:hasValue true ;
+                                owl:onProperty atm:withdrawalProcessedAndAccepted ] ) ] ] .
 
-atm:TransactionProcessedAfterRequest a owl:Class ;
-    owl:equivalentClass [ a owl:Class ;
-            owl:intersectionOf ( atm:Transaction [ a owl:Restriction ;
-                        owl:onProperty atm:isProcessedBy ;
-                        owl:someValuesFrom atm:BankComputer ] [ a owl:Restriction ;
-                        owl:onProperty atm:hasPrecedingEvent ;
-                        owl:someValuesFrom atm:Request ] ) ] .
-
-atm:Card rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:isRejectedWith ;
-            owl:someValuesFrom atm:ErrorMessage ] .
-
-atm:ValidPassword rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:isPasswordFor ;
-            owl:someValuesFrom [ a owl:Class ;
-                    owl:intersectionOf ( atm:CashCard [ a owl:Restriction ;
-                                owl:onProperty atm:hasBankCode ;
-                                owl:someValuesFrom atm:ValidBankCode ] ) ] ],
-        atm:Password .
+atm:BankComputer rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:responseTimeout ;
+            owl:someValuesFrom [ a rdfs:Datatype ;
+                    owl:onDatatype xsd:decimal ;
+                    owl:withRestrictions ( [ xsd:maxInclusive 120.0 ] ) ] ] .
 
 atm:MoneyDispensing rdfs:subClassOf [ a owl:Restriction ;
             owl:onProperty atm:triggers ;
-            owl:someValuesFrom atm:AmountLogged ] .
-
-atm:ValidBankCode rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:isBankCodeOf ;
-            owl:someValuesFrom [ a owl:Class ;
-                    owl:intersectionOf ( atm:CashCard [ a owl:Restriction ;
-                                owl:onProperty atm:issuedBy ;
-                                owl:someValuesFrom atm:Bank ] ) ] ],
-        atm:BankCode .
-
-atm:Bank rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom [ a owl:Class ;
-                    owl:unionOf ( atm:BankComputer atm:BankSoftware ) ] ;
-            owl:onProperty atm:providesSecurityFor ],
-        [ a owl:Restriction ;
-            owl:minQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
-            owl:onClass atm:ATM ;
-            owl:onProperty atm:processesTransactionsFrom ] .
-
-atm:ATM rdfs:subClassOf [ a owl:Restriction ;
-            owl:equivalentClass [ a owl:Restriction ;
-                    owl:onProperty atm:withdrawalProcessedAndAcceptedBy ;
-                    owl:someValuesFrom atm:Bank ] ;
-            owl:onProperty atm:dispensesMoney ] .
-
-atm:BankComputer rdfs:subClassOf [ a owl:Restriction ;
-            owl:hasValue 120.0 ;
-            owl:onProperty atm:responseTimeout ] .
+            owl:someValuesFrom atm:AmountLogging ] .
 
