@@ -1,5 +1,7 @@
 {
   "llm_notes": "Mapped 'If the transaction is not successful, an error message should be displayed and the card should be ejected.' \u2192 atm:ATM relatesTo atm:Transaction\nMapped 'The bank computer checks if the bank code is valid. A bank code is valid if the cash card was issued by the bank.' \u2192 atm:Bank relatesTo atm:CashCard\nMapped 'If it is not a valid bank code, the bank computer shall send a message to the ATM.' \u2192 atm:Bank relatesTo atm:RequirementTarget\nMapped 'The bank computer checks if the password is valid for a valid cash card.' \u2192 atm:Bank relatesTo atm:CashCard\nMapped 'If the password is invalid, the bank computer sends a message to the ATM.' \u2192 atm:Bank relatesTo atm:RequirementTarget",
+  "token_usage": null,
+  "few_shot_exemplars": null,
   "shacl": {
     "conforms": true,
     "text_report": "Validation Report\nConforms: True\n",
@@ -116,7 +118,8 @@
     "enabled": true,
     "consistent": true,
     "unsatisfiable_classes": [],
-    "notes": ""
+    "notes": "",
+    "backend": "pellet"
   },
   "iterations": [
     {
@@ -131,7 +134,8 @@
         "enabled": true,
         "consistent": true,
         "unsatisfiable_classes": [],
-        "notes": ""
+        "notes": "",
+        "backend": "pellet"
       },
       "cq_results": [
         {

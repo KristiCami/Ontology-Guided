@@ -1,6 +1,6 @@
 {
-  "pass_rate": 0.5714285714285714,
-  "passed": 12,
+  "pass_rate": 0.47619047619047616,
+  "passed": 10,
   "total": 21,
   "results": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "query": "# Withdrawals specialise the transaction concept (directly or indirectly)\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:Withdrawal rdfs:subClassOf+ atm:Transaction .\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
       "query": "# Deposits are also treated as transactions\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:Deposit rdfs:subClassOf+ atm:Transaction .\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {

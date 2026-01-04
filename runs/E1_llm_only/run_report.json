@@ -1,11 +1,11 @@
 {
   "mode": "draft_only",
-  "triples": 261,
+  "triples": 214,
   "llm_notes": "Generated via OpenAI chat.completions",
   "token_usage": {
     "prompt_tokens": 1128,
-    "completion_tokens": 797,
-    "total_tokens": 1925
+    "completion_tokens": 564,
+    "total_tokens": 1692
   },
   "drift_axioms_sample": [],
   "redundant_axioms_sample": []

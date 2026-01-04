@@ -3,42 +3,42 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 atm:ATM_dispenses_Transaction a owl:Axiom ;
-    atm:sourceRequirement "REQ-014" .
+    atm:sourceRequirement "FR-14" .
 
 atm:ATM_logs_CashCard a owl:Axiom ;
-    atm:sourceRequirement "REQ-006" .
+    atm:sourceRequirement "FR-6" .
 
 atm:ATM_logs_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "REQ-015" .
+    atm:sourceRequirement "FR-15" .
 
 atm:ATM_relatesTo_CashCard a owl:Axiom ;
-    atm:sourceRequirement "REQ-002",
-        "REQ-003",
-        "REQ-004" .
+    atm:sourceRequirement "FR-2",
+        "FR-3",
+        "FR-4" .
 
 atm:ATM_relatesTo_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "REQ-001",
-        "REQ-009",
-        "REQ-011" .
+    atm:sourceRequirement "FR-1",
+        "FR-11",
+        "FR-9" .
 
 atm:ATM_relatesTo_Transaction a owl:Axiom ;
-    atm:sourceRequirement "REQ-012",
-        "REQ-013",
-        "REQ-016" .
+    atm:sourceRequirement "FR-12",
+        "FR-13",
+        "FR-16" .
 
 atm:Bank_logs_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "REQ-008" .
+    atm:sourceRequirement "FR-8" .
 
 atm:Bank_relatesTo_CashCard a owl:Axiom ;
-    atm:sourceRequirement "REQ-005",
-        "REQ-010",
-        "REQ-017",
-        "REQ-019" .
+    atm:sourceRequirement "FR-1",
+        "FR-10",
+        "FR-3",
+        "FR-5" .
 
 atm:Bank_relatesTo_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "REQ-007",
-        "REQ-018",
-        "REQ-020" .
+    atm:sourceRequirement "FR-2",
+        "FR-4",
+        "FR-7" .
 
 atm:dispenses a owl:ObjectProperty ;
     rdfs:domain atm:ATM ;
