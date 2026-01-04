@@ -177,18 +177,9 @@ def _strip_invalid_restrictions(graph: Graph) -> Tuple[Graph, int]:
     invalid_nodes: set = set()
     for restriction in graph.subjects(RDF.type, OWL.Restriction):
         on_props = list(graph.objects(restriction, OWL.onProperty))
-        filler_terms = {filler: list(graph.objects(restriction, filler)) for filler in valid_fillers}
-        has_filler = any(values for values in filler_terms.values())
+        has_filler = any(graph.objects(restriction, filler) for filler in valid_fillers)
         has_complement = any(graph.objects(restriction, OWL.complementOf))
-
-        # SomeValues/AllValues/Min/Max/... fillers must be resources, not literals.
-        has_literal_filler = any(
-            any(isinstance(value, Literal) for value in values)
-            for predicate, values in filler_terms.items()
-            if predicate != OWL.hasValue  # hasValue can legitimately point to a literal
-        )
-
-        if len(on_props) != 1 or not has_filler or has_complement or has_literal_filler:
+        if len(on_props) != 1 or not has_filler or has_complement:
             invalid_nodes.add(restriction)
 
     if not invalid_nodes:
