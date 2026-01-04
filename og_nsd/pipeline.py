@@ -11,7 +11,7 @@ from .ontology import OntologyAssembler, load_schema_context
 from .queries import CompetencyQuestionRunner
 from .reasoning import OwlreadyReasoner
 from .reporting import build_report, save_report
-from .requirements import RequirementLoader, chunk_requirements
+from .requirements import RequirementLoader, chunk_requirements, load_split_ids
 from .shacl import ShaclValidator
 
 
@@ -50,12 +50,19 @@ class OntologyDraftingPipeline:
         return HeuristicLLM(base_namespace=config.base_namespace)
 
     def run(self) -> dict:
-        loader = RequirementLoader(self.config.requirements_path)
+        dev_ids = load_split_ids(self.config.dev_split_path)
+        test_ids = load_split_ids(self.config.test_split_path)
+        loader = RequirementLoader(self.config.requirements_path, dev_ids=dev_ids, test_ids=test_ids)
         requirements = loader.load(self.config.max_requirements)
+        exemplar_pool = (
+            [req for req in requirements if req.split == "dev"][:6] if dev_ids else None
+        )
         state = self.assembler.bootstrap()
         llm_response: Optional[LLMResponse] = None
         for batch in chunk_requirements(requirements, size=5):
-            llm_response = self.llm.generate_axioms(batch, schema_context=self.schema_context)
+            llm_response = self.llm.generate_axioms(
+                batch, schema_context=self.schema_context, exemplars=exemplar_pool
+            )
             self.assembler.add_turtle(state, llm_response.turtle)
         if llm_response is None:
             raise RuntimeError("LLM returned no axioms")
@@ -110,6 +117,7 @@ class OntologyDraftingPipeline:
             reasoner_report=iteration_reports[-1]["reasoner"],
             iterations=iteration_reports,
             patch_notes=patch_notes,
+            unmatched_split_ids=sorted(loader.unmatched_split_ids),
         )
         self.assembler.serialize(state, self.config.output_path)
         self.state_graph = state.graph

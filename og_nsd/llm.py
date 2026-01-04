@@ -31,6 +31,7 @@ class LLMResponse:
     turtle: str
     reasoning_notes: str
     token_usage: Dict[str, int] | None = None
+    exemplar_ids: List[str] | None = None
 
 
 class LLMClient(abc.ABC):
@@ -38,7 +39,10 @@ class LLMClient(abc.ABC):
 
     @abc.abstractmethod
     def generate_axioms(
-        self, requirements: Sequence[Requirement], schema_context: SchemaContext | None = None
+        self,
+        requirements: Sequence[Requirement],
+        schema_context: SchemaContext | None = None,
+        exemplars: Sequence[Requirement] | None = None,
     ) -> LLMResponse:
         raise NotImplementedError
 
@@ -75,7 +79,10 @@ class HeuristicLLM(LLMClient):
         self.base_ns = base_namespace.rstrip("#/") + "#"
 
     def generate_axioms(
-        self, requirements: Sequence[Requirement], schema_context: SchemaContext | None = None
+        self,
+        requirements: Sequence[Requirement],
+        schema_context: SchemaContext | None = None,
+        exemplars: Sequence[Requirement] | None = None,
     ) -> LLMResponse:
         triples: List[str] = [
             f"@prefix atm: <{self.base_ns}> .",
@@ -97,7 +104,12 @@ class HeuristicLLM(LLMClient):
             )
             notes.append(f"Mapped '{req.text}' → atm:{subject} {prop} atm:{obj}")
         turtle = "\n".join(triples)
-        return LLMResponse(turtle=turtle, reasoning_notes="\n".join(notes))
+        exemplar_ids = [req.identifier for req in exemplars] if exemplars else None
+        return LLMResponse(
+            turtle=turtle,
+            reasoning_notes="\n".join(notes),
+            exemplar_ids=exemplar_ids,
+        )
 
     def generate_patch(self, prompts: Sequence[str], context_ttl: str) -> LLMResponse:
         """Emit a simple, deterministic patch guided by violation summaries.
@@ -219,11 +231,17 @@ class OpenAILLM(LLMClient):
         self.system_prompt = system_prompt or self._default_system_prompt()
 
     def generate_axioms(
-        self, requirements: Sequence[Requirement], schema_context: SchemaContext | None = None
+        self,
+        requirements: Sequence[Requirement],
+        schema_context: SchemaContext | None = None,
+        exemplars: Sequence[Requirement] | None = None,
     ) -> LLMResponse:
         messages = [
             {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": self._build_prompt(requirements, schema_context)},
+            {
+                "role": "user",
+                "content": self._build_prompt(requirements, schema_context, exemplars),
+            },
         ]
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
@@ -240,6 +258,7 @@ class OpenAILLM(LLMClient):
             turtle=content,
             reasoning_notes="Generated via OpenAI chat.completions",
             token_usage=token_usage,
+            exemplar_ids=[req.identifier for req in exemplars] if exemplars else None,
         )
 
     def generate_patch(self, prompts: Sequence[str], context_ttl: str) -> LLMResponse:
@@ -288,8 +307,14 @@ class OpenAILLM(LLMClient):
             token_usage=token_usage,
         )
 
-    def _build_prompt(self, requirements: Sequence[Requirement], schema_context: SchemaContext | None) -> str:
+    def _build_prompt(
+        self,
+        requirements: Sequence[Requirement],
+        schema_context: SchemaContext | None,
+        exemplars: Sequence[Requirement] | None = None,
+    ) -> str:
         schema_section = self._format_schema_context(schema_context) if schema_context else ""
+        exemplar_section = self._format_few_shot_examples(exemplars) if exemplars else ""
 
         spec_section = (
             "SECTION B — Drafting Specification\n"
@@ -309,7 +334,9 @@ class OpenAILLM(LLMClient):
         joined = "\n\n".join(body)
 
         requirements_section = f"SECTION C — Requirements Input\n{joined}"
-        return "\n\n".join(filter(None, [schema_section, spec_section, requirements_section]))
+        return "\n\n".join(
+            filter(None, [schema_section, spec_section, exemplar_section, requirements_section])
+        )
 
     def _format_schema_context(self, schema_context: SchemaContext) -> str:
         lines = ["SECTION A — Allowed Vocabulary (schema constraints)"]
@@ -340,6 +367,35 @@ class OpenAILLM(LLMClient):
                 lines.append(f"- {term}: {label}")
 
         return "\n".join(lines)
+
+    def _format_few_shot_examples(self, exemplars: Sequence[Requirement]) -> str:
+        if not exemplars:
+            return ""
+
+        blocks: List[str] = ["FEW-SHOT EXAMPLES (dev only):"]
+        for exemplar in exemplars:
+            blocks.append(f"[{exemplar.identifier}] {exemplar.text}")
+            axioms_block = self._render_exemplar_axioms(exemplar)
+            if axioms_block:
+                blocks.append(axioms_block)
+            blocks.append("---")
+        return "\n".join(blocks).rstrip("-\n")
+
+    def _render_exemplar_axioms(self, exemplar: Requirement) -> str:
+        if exemplar.axioms is None:
+            return ""
+
+        sections: List[str] = []
+        for key in ("prefixes", "tbox", "abox"):
+            axioms = exemplar.axioms.get(key)
+            if not axioms:
+                continue
+            if isinstance(axioms, dict):
+                for prefix, uri in axioms.items():
+                    sections.append(f"@prefix {prefix}: <{uri}> .")
+            elif isinstance(axioms, list):
+                sections.extend(axioms)
+        return "\n".join(sections)
 
     def _default_system_prompt(self) -> str:
         return (

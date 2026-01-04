@@ -194,7 +194,7 @@ _BARE_XSD_DECIMAL_TOKEN_RE = re.compile(r"(?<!\^)\s+xsd:decimal\b")
 _PROPERTY_LIST_TYPE_MISUSE_RE = re.compile(
     r"^(\s*[A-Za-z][\w-]*:[\w-]+)\s+a\s+([A-Za-z][\w-]*:[\w-]+)(\s*[;,.].*)?$"
 )
-_CARET_BEFORE_QNAME_RE = re.compile(r"\^\s*([A-Za-z][\w-]*:)")
+_CARET_BEFORE_QNAME_RE = re.compile(r"(?<!\^)\^\s*([A-Za-z][\w-]*:)")
 
 
 def _sanitize_turtle(turtle: str) -> str:

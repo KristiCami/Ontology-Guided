@@ -43,6 +43,8 @@ def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
         action="store_true",
         help="Stop after the initial LLM draft and write the raw ontology without validation or repair",
     )
+    parser.add_argument("--dev-split", type=Path, help="Optional file containing dev requirement IDs")
+    parser.add_argument("--test-split", type=Path, help="Optional file containing test requirement IDs")
     args = parser.parse_args()
     return parser, args
 
@@ -66,6 +68,8 @@ def main() -> None:
         draft_only=args.draft_only,
         use_ontology_context=args.use_ontology_context,
         grounding_ontology_path=args.ontology_context,
+        dev_split_path=args.dev_split,
+        test_split_path=args.test_split,
     )
     pipeline = OntologyDraftingPipeline(config)
     report = pipeline.run()

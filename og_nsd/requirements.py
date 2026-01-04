@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Iterator, List, Sequence
@@ -14,9 +15,11 @@ class Requirement:
     identifier: str
     title: str
     text: str
+    axioms: dict | None
     boilerplate_prefix: str | None
     boilerplate_main: str | None
     boilerplate_suffix: str | None
+    split: str | None = None
 
     @property
     def boilerplate(self) -> str:
@@ -27,14 +30,21 @@ class Requirement:
 class RequirementLoader:
     """Loads requirement artifacts from JSON/JSONL files."""
 
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, dev_ids: set[str] | None = None, test_ids: set[str] | None = None) -> None:
         self.path = path
+        self.dev_ids = dev_ids or set()
+        self.test_ids = test_ids or set()
+        self.unmatched_split_ids: set[str] = set(self.dev_ids) | set(self.test_ids)
 
     def load(self, limit: int | None = None) -> List[Requirement]:
         records = list(self._iter_records())
         if limit is not None:
             records = records[:limit]
-        return [self._as_requirement(idx, rec) for idx, rec in enumerate(records, start=1)]
+        requirements: List[Requirement] = []
+        for idx, rec in enumerate(records, start=1):
+            requirement = self._as_requirement(idx, rec)
+            requirements.append(requirement)
+        return requirements
 
     def _iter_records(self) -> Iterator[dict]:
         text = self.path.read_text(encoding="utf-8").strip()
@@ -90,15 +100,54 @@ class RequirementLoader:
             return _iter()
 
     def _as_requirement(self, idx: int, record: dict) -> Requirement:
+        identifier = self._determine_identifier(idx, record)
+        split = self._resolve_split(identifier)
         boilerplate = record.get("boilerplate", {})
         return Requirement(
-            identifier=record.get("id") or f"REQ-{idx:03d}",
+            identifier=identifier,
             title=record.get("title", f"Requirement {idx}"),
             text=record.get("text", "").strip(),
+            axioms=record.get("axioms"),
             boilerplate_prefix=boilerplate.get("prefix"),
             boilerplate_main=boilerplate.get("main"),
             boilerplate_suffix=boilerplate.get("suffix"),
+            split=split,
         )
+
+    def _determine_identifier(self, idx: int, record: dict) -> str:
+        for key in ("id", "sentence_id", "identifier"):
+            if record.get(key):
+                return str(record[key])
+
+        meta_title = record.get("meta", {}).get("title")
+        if meta_title:
+            return self._normalize_title(str(meta_title))
+
+        if record.get("title"):
+            return self._normalize_title(str(record["title"]))
+
+        return f"REQ-{idx:03d}"
+
+    def _normalize_title(self, title: str) -> str:
+        match = re.search(r"(?:functional\s+requirement|fr)[\s_-]*(\d+)", title, flags=re.IGNORECASE)
+        if match:
+            return f"FR-{match.group(1)}"
+        return title.strip()
+
+    def _resolve_split(self, identifier: str) -> str | None:
+        if identifier in self.dev_ids:
+            self.unmatched_split_ids.discard(identifier)
+            return "dev"
+        if identifier in self.test_ids:
+            self.unmatched_split_ids.discard(identifier)
+            return "test"
+        return None
+
+
+def load_split_ids(path: Path | None) -> set[str]:
+    if path is None or not path.exists():
+        return set()
+    return {line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()}
 
 
 def chunk_requirements(requirements: Sequence[Requirement], size: int) -> Iterable[List[Requirement]]:
