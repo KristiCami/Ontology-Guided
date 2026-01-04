@@ -2,6 +2,8 @@
   "requirements_path": "baseline_requirements.jsonl",
   "shapes_path": "gold/shapes_atm.ttl",
   "ontology_path": "gold/atm_gold.ttl",
+  "llm_mode": "openai",
+  "temperature": 0.7,
   "max_requirements": 20,
   "output_root": "runs/E2_symbolic_only",
   "reasoning": true,
