@@ -1,12 +1,22 @@
 """Unit tests for ontology assembly helpers."""
 
 import unittest
+from pathlib import Path
+from unittest.mock import patch
+from tempfile import TemporaryDirectory
 
-from rdflib import Graph, Literal, URIRef, OWL, RDF
+from rdflib import BNode, Graph, Literal, URIRef, OWL, RDF
 from rdflib.namespace import XSD
 
+from og_nsd.config import PipelineConfig
+from og_nsd.llm import HeuristicLLM
 from og_nsd.ontology import _ensure_standard_prefixes, _sanitize_turtle
-from og_nsd.reasoning import OwlreadyReasoner, _sanitize_numeric_literals
+from og_nsd.reasoning import (
+    OwlreadyReasoner,
+    _sanitize_numeric_literals,
+    _strip_invalid_restrictions,
+)
+from og_nsd.pipeline import OntologyDraftingPipeline
 
 
 class EnsureStandardPrefixesTests(unittest.TestCase):
@@ -184,6 +194,100 @@ class SanitizeNumericLiteralsTests(unittest.TestCase):
         coerced = next(sanitized.objects(subject, predicate))
         self.assertIsNone(coerced.datatype)
         self.assertEqual(str(object_resource), str(coerced))
+
+
+class ReasonerFailureHandlingTests(unittest.TestCase):
+    def test_handles_pellet_errors_gracefully(self) -> None:
+        graph = Graph()
+        subject = URIRef("http://example.org/txn")
+        predicate = URIRef("http://example.org/requestedAmount")
+        graph.add((subject, predicate, Literal("amount")))
+
+        class DummyWorld:
+            def as_rdflib_graph(self) -> Graph:
+                copy = Graph()
+                for triple in graph:
+                    copy.add(triple)
+                return copy
+
+        class DummyOntology:
+            def __init__(self) -> None:
+                self.world = DummyWorld()
+
+            def load(self):
+                return self
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb) -> bool:
+                return False
+
+            def classes(self):
+                return []
+
+        with patch("og_nsd.reasoning.get_ontology", return_value=DummyOntology()), patch(
+            "og_nsd.reasoning.sync_reasoner_pellet", side_effect=RuntimeError("pellet failure")
+        ):
+            reasoner = OwlreadyReasoner(enabled=True)
+            result = reasoner.run(graph)
+
+        self.assertTrue(result.report.enabled)
+        self.assertIsNone(result.report.consistent)
+        self.assertEqual([], result.report.unsatisfiable_classes)
+        self.assertIn("Pellet failed: pellet failure", result.report.notes)
+        self.assertEqual(len(graph), len(result.expanded_graph))
+
+
+class RestrictionSanitizationTests(unittest.TestCase):
+    def test_removes_invalid_restrictions(self) -> None:
+        graph = Graph()
+        restriction = BNode()
+        subject = URIRef("http://example.org/ValidTransaction")
+        prop = URIRef("http://example.org/hasAccountProblem")
+        graph.add((restriction, RDF.type, OWL.Restriction))
+        graph.add((restriction, OWL.onProperty, prop))
+        graph.add((restriction, OWL.complementOf, URIRef("http://example.org/AccountProblem")))
+        graph.add((subject, OWL.equivalentClass, restriction))
+
+        sanitized, removed = _strip_invalid_restrictions(graph)
+
+        self.assertEqual(4, removed)
+        self.assertEqual(0, len(list(sanitized.subjects(RDF.type, OWL.Restriction))))
+        self.assertEqual(0, len(list(sanitized.objects(subject, OWL.equivalentClass))))
+
+
+class LLMSelectionTests(unittest.TestCase):
+    def _build_config(self, tmpdir: str) -> PipelineConfig:
+        base = Path(tmpdir)
+        return PipelineConfig(
+            requirements_path=base / "reqs.jsonl",
+            shapes_path=None,
+            base_ontology_path=None,
+            competency_questions_path=None,
+            output_path=base / "out.ttl",
+            report_path=None,
+            llm_mode="openai",
+            intermediate_dir=base / "intermediate",
+        )
+
+    def test_falls_back_to_heuristic_when_api_key_missing(self) -> None:
+        with TemporaryDirectory() as tmpdir, patch.dict("os.environ", {}, clear=True):
+            config = self._build_config(tmpdir)
+            pipeline = OntologyDraftingPipeline(config)
+
+        self.assertIsInstance(pipeline.llm, HeuristicLLM)
+
+    def test_uses_openai_when_api_key_present(self) -> None:
+        sentinel = object()
+        with TemporaryDirectory() as tmpdir, patch.dict(
+            "os.environ", {"OPENAI_API_KEY": "test-key"}, clear=True
+        ), patch("og_nsd.pipeline.OpenAILLM", return_value=sentinel) as openai_mock:
+            config = self._build_config(tmpdir)
+            pipeline = OntologyDraftingPipeline(config)
+
+        openai_mock.assert_called_once()
+        self.assertIs(pipeline.llm, sentinel)
 
 
 if __name__ == "__main__":
