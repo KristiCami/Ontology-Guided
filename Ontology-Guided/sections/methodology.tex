@@ -26,51 +26,51 @@ The pipeline can be formally described using the following pseudocode.
 \begin{algorithm}[htbp]
 \caption{Ontology--Guided Neuro--Symbolic Drafting (OG--NSD)}
 \begin{algorithmic}[1]
-\REQUIRE $R$: requirements documents; $O$: preloaded ontolo\-gies; $S$: SHACL shapes; $\iota$: base IRI; $L$: LLM; $K_{max}$: max repair iterations
-\ENSURE Validated ontology $G^{*}$, SHACL report
-\STATE $T \leftarrow$ LoadAndSegment($R$)
-\STATE $A \leftarrow$ ExtractAvailableTerms($O$)
-\STATE $G \leftarrow \emptyset$
-\FOR{each sentence $s \in T$}
-\STATE $p \leftarrow$ Prompt($L, s, A$)
-\STATE $\tau \leftarrow L$.GenerateOWL($p$)
-\STATE $G \leftarrow$ Merge($G$, ParseTurtle($\tau$))
-\ENDFOR
-\IF{Reasoning enabled}
-\STATE $G \leftarrow$ RunReasoner($G$)
-\ENDIF
-\STATE $(conforms, report) \leftarrow$ SHACLValidate($G, S$)
-\STATE $k \leftarrow 0$
-\WHILE{$\neg conforms$ and $k < K_{max}$}
-\STATE $V \leftarrow$ ExtractViolations(report)
-\STATE $R_{q} \leftarrow$ SynthesizeRepairPrompts($V, G, A$)
-\FOR{each repair prompt $r \in R_{q}$}
-\STATE $\tau' \leftarrow L$.GenerateOWL($r$)
-\STATE $G \leftarrow$ Merge($G$, ParseTurtle($\tau'$))
-\ENDFOR
-\IF{Reasoning enabled}
-\STATE $G \leftarrow$ RunReasoner($G$)
-\ENDIF
-\STATE $(conforms, report) \leftarrow$ SHACLValidate($G, S$)
-\STATE $k \leftarrow k + 1$
-\ENDWHILE
-\STATE \textbf{return} $G$, report
+\Require $R$: requirements documents; $O$: preloaded ontolo\-gies; $S$: SHACL shapes; $\iota$: base IRI; $L$: LLM; $K_{max}$: max repair iterations
+\Ensure Validated ontology $G^{*}$, SHACL report
+\State $T \leftarrow$ LoadAndSegment($R$)
+\State $A \leftarrow$ ExtractAvailableTerms($O$)
+\State $G \leftarrow \emptyset$
+\For{each sentence $s \in T$}
+\State $p \leftarrow$ Prompt($L, s, A$)
+\State $\tau \leftarrow L$.GenerateOWL($p$)
+\State $G \leftarrow$ Merge($G$, ParseTurtle($\tau$))
+\EndFor
+\If{Reasoning enabled}
+\State $G \leftarrow$ RunReasoner($G$)
+\EndIf
+\State $(conforms, report) \leftarrow$ SHACLValidate($G, S$)
+\State $k \leftarrow 0$
+\While{$\neg conforms$ and $k < K_{max}$}
+\State $V \leftarrow$ ExtractViolations(report)
+\State $R_{q} \leftarrow$ SynthesizeRepairPrompts($V, G, A$)
+\For{each repair prompt $r \in R_{q}$}
+\State $\tau' \leftarrow L$.GenerateOWL($r$)
+\State $G \leftarrow$ Merge($G$, ParseTurtle($\tau'$))
+\EndFor
+\If{Reasoning enabled}
+\State $G \leftarrow$ RunReasoner($G$)
+\EndIf
+\State $(conforms, report) \leftarrow$ SHACLValidate($G, S$)
+\State $k \leftarrow k + 1$
+\EndWhile
+\State \Return $G$, report
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}[htbp]
 \caption{Violation $\rightarrow$ Repair Prompt Synthesis}
 \begin{algorithmic}[1]
-\REQUIRE $V$: SHACL/Reasoner violations; $G$: current ontol\-ogy; $A$: available terms
-\ENSURE $R_{q}$: set of repair prompts for the LLM
-\STATE $R_{q} \leftarrow \emptyset$
-\FOR{each violation $v \in V$}
-\STATE $ctx \leftarrow$ ExtractLocalContext($G, v$)
-\STATE $expl \leftarrow$ CanonicalizeViolation($v$)
-\STATE $hint \leftarrow$ SelectTerms($A, ctx$)
-\STATE $r \leftarrow$ FormatPrompt($expl, ctx, hint$)
-\STATE $R_{q} \leftarrow R_{q} \cup \{r\}$
-\ENDFOR
-\STATE \textbf{return} $R_{q}$
+\Require $V$: SHACL/Reasoner violations; $G$: current ontol\-ogy; $A$: available terms
+\Ensure $R_{q}$: set of repair prompts for the LLM
+\State $R_{q} \leftarrow \emptyset$
+\For{each violation $v \in V$}
+\State $ctx \leftarrow$ ExtractLocalContext($G, v$)
+\State $expl \leftarrow$ CanonicalizeViolation($v$)
+\State $hint \leftarrow$ SelectTerms($A, ctx$)
+\State $r \leftarrow$ FormatPrompt($expl, ctx, hint$)
+\State $R_{q} \leftarrow R_{q} \cup \{r\}$
+\EndFor
+\State \Return $R_{q}$
 \end{algorithmic}
 \end{algorithm}
