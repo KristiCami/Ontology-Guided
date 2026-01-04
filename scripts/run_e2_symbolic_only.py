@@ -40,6 +40,7 @@ def main() -> None:
     output_root = PROJECT_ROOT / cfg.get("output_root", "runs/E2_symbolic_only")
     ensure_dir(output_root)
 
+    temperature = cfg.get("temperature", 0.7)
     pipeline_config = PipelineConfig(
         requirements_path=PROJECT_ROOT / cfg["requirements_path"],
         shapes_path=PROJECT_ROOT / cfg["shapes_path"],
@@ -49,7 +50,8 @@ def main() -> None:
         else None,
         output_path=output_root / "pred.ttl",
         report_path=output_root / "run_report.json",
-        llm_mode="heuristic",
+        llm_mode=cfg.get("llm_mode", "openai"),
+        llm_temperature=temperature,
         max_requirements=cfg.get("max_requirements", 20),
         reasoning_enabled=cfg.get("reasoning", True),
         max_iterations=cfg.get("iterations", 0),
