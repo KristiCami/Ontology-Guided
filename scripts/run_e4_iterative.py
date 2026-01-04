@@ -36,10 +36,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--stop-policies",
         type=str,
-        default="default",
+        default=None,
         help=(
             "Comma-separated list of stop policies to sweep. "
-            "Supported: default,hard_and_cq,ignore_no_hard,max_only."
+            "Supported: default,hard_and_cq,ignore_no_hard,max_only. "
+            "Defaults to config stop_policies (or stop_policy) when omitted."
         ),
     )
     parser.add_argument(
@@ -87,13 +88,24 @@ def _count_patch_types(patches):
     return counts
 
 
+def _normalize_stop_policies(raw) -> list[str]:
+    if raw is None:
+        return []
+    if isinstance(raw, str):
+        items = raw.split(",")
+    else:
+        items = raw
+    return [str(item).strip() for item in items if str(item).strip()]
+
+
 def main() -> None:
     args = parse_args()
     cfg = load_config(args.config)
     base_ns = cfg.get("base_namespace", "http://lod.csd.auth.gr/atm/atm.ttl#")
-    stop_policies = [policy.strip() for policy in args.stop_policies.split(",") if policy.strip()]
-    if not stop_policies:
-        stop_policies = ["default"]
+
+    cli_stop_policies = _normalize_stop_policies(args.stop_policies)
+    config_stop_policies = _normalize_stop_policies(cfg.get("stop_policies") or cfg.get("stop_policy"))
+    stop_policies = cli_stop_policies or config_stop_policies or ["hard_and_cq"]
 
     output_root_base = PROJECT_ROOT / cfg.get("output_root", "runs/E4_full")
     if args.output_root:

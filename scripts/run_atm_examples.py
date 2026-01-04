@@ -12,7 +12,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from og_nsd import OntologyDraftingPipeline, PipelineConfig  # noqa: E402
-from og_nsd.metrics import compute_exact_metrics, compute_semantic_metrics  # noqa: E402
+from og_nsd.metrics import (  # noqa: E402
+    compute_exact_metrics_from_graphs,
+    compute_semantic_metrics,
+)
 from og_nsd.queries import CompetencyQuestionRunner  # noqa: E402
 from og_nsd.shacl import ShaclValidator, summarize_shacl_report  # noqa: E402
 from rdflib import Graph  # noqa: E402
@@ -79,15 +82,16 @@ def main() -> None:
         summary_path.write_text(json.dumps(summarize_shacl_report(shacl_report), indent=2), encoding="utf-8")
 
     gold_path = PROJECT_ROOT / cfg.get("gold_path", "gold/atm_gold.ttl")
+    gold_graph = Graph().parse(gold_path)
     exact_metrics_path = output_root / "metrics_exact.json"
     semantic_metrics_path = output_root / "metrics_semantic.json"
     exact_metrics_path.write_text(
-        json.dumps(compute_exact_metrics(pipeline_config.output_path, gold_path), indent=2),
+        json.dumps(compute_exact_metrics_from_graphs(data_graph, gold_graph), indent=2),
         encoding="utf-8",
     )
     semantic_metrics_path.write_text(
         json.dumps(
-            compute_semantic_metrics(data_graph, Graph().parse(gold_path)),
+            compute_semantic_metrics(data_graph, gold_graph),
             indent=2,
         ),
         encoding="utf-8",
