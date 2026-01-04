@@ -77,26 +77,15 @@ class OwlreadyReasoner:
             unsat = []
             expanded_graph = base_graph
         else:
-            try:
-                with onto:
-                    sync_reasoner_pellet(infer_property_values=True, infer_data_property_values=True)
-                unsat = [
-                    cls.name
-                    for cls in onto.classes()
-                    if any(str(eq) == "Nothing" for eq in cls.equivalent_to)
-                ]
-                consistent = True
-                expanded_graph = onto.world.as_rdflib_graph()
-            except Exception as exc:  # pragma: no cover - exercised via mocks in tests
-                notes.append(f"Pellet failed: {exc}")
-                report = ReasonerReport(
-                    True,
-                    consistent,
-                    [],
-                    " ".join(notes),
-                    backend=self.backend,
-                )
-                return ReasonerResult(report=report, expanded_graph=base_graph)
+            with onto:
+                sync_reasoner_pellet(infer_property_values=True, infer_data_property_values=True)
+            unsat = [
+                cls.name
+                for cls in onto.classes()
+                if any(str(eq) == "Nothing" for eq in cls.equivalent_to)
+            ]
+            consistent = True
+            expanded_graph = onto.world.as_rdflib_graph()
 
         report = ReasonerReport(True, consistent, unsat, " ".join(notes), backend=self.backend)
         return ReasonerResult(report=report, expanded_graph=expanded_graph)
