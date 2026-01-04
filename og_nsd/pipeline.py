@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-import os
 from pathlib import Path
 from typing import Optional
 
@@ -41,19 +40,13 @@ class OntologyDraftingPipeline:
 
     def _select_llm(self, config: PipelineConfig) -> LLMClient:
         if config.llm_mode == "openai":
-            api_key = os.getenv("OPENAI_API_KEY")
-            if api_key:
-                try:
-                    return OpenAILLM(temperature=config.llm_temperature)
-                except RuntimeError:
-                    logging.warning(
-                        "openai package missing; falling back to heuristic LLM for offline execution"
-                    )
-                    return HeuristicLLM(base_namespace=config.base_namespace)
-            logging.warning(
-                "OPENAI_API_KEY not set; falling back to heuristic LLM for offline execution"
-            )
-            return HeuristicLLM(base_namespace=config.base_namespace)
+            try:
+                return OpenAILLM(temperature=config.llm_temperature)
+            except RuntimeError:
+                logging.warning(
+                    "openai package missing; falling back to heuristic LLM for offline execution"
+                )
+                return HeuristicLLM(base_namespace=config.base_namespace)
         return HeuristicLLM(base_namespace=config.base_namespace)
 
     def run(self) -> dict:
