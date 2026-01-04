@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 from rdflib import Graph
 
@@ -96,6 +97,45 @@ def _normalize_stop_policies(raw) -> list[str]:
     else:
         items = raw
     return [str(item).strip() for item in items if str(item).strip()]
+
+
+def _save_iteration_log(
+    iter_dir: Path,
+    iteration: int,
+    shacl_summary: dict,
+    cq_payload: dict,
+    patches: list,
+    reasoning_result,
+    triples_before_reasoning: int,
+    stop_decision: StopDecision,
+) -> dict:
+    payload = {
+        "iteration": iteration,
+        "shacl": shacl_summary,
+        "cq": {
+            "pass_rate": cq_payload.get("pass_rate", 0.0),
+            "failed": len([r for r in cq_payload.get("results", []) if not r.get("success", False)]),
+            "failed_queries": [r.get("query") for r in cq_payload.get("results", []) if not r.get("success", False)],
+            "results": cq_payload.get("results", []),
+        },
+        "patches": {
+            "count": len(patches),
+            "types": {k: v for k, v in _count_patch_types(patches).items() if v > 0},
+        },
+        "reasoning": {
+            "enabled": reasoning_result.report.enabled,
+            "consistent": reasoning_result.report.consistent,
+            "unsat_classes": len(reasoning_result.report.unsatisfiable_classes),
+            "notes": reasoning_result.report.notes,
+            "backend": reasoning_result.report.backend,
+            "triples_before_reasoning": triples_before_reasoning,
+            "triples_after_reasoning": len(reasoning_result.expanded_graph),
+        },
+        "stop": {"decision": stop_decision.stop, "reason": stop_decision.reason},
+        "stop_reason": stop_decision.reason,
+    }
+    (iter_dir / "iteration_log.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return payload
 
 
 def main() -> None:
@@ -212,6 +252,7 @@ def main() -> None:
         cq_pass_rate = 0.0
 
         while True:
+            triples_before_reasoning = len(state.graph)
             reasoning_result = reasoner.run(state.graph)
             if cfg.get("validation", True):
                 if validator is None:
@@ -225,6 +266,8 @@ def main() -> None:
                 shacl_report = None
                 summary = {"total": 0, "violations": {"hard": 0, "soft": 0}}
                 patches = []
+                (iter_dir / "shacl_report.ttl").write_text("Validation disabled for this run.\n", encoding="utf-8")
+                save_patch_plan(patches, iter_dir / "patches.json")
 
             cq_results = cq_runner.run(reasoning_result.expanded_graph) if cq_runner else []
             cq_pass_rate = (sum(1 for res in cq_results if res.success) / len(cq_results)) if cq_results else 0.0
@@ -252,28 +295,17 @@ def main() -> None:
                     stop_policy=policy,
                 )
 
-            repair_log["iterations"][f"iter{current_iter}"] = {
-                "shacl": summary,
-                "cq": {
-                    "pass_rate": cq_pass_rate,
-                    "failed": len([r for r in cq_results if not r.success]),
-                    "failed_queries": [r.query for r in cq_results if not r.success] if cq_results else [],
-                },
-                "patches": {
-                    "count": len(patches),
-                    "types": {k: v for k, v in _count_patch_types(patches).items() if v > 0},
-                },
-                "reasoning": {
-                    "enabled": reasoning_result.report.enabled,
-                    "consistent": reasoning_result.report.consistent,
-                    "unsat_classes": len(reasoning_result.report.unsatisfiable_classes),
-                    "notes": reasoning_result.report.notes,
-                    "backend": reasoning_result.report.backend,
-                    "triples_before_reasoning": len(state.graph),
-                    "triples_after_reasoning": len(reasoning_result.expanded_graph),
-                },
-                "stop_decision": stop_decision.reason,
-            }
+            iteration_log = _save_iteration_log(
+                iter_dir=iter_dir,
+                iteration=current_iter,
+                shacl_summary=summary,
+                cq_payload=cq_payload,
+                patches=patches,
+                reasoning_result=reasoning_result,
+                triples_before_reasoning=triples_before_reasoning,
+                stop_decision=stop_decision,
+            )
+            repair_log["iterations"][f"iter{current_iter}"] = iteration_log
 
             if stop_decision.stop:
                 break
@@ -296,14 +328,32 @@ def main() -> None:
                     f"Reason: {exc}\n\nRaw turtle:\n{patch_response.turtle}",
                     encoding="utf-8",
                 )
-                repair_log["iterations"][f"iter{next_iter}"] = {
-                    "shacl": {"total": 0, "violations": {"hard": 0, "soft": 0}},
-                    "cq": {"pass_rate": 0.0, "failed": 0, "failed_queries": []},
-                    "patches": {"count": 0, "types": {}},
-                    "reasoning": {"enabled": False, "consistent": False, "unsat_classes": 0, "notes": "parse_error"},
-                    "stop_decision": "patch_parse_error",
-                }
-                repair_log["stop"] = {"iteration": next_iter, "reason": "patch_parse_error", "error": str(exc)}
+                stop_decision = StopDecision(True, "patch_parse_error")
+                assembler.serialize(state, next_dir / "pred.ttl")
+                (next_dir / "shacl_report.ttl").write_text("Patch parse error; SHACL not executed.\n", encoding="utf-8")
+                save_patch_plan([], next_dir / "patches.json")
+                (next_dir / "cq_results.json").write_text(
+                    json.dumps({"pass_rate": 0.0, "results": []}, indent=2), encoding="utf-8"
+                )
+                stub_reasoning = SimpleNamespace(
+                    report=SimpleNamespace(
+                        enabled=False, consistent=False, unsatisfiable_classes=[], notes="patch_parse_error", backend=None
+                    ),
+                    expanded_graph=state.graph,
+                )
+                iteration_log = _save_iteration_log(
+                    iter_dir=next_dir,
+                    iteration=next_iter,
+                    shacl_summary={"total": 0, "violations": {"hard": 0, "soft": 0}},
+                    cq_payload={"pass_rate": 0.0, "results": []},
+                    patches=[],
+                    reasoning_result=stub_reasoning,
+                    triples_before_reasoning=len(state.graph),
+                    stop_decision=stop_decision,
+                )
+                repair_log["iterations"][f"iter{next_iter}"] = iteration_log
+                repair_log["stop"] = {"iteration": next_iter, "reason": stop_decision.reason, "error": str(exc)}
+                repair_log["stop_reason"] = stop_decision.reason
                 (output_root / "repair_log.json").write_text(json.dumps(repair_log, indent=2), encoding="utf-8")
                 print(f"[{policy}] Aborted at iter{next_iter} due to Turtle parse error. See {next_dir / 'llm_error.txt'}")
                 return
@@ -314,6 +364,7 @@ def main() -> None:
             current_iter = next_iter
 
         repair_log["stop"] = {"iteration": current_iter, "reason": stop_decision.reason}
+        repair_log["stop_reason"] = stop_decision.reason
 
         final_dir = output_root / "final"
         ensure_dir(final_dir)
