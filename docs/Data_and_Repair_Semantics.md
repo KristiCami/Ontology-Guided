@@ -5,13 +5,15 @@
 ## A. Ρόλοι Δεδομένων και Αποφυγή Διαρροής
 
 - **Διαχωρισμός context και gold**
-  - Νέο **ontology context**: `gold/atm_schema_context.ttl` (μόνο TBox, με κλάσεις, object/datatype properties, domain/range και prefixes).
+  - Νέο **ontology context**: `gold/atm_context_tbox.ttl` (μόνο TBox, με κλάσεις, object/datatype properties, domain/range και prefixes).
   - **Gold οντολογία για metrics** παραμένει το `gold/atm_gold.ttl`.
+  - Ο runner μπλοκάρει ρητά αν το `ontology_context_path` ταυτίζεται με το `gold_path`, ώστε να αποτρέπεται η διαρροή schema/gold.
 - **Αλλαγές στη διαμόρφωση**
   - Τα `configs/atm_e4_iterative.json` και `configs/atm_ontology_aware.json` διακρίνουν πλέον:
     - `ontology_context_path`: πηγή για prompt grounding.
     - `gold_path`: πηγή μόνο για αξιολόγηση.
   - Το script E4 επιβάλλει ότι το `iterations` στο config είναι η μοναδική πηγή για τον αριθμό επαναλήψεων· το `--kmax` είναι παρωχημένο και πρέπει να ταυτίζεται με το config αν δοθεί.
+  - Η επιλογή stop policy δέχεται λίστα από το config (`stop_policies`) ή CLI και προεπιλέγει το `hard_and_cq` αν δεν οριστεί, ώστε ο βρόχος να μην τερματίζει στο iter0 όταν τα CQ αποτυγχάνουν.
 - **Επιβολή prompt grounding**
   - Με `use_ontology_context=false` απενεργοποιείται πλήρως το φόρτωμα context.
   - Το φόρτωμα context απαιτεί `ontology_context_path` (ή ρητό `ontology_path`), αποτρέποντας την τυχαία χρήση του gold αρχείου.
@@ -24,7 +26,7 @@
   - Η μετατροπή SHACL→patch κάνει dedup και ταξινόμηση για ντετερμινιστικά πλάνα.
   - Το prompt εφαρμογής patch απαγορεύει νέους namespaces/URIs, διαγραφές ή αλλαγές εκτός scope και απαιτεί πλήρη διατήρηση του ontology.
 - **Ευθυγράμμιση metrics**
-  - Τα τελικά metrics υπολογίζονται στο reasoned (expanded) γράφημα ώστε να ταιριάζουν με το validation surface του SHACL/CQ.
+  - Τα τελικά metrics υπολογίζονται στο reasoned (expanded) γράφημα ώστε να ταιριάζουν με το validation surface του SHACL/CQ, και αυτή η επιλογή εφαρμόζεται σε όλα τα presets για συγκρισιμότητα.
 
 ## C. Logging και Διαγνωστικά Πειραμάτων
 
@@ -37,5 +39,4 @@
 
 - **Παράμετρος τεμαχισμού απαιτήσεων** ρυθμίζεται μέσω `requirements_chunk_size` ώστε να εκτίθεται η υπερπαράμετρος chunking.
 - **Τήρηση του flag validation**: με `validation=false` ο SHACL βρόχος παρακάμπτεται αντί να τρέχει σιωπηρά.
-
 

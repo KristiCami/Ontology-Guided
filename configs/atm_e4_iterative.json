@@ -8,6 +8,7 @@
   "validation": true,
   "llm_mode": "openai",
   "temperature": 0.1,
+  "stop_policies": ["hard_and_cq", "ignore_no_hard"],
   "max_requirements": 30,
   "requirements_chunk_size": 5,
   "output_root": "runs/E4_full",

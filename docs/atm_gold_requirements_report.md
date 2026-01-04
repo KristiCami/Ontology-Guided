@@ -21,7 +21,7 @@
 - **ATM ↔ Bank:** ATMShape απαιτεί operatedBy προς Bank (γραμμές 124–132).  
 - **Σοβαρότητα/μηνύματα:** Όλες οι SHACL ιδιότητες φέρουν sh:severity (Violation ή Warning) και sh:message για καθαρό feedback.
 
-## Σχήμα συμφραζομένων (gold/atm_schema_context.ttl)
+## Σχήμα συμφραζομένων (gold/atm_context_tbox.ttl)
 - Παρέχει τον ίδιο κατάλογο κλάσεων/ιδιοτήτων με domain/range, χωρίς περιορισμούς ή instances, ώστε εργαλεία παραγωγής/ελέγχου να έχουν ελαφρύ context για prefixes και δομή.
 
 ## Κάλυψη πρόσθετων παρατηρήσεων

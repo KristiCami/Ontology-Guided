@@ -9,7 +9,7 @@
 
 ## Τι χρησιμοποιείται στο prompt (και τι όχι)
 Για κάθε παρτίδα requirements:
-- **Schema context (fixed):** εξάγεται λεξιλόγιο/επιτρεπτό vocabulary από το grounding TTL (π.χ. `gold/atm_schema_context.ttl`) και μπαίνει στην ενότητα `SECTION A — Allowed Vocabulary`.  
+- **Schema context (fixed):** εξάγεται λεξιλόγιο/επιτρεπτό vocabulary από το grounding TTL (π.χ. `gold/atm_context_tbox.ttl`) και μπαίνει στην ενότητα `SECTION A — Allowed Vocabulary`.  
 - **Task spec (fixed):** ενότητα με κανόνες εξόδου (Turtle, χρήση `atm:` namespace, αποφυγή νέων όρων κ.λπ.).  
 - **Few-shot (dev only):** έως 6 παραδείγματα από το dev split. Στο prompt εμφανίζονται μόνο τα dev IDs και τα axioms που συνοδεύουν κάθε dev απαίτηση (αν υπάρχουν στο JSON). Test προτάσεις και το gold OWL τους **δεν** μπαίνουν ποτέ στα examples.  
 - **Target sentences:** το batch των υπό επεξεργασία προτάσεων (dev+test) έρχεται στο τέλος (`SECTION C`). Η gold TTL δεν περνάει αυτούσια στο prompt — μόνο το vocabulary.  
