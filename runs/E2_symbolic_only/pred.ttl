@@ -1,69 +1,44 @@
-@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix atm: <http://example.org/atm#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-atm:ATM_dispenses_Transaction a owl:Axiom ;
-    atm:sourceRequirement "FR-14" .
+atm:AmountExceedsTransactionPolicy rdfs:subClassOf atm:TriggersTransactionRestart .
 
-atm:ATM_logs_CashCard a owl:Axiom ;
-    atm:sourceRequirement "FR-6" .
+atm:FunctionalRequirement1 a atm:Requirement,
+        owl:NamedIndividual .
 
-atm:ATM_logs_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "FR-15" .
+atm:FunctionalRequirement10 a atm:FunctionalRequirement,
+        owl:NamedIndividual .
 
-atm:ATM_relatesTo_CashCard a owl:Axiom ;
-    atm:sourceRequirement "FR-2",
-        "FR-3",
-        "FR-4" .
+atm:FunctionalRequirement2 a atm:Requirement,
+        owl:NamedIndividual .
 
-atm:ATM_relatesTo_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "FR-1",
-        "FR-11",
-        "FR-9" .
+atm:FunctionalRequirement3 a atm:Requirement,
+        owl:NamedIndividual .
 
-atm:ATM_relatesTo_Transaction a owl:Axiom ;
-    atm:sourceRequirement "FR-12",
-        "FR-13",
-        "FR-16" .
+atm:FunctionalRequirement4 a atm:Requirement,
+        owl:NamedIndividual .
 
-atm:Bank_logs_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "FR-8" .
+atm:FunctionalRequirement5 a atm:Requirement,
+        owl:NamedIndividual .
 
-atm:Bank_relatesTo_CashCard a owl:Axiom ;
-    atm:sourceRequirement "FR-1",
-        "FR-10",
-        "FR-3",
-        "FR-5" .
+atm:FunctionalRequirement6 a atm:FunctionalRequirement,
+        owl:NamedIndividual .
 
-atm:Bank_relatesTo_RequirementTarget a owl:Axiom ;
-    atm:sourceRequirement "FR-2",
-        "FR-4",
-        "FR-7" .
+atm:FunctionalRequirement7 a atm:FunctionalRequirement,
+        owl:NamedIndividual .
 
-atm:dispenses a owl:ObjectProperty ;
-    rdfs:domain atm:ATM ;
-    rdfs:range atm:Transaction .
+atm:FunctionalRequirement8 a atm:FunctionalRequirement,
+        owl:NamedIndividual .
 
-atm:logs a owl:ObjectProperty ;
-    rdfs:domain atm:ATM,
-        atm:Bank ;
-    rdfs:range atm:CashCard,
-        atm:RequirementTarget .
+atm:FunctionalRequirement9 a atm:FunctionalRequirement,
+        owl:NamedIndividual .
 
-atm:relatesTo a owl:ObjectProperty ;
-    rdfs:domain atm:ATM,
-        atm:Bank ;
-    rdfs:range atm:CashCard,
-        atm:RequirementTarget,
-        atm:Transaction .
+atm:MoneyDispensed rdfs:subClassOf atm:AmountLogged .
 
-atm:Bank a owl:Class .
+atm:SuccessfulAuthorization rdfs:subClassOf atm:TriggersMoneyDispensing .
 
-atm:CashCard a owl:Class .
+atm:SuccessfulTransaction rdfs:subClassOf atm:DispensesMoney .
 
-atm:RequirementTarget a owl:Class .
-
-atm:Transaction a owl:Class .
-
-atm:ATM a owl:Class .
+atm:SuccessfulWithdrawalSequence rdfs:subClassOf atm:SetsTransactionToInitiated .
 

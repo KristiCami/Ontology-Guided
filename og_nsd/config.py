@@ -21,7 +21,7 @@ class PipelineConfig:
     max_iterations: int = 2
     max_requirements: Optional[int] = 20
     include_boilerplate_context: bool = True
-    llm_temperature: float = 0.7
+    llm_temperature: float = 0.1
     prompt_template_path: Optional[Path] = None
     reasoning_enabled: bool = False
     save_intermediate: bool = True
