@@ -3,6 +3,7 @@
   "shapes_path": "gold/shapes_atm.ttl",
   "use_ontology_context": true,
   "ontology_context_path": "gold/atm_schema_context.ttl",
+  "ontology_path": "gold/atm_schema_context.ttl",
   "gold_path": "gold/atm_gold.ttl",
   "dev_split": "splits/dev.txt",
   "test_split": "splits/test.txt",
