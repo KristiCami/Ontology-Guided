@@ -1,9 +1,9 @@
 {
   "llm_notes": "Generated via OpenAI chat.completions",
   "token_usage": {
-    "prompt_tokens": 269,
-    "completion_tokens": 106,
-    "total_tokens": 375
+    "prompt_tokens": 260,
+    "completion_tokens": 392,
+    "total_tokens": 652
   },
   "few_shot_exemplars": null,
   "shacl": {
@@ -119,11 +119,11 @@
     }
   ],
   "reasoner": {
-    "enabled": true,
-    "consistent": true,
+    "enabled": false,
+    "consistent": null,
     "unsatisfiable_classes": [],
-    "notes": "",
-    "backend": "pellet"
+    "notes": "Reasoner disabled or owlready2 unavailable.",
+    "backend": null
   },
   "iterations": [
     {
@@ -135,11 +135,11 @@
         "results": []
       },
       "reasoner": {
-        "enabled": true,
-        "consistent": true,
+        "enabled": false,
+        "consistent": null,
         "unsatisfiable_classes": [],
-        "notes": "",
-        "backend": "pellet"
+        "notes": "Reasoner disabled or owlready2 unavailable.",
+        "backend": null
       },
       "cq_results": [
         {

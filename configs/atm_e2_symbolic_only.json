@@ -7,7 +7,7 @@
   "max_requirements": 50,
   "output_root": "runs/E2_symbolic_only",
   "reasoning": true,
-  "iterations": 2,
+  "iterations": 15,
   "competency_questions": "atm_cqs.rq",
   "base_namespace": "http://lod.csd.auth.gr/atm/atm.ttl#"
 }
