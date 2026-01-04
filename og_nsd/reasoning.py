@@ -50,7 +50,6 @@ class OwlreadyReasoner:
 
         base_graph, coerced_literals = _sanitize_numeric_literals(graph)
         base_graph, stripped_restrictions = _strip_invalid_restrictions(base_graph)
-        base_graph, declared_classes = _declare_missing_classes(base_graph)
         notes: List[str] = []
         if coerced_literals:
             notes.append(
@@ -58,8 +57,6 @@ class OwlreadyReasoner:
             )
         if stripped_restrictions:
             notes.append(f"Removed {stripped_restrictions} invalid restriction(s) before reasoning.")
-        if declared_classes:
-            notes.append(f"Declared {declared_classes} missing owl:Class resource(s) for class-level axioms.")
 
         if not self.enabled or get_ontology is None:
             notes.append("Reasoner disabled or owlready2 unavailable.")
@@ -155,45 +152,6 @@ def _sanitize_numeric_literals(graph: Graph) -> Tuple[Graph, int]:
     return sanitized, fixes
 
 
-def _declare_missing_classes(graph: Graph) -> Tuple[Graph, int]:
-    """Ensure subjects/objects that participate in class-level axioms are typed as classes.
-
-    Pellet can raise ordering errors when subclass/equivalence relations reference
-    resources that are never declared as ``owl:Class``. We defensively add class
-    declarations for any resource that appears in common TBox positions.
-    """
-
-    classish_predicates = {
-        RDFS.subClassOf,
-        OWL.equivalentClass,
-        OWL.disjointWith,
-    }
-
-    declared_classes = set(graph.subjects(RDF.type, OWL.Class))
-    additions: list[tuple] = []
-
-    for s, p, o in graph:
-        if p in classish_predicates:
-            if not isinstance(s, Literal) and s not in declared_classes:
-                additions.append((s, RDF.type, OWL.Class))
-                declared_classes.add(s)
-            if not isinstance(o, Literal) and o not in declared_classes:
-                additions.append((o, RDF.type, OWL.Class))
-                declared_classes.add(o)
-
-    if not additions:
-        return graph, 0
-
-    enriched = Graph()
-    for prefix, uri in graph.namespace_manager.namespaces():
-        enriched.bind(prefix, uri)
-    for triple in graph:
-        enriched.add(triple)
-    for triple in additions:
-        enriched.add(triple)
-    return enriched, len(additions)
-
-
 def _strip_invalid_restrictions(graph: Graph) -> Tuple[Graph, int]:
     """Remove malformed OWL restrictions that Pellet cannot handle.
 
@@ -219,18 +177,9 @@ def _strip_invalid_restrictions(graph: Graph) -> Tuple[Graph, int]:
     invalid_nodes: set = set()
     for restriction in graph.subjects(RDF.type, OWL.Restriction):
         on_props = list(graph.objects(restriction, OWL.onProperty))
-        filler_terms = {filler: list(graph.objects(restriction, filler)) for filler in valid_fillers}
-        has_filler = any(values for values in filler_terms.values())
+        has_filler = any(graph.objects(restriction, filler) for filler in valid_fillers)
         has_complement = any(graph.objects(restriction, OWL.complementOf))
-
-        # SomeValues/AllValues/Min/Max/... fillers must be resources, not literals.
-        has_literal_filler = any(
-            any(isinstance(value, Literal) for value in values)
-            for predicate, values in filler_terms.items()
-            if predicate != OWL.hasValue  # hasValue can legitimately point to a literal
-        )
-
-        if len(on_props) != 1 or not has_filler or has_complement or has_literal_filler:
+        if len(on_props) != 1 or not has_filler or has_complement:
             invalid_nodes.add(restriction)
 
     if not invalid_nodes:
