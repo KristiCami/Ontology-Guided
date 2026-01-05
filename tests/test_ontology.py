@@ -10,7 +10,12 @@ from rdflib.namespace import XSD
 
 from og_nsd.config import PipelineConfig
 from og_nsd.llm import HeuristicLLM
-from og_nsd.ontology import _ensure_standard_prefixes, _sanitize_turtle
+from og_nsd.ontology import (
+    OntologyAssembler,
+    _ensure_standard_prefixes,
+    _normalize_base_prefix,
+    _sanitize_turtle,
+)
 from og_nsd.reasoning import (
     OwlreadyReasoner,
     _sanitize_numeric_literals,
@@ -51,6 +56,35 @@ class EnsureStandardPrefixesTests(unittest.TestCase):
 
         self.assertIn("@prefix atm: <http://example.org/atm#> .", enriched)
         Graph().parse(data=enriched, format="turtle")
+
+
+class BaseNamespaceNormalizationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.base_ns = "http://lod.csd.auth.gr/atm/atm.ttl#"
+
+    def test_rewrites_mismatched_atm_prefix(self) -> None:
+        turtle = "@prefix atm: <http://example.org/atm#> .\n\natm:ATM a owl:Class ."
+
+        normalized = _normalize_base_prefix(turtle, self.base_ns)
+
+        self.assertTrue(normalized.startswith(f"@prefix atm: <{self.base_ns}> ."))
+        self.assertNotIn("http://example.org/atm#", normalized)
+
+    def test_injects_atm_prefix_when_missing(self) -> None:
+        turtle = "atm:ATM a owl:Class ."
+
+        normalized = _normalize_base_prefix(turtle, self.base_ns)
+
+        self.assertTrue(normalized.startswith(f"@prefix atm: <{self.base_ns}> ."))
+
+    def test_assembler_enforces_base_namespace(self) -> None:
+        assembler = OntologyAssembler(base_namespace=self.base_ns)
+        state = assembler.bootstrap()
+
+        assembler.add_turtle(state, "@prefix atm: <http://example.org/atm#> .\natm:ATM a owl:Class .")
+
+        subject = next(state.graph.subjects(None, None))
+        self.assertTrue(str(subject).startswith(self.base_ns))
 
 
 class SanitizeTurtleTests(unittest.TestCase):

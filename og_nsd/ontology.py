@@ -30,10 +30,14 @@ class OntologyAssembler:
     def __init__(
         self,
         base_ontology_path: Optional[Path] = None,
+        base_namespace: Optional[str] = None,
         default_prefixes: Optional[Dict[str, str]] = None,
     ) -> None:
         self.base_path = base_ontology_path
+        self.base_namespace = base_namespace.rstrip("#/") + "#" if base_namespace else None
         self.default_prefixes = default_prefixes or {}
+        if self.base_namespace:
+            self.default_prefixes["atm"] = self.base_namespace
 
     def bootstrap(self) -> OntologyState:
         graph = Graph()
@@ -44,9 +48,10 @@ class OntologyAssembler:
         return OntologyState(graph=graph, turtle_snippets=snippets)
 
     def add_turtle(self, state: OntologyState, turtle: str) -> None:
-        cleaned = _ensure_standard_prefixes(
-            _strip_code_fence(turtle), additional_prefixes=self.default_prefixes
+        cleaned = _normalize_base_prefix(
+            _strip_code_fence(turtle), base_namespace=self.base_namespace
         )
+        cleaned = _ensure_standard_prefixes(cleaned, additional_prefixes=self.default_prefixes)
         try:
             state.graph.parse(data=cleaned, format="turtle")
         except Exception as exc:  # pragma: no cover - requires rdflib parse error
@@ -147,6 +152,29 @@ def _strip_code_fence(turtle: str) -> str:
     if match:
         return match.group(1).strip()
     return turtle.strip()
+
+
+_ATM_PREFIX_RE = re.compile(r"@prefix\s+atm:\s*<([^>]+)>\s*\.\s*", re.IGNORECASE)
+
+
+def _normalize_base_prefix(turtle: str, base_namespace: Optional[str]) -> str:
+    """Rewrite or inject the ``atm:`` prefix to honor ``base_namespace``."""
+
+    if not base_namespace:
+        return turtle
+
+    normalized_ns = base_namespace.rstrip("#/") + "#"
+    replacement = f"@prefix atm: <{normalized_ns}> .\n"
+
+    match = _ATM_PREFIX_RE.search(turtle)
+    if match:
+        declared_ns = match.group(1).rstrip("#/") + "#"
+        if declared_ns == normalized_ns:
+            return turtle
+        start, end = match.span()
+        return f"{turtle[:start]}{replacement}{turtle[end:].lstrip()}"
+
+    return replacement + turtle
 
 
 _STANDARD_PREFIXES = {
