@@ -19,7 +19,6 @@ from og_nsd.llm import HeuristicLLM, OpenAILLM  # noqa: E402
 from og_nsd.reasoning import OwlreadyReasoner  # noqa: E402
 from og_nsd.repair import (  # noqa: E402
     StopDecision,
-    cq_results_to_patches,
     final_metrics,
     save_patch_plan,
     save_shacl_report,
@@ -57,25 +56,6 @@ def parse_args() -> argparse.Namespace:
         default=None,  # kept for backwards compatibility; validated later.
         help="Deprecated; iterations are controlled via config. Do not set.",
     )
-    parser.add_argument(
-        "--min-patch-iterations",
-        type=int,
-        default=None,
-        help="Require at least this many iterations that produced patches before stopping (unless max iterations hit).",
-    )
-    parser.add_argument(
-        "--use-soft-violations",
-        dest="use_soft_violations",
-        action="store_true",
-        help="Convert soft/warning SHACL results into patches when no hard violations are present.",
-    )
-    parser.add_argument(
-        "--ignore-soft-violations",
-        dest="use_soft_violations",
-        action="store_false",
-        help="Skip soft/warning SHACL results when generating patches.",
-    )
-    parser.set_defaults(use_soft_violations=None)
     return parser.parse_args()
 
 
@@ -125,8 +105,6 @@ def _save_iteration_log(
     shacl_summary: dict,
     cq_payload: dict,
     patches: list,
-    patch_sources: list[str],
-    patch_iteration_count: int,
     reasoning_result,
     triples_before_reasoning: int,
     stop_decision: StopDecision,
@@ -143,8 +121,6 @@ def _save_iteration_log(
         "patches": {
             "count": len(patches),
             "types": {k: v for k, v in _count_patch_types(patches).items() if v > 0},
-            "sources": sorted(set(patch_sources)),
-            "iterations_with_patches": patch_iteration_count,
         },
         "reasoning": {
             "enabled": reasoning_result.report.enabled,
@@ -183,16 +159,6 @@ def main() -> None:
         raise ValueError("Config field 'iterations' must be a positive integer.")
     if args.kmax is not None:
         raise ValueError("--kmax is deprecated; configure iterations exclusively via the config file.")
-
-    min_patch_iterations = args.min_patch_iterations
-    if min_patch_iterations is None:
-        min_patch_iterations = cfg.get("min_patch_iterations", 2)
-    if min_patch_iterations <= 0:
-        raise ValueError("min_patch_iterations must be a positive integer.")
-
-    use_soft_violations = cfg.get("use_soft_violations", True)
-    if args.use_soft_violations is not None:
-        use_soft_violations = args.use_soft_violations
 
     prompt_mode = cfg.get("prompt_mode", "ontology_aware")
     valid_modes = {"ontology_aware", "baseline"}
@@ -251,7 +217,6 @@ def main() -> None:
                     "config": {
                         "path": str(args.config),
                         "iterations": iterations_cfg,
-                        "min_patch_iterations": min_patch_iterations,
                         "requirements_chunk_size": cfg.get("requirements_chunk_size", 5),
                         "use_ontology_context": bool(ontology_context_path),
                         "ontology_context_path": str(ontology_context_path) if ontology_context_path else None,
@@ -260,7 +225,6 @@ def main() -> None:
                         "validation": cfg.get("validation", True),
                         "reasoning": cfg.get("reasoning", True),
                         "stop_policy": policy,
-                        "use_soft_violations": use_soft_violations,
                     },
                     "iterations": {},
                     "stop": {"iteration": 0, "reason": "draft_parse_error", "error": str(exc)},
@@ -275,7 +239,6 @@ def main() -> None:
             "config": {
                 "path": str(args.config),
                 "iterations": iterations_cfg,
-                "min_patch_iterations": min_patch_iterations,
                 "requirements_chunk_size": cfg.get("requirements_chunk_size", 5),
                 "use_ontology_context": bool(ontology_context_path),
                 "ontology_context_path": str(ontology_context_path) if ontology_context_path else None,
@@ -284,38 +247,23 @@ def main() -> None:
                 "validation": cfg.get("validation", True),
                 "reasoning": cfg.get("reasoning", True),
                 "stop_policy": policy,
-                "use_soft_violations": use_soft_violations,
             },
             "iterations": {},
         }
         previous_patches = None
         current_iter = 0
         cq_pass_rate = 0.0
-        patch_iterations = 0
 
         while True:
             triples_before_reasoning = len(state.graph)
             reasoning_result = reasoner.run(state.graph)
-            patch_sources: list[str] = []
-
-            def _patch_key(patch) -> tuple[str | None, str | None, str | None]:
-                if hasattr(patch, "subject"):
-                    return (patch.subject, patch.predicate, patch.object)
-                if isinstance(patch, dict):
-                    return (patch.get("subject"), patch.get("predicate"), patch.get("object"))
-                return (None, None, None)
-
             if cfg.get("validation", True):
                 if validator is None:
                     raise RuntimeError("Validation enabled but SHACL validator is not configured.")
                 shacl_report = validator.validate(reasoning_result.expanded_graph)
                 summary = summarize_shacl_report(shacl_report)
                 save_shacl_report(shacl_report, iter_dir / "shacl_report.ttl")
-                patches = shacl_report_to_patches(
-                    shacl_report, include_soft_if_no_hard=bool(use_soft_violations)
-                )
-                if patches:
-                    patch_sources.append("shacl")
+                patches = shacl_report_to_patches(shacl_report)
                 save_patch_plan(patches, iter_dir / "patches.json")
             else:
                 shacl_report = None
@@ -326,18 +274,6 @@ def main() -> None:
 
             cq_results = cq_runner.run(reasoning_result.expanded_graph) if cq_runner else []
             cq_pass_rate = (sum(1 for res in cq_results if res.success) / len(cq_results)) if cq_results else 0.0
-            cq_patches = cq_results_to_patches(cq_results) if cq_results else []
-            if cq_patches:
-                patch_sources.append("competency_questions")
-            if patches:
-                existing = {_patch_key(p) for p in patches}
-                for patch in cq_patches:
-                    key = _patch_key(patch)
-                    if key not in existing:
-                        patches.append(patch)
-                        existing.add(key)
-            else:
-                patches = cq_patches
 
             cq_payload = {
                 "pass_rate": cq_pass_rate,
@@ -347,9 +283,6 @@ def main() -> None:
                 ],
             }
             (iter_dir / "cq_results.json").write_text(json.dumps(cq_payload, indent=2), encoding="utf-8")
-
-            if patches:
-                patch_iterations += 1
 
             if not cfg.get("validation", True):
                 stop_decision = StopDecision(True, "validation_disabled")
@@ -365,18 +298,12 @@ def main() -> None:
                     stop_policy=policy,
                 )
 
-            if stop_decision.stop and stop_decision.reason != "max_iterations_reached":
-                if patches and patch_iterations < min_patch_iterations:
-                    stop_decision = StopDecision(False, "min_patch_iterations_not_met")
-
             iteration_log = _save_iteration_log(
                 iter_dir=iter_dir,
                 iteration=current_iter,
                 shacl_summary=summary,
                 cq_payload=cq_payload,
                 patches=patches,
-                patch_sources=patch_sources,
-                patch_iteration_count=patch_iterations,
                 reasoning_result=reasoning_result,
                 triples_before_reasoning=triples_before_reasoning,
                 stop_decision=stop_decision,
@@ -423,8 +350,6 @@ def main() -> None:
                     shacl_summary={"total": 0, "violations": {"hard": 0, "soft": 0}},
                     cq_payload={"pass_rate": 0.0, "results": []},
                     patches=[],
-                    patch_sources=[],
-                    patch_iteration_count=patch_iterations,
                     reasoning_result=stub_reasoning,
                     triples_before_reasoning=len(state.graph),
                     stop_decision=stop_decision,

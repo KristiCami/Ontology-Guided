@@ -172,20 +172,6 @@ class HeuristicLLM(LLMClient):
             subj_iri = _iri(subject)
             pred_iri = _iri(predicate)
 
-            if action in {"addsubclass", "subclass"}:
-                obj_iri = _iri(obj)
-                graph.add((subj_iri, RDFS.subClassOf, obj_iri))
-                graph.add((subj_iri, RDF.type, OWL.Class))
-                graph.add((obj_iri, RDF.type, OWL.Class))
-                notes.append(f"{action}: {subject} rdfs:subClassOf {obj}")
-                continue
-
-            if action in {"addtriple", "assert"}:
-                obj_node = _iri(obj) if ":" in obj or obj.startswith("http") else Literal(obj)
-                graph.add((subj_iri, pred_iri, obj_node))
-                notes.append(f"{action}: {subject} {predicate} {obj}")
-                continue
-
             if obj.startswith("xsd:"):
                 graph.add((pred_iri, RDFS.domain, subj_iri))
                 graph.add((pred_iri, RDFS.range, _iri(obj)))
