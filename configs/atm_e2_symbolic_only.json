@@ -9,5 +9,6 @@
   "reasoning": true,
   "iterations": 3,
   "competency_questions": "atm_cqs.rq",
-  "base_namespace": "http://lod.csd.auth.gr/atm/atm.ttl#"
+  "base_namespace": "http://lod.csd.auth.gr/atm/atm.ttl#",
+  "use_ontology_context": true
 }
