@@ -1,6 +1,6 @@
 {
-  "pass_rate": 0.047619047619047616,
-  "passed": 1,
+  "pass_rate": 0.5714285714285714,
+  "passed": 12,
   "total": 21,
   "results": [
     {
@@ -10,57 +10,57 @@
     },
     {
       "query": "# Withdrawals specialise the transaction concept (directly or indirectly)\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:Withdrawal rdfs:subClassOf+ atm:Transaction .\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
       "query": "# Deposits are also treated as transactions\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:Deposit rdfs:subClassOf+ atm:Transaction .\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
       "query": "# ATMs connect either to transactions (gold) or to cash cards (operational)\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:handlesTransaction rdfs:domain atm:ATM ;\n                           rdfs:range atm:Transaction .\n  } AS ?handlesTransactions)\n  BIND(EXISTS {\n    atm:accepts rdfs:domain atm:ATM ;\n                rdfs:range atm:CashCard .\n  } AS ?acceptsCards)\n  FILTER (?handlesTransactions || ?acceptsCards)\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
       "query": "# ATMs are associated with banks either via operations or ownership\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:operatedBy rdfs:domain atm:ATM ;\n                   rdfs:range atm:Bank .\n  } AS ?operatedBy)\n  BIND(EXISTS {\n    atm:belongsToBank rdfs:domain atm:ATM ;\n                      rdfs:range [ owl:onProperty atm:belongsToBank ;\n                                   owl:allValuesFrom atm:Bank\n                                 ] .\n  } AS ?belongsTo)\n  FILTER (?operatedBy || ?belongsTo)\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
       "query": "# Banks maintain customer relationships\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:maintainsAccount rdfs:domain atm:Bank ;\n                        rdfs:range atm:Account .\n  } AS ?maintainsAccount)\n  BIND(EXISTS {\n    atm:hasCustomer rdfs:domain atm:Bank .\n  } AS ?hasCustomers)\n  FILTER (?maintainsAccount || ?hasCustomers)\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
       "query": "# Customers are linked to cash cards in both ontologies\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:ownsCard rdfs:domain atm:Customer ;\n                 rdfs:range atm:CashCard .\n  } AS ?ownsCard)\n  BIND(EXISTS {\n    atm:hasCashCard rdfs:domain atm:Customer ;\n                    rdfs:range atm:CashCard .\n  } AS ?hasCashCard)\n  FILTER (?ownsCard || ?hasCashCard)\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
       "query": "# Customers or their accounts are linked together\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:hasAccount rdfs:domain atm:Customer ;\n                  rdfs:range atm:Account .\n  } AS ?customerAccounts)\n  BIND(EXISTS {\n    atm:isHold rdfs:domain atm:Account .\n  } AS ?accountHeldBy)\n  FILTER (?customerAccounts || ?accountHeldBy)\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
       "query": "# Cash card bank codes are captured with an appropriate datatype\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK {\n  BIND(EXISTS { atm:bankCode rdfs:range xsd:string . } AS ?stringRange)\n  BIND(EXISTS { atm:bankCode rdfs:range xsd:integer . } AS ?integerRange)\n  BIND(EXISTS { atm:bankCode rdfs:domain atm:CashCard . } AS ?cashCardDomain)\n  BIND(EXISTS {\n    atm:bankCode rdfs:domain ?domain .\n    ?domain owl:unionOf ?union .\n  } AS ?unionDomain)\n  FILTER ((?stringRange || ?integerRange) && (?cashCardDomain || ?unionDomain))\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
       "query": "# Transaction timestamps are captured as temporal datatypes\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK {\n  atm:transactionTimestamp rdfs:domain atm:Transaction .\n  BIND(EXISTS { atm:transactionTimestamp rdfs:range xsd:dateTime . } AS ?dateTimeRange)\n  BIND(EXISTS { atm:transactionTimestamp rdfs:range xsd:dateTimeStamp . } AS ?dateTimeStampRange)\n  FILTER (?dateTimeRange || ?dateTimeStampRange)\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
       "query": "# Transaction amounts are numeric in both versions\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK {\n  BIND(EXISTS {\n    atm:requestedAmount rdfs:domain atm:Transaction ;\n                      rdfs:range xsd:decimal .\n  } AS ?requestedAmount)\n  BIND(EXISTS {\n    atm:transactionAmount rdfs:range xsd:integer .\n  } AS ?transactionAmount)\n  FILTER (?requestedAmount || ?transactionAmount)\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
       "query": "# Withdrawal-specific information is present\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK {\n  BIND(EXISTS {\n    atm:dispensedAmount rdfs:domain atm:Withdrawal ;\n                        rdfs:range xsd:decimal .\n  } AS ?dispensedAmount)\n  BIND(EXISTS {\n    atm:transactionAmount rdfs:domain ?domain .\n    ?domain owl:unionOf/rdf:rest*/rdf:first ?member .\n    FILTER (?member = atm:ATMTransaction || ?member = atm:Transaction)\n  } AS ?transactionAmountDomain)\n  FILTER (?dispensedAmount || ?transactionAmountDomain)\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
