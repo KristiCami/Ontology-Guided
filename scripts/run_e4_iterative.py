@@ -185,7 +185,10 @@ def main() -> None:
 
     schema_context = load_schema_context(PROJECT_ROOT / ontology_context_path, base_ns) if ontology_context_path else None
 
-    assembler = OntologyAssembler(default_prefixes=schema_context.prefixes if schema_context else None)
+    assembler = OntologyAssembler(
+        base_namespace=base_ns,
+        default_prefixes=schema_context.prefixes if schema_context else None,
+    )
     validator = ShaclValidator(PROJECT_ROOT / cfg["shapes_path"]) if cfg.get("validation", True) else None
     reasoner = OwlreadyReasoner(enabled=cfg.get("reasoning", True))
     cq_runner = None
