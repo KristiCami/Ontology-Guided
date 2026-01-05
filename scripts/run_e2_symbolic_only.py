@@ -40,7 +40,7 @@ def main() -> None:
     output_root = PROJECT_ROOT / cfg.get("output_root", "runs/E2_symbolic_only")
     ensure_dir(output_root)
 
-    temperature = cfg.get("temperature", 0.7)
+    temperature = cfg.get("temperature", 0.1)
     pipeline_config = PipelineConfig(
         requirements_path=PROJECT_ROOT / cfg["requirements_path"],
         shapes_path=PROJECT_ROOT / cfg["shapes_path"],
@@ -52,9 +52,9 @@ def main() -> None:
         report_path=output_root / "run_report.json",
         llm_mode=cfg.get("llm_mode", "openai"),
         llm_temperature=temperature,
-        max_requirements=cfg.get("max_requirements", 20),
+        max_requirements=cfg.get("max_requirements", 50),
         reasoning_enabled=cfg.get("reasoning", True),
-        max_iterations=cfg.get("iterations", 0),
+        max_iterations=cfg.get("iterations", 3),
         use_ontology_context=False,
         base_namespace=cfg.get("base_namespace", "http://lod.csd.auth.gr/atm/atm.ttl#"),
     )
