@@ -1,0 +1,233 @@
+Patch application failed to parse LLM Turtle.
+Reason: Failed to parse Turtle from LLM response after sanitization: at line 41 of <>:
+Bad syntax (objectList expected) at ^ in:
+"...b'roperty atm:dispensedAmount ;\n            owl:someValuesFrom'^b' ] ;\n    owl:equivalentClass [ a owl:Class ;\n            owl'..."
+
+Raw turtle:
+@prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+atm:BalanceInquiry a owl:Class .
+
+atm:Deposit a owl:Class ;
+    rdfs:subClassOf atm:Transaction .
+
+atm:DispensedMoneyImpliesAmountLogged a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:dispensedAmount ;
+            owl:someValuesFrom xsd:decimal ] ;
+    owl:equivalentClass [ a owl:Class ;
+            owl:intersectionOf ( atm:Withdrawal [ a owl:Restriction ;
+                        owl:onProperty atm:dispensedAmount ;
+                        owl:someValuesFrom xsd:decimal ] ) ] .
+
+atm:SuccessfulAuthorizationTriggerDispensing a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:dispensedAmount ;
+            owl:someValuesFrom xsd:decimal ] ;
+    owl:equivalentClass [ a owl:Class ;
+            owl:intersectionOf ( atm:Withdrawal [ a owl:Restriction ;
+                        owl:onProperty atm:authorizedBy ;
+                        owl:someValuesFrom atm:Authorization ] ) ] .
+
+atm:TransactionSuccessImpliesDispensing a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:dispensedAmount ;
+            owl:someValuesFrom xsd:decimal ] ;
+    owl:equivalentClass [ a owl:Class ;
+            owl:intersectionOf ( atm:Withdrawal [ a owl:Restriction ;
+                        owl:onProperty atm:authorizedBy ;
+                        owl:someValuesFrom atm:Authorization ] ) ] .
+
+atm:hasAccount a owl:ObjectProperty ;
+    rdfs:domain atm:Customer ;
+    rdfs:range atm:Account .
+
+atm:ownsCard a owl:ObjectProperty ;
+    rdfs:domain atm:Customer ;
+    rdfs:range atm:CashCard .
+
+atm:handlesTransaction a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:Transaction .
+
+atm:messageCode a owl:DatatypeProperty ;
+    rdfs:domain atm:Message ;
+    rdfs:range xsd:string .
+
+atm:onAccount a owl:ObjectProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range atm:Account .
+
+atm:operatedBy a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:Bank .
+
+atm:performedBy a owl:ObjectProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range atm:Customer .
+
+atm:requestedAmount a owl:DatatypeProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range xsd:decimal .
+
+atm:transactionTimestamp a owl:DatatypeProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range xsd:dateTime .
+
+atm:Message a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty atm:messageCode ] .
+
+atm:maintainsAccount a owl:ObjectProperty ;
+    rdfs:domain atm:Bank ;
+    rdfs:range atm:Account .
+
+atm:usesCard a owl:ObjectProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range atm:CashCard .
+
+atm:bankCode a owl:DatatypeProperty ;
+    rdfs:domain atm:CashCard ;
+    rdfs:range xsd:string .
+
+atm:issuesCard a owl:ObjectProperty ;
+    rdfs:domain atm:Bank ;
+    rdfs:range atm:CashCard .
+
+atm:serialNumber a owl:DatatypeProperty ;
+    rdfs:domain atm:CashCard ;
+    rdfs:range xsd:string .
+
+atm:Bank a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom atm:Account ;
+            owl:onProperty atm:maintainsAccount ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:CashCard ;
+            owl:onProperty atm:issuesCard ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:issuesCard ;
+            owl:someValuesFrom atm:CashCard ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:maintainsAccount ;
+            owl:someValuesFrom atm:Account ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:issuesCard ;
+            owl:someValuesFrom atm:CashCard ] .
+
+atm:Customer a owl:Class .
+
+atm:Withdrawal a owl:Class ;
+    rdfs:subClassOf atm:Transaction,
+        [ a owl:Restriction ;
+            owl:onProperty atm:authorizedBy ;
+            owl:someValuesFrom atm:Authorization ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:decimal ;
+            owl:onProperty atm:dispensedAmount ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:dispensedAmount ;
+            owl:someValuesFrom xsd:decimal ] .
+
+atm:receivesMessageFrom a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:BankComputer .
+
+atm:sendsMessageTo a owl:ObjectProperty ;
+    rdfs:domain atm:ATM ;
+    rdfs:range atm:BankComputer .
+
+atm:ATM a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom atm:Bank ;
+            owl:onProperty atm:operatedBy ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:BankComputer ;
+            owl:onProperty atm:sendsMessageTo ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:BankComputer ;
+            owl:onProperty atm:receivesMessageFrom ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom atm:Transaction ;
+            owl:onProperty atm:handlesTransaction ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:sendsMessageTo ;
+            owl:someValuesFrom atm:BankComputer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:receivesMessageFrom ;
+            owl:someValuesFrom atm:BankComputer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:sendsMessageTo ;
+            owl:someValuesFrom atm:BankComputer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:receivesMessageFrom ;
+            owl:someValuesFrom atm:BankComputer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:receivesMessageFrom ;
+            owl:someValuesFrom atm:BankComputer ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:dispenses ;
+            owl:someValuesFrom atm:Money ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:hasBackUpPowerSupply ;
+            owl:someValuesFrom atm:PowerSupply ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:hasCardVerificationTime ;
+            owl:someValuesFrom atm:Time ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:hasMainPowerSupply ;
+            owl:someValuesFrom atm:PowerSupply ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:hasPinVerificationTime ;
+            owl:someValuesFrom atm:Time ] .
+
+atm:Account a owl:Class .
+
+atm:dispensedAmount a owl:DatatypeProperty ;
+    rdfs:domain atm:Withdrawal ;
+    rdfs:range xsd:decimal .
+
+atm:authorizedBy a owl:ObjectProperty ;
+    rdfs:domain atm:Transaction ;
+    rdfs:range atm:Authorization .
+
+atm:Authorization a owl:Class ;
+    rdfs:
+
+atm:BasicRequirement a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:subject ;
+            owl:someValuesFrom atm:Subject ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:verb ;
+            owl:someValuesFrom atm:Verb ] .
+
+atm:ComplexRequirement a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:condition ;
+            owl:someValuesFrom atm:BasicRequirement ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:else ;
+            owl:someValuesFrom atm:BasicRequirement ] .
+
+atm:Keypad a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:consistOfKeys ;
+            owl:someValuesFrom atm:Keys ] .
+
+atm:displays a owl:Class ;
+    rdfs:subClassOf atm:ATM .
+
+atm:fromBankComputer a owl:Class ;
+    rdfs:subClassOf atm:BankComputer .
+
+atm:types a owl:Class ;
+    rdfs:subClassOf atm:Customer .
+
+atm:updates a owl:Class ;
+    rdfs:subClassOf atm:ATMtotalFundOfATM .
