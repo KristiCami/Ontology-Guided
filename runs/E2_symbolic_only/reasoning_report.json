@@ -1,5 +1,5 @@
 {
   "unsat_classes": [],
   "total_unsat": 0,
-  "notes": "Removed 5 invalid restriction(s) before reasoning. Declared 32 missing owl:Class resource(s) for class-level axioms."
+  "notes": "Declared 36 missing owl:Class resource(s) for class-level axioms."
 }

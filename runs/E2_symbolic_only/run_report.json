@@ -2,8 +2,8 @@
   "llm_notes": "Generated via OpenAI chat.completions",
   "token_usage": {
     "prompt_tokens": 1128,
-    "completion_tokens": 752,
-    "total_tokens": 1880
+    "completion_tokens": 569,
+    "total_tokens": 1697
   },
   "few_shot_exemplars": null,
   "shacl": {
@@ -122,7 +122,7 @@
     "enabled": true,
     "consistent": true,
     "unsatisfiable_classes": [],
-    "notes": "Removed 5 invalid restriction(s) before reasoning. Declared 32 missing owl:Class resource(s) for class-level axioms.",
+    "notes": "Declared 36 missing owl:Class resource(s) for class-level axioms.",
     "backend": "pellet"
   },
   "iterations": [
@@ -138,7 +138,7 @@
         "enabled": true,
         "consistent": true,
         "unsatisfiable_classes": [],
-        "notes": "Removed 5 invalid restriction(s) before reasoning. Declared 32 missing owl:Class resource(s) for class-level axioms.",
+        "notes": "Declared 36 missing owl:Class resource(s) for class-level axioms.",
         "backend": "pellet"
       },
       "cq_results": [
