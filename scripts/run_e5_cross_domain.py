@@ -43,6 +43,13 @@ def run_domain(name: str, cfg_path: Path, output_root: Path | None) -> None:
     resolved_output_root = output_root or (PROJECT_ROOT / cfg.get("output_root", f"runs/E5_cross_domain/{name}"))
     ensure_dir(resolved_output_root)
 
+    gold_path = PROJECT_ROOT / cfg.get("gold_path", "gold/atm_gold.ttl")
+    grounding_path = cfg.get("ontology_context_path") or cfg.get("ontology_path")
+    if cfg.get("use_ontology_context", False) and grounding_path is None:
+        raise ValueError(
+            "Ontology-aware prompting is enabled but no ontology_context_path/ontology_path was provided in the config."
+        )
+
     pipeline_config = PipelineConfig(
         requirements_path=PROJECT_ROOT / cfg["requirements_path"],
         shapes_path=PROJECT_ROOT / cfg["shapes_path"],
@@ -57,7 +64,7 @@ def run_domain(name: str, cfg_path: Path, output_root: Path | None) -> None:
         reasoning_enabled=cfg.get("reasoning", True),
         max_iterations=cfg.get("iterations", 0),
         use_ontology_context=cfg.get("use_ontology_context", True),
-        grounding_ontology_path=PROJECT_ROOT / cfg["ontology_path"] if cfg.get("ontology_path") else None,
+        grounding_ontology_path=PROJECT_ROOT / grounding_path if grounding_path else None,
         base_namespace=cfg.get("base_namespace", "http://lod.csd.auth.gr/atm/atm.ttl#"),
     )
 
@@ -73,7 +80,6 @@ def run_domain(name: str, cfg_path: Path, output_root: Path | None) -> None:
             encoding="utf-8",
         )
 
-    gold_path = PROJECT_ROOT / cfg.get("ontology_path", "gold/atm_gold.ttl")
     (resolved_output_root / "metrics_exact.json").write_text(
         json.dumps(compute_exact_metrics(pipeline_config.output_path, gold_path), indent=2),
         encoding="utf-8",

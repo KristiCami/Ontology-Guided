@@ -82,7 +82,7 @@ def main() -> None:
             json.dumps(reasoning_payload, indent=2), encoding="utf-8"
         )
 
-    gold_path = PROJECT_ROOT / cfg.get("ontology_path", "gold/atm_gold.ttl")
+    gold_path = PROJECT_ROOT / cfg.get("gold_path", cfg.get("ontology_path", "gold/atm_gold.ttl"))
     (output_root / "metrics_exact.json").write_text(
         json.dumps(compute_exact_metrics(pipeline_config.output_path, gold_path), indent=2),
         encoding="utf-8",
