@@ -41,6 +41,7 @@ def main() -> None:
     ensure_dir(output_root)
 
     temperature = cfg.get("temperature", 0.1)
+    gold_path = PROJECT_ROOT / cfg.get("ontology_path", "gold/atm_gold.ttl")
     pipeline_config = PipelineConfig(
         requirements_path=PROJECT_ROOT / cfg["requirements_path"],
         shapes_path=PROJECT_ROOT / cfg["shapes_path"],
@@ -55,8 +56,9 @@ def main() -> None:
         max_requirements=cfg.get("max_requirements", 50),
         reasoning_enabled=cfg.get("reasoning", True),
         max_iterations=cfg.get("iterations", 3),
-        use_ontology_context=False,
         base_namespace=cfg.get("base_namespace", "http://lod.csd.auth.gr/atm/atm.ttl#"),
+        grounding_ontology_path=gold_path,
+        use_ontology_context=cfg.get("use_ontology_context", True),
     )
 
     pipeline = OntologyDraftingPipeline(pipeline_config)
@@ -82,7 +84,6 @@ def main() -> None:
             json.dumps(reasoning_payload, indent=2), encoding="utf-8"
         )
 
-    gold_path = PROJECT_ROOT / cfg.get("ontology_path", "gold/atm_gold.ttl")
     (output_root / "metrics_exact.json").write_text(
         json.dumps(compute_exact_metrics(pipeline_config.output_path, gold_path), indent=2),
         encoding="utf-8",
