@@ -66,14 +66,14 @@ def main() -> None:
 
     asserted_graph = pipeline.state_graph or Graph().parse(pipeline_config.output_path)
     data_graph = pipeline.reasoned_graph or asserted_graph
-    validation_summary = None
 
     if pipeline.last_shacl_report:
         summary_path = output_root / "validation_summary.json"
-        validation_summary = summarize_shacl_report(pipeline.last_shacl_report)
-        summary_path.write_text(json.dumps(validation_summary, indent=2), encoding="utf-8")
+        summary_path.write_text(
+            json.dumps(summarize_shacl_report(pipeline.last_shacl_report), indent=2),
+            encoding="utf-8",
+        )
 
-    reasoning_payload = None
     if pipeline.last_reasoner_report:
         reasoning_payload = {
             "unsat_classes": pipeline.last_reasoner_report.unsatisfiable_classes,
@@ -84,13 +84,15 @@ def main() -> None:
             json.dumps(reasoning_payload, indent=2), encoding="utf-8"
         )
 
-    exact_metrics = compute_exact_metrics(pipeline_config.output_path, gold_path)
-    semantic_metrics = compute_semantic_metrics(data_graph, Graph().parse(gold_path))
+    (output_root / "metrics_exact.json").write_text(
+        json.dumps(compute_exact_metrics(pipeline_config.output_path, gold_path), indent=2),
+        encoding="utf-8",
+    )
+    (output_root / "metrics_semantic.json").write_text(
+        json.dumps(compute_semantic_metrics(data_graph, Graph().parse(gold_path)), indent=2),
+        encoding="utf-8",
+    )
 
-    (output_root / "metrics_exact.json").write_text(json.dumps(exact_metrics, indent=2), encoding="utf-8")
-    (output_root / "metrics_semantic.json").write_text(json.dumps(semantic_metrics, indent=2), encoding="utf-8")
-
-    cq_payload = None
     if pipeline_config.competency_questions_path:
         cq_runner = CompetencyQuestionRunner(pipeline_config.competency_questions_path)
         cq_results = cq_runner.run(data_graph)
@@ -106,25 +108,6 @@ def main() -> None:
             ],
         }
         (output_root / "cq_results.json").write_text(json.dumps(cq_payload, indent=2), encoding="utf-8")
-
-    summary = {
-        "config": {
-            "requirements_path": str(pipeline_config.requirements_path),
-            "shapes_path": str(pipeline_config.shapes_path),
-            "ontology_path": str(gold_path),
-            "use_ontology_context": pipeline_config.use_ontology_context,
-            "llm_mode": pipeline_config.llm_mode,
-            "llm_temperature": pipeline_config.llm_temperature,
-            "max_requirements": pipeline_config.max_requirements,
-            "reasoning_enabled": pipeline_config.reasoning_enabled,
-            "iterations": pipeline_config.max_iterations,
-        },
-        "metrics": {"exact": exact_metrics, "semantic": semantic_metrics},
-        "competency_questions": cq_payload or {},
-        "validation": validation_summary or {},
-        "reasoning": reasoning_payload or {},
-    }
-    (output_root / "run_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
     print("E2 run complete. Key outputs written under", output_root)
 

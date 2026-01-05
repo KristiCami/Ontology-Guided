@@ -3,18 +3,14 @@
 from __future__ import annotations
 
 import json
-import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional, Sequence, TYPE_CHECKING
+from typing import Iterable, List, Optional, Sequence
 
 from rdflib import Graph
 
 from .metrics import compute_exact_metrics_from_graphs, compute_semantic_metrics
 from .shacl import ShaclReport, summarize_shacl_report
-
-if TYPE_CHECKING:  # pragma: no cover - import guard for type checkers
-    from .queries import CompetencyQuestionResult
 
 
 @dataclass
@@ -37,22 +33,14 @@ class StopDecision:
     reason: str
 
 
-def shacl_report_to_patches(report: ShaclReport, include_soft_if_no_hard: bool = False) -> List[Patch]:
-    """Translate SHACL violations into a JSON-friendly patch plan.
-
-    By default, only ``Violation`` severities are converted to patches. When
-    ``include_soft_if_no_hard`` is true and no hard violations are present,
-    soft/warning results are also converted so the repair loop can progress.
-    """
+def shacl_report_to_patches(report: ShaclReport) -> List[Patch]:
+    """Translate hard SHACL violations into a JSON-friendly patch plan."""
 
     patches: List[Patch] = []
     seen: set[tuple[str, str, str]] = set()
-    severities = [(result.severity or "").lower() for result in report.results]
-    has_hard_violations = any("violation" in level for level in severities)
-
     for result in report.results:
         severity = (result.severity or "").lower()
-        if "violation" not in severity and not (include_soft_if_no_hard and not has_hard_violations):
+        if "violation" not in severity:
             continue
         key = (
             result.focus_node or "atm:UnknownFocus",
@@ -77,10 +65,7 @@ def shacl_report_to_patches(report: ShaclReport, include_soft_if_no_hard: bool =
 
 
 def save_patch_plan(patches: Sequence[Patch], path: Path) -> None:
-    normalized = []
-    for patch in patches:
-        normalized.append(patch.to_dict() if hasattr(patch, "to_dict") else patch)
-    path.write_text(json.dumps(normalized, indent=2), encoding="utf-8")
+    path.write_text(json.dumps([patch.to_dict() for patch in patches], indent=2), encoding="utf-8")
 
 
 def save_shacl_report(report: ShaclReport, path: Path) -> None:
@@ -103,96 +88,6 @@ def final_metrics(pred_graph: Graph, gold_graph: Graph) -> dict:
     exact = compute_exact_metrics_from_graphs(pred_graph, gold_graph)
     semantic = compute_semantic_metrics(pred_graph, gold_graph)
     return {"exact": exact, "semantic": semantic}
-
-
-_DOMAIN_RANGE_PATTERN = re.compile(
-    r"(atm:[A-Za-z0-9_]+)\s+rdfs:domain\s+(atm:[A-Za-z0-9_]+)\s*;\s*rdfs:range\s+([A-Za-z0-9_:]+)",
-    re.IGNORECASE,
-)
-_SUBCLASS_PATTERN = re.compile(
-    r"(atm:[A-Za-z0-9_]+)\s+rdfs:subClassOf[+*]?\s+(atm:[A-Za-z0-9_]+)",
-    re.IGNORECASE,
-)
-_ATM_TOKEN_PATTERN = re.compile(r"atm:[A-Za-z0-9_]+")
-
-
-def cq_results_to_patches(cq_results: Sequence["CompetencyQuestionResult"]) -> List[Patch]:
-    """Convert failed CQ checks into patch candidates.
-
-    The heuristic looks for common domain/range or subclass patterns within the
-    ASK queries. When none are found, it falls back to using the first two ATM
-    tokens as a subclass assertion. This keeps the repair loop moving even when
-    SHACL cannot propose edits (e.g., due to missing focus nodes).
-    """
-
-    patches: List[Patch] = []
-    seen: set[tuple[str, str, str]] = set()
-
-    for result in cq_results:
-        if result.success:
-            continue
-
-        query = result.query or ""
-        domain_range_matches = list(_DOMAIN_RANGE_PATTERN.finditer(query))
-        subclass_matches = list(_SUBCLASS_PATTERN.finditer(query))
-        patch_added = False
-
-        for match in domain_range_matches:
-            predicate, subject, obj = match.group(1), match.group(2), match.group(3)
-            key = (subject, predicate, obj)
-            if key in seen:
-                continue
-            seen.add(key)
-            patches.append(
-                Patch(
-                    action="addProperty",
-                    subject=subject,
-                    predicate=predicate,
-                    object=obj,
-                    message="Generated from failed competency question",
-                    severity="CQ",
-                )
-            )
-            patch_added = True
-
-        if not patch_added:
-            for match in subclass_matches:
-                subject, obj = match.group(1), match.group(2)
-                key = (subject, "rdfs:subClassOf", obj)
-                if key in seen:
-                    continue
-                seen.add(key)
-                patches.append(
-                    Patch(
-                        action="addSubclass",
-                        subject=subject,
-                        predicate="rdfs:subClassOf",
-                        object=obj,
-                        message="Generated from failed competency question (subclass expectation)",
-                        severity="CQ",
-                    )
-                )
-                patch_added = True
-                break
-
-        if not patch_added:
-            tokens = _ATM_TOKEN_PATTERN.findall(query)
-            if len(tokens) >= 2:
-                key = (tokens[0], "rdfs:subClassOf", tokens[1])
-                if key not in seen:
-                    seen.add(key)
-                    patches.append(
-                        Patch(
-                            action="addSubclass",
-                            subject=tokens[0],
-                            predicate="rdfs:subClassOf",
-                            object=tokens[1],
-                            message="Fallback CQ-derived subclass patch",
-                            severity="CQ",
-                        )
-                    )
-
-    return sorted(patches, key=lambda p: (p.subject, p.predicate, p.object))
 
 
 def should_stop(

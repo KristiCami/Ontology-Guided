@@ -71,29 +71,13 @@ class ShaclValidator:
         )
         report_graph_ttl: Optional[str] = None
         parsed_results: List[ShaclResult] = []
-
-        graph_obj: Optional[Graph] = None
         if isinstance(report_graph, bytes):
             report_graph_ttl = report_graph.decode("utf-8")
-            graph_obj = Graph()
-            try:
-                graph_obj.parse(data=report_graph_ttl, format="turtle")
-            except Exception:  # pragma: no cover - defensive, not expected in normal runs
-                graph_obj = None
         elif isinstance(report_graph, str):
             report_graph_ttl = report_graph
-            graph_obj = Graph()
-            try:
-                graph_obj.parse(data=report_graph_ttl, format="turtle")
-            except Exception:  # pragma: no cover - defensive, not expected in normal runs
-                graph_obj = None
-        elif isinstance(report_graph, Graph):
-            graph_obj = report_graph
+        elif report_graph:
             report_graph_ttl = report_graph.serialize(format="turtle")
-
-        if graph_obj is not None:
-            parsed_results = self._extract_results(graph_obj)
-
+            parsed_results = self._extract_results(report_graph)
         return ShaclReport(bool(conforms), str(text_report), report_graph_ttl, parsed_results)
 
     def _find_invalid_decimal_literals(self, data_graph: Graph) -> list[tuple[str, str, str]]:
