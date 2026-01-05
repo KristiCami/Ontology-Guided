@@ -10,9 +10,9 @@
   "prompt_mode": "ontology_aware",
   "validation": false,
   "llm_mode": "openai",
-  "max_requirements": 20,
+  "max_requirements": 50,
   "output_root": "runs/E3_no_repair",
-  "iterations": 0,
+  "iterations": 15,
   "reasoning": true,
   "competency_questions": "atm_cqs.rq"
 }
