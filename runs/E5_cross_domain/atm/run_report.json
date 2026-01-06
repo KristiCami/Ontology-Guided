@@ -1,9 +1,9 @@
 {
   "llm_notes": "Generated via OpenAI chat.completions",
   "token_usage": {
-    "prompt_tokens": 1137,
-    "completion_tokens": 217,
-    "total_tokens": 1354
+    "prompt_tokens": 1128,
+    "completion_tokens": 420,
+    "total_tokens": 1548
   },
   "few_shot_exemplars": null,
   "shacl": {
@@ -24,32 +24,32 @@
     },
     {
       "query": "# Deposits are also treated as transactions\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:Deposit rdfs:subClassOf+ atm:Transaction .\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
       "query": "# ATMs connect either to transactions (gold) or to cash cards (operational)\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:handlesTransaction rdfs:domain atm:ATM ;\n                           rdfs:range atm:Transaction .\n  } AS ?handlesTransactions)\n  BIND(EXISTS {\n    atm:accepts rdfs:domain atm:ATM ;\n                rdfs:range atm:CashCard .\n  } AS ?acceptsCards)\n  FILTER (?handlesTransactions || ?acceptsCards)\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
       "query": "# ATMs are associated with banks either via operations or ownership\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:operatedBy rdfs:domain atm:ATM ;\n                   rdfs:range atm:Bank .\n  } AS ?operatedBy)\n  BIND(EXISTS {\n    atm:belongsToBank rdfs:domain atm:ATM ;\n                      rdfs:range [ owl:onProperty atm:belongsToBank ;\n                                   owl:allValuesFrom atm:Bank\n                                 ] .\n  } AS ?belongsTo)\n  FILTER (?operatedBy || ?belongsTo)\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
       "query": "# Banks maintain customer relationships\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:maintainsAccount rdfs:domain atm:Bank ;\n                        rdfs:range atm:Account .\n  } AS ?maintainsAccount)\n  BIND(EXISTS {\n    atm:hasCustomer rdfs:domain atm:Bank .\n  } AS ?hasCustomers)\n  FILTER (?maintainsAccount || ?hasCustomers)\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
       "query": "# Customers are linked to cash cards in both ontologies\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:ownsCard rdfs:domain atm:Customer ;\n                 rdfs:range atm:CashCard .\n  } AS ?ownsCard)\n  BIND(EXISTS {\n    atm:hasCashCard rdfs:domain atm:Customer ;\n                    rdfs:range atm:CashCard .\n  } AS ?hasCashCard)\n  FILTER (?ownsCard || ?hasCashCard)\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
       "query": "# Customers or their accounts are linked together\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:hasAccount rdfs:domain atm:Customer ;\n                  rdfs:range atm:Account .\n  } AS ?customerAccounts)\n  BIND(EXISTS {\n    atm:isHold rdfs:domain atm:Account .\n  } AS ?accountHeldBy)\n  FILTER (?customerAccounts || ?accountHeldBy)\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
@@ -120,9 +120,9 @@
   ],
   "reasoner": {
     "enabled": true,
-    "consistent": true,
+    "consistent": null,
     "unsatisfiable_classes": [],
-    "notes": "",
+    "notes": "Removed 5 invalid restriction(s) before reasoning. Declared 30 missing owl:Class resource(s) for class-level axioms. Pellet failed: Java error message is:\nClassifying 14 elements\n\rClassifying:  7% complete in 00:00Exception in thread \"main\" java.lang.NullPointerException\n\tat org.mindswap.pellet.Individual.getRNeighborEdges(Individual.java:680)\n\tat org.mindswap.pellet.tableau.completion.rule.SomeValuesRule.applySomeValuesRule(SomeValuesRule.java:120)\n\tat org.mindswap.pellet.tableau.completion.rule.SomeValuesRule.apply(SomeValuesRule.java:64)\n\tat org.mindswap.pellet.tableau.completion.EmptySRIQStrategy.expand(EmptySRIQStrategy.java:303)\n\tat org.mindswap.pellet.tableau.completion.EmptySRIQStrategy.complete(EmptySRIQStrategy.java:162)\n\tat org.mindswap.pellet.ABox.isConsistent(ABox.java:1423)\n\tat org.mindswap.pellet.ABox.isSatisfiable(ABox.java:595)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.checkSatisfiability(CDOptimizedTaxonomyBuilder.java:763)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:814)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:265)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:217)\n\tat org.mindswap.pellet.KnowledgeBase.classify(KnowledgeBase.java:2095)\n\tat pellet.PelletRealize.run(PelletRealize.java:77)\n\tat pellet.Pellet.run(Pellet.java:105)\n\tat pellet.Pellet.main(Pellet.java:59)\n",
     "backend": "pellet"
   },
   "iterations": [
@@ -136,9 +136,9 @@
       },
       "reasoner": {
         "enabled": true,
-        "consistent": true,
+        "consistent": null,
         "unsatisfiable_classes": [],
-        "notes": "",
+        "notes": "Removed 5 invalid restriction(s) before reasoning. Declared 30 missing owl:Class resource(s) for class-level axioms. Pellet failed: Java error message is:\nClassifying 14 elements\n\rClassifying:  7% complete in 00:00Exception in thread \"main\" java.lang.NullPointerException\n\tat org.mindswap.pellet.Individual.getRNeighborEdges(Individual.java:680)\n\tat org.mindswap.pellet.tableau.completion.rule.SomeValuesRule.applySomeValuesRule(SomeValuesRule.java:120)\n\tat org.mindswap.pellet.tableau.completion.rule.SomeValuesRule.apply(SomeValuesRule.java:64)\n\tat org.mindswap.pellet.tableau.completion.EmptySRIQStrategy.expand(EmptySRIQStrategy.java:303)\n\tat org.mindswap.pellet.tableau.completion.EmptySRIQStrategy.complete(EmptySRIQStrategy.java:162)\n\tat org.mindswap.pellet.ABox.isConsistent(ABox.java:1423)\n\tat org.mindswap.pellet.ABox.isSatisfiable(ABox.java:595)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.checkSatisfiability(CDOptimizedTaxonomyBuilder.java:763)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:814)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:265)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:217)\n\tat org.mindswap.pellet.KnowledgeBase.classify(KnowledgeBase.java:2095)\n\tat pellet.PelletRealize.run(PelletRealize.java:77)\n\tat pellet.Pellet.run(Pellet.java:105)\n\tat pellet.Pellet.main(Pellet.java:59)\n",
         "backend": "pellet"
       },
       "cq_results": [
@@ -154,32 +154,32 @@
         },
         {
           "query": "# Deposits are also treated as transactions\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:Deposit rdfs:subClassOf+ atm:Transaction .\n}",
-          "success": true,
+          "success": false,
           "message": ""
         },
         {
           "query": "# ATMs connect either to transactions (gold) or to cash cards (operational)\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:handlesTransaction rdfs:domain atm:ATM ;\n                           rdfs:range atm:Transaction .\n  } AS ?handlesTransactions)\n  BIND(EXISTS {\n    atm:accepts rdfs:domain atm:ATM ;\n                rdfs:range atm:CashCard .\n  } AS ?acceptsCards)\n  FILTER (?handlesTransactions || ?acceptsCards)\n}",
-          "success": true,
+          "success": false,
           "message": ""
         },
         {
           "query": "# ATMs are associated with banks either via operations or ownership\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:operatedBy rdfs:domain atm:ATM ;\n                   rdfs:range atm:Bank .\n  } AS ?operatedBy)\n  BIND(EXISTS {\n    atm:belongsToBank rdfs:domain atm:ATM ;\n                      rdfs:range [ owl:onProperty atm:belongsToBank ;\n                                   owl:allValuesFrom atm:Bank\n                                 ] .\n  } AS ?belongsTo)\n  FILTER (?operatedBy || ?belongsTo)\n}",
-          "success": true,
+          "success": false,
           "message": ""
         },
         {
           "query": "# Banks maintain customer relationships\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:maintainsAccount rdfs:domain atm:Bank ;\n                        rdfs:range atm:Account .\n  } AS ?maintainsAccount)\n  BIND(EXISTS {\n    atm:hasCustomer rdfs:domain atm:Bank .\n  } AS ?hasCustomers)\n  FILTER (?maintainsAccount || ?hasCustomers)\n}",
-          "success": true,
+          "success": false,
           "message": ""
         },
         {
           "query": "# Customers are linked to cash cards in both ontologies\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:ownsCard rdfs:domain atm:Customer ;\n                 rdfs:range atm:CashCard .\n  } AS ?ownsCard)\n  BIND(EXISTS {\n    atm:hasCashCard rdfs:domain atm:Customer ;\n                    rdfs:range atm:CashCard .\n  } AS ?hasCashCard)\n  FILTER (?ownsCard || ?hasCashCard)\n}",
-          "success": true,
+          "success": false,
           "message": ""
         },
         {
           "query": "# Customers or their accounts are linked together\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:hasAccount rdfs:domain atm:Customer ;\n                  rdfs:range atm:Account .\n  } AS ?customerAccounts)\n  BIND(EXISTS {\n    atm:isHold rdfs:domain atm:Account .\n  } AS ?accountHeldBy)\n  FILTER (?customerAccounts || ?accountHeldBy)\n}",
-          "success": true,
+          "success": false,
           "message": ""
         },
         {
