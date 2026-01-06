@@ -147,8 +147,6 @@ python scripts/run_e5_cross_domain.py --config configs/e5_cross_domain.json
 python scripts/run_e6_cq_oriented.py --config configs/atm_e6_cq_oriented.json
 ```
 
-The default E5 configuration now runs two domains: the ATM stack (`configs/atm_e5_cross_domain.json`) and a healthcare stack (`configs/health_ontology_aware.json`) built from `health_requirements.jsonl`, `gold/health_gold.ttl`, `gold/shapes_health.ttl`, and `health_cqs.rq`. Both use `llm_mode=openai`; add more domain blocks in `configs/e5_cross_domain.json` as needed. The healthcare assets mirror the ATM complexity with a similar number of requirements and constrained triples to exercise cross-domain behavior on comparable difficulty.
-
 ### Development tips
 - The pipeline is modular: swap in a domain-specific LLM by subclassing `LLMClient` or plug in another validator by editing `og_nsd/shacl.py`.
 - `RequirementLoader` supports both pure JSON (list/dict) and JSONL files.  It also exposes `chunk_requirements` for few-shot prompt batching.
