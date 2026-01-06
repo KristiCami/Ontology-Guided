@@ -1,0 +1,36 @@
+{
+  "iteration": 1,
+  "shacl": {
+    "total": 0,
+    "violations": {
+      "hard": 0,
+      "soft": 0
+    }
+  },
+  "cq": {
+    "pass_rate": 0.0,
+    "failed": 0,
+    "failed_queries": [],
+    "results": []
+  },
+  "patches": {
+    "count": 0,
+    "types": {},
+    "sources": [],
+    "iterations_with_patches": 1
+  },
+  "reasoning": {
+    "enabled": false,
+    "consistent": false,
+    "unsat_classes": 0,
+    "notes": "patch_parse_error",
+    "backend": null,
+    "triples_before_reasoning": 274,
+    "triples_after_reasoning": 274
+  },
+  "stop": {
+    "decision": true,
+    "reason": "patch_parse_error"
+  },
+  "stop_reason": "patch_parse_error"
+}

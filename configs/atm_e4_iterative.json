@@ -12,7 +12,7 @@
   "max_requirements": 30,
   "requirements_chunk_size": 5,
   "output_root": "runs/E4_full",
-  "iterations": 20,
+  "iterations": 7,
   "reasoning": true,
   "competency_questions": "atm_cqs.rq",
   "base_namespace": "http://lod.csd.auth.gr/atm/atm.ttl#",
