@@ -404,37 +404,66 @@ def main() -> None:
                     f"Reason: {exc}\n\nRaw turtle:\n{patch_response.turtle}",
                     encoding="utf-8",
                 )
-                stop_decision = StopDecision(True, "patch_parse_error")
-                assembler.serialize(state, next_dir / "pred.ttl")
-                (next_dir / "shacl_report.ttl").write_text("Patch parse error; SHACL not executed.\n", encoding="utf-8")
-                save_patch_plan([], next_dir / "patches.json")
-                (next_dir / "cq_results.json").write_text(
-                    json.dumps({"pass_rate": 0.0, "results": []}, indent=2), encoding="utf-8"
-                )
-                stub_reasoning = SimpleNamespace(
-                    report=SimpleNamespace(
-                        enabled=False, consistent=False, unsatisfiable_classes=[], notes="patch_parse_error", backend=None
-                    ),
-                    expanded_graph=state.graph,
-                )
-                iteration_log = _save_iteration_log(
-                    iter_dir=next_dir,
-                    iteration=next_iter,
-                    shacl_summary={"total": 0, "violations": {"hard": 0, "soft": 0}},
-                    cq_payload={"pass_rate": 0.0, "results": []},
-                    patches=[],
-                    patch_sources=[],
-                    patch_iteration_count=patch_iterations,
-                    reasoning_result=stub_reasoning,
-                    triples_before_reasoning=len(state.graph),
-                    stop_decision=stop_decision,
-                )
-                repair_log["iterations"][f"iter{next_iter}"] = iteration_log
-                repair_log["stop"] = {"iteration": next_iter, "reason": stop_decision.reason, "error": str(exc)}
-                repair_log["stop_reason"] = stop_decision.reason
-                (output_root / "repair_log.json").write_text(json.dumps(repair_log, indent=2), encoding="utf-8")
-                print(f"[{policy}] Aborted at iter{next_iter} due to Turtle parse error. See {next_dir / 'llm_error.txt'}")
-                return
+                fallback_notes = ["llm_patch_parse_error"]
+                try:
+                    fallback_llm = HeuristicLLM(base_ns)
+                    fallback_response = fallback_llm.apply_patches([p.to_dict() for p in patches], context_ttl)
+                    assembler.add_turtle(next_state, fallback_response.turtle)
+                    fallback_notes.append("fallback_heuristic_patch_applied")
+                    (next_dir / "fallback_patch.ttl").write_text(fallback_response.turtle, encoding="utf-8")
+                except Exception as fallback_exc:  # pragma: no cover - defensive guard
+                    fallback_notes.append(f"fallback_failed: {fallback_exc}")
+                    (next_dir / "patch_application_notes.txt").write_text(
+                        "\n".join(fallback_notes), encoding="utf-8"
+                    )
+                    stop_decision = StopDecision(True, "patch_parse_error")
+                    assembler.serialize(state, next_dir / "pred.ttl")
+                    (next_dir / "shacl_report.ttl").write_text(
+                        "Patch parse error; SHACL not executed.\n", encoding="utf-8"
+                    )
+                    save_patch_plan([], next_dir / "patches.json")
+                    (next_dir / "cq_results.json").write_text(
+                        json.dumps({"pass_rate": 0.0, "results": []}, indent=2), encoding="utf-8"
+                    )
+                    stub_reasoning = SimpleNamespace(
+                        report=SimpleNamespace(
+                            enabled=False,
+                            consistent=False,
+                            unsatisfiable_classes=[],
+                            notes="patch_parse_error",
+                            backend=None,
+                        ),
+                        expanded_graph=state.graph,
+                    )
+                    iteration_log = _save_iteration_log(
+                        iter_dir=next_dir,
+                        iteration=next_iter,
+                        shacl_summary={"total": 0, "violations": {"hard": 0, "soft": 0}},
+                        cq_payload={"pass_rate": 0.0, "results": []},
+                        patches=[],
+                        patch_sources=[],
+                        patch_iteration_count=patch_iterations,
+                        reasoning_result=stub_reasoning,
+                        triples_before_reasoning=len(state.graph),
+                        stop_decision=stop_decision,
+                    )
+                    repair_log["iterations"][f"iter{next_iter}"] = iteration_log
+                    repair_log["stop"] = {
+                        "iteration": next_iter,
+                        "reason": stop_decision.reason,
+                        "error": str(fallback_exc),
+                    }
+                    repair_log["stop_reason"] = stop_decision.reason
+                    (output_root / "repair_log.json").write_text(json.dumps(repair_log, indent=2), encoding="utf-8")
+                    print(
+                        f"[{policy}] Aborted at iter{next_iter} due to Turtle parse error. "
+                        f"See {(next_dir / 'llm_error.txt')}"
+                    )
+                    return
+                else:
+                    (next_dir / "patch_application_notes.txt").write_text(
+                        "\n".join(fallback_notes), encoding="utf-8"
+                    )
             state = next_state
             assembler.serialize(state, next_dir / "pred.ttl")
 
