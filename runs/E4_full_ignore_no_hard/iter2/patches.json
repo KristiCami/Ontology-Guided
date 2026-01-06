@@ -1,15 +1,6 @@
 [
   {
     "action": "addSubclass",
-    "subject": "atm:bankCode",
-    "predicate": "rdfs:subClassOf",
-    "object": "atm:bankCode",
-    "message": "Fallback CQ-derived subclass patch",
-    "source_shape": null,
-    "severity": "CQ"
-  },
-  {
-    "action": "addSubclass",
     "subject": "atm:displays",
     "predicate": "rdfs:subClassOf",
     "object": "atm:ATM",

@@ -1,5 +1,5 @@
 {
-  "iteration": 4,
+  "iteration": 2,
   "shacl": {
     "total": 0,
     "violations": {
@@ -8,10 +8,9 @@
     }
   },
   "cq": {
-    "pass_rate": 0.7142857142857143,
-    "failed": 6,
+    "pass_rate": 0.7619047619047619,
+    "failed": 5,
     "failed_queries": [
-      "# Cash card bank codes are captured with an appropriate datatype\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK {\n  BIND(EXISTS { atm:bankCode rdfs:range xsd:string . } AS ?stringRange)\n  BIND(EXISTS { atm:bankCode rdfs:range xsd:integer . } AS ?integerRange)\n  BIND(EXISTS { atm:bankCode rdfs:domain atm:CashCard . } AS ?cashCardDomain)\n  BIND(EXISTS {\n    atm:bankCode rdfs:domain ?domain .\n    ?domain owl:unionOf ?union .\n  } AS ?unionDomain)\n  FILTER ((?stringRange || ?integerRange) && (?cashCardDomain || ?unionDomain))\n}",
       "# Transaction timestamps are captured as temporal datatypes\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK {\n  atm:transactionTimestamp rdfs:domain atm:Transaction .\n  BIND(EXISTS { atm:transactionTimestamp rdfs:range xsd:dateTime . } AS ?dateTimeRange)\n  BIND(EXISTS { atm:transactionTimestamp rdfs:range xsd:dateTimeStamp . } AS ?dateTimeStampRange)\n  FILTER (?dateTimeRange || ?dateTimeStampRange)\n}",
       "# ATM user interfaces capture both normal and error displays\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:displays rdfs:domain atm:ATM ;\n               rdfs:range ?displayUnion .\n  ?displayUnion owl:unionOf ?list .\n  FILTER EXISTS { ?list rdf:rest*/rdf:first atm:NormalDisplay }\n  FILTER EXISTS { ?list rdf:rest*/rdf:first atm:ErrorDisplay }\n}",
       "# Bidirectional communication with the bank back-end is represented\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:fromBankComputer rdfs:range atm:BankComputer .\n  } AS ?fromBankComputer)\n  BIND(EXISTS {\n    atm:toBankComputer rdfs:range atm:BankComputer .\n  } AS ?toBankComputer)\n  BIND(EXISTS {\n    atm:toATM rdfs:range atm:ATM .\n  } AS ?toAtm)\n  FILTER (?fromBankComputer && ?toBankComputer && ?toAtm)\n}",
@@ -61,7 +60,7 @@
       },
       {
         "query": "# Cash card bank codes are captured with an appropriate datatype\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK {\n  BIND(EXISTS { atm:bankCode rdfs:range xsd:string . } AS ?stringRange)\n  BIND(EXISTS { atm:bankCode rdfs:range xsd:integer . } AS ?integerRange)\n  BIND(EXISTS { atm:bankCode rdfs:domain atm:CashCard . } AS ?cashCardDomain)\n  BIND(EXISTS {\n    atm:bankCode rdfs:domain ?domain .\n    ?domain owl:unionOf ?union .\n  } AS ?unionDomain)\n  FILTER ((?stringRange || ?integerRange) && (?cashCardDomain || ?unionDomain))\n}",
-        "success": false,
+        "success": true,
         "message": ""
       },
       {
@@ -127,27 +126,27 @@
     ]
   },
   "patches": {
-    "count": 6,
+    "count": 5,
     "types": {
-      "addSubclass": 6
+      "addSubclass": 5
     },
     "sources": [
       "competency_questions"
     ],
-    "iterations_with_patches": 5
+    "iterations_with_patches": 3
   },
   "reasoning": {
     "enabled": true,
     "consistent": null,
     "unsat_classes": 0,
-    "notes": "Removed 71 invalid restriction(s) before reasoning. Declared 182 missing owl:Class resource(s) for class-level axioms. Pellet failed: Java error message is:\nClassifying 14 elements\n\rClassifying:  7% complete in 00:00Exception in thread \"main\" java.lang.NullPointerException\n\tat org.mindswap.pellet.tableau.completion.rule.AllValuesRule.applyAllValues(AllValuesRule.java:102)\n\tat org.mindswap.pellet.tableau.completion.CompletionStrategy.addType(CompletionStrategy.java:469)\n\tat org.mindswap.pellet.tableau.completion.rule.UnfoldingRule.applyUnfoldingRule(UnfoldingRule.java:98)\n\tat org.mindswap.pellet.tableau.completion.rule.UnfoldingRule.apply(UnfoldingRule.java:61)\n\tat org.mindswap.pellet.tableau.completion.EmptySRIQStrategy.expand(EmptySRIQStrategy.java:285)\n\tat org.mindswap.pellet.tableau.completion.EmptySRIQStrategy.complete(EmptySRIQStrategy.java:162)\n\tat org.mindswap.pellet.ABox.isConsistent(ABox.java:1423)\n\tat org.mindswap.pellet.ABox.isSatisfiable(ABox.java:595)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.checkSatisfiability(CDOptimizedTaxonomyBuilder.java:763)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:814)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:265)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:217)\n\tat org.mindswap.pellet.KnowledgeBase.classify(KnowledgeBase.java:2095)\n\tat pellet.PelletRealize.run(PelletRealize.java:77)\n\tat pellet.Pellet.run(Pellet.java:105)\n\tat pellet.Pellet.main(Pellet.java:59)\n",
+    "notes": "Removed 4 invalid restriction(s) before reasoning. Declared 311 missing owl:Class resource(s) for class-level axioms. Pellet failed: Java error message is:\nClassifying 14 elements\n\rClassifying:  7% complete in 00:00Exception in thread \"main\" java.lang.NullPointerException\n\tat org.mindswap.pellet.Individual.getRNeighborEdges(Individual.java:680)\n\tat org.mindswap.pellet.tableau.completion.rule.SomeValuesRule.applySomeValuesRule(SomeValuesRule.java:120)\n\tat org.mindswap.pellet.tableau.completion.rule.SomeValuesRule.apply(SomeValuesRule.java:64)\n\tat org.mindswap.pellet.tableau.completion.EmptySRIQStrategy.expand(EmptySRIQStrategy.java:303)\n\tat org.mindswap.pellet.tableau.completion.EmptySRIQStrategy.complete(EmptySRIQStrategy.java:162)\n\tat org.mindswap.pellet.ABox.isConsistent(ABox.java:1423)\n\tat org.mindswap.pellet.ABox.isSatisfiable(ABox.java:595)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.checkSatisfiability(CDOptimizedTaxonomyBuilder.java:763)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:814)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:265)\n\tat org.mindswap.pellet.taxonomy.CDOptimizedTaxonomyBuilder.classify(CDOptimizedTaxonomyBuilder.java:217)\n\tat org.mindswap.pellet.KnowledgeBase.classify(KnowledgeBase.java:2095)\n\tat pellet.PelletRealize.run(PelletRealize.java:77)\n\tat pellet.Pellet.run(Pellet.java:105)\n\tat pellet.Pellet.main(Pellet.java:59)\n",
     "backend": "pellet",
-    "triples_before_reasoning": 1241,
-    "triples_after_reasoning": 1352
+    "triples_before_reasoning": 2073,
+    "triples_after_reasoning": 2380
   },
   "stop": {
-    "decision": false,
-    "reason": "continue"
+    "decision": true,
+    "reason": "patches_unchanged"
   },
-  "stop_reason": "continue"
+  "stop_reason": "patches_unchanged"
 }

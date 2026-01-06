@@ -448,9 +448,6 @@ atm:Account a owl:Class .
 
 atm:Transaction a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:usesCard ;
-            owl:someValuesFrom atm:CashCard ],
-        [ a owl:Restriction ;
             owl:onProperty atm:authorizedBy ;
             owl:someValuesFrom atm:Authorization ],
         [ a owl:Restriction ;
@@ -506,7 +503,10 @@ atm:Transaction a owl:Class ;
             owl:onProperty atm:onAccount ],
         [ a owl:Restriction ;
             owl:allValuesFrom atm:CashCard ;
-            owl:onProperty atm:usesCard ] .
+            owl:onProperty atm:usesCard ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:usesCard ;
+            owl:someValuesFrom atm:CashCard ] .
 
 atm:receivesMessageFrom a owl:ObjectProperty ;
     rdfs:domain atm:ATM ;

@@ -1,3 +1,9 @@
+Patch application failed to parse LLM Turtle.
+Reason: Failed to parse Turtle from LLM response after sanitization: at line 85 of <>:
+Bad syntax (objectList expected) at ^ in:
+"...b'roperty atm:dispensedAmount ;\n            owl:someValuesFrom'^b' ],\n        [ a owl:Restriction ;\n            owl:allValuesF'..."
+
+Raw turtle:
 @prefix atm: <http://lod.csd.auth.gr/atm/atm.ttl#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -15,7 +21,8 @@ atm:BankComputerMessageSender a owl:Class ;
             owl:onProperty atm:sendsMessageTo ;
             owl:someValuesFrom atm:BankComputer ] .
 
-atm:Deposit a owl:Class .
+atm:Deposit a owl:Class ;
+    rdfs:subClassOf atm:Transaction .
 
 atm:Message a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
@@ -132,7 +139,22 @@ atm:ATM a owl:Class ;
             owl:onProperty atm:receivesMessageFrom ],
         [ a owl:Restriction ;
             owl:allValuesFrom atm:Transaction ;
-            owl:onProperty atm:handlesTransaction ] .
+            owl:onProperty atm:handlesTransaction ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:dispenses ;
+            owl:someValuesFrom atm:Money ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:hasBackUpPowerSupply ;
+            owl:someValuesFrom atm:PowerSupply ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:hasCardVerificationTime ;
+            owl:someValuesFrom atm:Time ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:hasMainPowerSupply ;
+            owl:someValuesFrom atm:PowerSupply ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:hasPinVerificationTime ;
+            owl:someValuesFrom atm:Time ] .
 
 atm:Bank a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
@@ -183,38 +205,37 @@ atm:Transaction a owl:Class ;
             owl:allValuesFrom atm:Authorization ;
             owl:onProperty atm:authorizedBy ],
         [ a owl:Restriction ;
-            owl:allValuesFrom xsd:decimal ;
-            owl:onProperty atm:requestedAmount ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:dateTime ;
-            owl:onProperty atm:transactionTimestamp ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom atm:Customer ;
-            owl:onProperty atm:performedBy ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom atm:Account ;
-            owl:onProperty atm:onAccount ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom atm:CashCard ;
-            owl:onProperty atm:usesCard ] .
+            owl:allVal .
 
-atm:CashCard a owl:Class ;
+atm:BasicRequirement a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:serialNumber ;
-            owl:someValuesFrom xsd:string ],
+            owl:onProperty atm:subject ;
+            owl:someValuesFrom atm:Subject ],
         [ a owl:Restriction ;
-            owl:onProperty atm:bankCode ;
-            owl:someValuesFrom xsd:string ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty atm:bankCode ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty atm:serialNumber ],
-        [ a owl:Restriction ;
-            owl:onProperty atm:serialNumber ;
-            owl:someValuesFrom xsd:string ],
-        [ a owl:Restriction ;
-            owl:onProperty atm:bankCode ;
-            owl:someValuesFrom xsd:string ] .
+            owl:onProperty atm:verb ;
+            owl:someValuesFrom atm:Verb ] .
 
+atm:ComplexRequirement a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:condition ;
+            owl:someValuesFrom atm:BasicRequirement ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:else ;
+            owl:someValuesFrom atm:BasicRequirement ] .
+
+atm:Keypad a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty atm:consistOfKeys ;
+            owl:someValuesFrom atm:Keys ] .
+
+atm:displays a owl:Class ;
+    rdfs:subClassOf atm:ATM .
+
+atm:fromBankComputer a owl:Class ;
+    rdfs:subClassOf atm:BankComputer .
+
+atm:types a owl:Class ;
+    rdfs:subClassOf atm:Customer .
+
+atm:updates a owl:Class ;
+    rdfs:subClassOf atm:ATMtotalFundOfATM .

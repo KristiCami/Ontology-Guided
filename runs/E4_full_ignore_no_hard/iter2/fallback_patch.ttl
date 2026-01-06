@@ -231,15 +231,6 @@ atm:requestedAmount a owl:DatatypeProperty ;
 
 atm:Withdrawal a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:onProperty atm:dispensedAmount ;
-            owl:someValuesFrom xsd:decimal ],
-        [ a owl:Restriction ;
-            owl:onProperty atm:requestedAmount ;
-            owl:someValuesFrom xsd:decimal ],
-        [ a owl:Restriction ;
-            owl:onProperty atm:transactionTimestamp ;
-            owl:someValuesFrom xsd:dateTime ],
-        [ a owl:Restriction ;
             owl:onProperty atm:authorizedBy ;
             owl:someValuesFrom atm:Authorization ],
         [ a owl:Restriction ;
@@ -275,6 +266,15 @@ atm:Withdrawal a owl:Class ;
         [ a owl:Restriction ;
             owl:onProperty atm:dispensedAmount ;
             owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:dispensedAmount ;
+            owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:requestedAmount ;
+            owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ;
+            owl:onProperty atm:transactionTimestamp ;
+            owl:someValuesFrom xsd:dateTime ],
         atm:Transaction ;
     owl:equivalentClass [ a owl:Class ;
             owl:intersectionOf ( atm:Withdrawal [ a owl:Restriction ;

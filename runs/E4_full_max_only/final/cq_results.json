@@ -1,5 +1,5 @@
 {
-  "pass_rate": 0.7142857142857143,
+  "pass_rate": 0.5238095238095238,
   "results": [
     {
       "query": "PREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nASK {\n  FILTER NOT EXISTS {\n    VALUES ?cls {\n      atm:ATM atm:Bank atm:Customer atm:Account atm:CashCard\n      atm:Transaction atm:Withdrawal atm:Deposit atm:Authorization\n    }\n    FILTER NOT EXISTS { ?cls a owl:Class . }\n  }\n}",
@@ -13,7 +13,7 @@
     },
     {
       "query": "# Deposits are also treated as transactions\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:Deposit rdfs:subClassOf+ atm:Transaction .\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
@@ -43,12 +43,12 @@
     },
     {
       "query": "# Cash card bank codes are captured with an appropriate datatype\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK {\n  BIND(EXISTS { atm:bankCode rdfs:range xsd:string . } AS ?stringRange)\n  BIND(EXISTS { atm:bankCode rdfs:range xsd:integer . } AS ?integerRange)\n  BIND(EXISTS { atm:bankCode rdfs:domain atm:CashCard . } AS ?cashCardDomain)\n  BIND(EXISTS {\n    atm:bankCode rdfs:domain ?domain .\n    ?domain owl:unionOf ?union .\n  } AS ?unionDomain)\n  FILTER ((?stringRange || ?integerRange) && (?cashCardDomain || ?unionDomain))\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
       "query": "# Transaction timestamps are captured as temporal datatypes\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK {\n  atm:transactionTimestamp rdfs:domain atm:Transaction .\n  BIND(EXISTS { atm:transactionTimestamp rdfs:range xsd:dateTime . } AS ?dateTimeRange)\n  BIND(EXISTS { atm:transactionTimestamp rdfs:range xsd:dateTimeStamp . } AS ?dateTimeStampRange)\n  FILTER (?dateTimeRange || ?dateTimeStampRange)\n}",
-      "success": false,
+      "success": true,
       "message": ""
     },
     {
@@ -63,7 +63,7 @@
     },
     {
       "query": "# ATMs explicitly dispense cash\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:dispenses rdfs:domain atm:ATM ;\n                rdfs:range atm:Money .\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
@@ -73,12 +73,12 @@
     },
     {
       "query": "# Resilience features include backup or main power supplies\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:hasBackUpPowerSupply rdfs:domain atm:ATM ;\n                             rdfs:range atm:PowerSupply .\n  } AS ?backup)\n  BIND(EXISTS {\n    atm:hasMainPowerSupply rdfs:domain atm:ATM ;\n                           rdfs:range atm:PowerSupply .\n  } AS ?main)\n  FILTER (?backup || ?main)\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
       "query": "# Operational timings are captured for security-critical checks\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:hasCardVerificationTime rdfs:domain atm:ATM ;\n                                 rdfs:range atm:Time .\n  } AS ?cardVerification)\n  BIND(EXISTS {\n    atm:hasPinVerificationTime rdfs:domain atm:ATM ;\n                                rdfs:range atm:Time .\n  } AS ?pinVerification)\n  FILTER (?cardVerification && ?pinVerification)\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
@@ -93,7 +93,7 @@
     },
     {
       "query": "# Requirements modelling captures subject, verb, condition and else branches\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  BIND(EXISTS {\n    atm:subject rdfs:domain atm:BasicRequirement ;\n                rdfs:range atm:Subject .\n  } AS ?subject)\n  BIND(EXISTS {\n    atm:verb rdfs:domain atm:BasicRequirement ;\n             rdfs:range atm:Verb .\n  } AS ?verb)\n  BIND(EXISTS {\n    atm:condition rdfs:domain atm:ComplexRequirement ;\n                  rdfs:range atm:BasicRequirement .\n  } AS ?condition)\n  BIND(EXISTS {\n    atm:else rdfs:domain atm:ComplexRequirement ;\n             rdfs:range atm:BasicRequirement .\n  } AS ?else)\n  FILTER (?subject && ?verb && ?condition && ?else)\n}",
-      "success": true,
+      "success": false,
       "message": ""
     },
     {
@@ -103,7 +103,7 @@
     },
     {
       "query": "# ATM keypads are defined with explicit key components\nPREFIX atm: <http://lod.csd.auth.gr/atm/atm.ttl#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nASK {\n  atm:consistOfKeys rdfs:domain atm:Keypad ;\n                    rdfs:range atm:Keys .\n}",
-      "success": true,
+      "success": false,
       "message": ""
     }
   ]
