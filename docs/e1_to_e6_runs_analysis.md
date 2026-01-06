@@ -40,7 +40,8 @@
 - **E3_no_repair**: F1≈0.245, CQ pass 12/12.
 - **E4_full_default (final)**: F1≈0.305, CQ pass 11/21, 0 hard/soft παραβιάσεις.
 - **E4_full_hard_and_cq (final)**: F1≈0.044, CQ pass 4/21, 0 hard/soft παραβιάσεις.
-- **E4_full_max_only / ignore_no_hard**: δεν παρήγαγαν final metrics λόγω `llm_error`/patch_parse_error, αλλά διαθέτουν rich iteration logs.
+- **E4_full_max_only**: F1≈0.343 (precision 0.2519, recall 0.536) με 266 pred_triples, CQ pass 11/21, 0 hard/soft παραβιάσεις, stop_reason `max_iterations_reached`.
+- **E4_full_ignore_no_hard**: F1≈0.034 (precision 0.0181, recall 0.344) με 2.380 pred_triples, CQ pass 16/21, 0 hard/soft παραβιάσεις, stop_reason `patches_unchanged` (Pellet NPEs).
 - **E5_cross_domain (ATM)**: F1≈0.219 semantic (0.2296 exact), CQ pass 9/21.
 - **E5_cross_domain (Health)**: F1≈0.091 semantic (0.048 exact), CQ pass 1/8.
 - **E6_cq_sweep**: μόνο repair logs (threshold 0.5 και 0.8), χωρίς τελικά metrics· pass rates παρατίθενται ανα iteration.
@@ -172,42 +173,43 @@ Pass rate 0.1904 (4/21). Περνούν μόνο οι τάξεις και οι �
 #### Συμπέρασμα
 Η παραλλαγή απέτυχε να βελτιώσει τις CQs και κατέστρεψε την ακρίβεια. Απαιτεί επανασχεδιασμό του patch generator (π.χ. ποινή σε υπερβολική αύξηση τριπλετών, έλεγχος duplicates) και alignment του stop policy με pass rate.
 
-### E4_full_max_only – Τερματισμός λόγω LLM parse error
+### E4_full_max_only – Τερματισμός σε μέγιστες επαναλήψεις με σταθερό pass rate
 #### Μεταδεδομένα
-- Iterations 0–5, χωρίς final. Στο `iter5/llm_error.txt` αναφέρεται «Failed to parse Turtle from LLM response… Bad syntax (objectList expected)».
-- Patches: καταγράφονται μέχρι iter4, αλλά στο iter5 δεν εφαρμόζονται λόγω error.
+- Iterations: 0–3 με stop_reason `max_iterations_reached`.
+- Πλήθος patches ανά iteration: 15 (10 addProperty, 5 addSubclass) από CQs, `iterations_with_patches: 4`.
+- Reasoner: Pellet `consistent: true` σε όλα τα βήματα. Missing classes αυξάνονται (37→304) και αφαιρούνται invalid restrictions (0→6). `triples_before_reasoning` διογκώνονται (219→1378) αλλά `triples_after_reasoning` μένουν σταθερά στις 266.
+- SHACL: 0 παραβιάσεις σε όλα τα βήματα. `validation_summary` του final: 0 hard/soft.
 
-#### CQs ανά iteration
-- **iter0**: pass rate 0.5238 (όμοιο με E4 default iter0), αποτυχίες στις 10 λειτουργικές ερωτήσεις.
-- **iter1–4**: τα διαθέσιμα `cq_results.json` (δεν αναλύονται όλα εδώ λόγω όγκου) δείχνουν σταδιακή εξέλιξη, αλλά δεν υπάρχει final snapshot.
-
-#### Reasoner/SHACL
-Δεν υπάρχουν validation summaries. Οι iteration logs δείχνουν αυξομειώσεις τριπλετών, με pellet να εφαρμόζεται στα πρώτα βήματα.
-
-#### Ερμηνεία
-- **LLM error**: Η αποτυχία parse στο iter5 προέρχεται από πολλαπλά επαναλαμβανόμενα owl:Restriction blocks χωρίς σωστό object list. Αυτό δείχνει ανάγκη για αυστηρό filtering/sanitization πριν το parsing.
-- **Μάθημα**: Σε max_only πολιτική, η επιδίωξη μεγιστοποίησης κάλυψης οδηγεί σε μεγάλες, δύσκολες RDF λίστες που αυξάνουν τον κίνδυνο συντακτικών σφαλμάτων. Χρειάζεται early validation και retry.
-
-### E4_full_ignore_no_hard – Τερματισμός μετά από patch_parse_error
-#### Μεταδεδομένα
-- Iterations: 0 (παράγει αποτελέσματα), 1 (σταματά λόγω error). Στο `iter1/llm_error.txt` υπάρχει parse failure σε Turtle που περιέχει πολλαπλά Restrictions.
-- Iter0 patches: 27 (19 addProperty, 8 addSubclass) από CQs.
+#### Μετρικές (final)
+Precision 0.2519, recall 0.536, F1 0.3427, pred 266, overlap 67 (exact = semantic). Είναι το καλύτερο F1 της σειράς E4, ελαφρά πάνω από το default (0.3052).
 
 #### CQs
-- **iter0**: pass rate 0.0476 (1/21 επιτυχία). Η μόνη επιτυχία είναι η παρουσία των βασικών τάξεων. Όλες οι υπόλοιπες 20 αποτυγχάνουν.
-- **iter1**: CQ list κενή λόγω patch parse error (stop_reason `patch_parse_error`).
-
-#### Reasoner
-- Iter0: Pellet failed με NullPointerException, 55 missing classes, 1 invalid restriction αφαιρέθηκε. Το `consistent` είναι `null` λόγω failure.
-- Iter1: reasoning disabled, consistent false, stop decision true λόγω parse error.
+Pass rate σταθερά 0.5238 (11/21) σε όλα τα iterations. Οι ίδιες 10 λειτουργικές CQs αποτυγχάνουν (dispenses, UI union, power supplies, verification times, bank-computer comms, updates union, requirements, customer types union, keypad, Deposit⊑Transaction).
 
 #### Ερμηνεία
-- **Επιθετική έναρξη**: Το pass rate ξεκινά στο 0.0476, που είναι πολύ χαμηλότερο από οποιοδήποτε άλλο run. Πιθανόν το αρχικό draft ήταν ελλιπές.
-- **Patch parsing**: Τα patches του iter1 περιλάμβαναν πολύπλοκες unions και restrictions (βλ. llm_error), οδηγώντας σε stop. Χρειάζεται καλύτερη καθοδήγηση LLM για παραγωγή συντακτικά ορθού Turtle.
+- **Σταθερότητα με μικρό γράφημα**: Παρά το ότι ο generator προσπαθεί να αυξήσει το γράφημα, το reasoning το «συμπιέζει» στις 266 τριπλέτες, διατηρώντας precision/recall.
+- **Καμία βελτίωση CQs**: Η πολιτική `max_only` δεν βελτίωσε τις 10 λειτουργικές αποτυχίες, αλλά παρέμεινε συνεπής και χωρίς παραβιάσεις.
+
+### E4_full_ignore_no_hard – Υψηλό CQ pass με πολύ θόρυβο
+#### Μεταδεδομένα
+- Iterations: 0–2, stop_reason `patches_unchanged`.
+- Patches: iter0 26 (19 addProperty, 7 addSubclass), iter1/iter2 μόνο 5 addSubclass. `iterations_with_patches: 3`.
+- Reasoner: Pellet NPE σε όλα τα iterations (`consistent: null`). Missing classes διογκώνονται 46→311, invalid restrictions αφαιρούνται (0→4). `triples_before_reasoning` 262→2073 και `after_reasoning` 308→2380.
+- SHACL: 0 παραβιάσεις· `validation_summary` final 0 hard/soft.
+
+#### Μετρικές (final)
+Precision 0.0181, recall 0.344, F1 0.0343, pred 2380, overlap 43. Η υψηλή κάλυψη συνοδεύεται από πολύ χαμηλή καθαρότητα.
+
+#### CQs
+Pass rate ανέβηκε από 0.0952 (2/21) στο iter0 σε 0.7619 (16/21) στα iter1/iter2. Οι αποτυχίες στο final περιορίζονται σε 5 CQs: transaction timestamp, UI union, bank-computer comms, updates union, customer types union.
+
+#### Ερμηνεία
+- **Κάλυψη CQs με τίμημα precision**: Τα patches (κυρίως addSubclass) αυξάνουν θεαματικά τις επιτυχίες CQs αλλά εκτινάσσουν τις τριπλέτες σε 2.380, προκαλώντας σχεδόν μηδενικό precision.
+- **Reasoner αστάθεια**: Τα διαδοχικά Pellet NPEs και τα εκατοντάδες missing classes δείχνουν ότι το γράφημα είναι εύθραυστο, παρότι δεν αναφέρονται SHACL παραβιάσεις.
 
 ### Συνολική σύγκριση E4
 - **Default vs Hard_and_cq**: Ο ίδιος αρχικός pass rate (0.5238) οδηγεί σε τελικό 0.5238 (default) και 0.1904 (hard_and_cq). Το μέγεθος γραφήματος είναι 314 vs 871, με precision 0.2134 vs 0.0253. Άρα το αυστηρό stop policy χωρίς ρητή ποινή στο μέγεθος γραφήματος οδηγεί σε υπερπαραγωγή και κατάρρευση precision.
-- **Max_only vs Ignore_no_hard**: Και οι δύο απέτυχαν λόγω parse error, αλλά ξεκινούν από διαφορετικές βάσεις (0.5238 vs 0.0476 pass rate). Αυτό δείχνει ότι η ποιότητα του αρχικού draft είναι καθοριστική για την επιτυχία του repair· αν ξεκινά από 1/21, ακόμη και πολλά patches δεν επαρκούν.
+- **Max_only vs Ignore_no_hard**: Και οι δύο έφτασαν σε `final`. Το max_only κρατά το pass rate σταθερό 0.5238 με μικρό γράφημα (266 τριπλέτες) και F1 0.343, ενώ το ignore_no_hard ανεβάζει pass rate σε 0.7619 αλλά με 2.380 τριπλέτες και F1 0.034. Η ποιότητα του αρχικού draft επηρεάζει την πορεία, αλλά και το stop policy (patches_unchanged) επιτρέπει θόρυβο.
 - **Stability**: Η default παραμένει η μόνη πλήρως επιτυχής (χωρίς errors) με μηδενικές παραβιάσεις. Παρά τα μέτρια CQs, αποτελεί σταθερό σημείο αναφοράς.
 
 ## Πείραμα E5 – Διατομεακή αξιολόγηση (ATM και Health)
@@ -254,7 +256,7 @@ Pass rate ~0.4286 (9/21). Περνούν οι τάξεις, Withdrawals⊑Transa
 Το E6 δεν παρήγαγε final metrics· μόνο `repair_log.json` υπάρχει για κάθε κατώφλι. Στόχος ήταν να εξεταστεί πώς αλλάζει ο βρόχος repair όταν θεωρείται ότι οι CQs περνούν αν η πιθανότητα επιτυχίας υπερβαίνει ένα κατώφλι (0.5 ή 0.8).
 
 ### Threshold 0.5
-- **Iter0**: pass rate 0.0476 (1/21), ίδιες αποτυχίες με E4 ignore_no_hard iter0 (20/21 αποτυχίες). SHACL 0 παραβιάσεις. Reasoner: 3 invalid restrictions αφαιρέθηκαν, 223 missing classes, Pellet NPE.
+- **Iter0**: pass rate 0.0476 (1/21), ίδιο μοτίβο με E4 ignore_no_hard στο αρχικό στάδιο (εκεί 0.0952, 19 αποτυχίες). SHACL 0 παραβιάσεις. Reasoner: 3 invalid restrictions αφαιρέθηκαν, 223 missing classes, Pellet NPE.
 - **Patches**: 25 (19 addProperty, 6 addSubclass) από CQs, iterations_with_patches: 3.
 - **Stop**: `patches_unchanged` στο iteration 2, με triples_before_reasoning 859 → after 1079. Καμία βελτίωση pass rate καταγράφεται (το log κόβεται, αλλά το stop_reason δείχνει στασιμότητα patches).
 - **Ερμηνεία**: Το χαμηλό κατώφλι δεν βοήθησε – το pass rate παρέμεινε πολύ χαμηλό και η διαδικασία σταμάτησε όταν τα patches έπαψαν να αλλάζουν. Η αύξηση τριπλετών χωρίς βελτίωση CQs υποδεικνύει misalignment μεταξύ patches και απαιτήσεων.
@@ -304,7 +306,7 @@ Pass rate ~0.4286 (9/21). Περνούν οι τάξεις, Withdrawals⊑Transa
 ## Ερμηνεία των iteration logs σε βάθος
 ### Patch counts και επιπτώσεις
 - **E4 default**: 15 patches σε κάθε iteration, αλλά χωρίς βελτίωση CQs. Πιθανόν τα patches εφαρμόστηκαν αλλά δεν κάλυψαν τις ερωτήσεις ή δεν μετρούνταν λόγω syntactic variance.
-- **E4 ignore_no_hard**: 27 patches iter0, αλλά το pass rate έμεινε 0.0476. Αυτό σημαίνει ότι τα patches μπορεί να προστέθηκαν σε λάθος σημεία ή να μην επηρέασαν τις ερωτήσεις.
+- **E4 ignore_no_hard**: 26 patches iter0, με pass rate 0.0952. Αν και τα patches αύξησαν τις τριπλέτες, η ουσιαστική βελτίωση ήρθε στο iter1 (0.7619), άρα το πρώτο κύμα patches δεν στόχευε σωστά τις αποτυχίες.
 - **E6 threshold 0.5**: 25 patches, iterations_with_patches 3, αλλά stop λόγω unchanged patches. Άρα μετά από 3 iterations οι προτάσεις ήταν ίδιες, δείχνοντας ότι ο generator κόλλησε.
 - **E6 threshold 0.8**: 15 patches, stop στο iter1. Ο generator θεώρησε ότι δεν χρειάζονται περαιτέρω αλλαγές λόγω υψηλού κατωφλιού.
 
@@ -315,13 +317,13 @@ Pass rate ~0.4286 (9/21). Περνούν οι τάξεις, Withdrawals⊑Transa
 ### Stop reasons
 - `no_hard_violations`: E4 default. Δείχνει ότι οι SHACL/hard κανόνες ήταν ικανοποιημένοι ήδη από iter1.
 - `patches_unchanged`: E6 και πιθανώς άλλες, σημαίνει στασιμότητα generator.
-- `patch_parse_error`/`llm_error`: E4 max_only, ignore_no_hard. Κρίσιμο να προστεθεί retry ή sanitization.
+- `patches_unchanged`/`max_iterations_reached`: Στα E4 max_only και ignore_no_hard δείχνουν στασιμότητα ή έλλειψη προόδου. Απαιτείται κριτήριο stop που συνδυάζει pass rate και μέγεθος γραφήματος, μαζί με sanitization των patches (υπάρχουν `llm_error.txt` αλλά δεν διακόπτουν τη ροή).
 
 ## Συγκριτική οπτική χρήσιμων σεναρίων
 1. **Χρήσιμο baseline**: E1 seed1 (σταθερό LLM), E2 (συμβολικό). Παρέχουν μέτρο σύγκρισης.
 2. **Χρήσιμη αλλά ατελής αυτο-διόρθωση**: E4 default – σταθερό pipeline, με ανάγκη καλύτερου CQ alignment.
 3. **Παράδειγμα προς αποφυγή**: E4 hard_and_cq – δείχνει ότι η υπερβολική επιθετικότητα οδηγεί σε θόρυβο.
-4. **Προειδοποιητικά**: E4 max_only/ignore_no_hard, E6 thr0.5 – αναδεικνύουν κινδύνους parsing και στασιμότητας patches.
+4. **Προειδοποιητικά**: E4 max_only/ignore_no_hard, E6 thr0.5 – αναδεικνύουν κινδύνους στασιμότητας patches, διόγκωσης τριπλετών και ανεπαρκούς βελτίωσης CQs.
 5. **Διατομεακή πρόκληση**: E5 health – καταδεικνύει ότι χωρίς domain-specific CQs ή prompts η απόδοση καταρρέει.
 
 ## Προτεινόμενες κατευθύνσεις βελτίωσης
@@ -355,7 +357,7 @@ Pass rate ~0.4286 (9/21). Περνούν οι τάξεις, Withdrawals⊑Transa
 - Το few-shot χωρίς repair (E3) αυξάνει θόρυβο.
 - Ο repair βρόχος default (E4) σταθεροποιεί το pipeline, αλλά δεν αυξάνει το CQ pass rate· χρειάζεται καλύτερο alignment patches–CQs.
 - Η επιθετική πολιτική (hard_and_cq) δείχνει ότι χωρίς έλεγχο μεγέθους και ποιότητας, τα patches μπορούν να καταστρέψουν precision και recall.
-- Τα σενάρια max_only και ignore_no_hard αναδεικνύουν κινδύνους parsing και σημείο βελτίωσης της ανθεκτικότητας.
+- Τα σενάρια max_only και ignore_no_hard αναδεικνύουν κινδύνους στασιμότητας, διόγκωσης τριπλετών και ανάγκη για ποιοτικότερο patch selection/sanitization.
 - Η διατομεακή επέκταση (E5) εκθέτει την ανάγκη για domain-specific καθοδήγηση.
 - Η σάρωση κατωφλιών CQs (E6) καταδεικνύει ότι το stop policy πρέπει να εξαρτάται από ουσιαστική πρόοδο, όχι απλώς από στασιμότητα patches.
 
@@ -656,7 +658,7 @@ atm:consistOfKeys rdfs:domain atm:Keypad ;
 - **`min_patch_iterations_not_met` (E4 default iter0)**: δείχνει ότι μετά το πρώτο iteration απαιτούνται επιπλέον βήματα ακόμα και χωρίς παραβιάσεις. Καλή πρακτική για να δοθεί χρόνος στα patches να εφαρμοστούν.
 - **`no_hard_violations` (E4 default final)**: τερματισμός όταν δεν υπάρχουν παραβιάσεις SHACL/hard. Όμως οι CQs μπορεί να παραμένουν αποτυχημένες, άρα χρειάζεται συνδυασμένο κριτήριο.
 - **`patches_unchanged` (E6 thresholds)**: ο generator επανέλαβε τα ίδια patches, άρα θεωρήθηκε ότι η διαδικασία κορέστηκε. Θα ήταν χρήσιμη επιπλέον συνθήκη βελτίωσης CQs.
-- **`patch_parse_error` (E4 ignore_no_hard)** και **`llm_error` (E4 max_only)**: τερματισμός λόγω συντακτικών λαθών. Θα πρέπει να οδηγεί σε fallback strategy (π.χ. ασφαλής λειτουργία χωρίς νέα patches).
+- **`llm_error` / patch parsing warnings (E4 max_only, E4 ignore_no_hard)**: εμφανίζονται στα ενδιάμεσα iterations, παρότι το pipeline συνέχισε έως το final. Απαιτείται fallback strategy ή sanitization πριν την εφαρμογή patches.
 
 ## Παράρτημα Λ – Ερμηνεία token usage
 Η κατανάλωση tokens δεν συνδέεται γραμμικά με την ποιότητα, αλλά παρέχει ένδειξη πολυπλοκότητας προτροπής:
@@ -711,8 +713,8 @@ atm:consistOfKeys rdfs:domain atm:Keypad ;
 - **E3**: Few-shot, F1 0.245, 12/12 CQs (υποσύνολο), χαμηλό precision.
 - **E4 default**: Repair σταθερό, F1 0.305, 11/21 CQs, 0 παραβιάσεις.
 - **E4 hard_and_cq**: Υπερπαραγωγή, F1 0.044, 4/21 CQs, 0 παραβιάσεις.
-- **E4 max_only**: Χωρίς final, llm_error iter5, αρχικό pass 0.5238.
-- **E4 ignore_no_hard**: Χωρίς final, pass 0.0476 iter0, patch_parse_error iter1.
+- **E4 max_only**: Final με stop `max_iterations_reached`, F1 0.3427 (266 τριπλέτες), pass rate 0.5238.
+- **E4 ignore_no_hard**: Final με stop `patches_unchanged`, F1 0.0343 (2.380 τριπλέτες), pass rate 0.7619.
 - **E5 ATM**: F1 0.219, 9/21 CQs, cross-domain drift.
 - **E5 Health**: F1 0.091, 1/8 CQs, πολλοί invalid restrictions.
 - **E6 thr0.5**: pass 0.0476, patches 25, stop patches_unchanged.
@@ -737,8 +739,9 @@ atm:consistOfKeys rdfs:domain atm:Keypad ;
 - **iter5**: `llm_error.txt` αποκαλύπτει πολλαπλά annotatedTarget χωρίς σωστό objectList. Ο βρόχος σταματά. Αυτό υποδηλώνει ότι όσο αυξάνεται η πολυπλοκότητα (περισσότερα patches), τόσο αυξάνεται ο κίνδυνος συντακτικών λαθών.
 
 ### E4 full ignore_no_hard
-- **iter0**: Εξαιρετικά χαμηλό pass rate 0.0476, 274 τριπλέτες πριν το reasoning, 328 μετά, reasoner NPE και 55 missing classes. Παρ' όλα αυτά εφαρμόζονται 27 patches.
-- **iter1**: Ο reasoner δεν τρέχει (enabled false), consistent false, stop_reason `patch_parse_error`. Ο βρόχος σταματά χωρίς καμία CQ αξιολόγηση στο iter1 (κενή λίστα).
+- **iter0**: Pass rate 0.0952, 262 τριπλέτες πριν το reasoning, 308 μετά, reasoner NPE και 46 missing classes. Εφαρμόζονται 26 patches (19 addProperty, 7 addSubclass).
+- **iter1**: Pass rate 0.7619, 1016→1168 τριπλέτες μετά το reasoning, reasoner NPE, 154 missing classes, 5 addSubclass patches.
+- **iter2/final**: Pass rate 0.7619, 2073→2380 τριπλέτες, reasoner NPE, 311 missing classes, stop_reason `patches_unchanged`.
 
 Η αφηγηματική μορφή αναδεικνύει ότι ο αριθμός iterations δεν είναι το μόνο κριτήριο· η ποιότητα των patches και η σταθερότητα parsing είναι καθοριστικές.
 
@@ -811,7 +814,7 @@ atm:consistOfKeys rdfs:domain atm:Keypad ;
 Οι εκτελέσεις που πετυχαίνουν 11/21 CQs (E1 seed1, E4 default) ουσιαστικά καλύπτουν το πρώτο μισό της λίστας, ενώ αποτυγχάνουν στα UI/Resilience/Metrics/Requirements. Άρα η ευθυγράμμιση με gold είναι μερική.
 
 ## Παράρτημα – Επιπτώσεις των αποτυχιών parsing στην αξιολόγηση
-Στα σενάρια όπου το parsing αποτυγχάνει (llm_error, patch_parse_error), δεν δημιουργούνται final metrics. Αυτό έχει δύο επιπτώσεις:
+Στα σενάρια όπου το parsing αποτυγχάνει χωρίς ανάκαμψη (llm_error, patch_parse_error), δεν δημιουργούνται final metrics. Αυτό έχει δύο επιπτώσεις:
 1. **Απουσία αντικειμενικής μέτρησης**: Δεν μπορούμε να καταγράψουμε precision/recall/F1, άρα οι εκτελέσεις αυτές δεν συνεισφέρουν στατιστικά. Ωστόσο, οι παρατηρήσεις από τα errors είναι πολύτιμες για τη βελτίωση pipeline.
 2. **Διακοπή βελτίωσης**: Αν το parsing αποτύχει μετά από πολλαπλά iterations (όπως στο max_only iter5), μπορεί να έχουν ήδη προστεθεί πολλές τριπλέτες, αλλά χωρίς αξιολόγηση. Για να μη χαθεί η πρόοδος, θα πρέπει να υπάρχει checkpoint πριν από κάθε patch εφαρμογή.
 
@@ -838,8 +841,8 @@ atm:consistOfKeys rdfs:domain atm:Keypad ;
 
 ## Παράρτημα – Δείκτες σταθερότητας και ανθεκτικότητας
 Προτείνονται δύο δείκτες:
-- **Stability Index**: μεταβολή F1 μεταξύ iter0 και final. Στο E4 default είναι ~0 (καμία αλλαγή στις μετρικές δεν ανακοινώθηκε), άρα χαμηλή βελτίωση. Στο E4 hard_and_cq είναι αρνητικός (πτώση από αρχικό pass rate σε 0.1904), άρα αρνητική σταθερότητα.
-- **Resilience Index**: αριθμός iterations πριν από failure. Στο E4 max_only είναι 5, E4 ignore_no_hard 1, E6 thr0.5 2, E6 thr0.8 1. Όσο μεγαλύτερος, τόσο πιο ανθεκτικός ο βρόχος parsing.
+- **Stability Index**: μεταβολή F1 μεταξύ iter0 και final. Στο E4 default παραμένει σχεδόν μηδενική, στο E4 max_only είναι ελαφρώς θετική (τελικό F1 0.3427 με ίδιο pass rate 0.5238), ενώ στο E4 ignore_no_hard είναι αρνητική από άποψη precision (F1 0.0343 παρά το υψηλότερο pass rate).
+- **Resilience Index**: αριθμός iterations μέχρι το stop. E4 max_only τερματίζει στο 3 (0-based, 4 κύκλοι), E4 ignore_no_hard στο 2 (3 κύκλοι) με `patches_unchanged`, E6 thr0.5 στο 2 και E6 thr0.8 στο 1. Περισσότεροι κύκλοι χωρίς κατάρρευση parsing ή μετρικών υποδηλώνουν μεγαλύτερη ανθεκτικότητα.
 
 Οι δείκτες μπορούν να χρησιμοποιηθούν σε επόμενα reports για να συνοψίζουν την «υγεία» του pipeline.
 
@@ -856,7 +859,7 @@ atm:consistOfKeys rdfs:domain atm:Keypad ;
 Για να διευκολυνθεί η μετάδοση γνώσης, συνοψίζονται τα κύρια μαθήματα σε μορφή bullet, με επεξηγηματικό κείμενο που αιτιολογεί κάθε σημείο.
 
 1. **Η ποιότητα του αρχικού draft καθορίζει ταβάνι απόδοσης**
-   - Όταν το αρχικό pass rate είναι 0.5238 (E1 seed1, E4 default iter0), ακόμη και χωρίς αποτελεσματικά patches, το τελικό αποτέλεσμα διατηρείται μέτριο. Αντίθετα, όταν το αρχικό pass είναι 0.0476 (E4 ignore_no_hard), η ανάκαμψη είναι δύσκολη. Άρα επένδυση στο prompt/seed έχει σημαντική απόδοση.
+   - Όταν το αρχικό pass rate είναι 0.5238 (E1 seed1, E4 default iter0), ακόμη και χωρίς αποτελεσματικά patches, το τελικό αποτέλεσμα διατηρείται μέτριο. Αντίθετα, όταν το αρχικό pass είναι χαμηλό (0.0952 στο E4 ignore_no_hard iter0), απαιτούνται πολλαπλά κύματα patches για να ανακτηθεί CQ pass rate, με κίνδυνο διόγκωσης τριπλετών. Άρα επένδυση στο prompt/seed έχει σημαντική απόδοση.
 
 2. **Repair χωρίς στόχευση CQs δεν εγγυάται βελτίωση**
    - Το E4 default δείχνει μηδενική αλλαγή CQs παρά τις 15 προσθήκες ιδιοτήτων/υποκλάσεων. Χωρίς ρητή αντιστοίχιση patch→CQ, ο βρόχος μπορεί να προσθέτει τριπλέτες που δεν αξιολογούνται.
@@ -865,7 +868,7 @@ atm:consistOfKeys rdfs:domain atm:Keypad ;
    - Η υπερπαραγωγή του E4 hard_and_cq δείχνει ότι stop μόνο βάσει παραβιάσεων δεν επαρκεί. Ένα όριο στον αριθμό τριπλετών ή στη μη βελτίωση pass_rate θα αποτρέψει τέτοιες καταστάσεις.
 
 4. **Parsing robustness είναι κρίσιμη**
-   - Τα λάθη `llm_error` και `patch_parse_error` καταστρέφουν κύκλους εργασίας. Απαιτείται pipeline που ελέγχει τη συντακτική ορθότητα πριν την εφαρμογή.
+   - Τα λάθη `llm_error` και `patch_parse_error` καταστρέφουν κύκλους εργασίας. Απαιτείται pipeline που ελέγχει τη συντακτική ορθότητα πριν την εφαρμογή ή επιχειρεί αυτόματη ανάκαμψη.
 
 5. **Cross-domain μεταφορά απαιτεί ειδική μέριμνα**
    - Η απόδοση στο health domain καταδεικνύει ότι οι γενικές τεχνικές δεν μεταφέρονται αυτόματα. Few-shot και domain-specific CQs είναι αναγκαία.
