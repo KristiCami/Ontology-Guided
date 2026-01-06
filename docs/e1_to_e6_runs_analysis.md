@@ -22,26 +22,6 @@
 | E6 CQ sweep (thr 0.5) | ATM, repair with p≥0.5 | N/A | 3/21 (iter1–2) | 0/0 | null | 3 iters, stop: patches_unchanged | Pass rate 0.048→0.143→0.143, triples after reasoning 382→1079 (`runs/E6_cq_sweep/threshold_0_5`) |
 | E6 CQ sweep (thr 0.8) | ATM, repair with p≥0.8 | N/A | 11/21 (iter0–1) | 0/0 | true | 2 iters, stop: patches_unchanged | Pass rate stable 0.524, triples after reasoning 280 (`runs/E6_cq_sweep/threshold_0_8`) |
 
-### Πίνακας Β – Ablations & Sensitivity (A1–A14)
-Δεν υπάρχουν αντίστοιχα artefacts κάτω από `runs/` για τις A1–A14, οπότε οι τιμές παραμένουν «N/A». Ο πίνακας καταγράφει την κατάσταση για διαφάνεια και μελλοντική συμπλήρωση.
-
-| ID | Παραλλαγή | Κατάσταση στο repo | Παρατηρήσεις για συμπλήρωση |
-| --- | --- | --- | --- |
-| A1 (−wSHACL) | Ίδια λ, χωρίς severities | N/A (δεν εκτελέστηκε) | Προσθήκη μετρικών όταν υπάρξει run: iters, post-violations, CQ% |
-| A2 (−PatchCalc) | Raw Turtle | N/A (δεν εκτελέστηκε) | Καταγραφή soft error/invalid RDF rate |
-| A3 (−Admissibility) | Commit χωρίς safety precheck | N/A (δεν εκτελέστηκε) | Χρειάζεται # νέων hard viol., unsat incidents |
-| A4 (−OntoAwarePrompt) | Χωρίς grounding | N/A (δεν εκτελέστηκε) | Συλλογή ΔF1, iters, drift cases |
-| A5 (Reasoner order) | Reasoner πριν/μετά SHACL | N/A (δεν εκτελέστηκε) | Μετρήσεις Δviolations, runtime |
-| A6 (LLM swap) | GPT-X / Claude-Y / Llama-Z | N/A (δεν εκτελέστηκε) | F1, iters, time/iter, cost/ontology |
-| A7 ($K_{max}$ budget) | K∈{1,2,3,5} | N/A (δεν εκτελέστηκε) | Conformance rate, F1@budget, time |
-| A8 (Top-m hints) | m∈{0,5,10,20}, λ grid | N/A (δεν εκτελέστηκε) | ΔF1, iters, grounding errors |
-| A9 (Weights λ) | λ1–λ3 grid | N/A (δεν εκτελέστηκε) | Pareto (F1, edits, CQ%) |
-| A10 (Noisy reqs) | 5/15/30 % noise | N/A (δεν εκτελέστηκε) | ΔF1, Δiters, conformance% |
-| A11 (Long docs) | 5/15/30/60 sentences | N/A (δεν εκτελέστηκε) | Runtime scaling, mem, conformance |
-| A12 (Shapes coverage) | −/+20 % SHACL | N/A (δεν εκτελέστηκε) | Under/over-constraint impact |
-| A13 (Aligners) | String vs Embedding vs Hybrid | N/A (δεν εκτελέστηκε) | Alignment P/R, downstream ΔF1 |
-| A14 (CQ design) | CQ density/strictness | N/A (δεν εκτελέστηκε) | CQ density/strictness vs F1 |
-
 ## Μεθοδολογία ανάγνωσης και σύνθεσης των JSON
 
 ### Βασικές μετρικές και αρχεία
