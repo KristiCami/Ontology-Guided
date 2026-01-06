@@ -26,6 +26,13 @@ def parse_args() -> argparse.Namespace:
         default=PROJECT_ROOT / "configs/e5_cross_domain.json",
         help="Path to a JSON file listing domain configs",
     )
+    parser.add_argument(
+        "--llm-mode",
+        dest="llm_mode",
+        choices=["openai", "heuristic"],
+        default=None,
+        help="Override llm_mode for all listed domains (e.g., heuristic to avoid API quota issues)",
+    )
     return parser.parse_args()
 
 
@@ -38,7 +45,7 @@ def ensure_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
-def run_domain(name: str, cfg_path: Path, output_root: Path | None) -> None:
+def run_domain(name: str, cfg_path: Path, output_root: Path | None, llm_mode_override: str | None) -> None:
     cfg = load_config(cfg_path)
     resolved_output_root = output_root or (PROJECT_ROOT / cfg.get("output_root", f"runs/E5_cross_domain/{name}"))
     ensure_dir(resolved_output_root)
@@ -52,7 +59,7 @@ def run_domain(name: str, cfg_path: Path, output_root: Path | None) -> None:
         else None,
         output_path=resolved_output_root / "pred.ttl",
         report_path=resolved_output_root / "run_report.json",
-        llm_mode=cfg.get("llm_mode", "heuristic"),
+        llm_mode=llm_mode_override or cfg.get("llm_mode", "heuristic"),
         max_requirements=cfg.get("max_requirements", 20),
         reasoning_enabled=cfg.get("reasoning", True),
         max_iterations=cfg.get("iterations", 0),
@@ -97,7 +104,7 @@ def main() -> None:
         name = domain.get("name") or Path(domain["config"]).stem
         cfg_path = PROJECT_ROOT / domain["config"]
         output_root = PROJECT_ROOT / domain["output_root"] if domain.get("output_root") else None
-        run_domain(name, cfg_path, output_root)
+        run_domain(name, cfg_path, output_root, args.llm_mode)
 
 
 if __name__ == "__main__":
