@@ -1,0 +1,60 @@
+# Appointment links patient, doctor, and clinic
+ASK WHERE {
+  ?a a <http://example.org/health#Appointment> ;
+     <http://example.org/health#appointmentPatient> ?p ;
+     <http://example.org/health#scheduledWith> ?d ;
+     <http://example.org/health#scheduledAt> ?c .
+}
+
+# Visits reference a room and clinician
+ASK WHERE {
+  ?v a <http://example.org/health#Visit> ;
+     <http://example.org/health#visitRoom> ?r ;
+     <http://example.org/health#visitPerformedBy> ?cl .
+}
+
+# Prescriptions capture medication and dosage
+ASK WHERE {
+  ?rx a <http://example.org/health#Prescription> ;
+      <http://example.org/health#prescriptionMedication> ?m ;
+      <http://example.org/health#dosageText> ?dose .
+}
+
+# Lab orders produce at least one result
+ASK WHERE {
+  ?lo a <http://example.org/health#LabOrder> ;
+      <http://example.org/health#labHasResult> ?lr .
+}
+
+# Insurance policies carry a policy number
+ASK WHERE {
+  ?pol a <http://example.org/health#InsurancePolicy> ;
+       <http://example.org/health#policyNumber> ?num .
+}
+
+# Vital signs are timestamped and linked to patient
+ASK WHERE {
+  ?vs a <http://example.org/health#VitalSignMeasurement> ;
+      <http://example.org/health#vitalMeasurementOf> ?p ;
+      <http://example.org/health#measurementTime> ?t .
+}
+
+# Billing records tie to a visit and amount
+ASK WHERE {
+  ?b a <http://example.org/health#BillingRecord> ;
+     <http://example.org/health#billingFor> ?v ;
+     <http://example.org/health#billingAmount> ?amt .
+}
+
+# No double-booked appointment slots for same clinician/start
+ASK WHERE {
+  FILTER NOT EXISTS {
+    ?a1 a <http://example.org/health#Appointment> ;
+        <http://example.org/health#scheduledWith> ?c ;
+        <http://example.org/health#scheduledStart> ?t .
+    ?a2 a <http://example.org/health#Appointment> ;
+        <http://example.org/health#scheduledWith> ?c ;
+        <http://example.org/health#scheduledStart> ?t .
+    FILTER(?a1 != ?a2)
+  }
+}
