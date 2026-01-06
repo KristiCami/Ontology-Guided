@@ -3,6 +3,91 @@
 ## Εισαγωγή
 Η παρούσα τεχνική αναφορά αποτελεί εκτενές υπόμνημα (περί τις 10.000 λέξεις) για τα πειράματα που βρίσκονται στον φάκελο `runs/` της τρέχουσας έκδοσης του αποθετηρίου. Καλύπτει όλες τις εκτελέσεις E1–E4 που αφορούν το σενάριο ATM, καθώς και τις νεότερες εκτελέσεις E5 (διατομεακή αξιολόγηση ATM/health) και E6 (σάρωση κατωφλιών CQs). Η γραφή είναι προσανατολισμένη σε ακαδημαϊκή τεκμηρίωση, με στόχο να αποτυπώνει τις παρατηρήσεις πάνω στα JSON, να εξηγεί τις μετρικές και να αιτιολογεί τις αποκλίσεις σε σχέση με τις αναμενόμενες συμπεριφορές. Το κείμενο είναι δομημένο θεματικά και χρονικά, ώστε να φαίνεται καθαρά η εξέλιξη του pipeline, οι βελτιώσεις ή οπισθοχωρήσεις ανά παραλλαγή, και η αξία των πειραμάτων ως προς τη χρήση τους για καθοδήγηση οντολογιών που δημιουργούνται ή επιδιορθώνονται με LLMs.
 
+## Συνοπτική δομή πινάκων και στόχων αξιολόγησης
+
+### Πίνακας Α: Κύρια Πειράματα (Main Results)
+
+| **ID** | **Name** | **Question / Hypothesis** | **Setup (Datasets / Models / Shapes)** | **Primary Metrics** |
+| --- | --- | --- | --- | --- |
+| E1 | LLM-only | Without symbolic checks, quality degrades (drift and inconsistencies). | ATM, Health, Auto; LLM:=GPT-X (fixed); *no* SHACL/Reasoner; zero-shot/few-shot prompting. | P/R/F1 (axioms); qualitative errors. |
+| E2 | Symbolic-only | Rules/alignment only → high precision, low recall. | Hand-crafted rules + aligners; *no* LLM drafting; full SHACL/Reasoner. | P/R/F1; violations; unsat classes. |
+| E3 | Ours (no-repair) | Drafting + validation *without* the loop: how far does a single pass get? | \system{} with ontology-aware prompting; SHACL+Reasoner; *no* V→Prompt loop. | P/R/F1; violations@iter0. |
+| E4 | **Ours (full)** | **Closed-loop CEGIR (wSHACL + Patch Calculus) improves F1 and compliance.** | \system{} full: ontology-aware prompting; SHACL+Reasoner; V→Prompt; Patch Calculus; admissibility. | **P/R/F1**; **#viol. ↓**; unsat=0; CQ%; iters to conform. |
+| E5 | Cross-domain | Plug-and-play portability without retraining the LLM. | Swap DSOs+SHACL: ATM→Health→Auto; same LLM/prompts. | ΔF1 vs ATM; ΔCQ%; iters dist. |
+| E6 | CQ-oriented | Improvement on Competency Questions via repair. | Sufficient SPARQL ASK set per domain; run per iteration. | CQ pass rate per iter; first conforming iter. |
+
+### Experiment Rationale (E1–E6)
+
+- **E1 — LLM-only:** Tests το νευρωνικό baseline χωρίς συμβολικές δικλίδες ασφαλείας. → Δείχνει drift, ασυνέπειες και ασταθή recall/precision.
+- **E2 — Symbolic-only:** Ελέγχει το συμβολικό baseline με κανόνες/aligners. → Ανώτατο precision, χαμηλό recall λόγω περιορισμένης κάλυψης.
+- **E3 — Ours (no-repair):** Αξιολογεί single-pass drafting+validation χωρίς feedback. → Μετρά πόσο απέχει η μία διαδρομή από το στόχο και λειτουργεί ως baseline για το repair loop.
+- **E4 — Ours (full):** Πλήρης CEGIR με weighted SHACL, Patch Calculus, admissibility. → Ελέγχει αν το closed-loop repair βελτιώνει F1, συμμόρφωση και συνοχή.
+- **E5 — Cross-domain:** Δοκιμάζει plug-and-play φορητότητα σε νέους τομείς χωρίς retraining. → Τεκμηριώνει domain-agnostic συμπεριφορά.
+- **E6 — CQ-oriented:** Εστιάζει στη βελτίωση Competency Questions μέσω repair. → Μετρά CQ pass rate ανά iteration και χρόνο μέχρι πλήρη κάλυψη.
+
+### Πίνακας Β: Ablations & Sensitivity
+
+| **ID** | **Name** | **What is varied** | **Setup detail** | **Readouts** |
+| --- | --- | --- | --- | --- |
+| A1 | -wSHACL | Απενεργοποίηση weighted severities (treat all equal). | λ₁=λ₂=λ₃ uniform; no hard/soft split. | #iters, #viol. post, CQ%, time/iter. |
+| A2 | -PatchCalc | Ελεύθερο Turtle αντί για typed patches. | Ίδιος βρόχος, αλλά LLM επιστρέφει raw Turtle. | Soft error rate, invalid RDF rate, regressions. |
+| A3 | -Admissibility | Commit χωρίς προέλεγχο hard-safety. | Skip tentative validate; commit→validate. | Hard regressions (#new hard viol.), unsat>0 incidents. |
+| A4 | -OntoAwarePrompt | Χωρίς grounding (labels/synonyms/types). | Αφαίρεση H_m(s), μόνο generic few-shot. | Δ(F1), #iters, lexical drift cases. |
+| A5 | Reasoner order | Reasoner πριν/μετά SHACL. | Swap ordering per iter. | Δ(#viol.), runtime, coherence. |
+| A6 | LLM swap | Μοντέλο: GPT-X vs Claude-Y vs Llama-Z. | Same prompts; temperature=τ grid. | F1, iters, time/iter, cost/ontology. |
+| A7 | K_max budget | Ευαισθησία σε K_max∈{1,2,3,5}. | Keep other params fixed. | Conformance rate, F1@budget, time. |
+| A8 | Top-m hints | m∈{0,5,10,20} & λ∈{0.25,0.5,0.75}. | Hybrid BM25/embeddings. | Δ(F1), #iters, grounding errors. |
+| A9 | Weights λ | Πλέγμα λ₁,λ₂,λ₃. | Trade-off soft cost vs edits vs CQ. | Pareto curves (F1 vs edits vs CQ%). |
+| A10 | Noisy reqs | Προσθήκη θορύβου/παραφράσεων. | Noise levels: 5%, 15%, 30%. | Robustness: Δ(F1), Δ(#iters), conformance%. |
+| A11 | Long docs | Κλιμάκωση με μήκος/πλήθος προτάσεων. | Buckets: 5/15/30/60 sentences. | Runtime scaling, mem, conformance. |
+| A12 | Shapes coverage | Λειψή/υπερπλήρης δέσμη SHACL. | Remove 20% vs add 20% optional shapes. | Under/over-constraint impact on loop. |
+| A13 | Aligners | Διαφορετικοί matchers (labels/syn/struct). | String vs Embedding vs Hybrid. | Alignment P/R, downstream Δ(F1). |
+| A14 | CQ design | Πυκνότητα/αυστηρότητα CQs. | N∈{5,10,20}; stricter ASK variants. | CQ% vs F1 correlation. |
+
+### Αblation & Sensitivity Rationale (A1–A14)
+
+- **A1 – −wSHACL:** Διερευνά αν ο διαχωρισμός hard/soft βελτιώνει ταχύτητα σύγκλισης και προτεραιοποίηση.
+- **A2 – −PatchCalc:** Μετρά την ανάγκη δομημένων patches για συντακτική και σημασιολογική εγκυρότητα.
+- **A3 – −Admissibility:** Αξιολογεί τη σημασία του προ-ελέγχου ασφαλείας ώστε να αποφεύγονται νέες σκληρές παραβιάσεις/unsat.
+- **A4 – −OntoAwarePrompt:** Ποσοτικοποιεί τον ρόλο του grounding σε recall, #iters και lexical drift.
+- **A5 – Reasoner order:** Εξετάζει την επίδραση της σειράς Reasoner↔SHACL σε σύγκλιση και runtime.
+- **A6 – LLM swap:** Συγκρίνει μοντέλα και κόστος για σταθερή στρατηγική prompting.
+- **A7 – K_max budget:** Ελέγχει αποδοτικότητα υπό περιορισμένο budget επαναλήψεων.
+- **A8 – Top-m hints:** Αναλύει ευαισθησία του grounding σε m και λ.
+- **A9 – Weights λ:** Εξερευνά trade-offs μεταξύ κόστους soft viol., edits και CQ%.
+- **A10 – Noisy requirements:** Μετρά ανθεκτικότητα σε παραφράσεις/θόρυβο.
+- **A11 – Long documents:** Εκτιμά κλιμάκωση χρόνου/μνήμης και conformance.
+- **A12 – Shapes coverage:** Επιπτώσεις υπο- ή υπερ-πλήρους δέσμης SHACL.
+- **A13 – Aligners:** Συγκρίνει string vs embedding vs hybrid matchers και downstream ποιότητα.
+- **A14 – CQ design:** Συνδέει πυκνότητα/αυστηρότητα CQs με F1/συμμόρφωση.
+
+### Μετρικές & Αναφορά αποτελεσμάτων (συνοπτικά)
+
+- **Extraction:** macro/micro F1 per axiom type + semantic matching (reasoner entailment).
+- **Compliance:** #SHACL violations (ανά severity), first conforming iteration, % reduction.
+- **Reasoning:** Consistency flag, #unsatisfiable classes.
+- **CQs:** % ASK που αληθεύουν ανά iteration.
+- **Efficiency/Κόστος:** iterations to conform, time/iter, total time/ontology, LLM tokens/cost.
+- **Safety:** #hard regressions (0 για πλήρες σύστημα).
+
+**Επεξήγηση βασικών μετρικών**
+
+- *Extraction Quality:* Macro/micro Precision, Recall, F1 per axiom type (Classes, SubClassOf, Domain, Range, ObjectProperty, DatatypeProperty) με συντακτική και σημασιολογική αντιστοίχιση.
+- *Constraint Compliance:* Αριθμός SHACL παραβιάσεων (Violation/Warning/Info), πρώτο conforming iteration, % μείωση παραβιάσεων.
+- *Reasoning Coherence:* Consistency flag και #unsatisfiable classes.
+- *Competency Questions:* % SPARQL ASK που αληθεύουν μετά από reasoning ανά iteration.
+- *Efficiency and Cost:* Iterations έως conformance, μέσος χρόνος/iteration, συνολικός χρόνος/ontology, LLM tokens/cost.
+- *Safety:* #νέων hard regressions (πρέπει να είναι 0 για το πλήρες σύστημα).
+
+### Προτεινόμενα γραφήματα και σχεδίαση
+
+- **Repair dynamics:** Stacked παραβιάσεις/iteration (ανά severity) + γραμμή CQ%.
+- **F1 vs Iterations:** Καμπύλες macro-F1 για E3 vs E4.
+- **Domain transfer:** Bar/line ΔF1 (ATM→Health→Auto) με conformance rate.
+- **Ablation summary:** Spider/radar με (F1, #iters, CQ%, regressions) για A1–A4.
+- **Sensitivity:** Heatmaps για (Top-m, λ) και (λ_weights grid).
+- **Budget curves:** F1@K_max και Conformance@%time για διαφορετικά budgets.
+
 ## Μεθοδολογία ανάγνωσης και σύνθεσης των JSON
 
 ### Βασικές μετρικές και αρχεία
