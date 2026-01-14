@@ -19,18 +19,18 @@ Ours (full) & 0.213 & 0.536 & 0.305 \\
 \end{table}
 
 \subsection{Constraint Compliance and Repair Efficiency}
-Table~\ref{tab:table2} summarizes the effect of the repair loop on SHACL compliance and competency question (CQ) satisfaction. For the ATM dataset, both settings already satisfy the SHACL constraints, and the repair loop terminates after two iterations when no hard violations remain. The CQ pass rate remains within the same range (12/21 vs.\ 11/21), indicating that the repair loop in this configuration primarily targets structural validity rather than improving CQ coverage.
+Table~\ref{tab:table2} summarizes the effect of the repair loop on SHACL compliance. For the ATM dataset, both settings already satisfy the SHACL constraints, and the repair loop terminates after two iterations when no hard violations remain. This indicates that the repair loop primarily targets semantic quality (e.g., competency questions) rather than resolving SHACL errors in this run.
 
 \begin{table}[htbp]
 \centering
-\caption{CONSTRAINT COMPLIANCE, CQ PASS RATE, AND REPAIR EFFICIENCY}
+\caption{CONSTRAINT COMPLIANCE AND REPAIR EFFICIENCY}
 \label{tab:table2}
-\begin{tabular}{lccccc}
+\begin{tabular}{lcccc}
 \toprule
-Setting & Viol.\ pre & Viol.\ post & CQ pass rate & Iterations & Conforms \\
+Setting & Viol.\ pre & Viol.\ post & Iterations & Conforms \\
 \midrule
-No repair & 0 & 0 & 0.571 & 0 & Yes \\
-Full & 0 & 0 & 0.524 & 2 & Yes \\
+No repair & 0 & 0 & 0 & Yes \\
+Full & 0 & 0 & 2 & Yes \\
 \bottomrule
 \end{tabular}
 \end{table}
