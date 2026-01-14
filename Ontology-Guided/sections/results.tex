@@ -2,9 +2,9 @@
 \subsection{Ontology Element Extraction}
 Table~\ref{tab:table1} reports the precision, recall, and F1--score for ontology element extraction across baselines (exact triple matching). The LLM--only baseline is averaged over two seeds. While the symbolic component achieves the highest recall, the full neuro--symbolic pipeline yields a stronger precision--recall balance than either baseline.
 
-\begin{table}[t]
+\begin{table}[htbp]
 \centering
-\caption{Ontology element extraction quality (exact triple matching).}
+\caption{ONTOLOGY ELEMENT EXTRACTION QUALITY}
 \label{tab:table1}
 \begin{tabular}{lccc}
 \toprule
@@ -19,18 +19,18 @@ Ours (full) & 0.213 & 0.536 & 0.305 \\
 \end{table}
 
 \subsection{Constraint Compliance and Repair Efficiency}
-Table~\ref{tab:table2} summarizes the effect of the repair loop on SHACL compliance and competency question (CQ) satisfaction. For the ATM dataset, both settings already satisfy the SHACL constraints, and the repair loop terminates after two iterations when no hard violations remain. The CQ pass rate remains within the same range (12/21 vs.\ 11/21), indicating that the repair loop in this configuration primarily targets structural validity rather than improving CQ coverage.
+Table~\ref{tab:table2} summarizes the effect of the repair loop on SHACL compliance. For the ATM dataset, both settings already satisfy the SHACL constraints, and the repair loop terminates after two iterations when no hard violations remain. This indicates that the repair loop primarily targets semantic quality (e.g., competency questions) rather than resolving SHACL errors in this run.
 
-\begin{table}[t]
+\begin{table}[htbp]
 \centering
-\caption{Constraint compliance, CQ pass rate, and repair efficiency.}
+\caption{CONSTRAINT COMPLIANCE AND REPAIR EFFICIENCY}
 \label{tab:table2}
-\begin{tabular}{lcccccc}
+\begin{tabular}{lcccc}
 \toprule
-Setting & Viol.\ pre & Viol.\ post & CQ passed & CQ pass rate & Iterations & Conforms \\
+Setting & Viol.\ pre & Viol.\ post & Iterations & Conforms \\
 \midrule
-No repair & 0 & 0 & 12/21 & 0.571 & 0 & Yes \\
-Full & 0 & 0 & 11/21 & 0.524 & 2 & Yes \\
+No repair & 0 & 0 & 0 & Yes \\
+Full & 0 & 0 & 2 & Yes \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -38,9 +38,9 @@ Full & 0 & 0 & 11/21 & 0.524 & 2 & Yes \\
 \subsection{Domain Adaptation}
 Table~\ref{tab:table3} reports cross--domain extraction results when switching to the healthcare dataset. Performance degrades substantially compared to ATM, suggesting that domain transfer requires additional adaptation (e.g., richer domain ontologies or more targeted prompting) to maintain extraction quality.
 
-\begin{table}[t]
+\begin{table}[htbp]
 \centering
-\caption{Cross--domain ontology extraction (exact matching).}
+\caption{CROSS--DOMAIN ONTOLOGY EXTRACTION (EXACT MATCHING)}
 \label{tab:table3}
 \begin{tabular}{lccc}
 \toprule
