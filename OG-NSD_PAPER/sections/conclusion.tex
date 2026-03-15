@@ -1,0 +1,7 @@
+\section{Conclusion}
+
+We presented OG-NSD, a neuro-symbolic pipeline for drafting OWL ontologies from natural-language requirements. The pipeline combines LLM drafting with ontology-aware prompting, SHACL validation, DL reasoning, competency-question checking, and iterative repair.
+
+The study shows that symbolic feedback is useful when it acts as a controlled guidance mechanism, but overly aggressive repair policies can damage precision, destabilize reasoning, and inflate graph size. The most balanced iterative policy in our study is \texttt{max\_only}, while low-temperature neural drafting remains a strong baseline in its own right.
+
+More broadly, the results suggest that the central challenge in LLM-driven ontology engineering is not only how to generate ontologies, but how to regulate the interaction between generation, validation, and stopping.

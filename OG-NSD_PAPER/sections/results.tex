@@ -1,0 +1,16 @@
+\section{Results}
+\subsection{E1: Neural Baseline}
+E1 evaluates the system under pure drafting conditions, without SHACL, reasoning, or repair. Two temperature settings are compared.
+
+\subsection{E2 and E3: Validation-Oriented Baseline vs. Ontology-Aware Drafting}
+Results suggest that ontology-aware prompting improves lexical alignment and coverage, but not necessarily overall precision.
+
+\subsection{E4: Full OG-NSD with Repair Policies}
+Conservative policies preserve a better balance between ontology quality and functional adequacy, whereas aggressive CQ-driven repair increases CQ pass rate at the cost of precision and overall graph quality.
+
+\subsection{E5: Cross-Domain Transfer}
+\subsection{E6: CQ-Oriented Iterative Analysis}
+E6 acts as an instrumentation view over iterative execution, reporting how CQ pass rate evolves across iterations and when a run reaches a conforming state.
+
+\subsection{Overall Findings}
+Low-temperature drafting is a strong baseline; ontology-aware prompting improves lexical alignment but not necessarily precision; iterative repair helps only with controlled stopping policies; CQ-oriented monitoring is diagnostically useful; and cross-domain quality transfer remains limited.

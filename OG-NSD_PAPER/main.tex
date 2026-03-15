@@ -1,0 +1,42 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+
+\setcopyright{none}
+\settopmatter{printacmref=false}
+\renewcommand\shortauthors{Skaperdas et al.}
+
+\title{OG-NSD: Neuro-Symbolic Ontology Drafting from Natural-Language Requirements}
+
+\author{Efstratios Skaperdas}
+\author{Kristi Cami}
+\author{Nick Bassiliades}
+\affiliation{%
+  \institution{Department of Informatics, Aristotle University of Thessaloniki, Greece}%
+  \country{Greece}}
+
+\begin{document}
+
+\begin{abstract}
+Natural-language requirements are easy for analysts and domain stakeholders to write, but difficult to validate systematically and to transform into machine-interpretable semantic artifacts. We present \emph{OG-NSD}, a neuro-symbolic pipeline for ontology drafting from natural-language requirements. The pipeline combines LLM-based drafting with ontology-aware prompting, SHACL validation, OWL/DL reasoning, competency-question evaluation, and an iterative repair loop that converts symbolic violations into corrective prompts. We evaluate the approach through a controlled pilot study spanning neural baselines, a validation-oriented baseline, ontology-aware drafting, iterative repair policies, cross-domain transfer, and CQ-oriented iterative analysis. The results show a deliberately mixed but informative picture. Low-temperature drafting provides a strong raw baseline ($F1 = 0.4769$, 11/21 competency questions), ontology-aware prompting improves vocabulary alignment but not necessarily precision, and iterative repair helps only when conservative stopping policies are used. Among the tested repair strategies, the \texttt{max\_only} configuration yields the best balance within the iterative family ($F1 = 0.3427$, 11/21 competency questions), whereas aggressive CQ-driven repair leads to graph explosion and unstable reasoning. These findings support the main claim of the paper: symbolic feedback is most useful when treated as an active control mechanism for ontology drafting rather than as a purely post-hoc diagnostic layer.
+\end{abstract}
+
+\keywords{LLMs, ontology engineering, requirements formalization, neuro-symbolic AI, SHACL, OWL}
+
+\maketitle
+
+\input{sections/intro}
+\input{sections/related_work}
+\input{sections/methodology}
+% \input{sections/experimental_setup}
+% \input{sections/results}
+% \input{sections/discussion}
+% \input{sections/threats_to_validity}
+% \input{sections/conclusion}
+
+\input{sections/references}
+
+\end{document}
+

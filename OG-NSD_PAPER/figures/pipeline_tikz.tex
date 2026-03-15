@@ -1,0 +1,206 @@
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  >={Stealth[length=2.6mm,width=1.9mm]},
+  line join=round,
+  line cap=round,
+  input/.style={
+    rectangle,
+    rounded corners=2.5pt,
+    draw=black!35,
+    fill=blue!2,
+    line width=0.8pt,
+    minimum width=3.55cm,
+    minimum height=0.92cm,
+    align=center,
+    inner sep=4pt
+  },
+  core/.style={
+    rectangle,
+    rounded corners=2.5pt,
+    draw=black!55,
+    fill=black!2,
+    line width=0.9pt,
+    minimum width=4.15cm,
+    minimum height=0.96cm,
+    align=center,
+    inner sep=4pt
+  },
+  validate/.style={
+    rectangle,
+    rounded corners=2.5pt,
+    draw=green!40!black,
+    fill=green!5,
+    line width=0.9pt,
+    minimum width=4.15cm,
+    minimum height=0.96cm,
+    align=center,
+    inner sep=4pt
+  },
+  repair/.style={
+    rectangle,
+    rounded corners=2.5pt,
+    draw=orange!65!black,
+    fill=orange!6,
+    line width=0.9pt,
+    minimum width=4.15cm,
+    minimum height=0.96cm,
+    align=center,
+    inner sep=4pt
+  },
+  decision/.style={
+    rectangle,
+    rounded corners=2.5pt,
+    draw=orange!75!black,
+    fill=orange!8,
+    line width=0.9pt,
+    minimum width=2.2cm,
+    minimum height=0.84cm,
+    align=center,
+    inner sep=3pt
+  },
+  output/.style={
+    rectangle,
+    rounded corners=2.5pt,
+    draw=cyan!35!black,
+    fill=cyan!2,
+    line width=0.8pt,
+    minimum width=4.05cm,
+    minimum height=0.92cm,
+    align=center,
+    inner sep=4pt
+  },
+  gbox/.style={
+    rectangle,
+    rounded corners=5pt,
+    draw=black!18,
+    line width=0.8pt,
+    inner sep=8pt
+  },
+  mainflow/.style={
+    -{Stealth[length=2.6mm,width=1.9mm]},
+    draw=black!78,
+    line width=1.0pt
+  },
+  auxflow/.style={
+    -{Stealth[length=2.3mm,width=1.6mm]},
+    draw=black!55,
+    line width=0.9pt
+  },
+  vflow/.style={
+    -{Stealth[length=2.6mm,width=1.9mm]},
+    draw=green!45!black,
+    line width=1.0pt
+  },
+  rflow/.style={
+    -{Stealth[length=2.6mm,width=1.9mm]},
+    draw=orange!78!black,
+    line width=1.0pt
+  },
+  sec/.style={font=\bfseries\small},
+  looplabel/.style={
+    font=\scriptsize,
+    fill=white,
+    inner sep=1pt
+  }
+]
+
+% ------------------------------------------------
+% Section titles
+% ------------------------------------------------
+\node[sec] at (0.0,5.95)   {Inputs and Assets};
+\node[sec] at (6.20,5.95)  {OG-NSD Core Pipeline};
+\node[sec] at (13.45,5.95) {Outputs};
+
+% ------------------------------------------------
+% Inputs
+% ------------------------------------------------
+\node[input] (req)   at (0.0,4.60)  {Requirements\\JSON / JSONL};
+\node[input] (base)  at (0.0,3.20)  {Base Ontology\\(optional)};
+\node[input] (shacl) at (0.0,1.05)  {SHACL Shapes};
+\node[input] (cq)    at (0.0,-0.40) {Competency\\Questions};
+\node[input] (cfg)   at (0.0,-2.95) {Configs / Exemplars\\Domain Vocabulary};
+
+% ------------------------------------------------
+% Core
+% ------------------------------------------------
+\node[core]     (prep)     at (6.20,4.60)  {Preprocessing\\load, normalize, chunk};
+\node[core]     (draft)    at (6.20,3.15)  {Ontology-Aware Drafting\\LLM or heuristic mode};
+\node[core]     (init)     at (6.20,1.70)  {Initial Draft Ontology\\OWL / Turtle};
+\node[validate] (valid)    at (6.20,0.05)  {Symbolic Validation\\SHACL + DL Reasoning + CQs};
+\node[validate] (feedback) at (6.20,-1.45) {Structured Feedback\\violations, unsat classes, failed CQs};
+\node[repair]   (repair)   at (6.20,-2.95) {Repair / Update\\LLM-guided patches};
+\node[decision] (stop)     at (6.20,-4.35) {Stop?};
+
+% ------------------------------------------------
+% Outputs
+% ------------------------------------------------
+\node[output] (finalo) at (13.45,4.60) {Final Ontology\\TTL / OWL};
+\node[output] (report) at (13.45,2.95) {JSON Report\\metrics, CQ results, validation summary};
+\node[output] (interm) at (13.45,-2.95) {Intermediate Artifacts\\per iteration};
+
+% ------------------------------------------------
+% Group boxes
+% ------------------------------------------------
+\node[gbox,fit=(req)(base)(shacl)(cq)(cfg)] {};
+\node[gbox,fit=(prep)(draft)(init)(valid)(feedback)(repair)(stop)] {};
+\node[gbox,fit=(finalo)(report)(interm)] {};
+
+% ------------------------------------------------
+% Main vertical flow
+% ------------------------------------------------
+\draw[mainflow] (prep.south)     -- (draft.north);
+\draw[mainflow] (draft.south)    -- (init.north);
+\draw[mainflow] (init.south)     -- (valid.north);
+\draw[vflow]    (valid.south)    -- (feedback.north);
+\draw[vflow]    (feedback.south) -- (repair.north);
+\draw[rflow]    (repair.south)   -- (stop.north);
+
+% ------------------------------------------------
+% Stop loop
+% ------------------------------------------------
+\coordinate (loopL) at ($(stop.west)+(-0.80,0)$);
+\coordinate (repairHit) at ($(repair.south west)+(0.55,0)$);
+\coordinate (repairBelow) at ($(repairHit)+(0,-0.55)$);
+
+\draw[rflow]
+  (stop.west) -- (loopL)
+  node[pos=0.42,below,looplabel] {no / iterate}
+  |- (repairBelow) -- (repairHit);
+
+\draw[rflow]
+  (stop.east) -- ++(1.05,0)
+  node[midway,above,looplabel] {yes / stop};
+
+% ------------------------------------------------
+% Input routing with common vertical alignment
+% ------------------------------------------------
+\coordinate (topBus)   at ($(prep.west)+(-1.10,0)$);
+\coordinate (inputBus) at ($(valid.west)+(-1.55,0)$);
+
+\coordinate (sTurn) at ($(valid.west)+(-0.85,0)$);
+\coordinate (cTurn) at ($(feedback.west)+(-0.85,0)$);
+\coordinate (gTurn) at ($(repair.west)+(-0.85,0)$);
+
+\draw[auxflow] (req.east)  -- (topBus |- req.east)  -- (topBus) -- (prep.west);
+\draw[auxflow] (base.east) -- (topBus |- base.east) -- (topBus);
+
+\draw[auxflow] (shacl.east) -- (inputBus |- shacl.east) -- (inputBus |- sTurn) -- (sTurn) -- (valid.west);
+\draw[auxflow] (cq.east)    -- (inputBus |- cq.east)    -- (inputBus |- cTurn) -- (cTurn) -- (feedback.west);
+\draw[auxflow] (cfg.east)   -- (inputBus |- cfg.east)   -- (inputBus |- gTurn) -- (gTurn) -- (repair.west);
+
+% ------------------------------------------------
+% Output routing
+% ------------------------------------------------
+\coordinate (vLane) at ($(valid.east)+(0.95,0)$);
+\coordinate (fLane) at ($(feedback.east)+(1.55,0)$);
+\coordinate (rLane) at ($(repair.east)+(1.00,0)$);
+
+\coordinate (vTurn) at ($(finalo.west)+(-0.85,0)$);
+\coordinate (fTurn) at ($(report.west)+(-0.85,0)$);
+\coordinate (rTurn) at ($(interm.west)+(-0.85,0)$);
+
+\draw[auxflow] (valid.east)    -- (vLane) |- (vTurn) -- (finalo.west);
+\draw[auxflow] (feedback.east) -- (fLane) |- (fTurn) -- (report.west);
+\draw[auxflow] (repair.east)   -- (rLane) -- (rTurn) -- (interm.west);
+
+\end{tikzpicture}

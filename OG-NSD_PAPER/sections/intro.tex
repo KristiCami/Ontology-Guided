@@ -1,0 +1,17 @@
+\section{Introduction}
+
+Requirements are commonly expressed in natural language because this format is accessible to analysts, developers, and domain stakeholders. However, natural-language requirements are often ambiguous, underspecified, and difficult to validate systematically. This limits downstream automation, including traceability, consistency checking, reuse, and formal analysis. In ontology engineering, the problem is particularly significant: requirement documents may implicitly define classes, relations, hierarchies, and domain constraints, yet converting them into formal semantic artifacts remains a labor-intensive and expert-driven task \cite{gruber1993,uschold1996}.
+
+Large language models (LLMs) have recently shown strong capabilities for extracting structured information from free text and producing draft knowledge representations. This raises a natural question: can LLMs accelerate ontology drafting directly from requirement descriptions? The answer is promising, but not straightforward. In practice, LLM outputs may omit constraints, invent classes or properties, drift away from domain vocabulary, or produce ontologies that are syntactically plausible but semantically weak. For ontology engineering, such defects are critical because quality is not measured only by fluent output, but by structural validity, logical consistency, and the ability to support intended queries \cite{garcia2024thesis,garijo2025,saeedizade2024}.
+
+In this paper, we present \emph{OG-NSD} (Ontology-Guided Neuro-Symbolic Drafting), a pipeline for transforming natural-language requirements into draft OWL ontologies through a closed neuro-symbolic loop. The key idea is simple: an LLM produces a candidate ontology, symbolic validators detect structural and logical problems, and these signals are transformed into targeted corrective prompts that guide the next repair step. Rather than treating validation as a final filtering stage, OG-NSD incorporates validation into generation itself.
+
+The contribution of this work is fourfold:
+\begin{itemize}
+  \item We define a modular neuro-symbolic pipeline for LLM-driven ontology drafting from requirements.
+  \item We operationalize SHACL violations, reasoning outcomes, and competency-question failures as structured feedback for iterative repair.
+  \item We present a controlled experimental suite (E1--E6) that separates the effects of raw drafting, symbolic control, ontology-aware prompting, iterative repair, cross-domain transfer, and CQ-oriented iterative analysis.
+  \item We provide a realistic pilot evaluation over ATM and healthcare requirements, showing both the strengths and the limits of the approach.
+\end{itemize}
+
+The paper intentionally makes a measured claim rather than a maximalist one. We do not claim that the full neuro-symbolic loop uniformly dominates every baseline under every metric. Instead, the experiments show a more nuanced picture: low-temperature drafting is already strong, ontology-aware prompting improves alignment but can still introduce structural noise, and repair helps only when its stopping policy is well controlled. That empirical profile is precisely what makes the problem scientifically interesting.

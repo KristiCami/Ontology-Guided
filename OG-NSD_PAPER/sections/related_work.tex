@@ -1,0 +1,11 @@
+\section{Related Work}
+
+The proposed work lies at the intersection of ontology engineering, natural-language requirements formalization, symbolic validation, and LLM-assisted structured generation.
+
+A first line of work concerns the role of ontologies as formal, reusable representations of domain knowledge. Foundational work by Gruber framed ontologies as explicit specifications of conceptualizations and emphasized portability and reuse~\cite{gruber1993}. Uschold and Gr{\"u}ninger further systematized ontology development by discussing principles, methods, and application contexts~\cite{uschold1996}. In ontology engineering practice, competency questions (CQs) became a standard way to delimit ontology scope and evaluate adequacy with respect to intended tasks~\cite{gruninger1995,monfardini2023}.
+
+A second line of work concerns the formal languages and validation mechanisms used to specify and check ontologies. OWL 2 provides the standard semantic framework for ontology representation on the Semantic Web~\cite{owl2overview2012,owl2syntax2012}. SHACL provides a graph-based validation language for checking RDF data against structural and typing constraints~\cite{shacl2017}. These technologies offer strong guarantees at the symbolic level, but they are usually applied after ontology construction rather than integrated into the generation loop.
+
+A third line of work explores LLMs for ontology engineering and ontology learning. Recent studies report that LLMs can assist with relation extraction, glossary induction, ontology extension, schema suggestion, and direct ontology generation from textual descriptions~\cite{garcia2024thesis,saeedizade2024,lippolis2024,garijo2025}. At the same time, these works also highlight recurring weaknesses: hallucinated schema elements, inconsistent use of vocabulary, weak traceability to source text, and difficulty maintaining structural discipline across domains.
+
+Finally, recent neuro-symbolic perspectives argue that symbolic constraints should not be treated merely as post-hoc diagnostics, but as mechanisms that actively shape neural generation and reasoning~\cite{delong2024}. OG-NSD aligns with this direction while focusing specifically on ontology drafting from requirement sets and on the conversion of symbolic diagnostics into repair-oriented prompts.

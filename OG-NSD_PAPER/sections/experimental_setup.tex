@@ -1,0 +1,11 @@
+\section{Experimental Setup}
+\subsection{Domains, Assets, and Research Questions}
+The experiments use two domains: ATM and healthcare. Each domain provides requirement files, SHACL shapes, competency questions, and (when available) gold ontologies and base ontologies.
+
+The evaluation is organized around five research questions: (1) whether validation-oriented control improves quality over raw generation, (2) whether ontology-aware prompting improves alignment and structure, (3) whether explicit repair policies add value, (4) whether the same pipeline transfers across domains, and (5) what iterative CQ monitoring reveals.
+
+\subsection{System Variants}
+We study six configurations: E1 (neural baseline), E2 (validation-oriented baseline), E3 (ontology-aware drafting), E4 (full OG-NSD with policy variants), E5 (cross-domain transfer), and E6 (CQ-oriented iterative analysis).
+
+\subsection{Metrics}
+The evaluation combines exact overlap, relaxed reasoning-aware overlap, SHACL compliance, consistency and reasoner behavior, CQ pass rate, number of predicted triples, overlap count, removed invalid restrictions, missing classes, and graph growth across repair iterations.

@@ -1,0 +1,86 @@
+\section{OG-NSD Method}
+
+\subsection{Problem Setting}
+Given a set of natural-language requirements $R=\{r_1,\ldots,r_n\}$ and optional domain assets $A$ (e.g., base ontology, SHACL shapes, competency questions, glossary terms, and exemplar mappings), the goal is to generate a draft ontology $O$ in OWL/Turtle that captures the key classes, properties, hierarchies, and constraints needed to support downstream validation and querying.
+
+We assume a practical setting in which exact gold formalizations may be incomplete or domain-dependent. Therefore, across the full experimental suite, ontology quality is not reduced to exact overlap with a reference ontology, but is assessed more broadly through structural validation, reasoning-based checks, and competency-question performance where applicable.
+
+\subsection{Inputs and Assets}
+The implementation relies on a clearly defined set of inputs and supporting assets. Requirement files are stored in JSONL or JSON form, with each requirement processed as a standalone natural-language statement. The pipeline also accepts base ontologies, SHACL shapes, competency-question files, configuration files, and optional gold ontologies for evaluation. This design supports reproducibility and allows experiments to be replayed without modifications to the core code.
+
+The main asset categories are:
+{\hyphenpenalty=10000\exhyphenpenalty=10000\emergencystretch=2em
+\begin{itemize}
+  \item \textbf{Requirements}: JSONL/JSON files containing requirement statements, such as \texttt{atm\_requirements.jsonl} and \texttt{health\_requirements.jsonl}.
+  \item \textbf{Domain ontology}: optional base ontology used for grounding and graph merging.
+  \item \textbf{SHACL shapes}: domain-specific structural constraints encoded in Turtle.
+  \item \textbf{Competency Questions}: SPARQL ASK queries used to assess conceptual adequacy.
+  \item \textbf{Ontology context and exemplars}: optional vocabulary, prefixes, and small Turtle exemplars injected into prompts during ontology-aware drafting.
+  \item \textbf{Configuration files}: experiment-specific parameter snapshots controlling LLM mode, reasoning, repair iterations, and paths.
+  \item \textbf{Outputs and reports}: TTL ontologies, JSON metrics, and intermediate artifacts stored under \texttt{build/} or \texttt{runs/}.
+\end{itemize}}
+
+Figure~\ref{fig:pipeline} summarizes the overall OG-NSD workflow and the role of the main assets used throughout the pipeline. The figure makes explicit that ontology drafting is not treated as a one-shot generation task: requirements, domain vocabulary, SHACL shapes, and competency questions jointly support a closed validation-and-repair process.
+
+As Figure~\ref{fig:pipeline} suggests, the method is organized around a separation of concerns: drafting expands coverage, validation enforces discipline, and repair controls the interaction between the two. This decomposition is important because it lets us study where errors originate and which part of the pipeline is actually responsible for improvements.
+
+\begin{figure*}[t]
+  \centering
+  \resizebox{\textwidth}{!}{\input{figures/pipeline_tikz}}
+  \caption{Overview of the OG-NSD pipeline. Natural-language requirements and domain assets are transformed into a draft ontology through ontology-aware drafting. The candidate ontology is then symbolically validated using SHACL, DL reasoning, and competency questions, and iteratively refined through structured feedback until the stopping criteria are satisfied.}
+  \label{fig:pipeline}
+\end{figure*}
+
+\subsection{Preprocessing}
+Preprocessing in OG-NSD is intentionally lightweight. The system performs syntactic loading, whitespace normalization, filtering of empty or malformed entries, and optional chunking of requirement sets. The design avoids aggressive linguistic transformations such as stemming or lemmatization, because the original requirement formulations are treated as the semantic ground truth.
+
+Requirement loading is implemented so that the rest of the pipeline remains format-agnostic. The requirement loader supports both JSONL, where each line is an independent requirement, and JSON lists. In both cases, the output is normalized into a uniform list of strings. Large requirement sets can be chunked into batches in order to respect LLM context limits and to keep execution cost under control. This chunking step functions as an operational split mechanism rather than as a train/validation/test split. It allows the same requirement subset to be used across multiple runs, thus improving reproducibility and comparability.
+
+The same stage also supports the injection of ontology vocabulary and exemplars into prompts. These exemplars are small Turtle fragments that illustrate how requirement phrases should be translated into ontology constructs. They function as a style guide for namespace usage, subclass modeling, and property declarations.
+
+\subsection{Configuration, Model Settings, and Reproducibility}
+The behavior of the pipeline is controlled through a unified configuration layer. A configuration object specifies paths to requirements, gold ontologies, SHACL shapes, competency questions, and optional base ontologies, as well as operational parameters such as LLM mode, maximum number of repair iterations, maximum number of requirements to process, whether reasoning is enabled, and whether the run should stop after drafting.
+
+This design supports two desirable properties: reproducibility, because each experiment corresponds to a fixed configuration snapshot, and comparability, because differences between runs can be attributed to explicit parameter changes rather than to hidden code modifications.
+
+The implementation consists of modules for requirement loading and chunking, LLM drafting, ontology parsing and serialization, SHACL validation, DL reasoning, CQ execution, and JSON reporting. The drafting stage supports both a live LLM backend and a heuristic fallback mode. In the reported experiments, the neural baseline explicitly studies two temperatures ($T=0.1$ and $T=0.7$), allowing us to quantify the effect of generation stochasticity. Ontology-aware runs use domain vocabulary and exemplar-guided prompting. Full repair experiments are executed under fixed stopping policies, with maximum iteration budgets defined in the corresponding configuration files. All runs produce serialized ontologies together with JSON summaries, which makes the evolution from initial draft to final output auditable and directly reproducible.
+
+The public implementation and experimental artifacts are available in the project repository at \url{https://github.com/KristiCami/Ontology-Guided}. The released experiment scripts support both OpenAI-backed execution and a deterministic heuristic fallback. In the public code, the effective backend, temperature, ontology-context usage, reasoning flag, and iteration budget are selected through configuration files, while the generated run artifacts record the conditions of each execution. We therefore interpret the reported runs through their configuration snapshots and saved outputs rather than assuming a single fixed backend across all experiments. For the reported OpenAI-backed runs, the provider, model name, decoding settings, and the use of the same or different models across drafting and repair are specified in the corresponding configuration snapshots and documented in the released artifacts.
+
+\subsection{LLM Drafting}
+The drafting stage is the neural core of OG-NSD. Its input is a set of normalized requirements, and its output is an initial draft ontology in Turtle. The system supports two execution modes: an OpenAI-backed mode and a heuristic fallback mode. In the public implementation, the effective LLM mode and temperature are selected through configuration, while the heuristic mode remains useful for offline runs and deterministic reproduction.
+
+Ontology-aware prompting is a key feature of the system. When enabled, the pipeline extracts vocabulary from a gold or base ontology---classes, properties, domains, ranges, and prefixes---and injects this information into the prompt as structured context. This does not amount to copying ontology axioms; rather, it acts as a lexical and structural contract that reduces drift and promotes consistent namespace usage. The resulting draft is serialized and stored as a temporary artifact so that its contribution can be studied independently before symbolic correction is applied.
+
+\subsection{Validation and Repair Loop}
+After drafting, the candidate ontology is validated at multiple levels.
+\begin{itemize}
+  \item \textbf{SHACL validation.} SHACL captures structural expectations such as missing properties, invalid typing, incomplete declarations, and domain-specific modeling rules. The resulting violations are fine-grained and interpretable, making them suitable as repair signals.
+  \item \textbf{DL reasoning.} Reasoning checks whether the ontology remains logically coherent under OWL semantics. It can reveal inconsistencies and unsatisfiable classes that are not visible through purely local shape checks.
+  \item \textbf{Competency-question testing.} Competency questions are implemented as SPARQL ASK queries. They provide an independent signal of domain adequacy by checking whether the ontology supports intended domain questions.
+\end{itemize}
+
+The outputs of these validators are then transformed into repair-oriented feedback. Instead of exposing raw tool logs to the model, OG-NSD produces compact structured prompts that specify the problem, its local context, and the expected correction. Let $O^{(t)}$ denote the ontology at iteration $t$. The repair step is written as:
+\[
+O^{(t+1)}=\mathrm{RepairLLM}(O^{(t)},V_{\mathrm{shacl}}^{(t)},V_{\mathrm{reason}}^{(t)},C^{(t)}),
+\]
+where $V_{\mathrm{shacl}}^{(t)}$ and $V_{\mathrm{reason}}^{(t)}$ denote validation signals and $C^{(t)}$ denotes optional competency-question feedback.
+
+Each repair iteration includes four substeps: validation, violation aggregation, repair-prompt synthesis, and patch integration into the current graph. The process is therefore closer to counterexample-guided repair than to naive prompt repetition. The entire iteration history is stored in JSON form, making it possible to inspect what changed and why.
+
+\subsection{Termination, Serialization, and Reporting}
+The repair loop terminates when no hard SHACL violations remain, when CQ performance stabilizes, when no new patches are produced, or when the maximum number of iterations is reached. These criteria balance quality improvement against runtime and LLM cost.
+
+The final ontology is serialized to Turtle via an ontology abstraction layer built on top of RDFLib. The serialized graph may combine the initial draft, an optional base ontology, and the patches introduced during repair. Intermediate graphs and JSON reports are preserved so that the evolution from draft to final ontology remains fully traceable. As a result, the output of a run is not a single ontology file, but a pair consisting of the final TTL graph and an analytical report containing SHACL summaries, reasoner results, CQ traces, and repair metadata.
+
+\subsection{Robustness and Auditability}
+A further implementation detail that is important for interpreting the experiments is that OG-NSD is designed to fail transparently rather than silently. Requirement files are normalized before drafting, Turtle outputs are parsed before downstream validation, and malformed or invalid restrictions are explicitly recorded in the run artifacts rather than being hidden inside later stages. Likewise, intermediate outputs are preserved per iteration so that one can distinguish defects introduced during initial drafting from defects created or amplified during repair.
+
+This matters experimentally for two reasons. First, it improves auditability: when a repair policy behaves poorly, the analyst can inspect the exact draft, validation output, patch set, and post-reasoning graph associated with that run. Second, it improves comparability: because execution is configuration-driven and artifact-producing, differences between methods can be tied to concrete choices such as stopping policy, threshold setting, or prompting mode. In practice, this logging discipline is especially useful in failure cases such as graph explosion, repeated invalid restrictions, or reasoner instability, where a pure black-box evaluation would reveal that something went wrong but not where it went wrong.
+
+\subsection{Evaluation Methodology}
+The evaluation of generated ontologies in OG-NSD is explicitly multi-layered. It combines four complementary perspectives.
+
+First, exact matching compares predicted axioms against the reference ontology at strict IRI level after duplicate removal and namespace normalization. Second, we report a relaxed reasoning-aware overlap metric. This metric uses the reasoned graph when reasoning is enabled and otherwise the asserted graph, and compares a normalized schema-oriented triple space. It should therefore be interpreted as an approximate indicator of semantic proximity rather than as full semantic equivalence. Third, structural and logical quality are measured through SHACL and DL reasoning. Fourth, competency questions assess whether the ontology captures the domain knowledge needed to support intended queries.
+
+This layered design is necessary because no single metric captures ontology quality in full. An ontology may be syntactically close to the gold reference while remaining logically weak, or it may be logically valid but still fail to support the intended domain questions.

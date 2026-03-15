@@ -1,0 +1,7 @@
+\section{Discussion}
+
+The main value of OG-NSD is methodological. It reframes ontology drafting as a controlled neuro-symbolic process rather than a one-shot generation problem. This is important for LLM-driven ontology engineering because quality cannot be reduced to fluent output alone; it requires explicit structural, logical, and task-oriented criteria.
+
+The experiments also clarify limits of the approach. Symbolic validation is helpful, but not a universal optimizer. Its benefit depends on how validation feedback is translated into prompts and how termination is controlled. Similarly, competency questions are valuable as adequacy signals, but when treated as the sole optimization target they can encourage overgeneration.
+
+One notable finding is that the best iterative configuration (\texttt{max\_only}) still does not surpass the strongest raw neural baseline (E1 at low temperature) in F1. This does not invalidate the neuro-symbolic framing; rather, it shows that current repair policies privilege structural stabilization over pure overlap maximization.
