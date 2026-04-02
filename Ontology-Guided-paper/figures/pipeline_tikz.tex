@@ -1,0 +1,50 @@
+\begin{tikzpicture}[
+  box/.style={
+    draw,
+    rectangle,
+    minimum width=2.4cm,
+    minimum height=0.9cm,
+    align=center
+  },
+  arrow/.style={-Stealth, thick},
+  lbl/.style={
+    fill=gray!20,
+    inner sep=1.2pt,
+    rounded corners=1pt,
+    font=\scriptsize
+  },
+  node distance=1.25cm
+]
+
+% Main horizontal pipeline
+\node[box] (s1) {S1 Input};
+\node[box, right=of s1] (s2) {S2 Preproc};
+\node[box, right=of s2] (s3) {S3 LLM};
+\node[box, right=of s3] (s4) {S4 Align};
+\node[box, right=of s4] (s5) {S5 Draft};
+\node[box, right=of s5] (s6) {S6 Reason};
+\node[box, right=of s6] (s7) {S7 SHACL};
+
+% Output / Repair
+\node[box, right=1.7cm of s7, yshift=0.9cm] (s8) {S8 Repair};
+\node[box, right=1.7cm of s7, yshift=-0.9cm] (s9) {S9 Output};
+
+% Straight arrows
+\draw[arrow] (s1) -- (s2);
+\draw[arrow] (s2) -- (s3);
+\draw[arrow] (s3) -- (s4);
+\draw[arrow] (s4) -- (s5);
+\draw[arrow] (s5) -- (s6);
+\draw[arrow] (s6) -- (s7);
+
+% Branches from SHACL
+\draw[arrow] (s7) -- node[lbl, near start] {viol} (s8);
+\draw[arrow] (s7) -- node[lbl, near start] {ok} (s9);
+
+% Feedback loop: Repair -> LLM (as it was)
+\draw[arrow]
+  (s8.west)
+  to[out=180, in=60, looseness=1.25]
+  (s3.north);
+
+\end{tikzpicture}

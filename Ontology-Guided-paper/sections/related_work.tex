@@ -1,0 +1,23 @@
+\section{RELATED WORK}
+\subsection{Ontology Learning from Text}
+Early efforts such as Text2Onto and OntoLearn applied natural language processing (NLP) pipelines to extract terms, concepts, and relations from textual sources. While these approaches demonstrated that domain ontologies can be boot\-strapped from unstructured documents, they typically pro\-duced flat vocabularies or shallow taxonomies. More impor\-tantly, the generated ontologies lacked logical rigor and often required extensive manual post--processing. Later requirement engineering frameworks attempted to map requirements into formal models such as UML or description logics. However, these systems relied heavily on handcrafted linguistic patterns and grammar rules, making them brittle and domain--specific.
+
+\subsection{Neuro--Symbolic Integration}
+Recent advances in neuro--symbolic AI combine machine learning with logic--based reasoning. Applications include knowledge graph construction, natural language inference, and constraint satisfaction. In these cases, the neural model provides broad coverage while symbolic methods enforce structure or consistency. Nevertheless, most prior approaches treat symbolic validation as a one--shot filter: if a neural output fails constraints, it is either discarded or requires human intervention. Iterative repair and feedback mechanisms between symbolic validators and neural models remain under--explored.
+
+\subsection{SHACL--based Validation}
+The Shapes Constraint Language (SHACL) has become a standard for expressing structural and semantic constraints over RDF graphs and OWL ontologies. It is widely used for validating ontology conformance and ensuring data quality. Existing SHACL--based tools focus on detecting violations and producing human--readable reports. However, they stop short of automating the correction of invalid ontologies. To the best of our knowledge, no prior work systematically transforms SHACL violation reports into repair instructions for neural models.
+
+\subsection{Domain Adaptation in Ontology Engineering}
+Ontology learning systems are often designed for a single domain, with handcrafted grammars or domain--specific train\-ing data. When transferring to new domains such as health\-care, automotive, or aerospace, these systems typically require substantial retraining or redesign. This limits their portability and long--term sustainability. Recent work in requirement formalization, such as OpenReq, has improved scalability but still lacks automated neuro--symbolic repair mechanisms or plug--and--play domain adaptability.
+
+\subsection{Our Contribution Beyond the State of the Art}
+In contrast to existing approaches, our work advances the field in several key dimensions:
+\begin{itemize}
+\item We propose the first closed neuro--symbolic repair loop where SHACL and reasoner violations are automatically transformed into targeted repair prompts for an LLM.
+\item We implement ontology--aware prompting by injecting available domain vocabularies (RBO, Lexical, and domain--specific ontologies) into the LLM generation process.
+\item We demonstrate cross--domain adaptability by reusing the same architecture across multiple requirement do\-mains without retraining the neural component.
+\item We present a self--correcting pipeline that converges toward SHACL--compliant and reasoner--consistent OWL ontologies, requiring no manual edits.
+\end{itemize}
+
+Thus, while related work has separately addressed ontology learning, neuro--symbolic integration, and SHACL validation, our approach uniquely combines these elements into an itera\-tive, domain--general, and fully automated drafting process.
