@@ -291,13 +291,6 @@ We evaluate along five complementary dimensions:
    $$P = \frac{|A_g \cap A_p|}{|A_p|}, \quad R = \frac{|A_g \cap A_p|}{|A_g|}, \quad F_1 = \frac{2PR}{P + R}.$$
    We report macro-F1 (average over types) and micro-F1 (global). Matching can be syntactic (IRI equality) or semantic (entailment under a reasoner).
 
-   | Method | Precision | Recall | F1 |
-   | --- | --- | --- | --- |
-   | LLM-only | – | – | – |
-   | Symbolic-only | – | – | – |
-   | Ours (no repair) | – | – | – |
-   | Ours (full) | – | – | – |
-
 2. **Constraint compliance (SHACL).** Measures structural validity of the ontology with respect to SHACL shapes. At each iteration we log: (i) number of violations (by severity), (ii) by-shape failures, and (iii) conformance flag. Key summaries: violations at iteration 0 vs. final, percentage reduction, and first conforming iteration (if any).
 
 3. **Reasoning quality.** Measures logical soundness under DL reasoning. At each iteration we check: (i) consistency (does a model exist?), (ii) coherence (number of unsatisfiable classes), and (iii) optional hierarchy size as a sanity check.
